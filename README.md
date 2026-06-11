@@ -2,6 +2,13 @@
 
 VoytArt is a modern art gallery web application designed to showcase and sell art. The project includes a user-facing platform (art showcase, exhibition gallery, and shop) and a secure administrative dashboard for managing content such as artists, paintings, collections, categories, and posts.
 
+## ✨ Key Features
+
+- **Smooth Scroll Animations:** The main page features a captivating scroll-based animation implemented by sequentially rendering a series of high-quality image frames.
+- **Admin Dashboard:** A fully functional, protected area for administrators to manage gallery content. It allows for CRUD operations on artworks, artists, categories, collections, and gallery posts.
+- **Dynamic Gallery:** Dedicated pages to explore individual artworks, view collections, and read stories.
+- **Shop (WIP):** An e-commerce section designed for purchasing art and related products. *(Note: The shop functionality is currently under development).*
+
 ## 🚀 Tech Stack
 
 - **Framework:** [Next.js](https://nextjs.org/) (App Router)
