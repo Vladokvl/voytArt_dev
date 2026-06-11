@@ -1,0 +1,84 @@
+@use "~/styles/mixins" as *;
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PageLoader.module.scss — стилі екрану завантаження
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ── Fullscreen чорний оверлей ────────────────────────────────────────────────
+// position: fixed → поверх усього, не залежить від scroll-контейнерів
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 9999; // вище за все інше (Header ~100, HUD ~100, neon curtain ~30)
+}
+
+// ── Враппер позиціонуються позицією heroContent ───────────────────────────
+// top/left/width/height виставляється JS через getBoundingClientRect().
+// position: fixed → прив'язаний до візуального viewport, як і getBoundingClientRect —
+// тому позиція завжди точна навіть коли адресний рядок мобільного браузера видимий.
+.circleWrapper {
+  position: fixed;
+  // top / left / width / height: виставляються JS через style
+}
+
+.loadingLabel {
+  position: absolute;
+  left: 50%;
+  bottom: -2.35rem;
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 0.74rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+  animation: loaderPulse 1.6s ease-in-out infinite;
+
+  @include mobile {
+    bottom: -2.1rem;
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+  }
+}
+
+// ── Круглий контейнер для відео ──────────────────────────────────────────────
+// position: absolute; bottom: 0 → «осідає» на дно circleWrapper,
+// так само як logoWrapper є останнім у flex-колонці heroContent.
+// ↓↓ Змінюй розмір min(200px, 55vmin) — онови також Sections.module.scss (.logoWrapper)
+//    та .circleWrapper calc() вище
+.circle {
+  width: min(200px, 55vmin);
+  height: min(200px, 55vmin);
+  border-radius: 50%; // ← обтинає в коло
+  overflow: hidden; // ← приховує кути відео
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0; // ← JS проявляє після встановлення висоти circleWrapper
+
+  @include mobile {
+    width: min(150px, 55vmin);
+    height: min(150px, 55vmin);
+  }
+}
+
+// ── Відео всередині кола ─────────────────────────────────────────────────────
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; // ← заповнює коло не деформуючи пропорції
+}
+
+@keyframes loaderPulse {
+  0%,
+  100% {
+    opacity: 0.38;
+  }
+  50% {
+    opacity: 0.92;
+  }
+}

@@ -1,0 +1,203 @@
+"use client";
+import { useActionState, useRef, useState, useTransition } from "react";
+import { updateProductAction } from "./_actions";
+import styles from "../_formStyles.module.scss";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+
+type Author = { id: number; firstName: string; lastName: string };
+type Category = { id: number; name: string };
+type ProductImage = { id: number; url: string; order: number };
+type Product = {
+  id: number;
+  title: string;
+  description: string | null;
+  price: number;
+  stock: number;
+  sortOrder: number;
+  authorId: number;
+  categoryId: number;
+  images: ProductImage[];
+};
+
+export default function ProductEditForm({
+  product,
+  authors,
+  categories,
+}: {
+  product: Product;
+  authors: Author[];
+  categories: Category[];
+}) {
+  const [state, formAction] = useActionState(updateProductAction, undefined);
+  const [uploading, setUploading] = useState(false);
+  const [pending, startTransition] = useTransition();
+  const [description, setDescription] = useState(product.description ?? "");
+  const [previews, setPreviews] = useState<string[]>(product.images.map((i) => i.url));
+  const [imageUrls, setImageUrls] = useState<string[]>(product.images.map((i) => i.url));
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const editor = useEditor({
+    extensions: [StarterKit],
+    content: product.description ?? "",
+    immediatelyRender: false,
+    onUpdate: ({ editor }) => setDescription(editor.getHTML()),
+  });
+
+  async function uploadFiles(files: FileList) {
+    const urls: string[] = [];
+    const localPreviews: string[] = [];
+    for (const file of Array.from(files)) {
+      localPreviews.push(URL.createObjectURL(file));
+      const data = new FormData();
+      data.append("file", file);
+      data.append("upload_preset", "voytart_unsigned");
+      data.append("folder", "voytart/products");
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        { method: "POST", body: data },
+      );
+      const json = (await res.json()) as { secure_url: string };
+      urls.push(json.secure_url);
+    }
+    return { urls, localPreviews };
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const fileInput = form.elements.namedItem("images") as HTMLInputElement;
+    const files = fileInput.files;
+
+    setUploading(true);
+    let uploadedUrls = imageUrls;
+    if (files && files.length > 0) {
+      const { urls, localPreviews } = await uploadFiles(files);
+      uploadedUrls = [...imageUrls, ...urls];
+      setPreviews((prev) => [...prev, ...localPreviews]);
+      setImageUrls(uploadedUrls);
+    }
+    setUploading(false);
+
+    const actionData = new FormData(form);
+    actionData.delete("images");
+    actionData.delete("imageUrls");
+    for (const url of uploadedUrls) actionData.append("imageUrls", url);
+
+    startTransition(() => formAction(actionData));
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className={styles.form}>
+      <h1 style={{ fontSize: "1.25rem", fontWeight: 600 }}>Редагувати товар</h1>
+      {state?.error && <p className={styles.error}>{state.error}</p>}
+      <input type="hidden" name="id" value={product.id} />
+
+      <div className={styles.row}>
+        <div className={styles.field}>
+          <label className={styles.label}>Назва *</label>
+          <input className={styles.input} name="title" defaultValue={product.title} required />
+        </div>
+        <div className={styles.field}>
+          <label className={styles.label}>Ціна (грн) *</label>
+          <input className={styles.input} name="price" type="number" step="0.01" min="0" defaultValue={product.price} required />
+        </div>
+      </div>
+
+      <div className={styles.row}>
+        <div className={styles.field}>
+          <label className={styles.label}>Залишок</label>
+          <input className={styles.input} name="stock" type="number" min="0" defaultValue={product.stock} />
+        </div>
+        <div className={styles.field}>
+          <label className={styles.label}>Порядок сортування</label>
+          <input className={styles.input} name="sortOrder" type="number" defaultValue={product.sortOrder} />
+        </div>
+      </div>
+
+      <div className={styles.row}>
+        <div className={styles.field}>
+          <label className={styles.label}>Автор *</label>
+          <select className={styles.select} name="authorId" required defaultValue={product.authorId}>
+            {authors.map((a) => (
+              <option key={a.id} value={a.id}>{a.firstName} {a.lastName}</option>
+            ))}
+          </select>
+        </div>
+        <div className={styles.field}>
+          <label className={styles.label}>Категорія *</label>
+          <select className={styles.select} name="categoryId" required defaultValue={product.categoryId}>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className={styles.field}>
+        <label className={styles.label}>Опис</label>
+        <div className={styles.editorWrapper}>
+          <div className={styles.toolbar}>
+            <button type="button" onClick={() => editor?.chain().focus().toggleBold().run()}
+              className={editor?.isActive("bold") ? styles.toolbarBtnActive : styles.toolbarBtn}><b>B</b></button>
+            <button type="button" onClick={() => editor?.chain().focus().toggleItalic().run()}
+              className={editor?.isActive("italic") ? styles.toolbarBtnActive : styles.toolbarBtn}><i>I</i></button>
+            <button type="button" onClick={() => editor?.chain().focus().toggleBulletList().run()}
+              className={editor?.isActive("bulletList") ? styles.toolbarBtnActive : styles.toolbarBtn}>≡</button>
+          </div>
+          <EditorContent editor={editor} className={styles.editorContent} />
+        </div>
+        <input type="hidden" name="description" value={description} />
+      </div>
+
+      <div className={styles.field}>
+        <label className={styles.label}>Фото</label>
+        <div
+          className={`${styles.dropZone} ${dragOver ? styles.dragOver : ""}`}
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={async (e) => {
+            e.preventDefault();
+            setDragOver(false);
+            if (e.dataTransfer.files.length === 0) return;
+            setUploading(true);
+            const { urls, localPreviews } = await uploadFiles(e.dataTransfer.files);
+            setPreviews((prev) => [...prev, ...localPreviews]);
+            setImageUrls((prev) => [...prev, ...urls]);
+            setUploading(false);
+          }}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          {previews.length > 0 ? (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+              {previews.map((src, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={i} src={src} alt="" className={styles.previewImg} style={{ width: 80, height: 80, objectFit: "cover" }} />
+              ))}
+            </div>
+          ) : (
+            <span>Перетягни фото або клікни для вибору</span>
+          )}
+        </div>
+        <input ref={fileInputRef} type="file" name="images" accept="image/*" multiple style={{ display: "none" }}
+          onChange={async (e) => {
+            if (!e.target.files) return;
+            setUploading(true);
+            const { urls, localPreviews } = await uploadFiles(e.target.files);
+            setPreviews((prev) => [...prev, ...localPreviews]);
+            setImageUrls((prev) => [...prev, ...urls]);
+            setUploading(false);
+          }}
+        />
+        {imageUrls.map((url, i) => (
+          <input key={i} type="hidden" name="imageUrls" value={url} />
+        ))}
+      </div>
+
+      <button type="submit" className={styles.submitBtn} disabled={uploading || pending}>
+        {uploading ? "Завантаження фото..." : pending ? "Збереження..." : "Зберегти зміни"}
+      </button>
+    </form>
+  );
+}

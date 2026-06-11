@@ -1,0 +1,128 @@
+.menuShell {
+	position: fixed;
+	top: 1.35rem;
+	right: 1.35rem;
+	z-index: 260;
+	display: flex;
+	align-items: center;
+}
+
+.menuTrigger {
+	display: inline-flex;
+	font: inherit;
+	font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+	align-items: center;
+	justify-content: center;
+	gap: 0.7rem;
+	min-width: 8rem;
+	height: 3.25rem;
+	padding: 0;
+	border: 1px solid rgba(255, 255, 255, 0.14);
+	border-radius: 999px;
+	background: rgba(17, 17, 17, 0.555);
+	backdrop-filter: blur(16px);
+	color: #fff;
+	cursor: pointer;
+	box-shadow: 0 14px 40px rgba(0, 0, 0, 0.22);
+	transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+
+	&:hover {
+		background: rgba(17, 17, 17, 0.84);
+		border-color: rgba(255, 255, 255, 0.26);
+		transform: translateY(-1px);
+	}
+
+	@media (max-width: 768px) {
+		min-width: 3.25rem;
+		width: 3.25rem;
+		padding: 0;
+		gap: 0;
+	}
+}
+
+.menuLabel {
+	font-size: 0.88rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+
+	@media (max-width: 768px) {
+		display: none;
+	}
+}
+
+.menuIcon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.55rem;
+	height: 1.55rem;
+	color: var(--color-accent);
+
+	svg {
+		width: 100%;
+		height: 100%;
+	}
+}
+
+.dropdown {
+	position: absolute;
+	right: calc(100% + 0.6rem);
+	top: 50%;
+	display: flex;
+	align-items: center;
+	gap: 0.35rem;
+	padding:  0.3rem 0.55rem;
+	border-radius: 1.15rem;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	background: rgba(10, 10, 10, 0.301);
+	backdrop-filter: blur(18px);
+	box-shadow: 0 20px 48px rgba(0, 0, 0, 0.32);
+	opacity: 0;
+	transform: translateY(-50%) translateX(12px) scale(0.96);
+	transform-origin: right center;
+	pointer-events: none;
+	transition: opacity 0.24s ease, transform 0.24s ease;
+	white-space: nowrap;
+
+	@media (max-width: 768px) {
+		max-width: calc(100vw - 6rem);
+		overflow-x: auto;
+		scrollbar-width: none;
+
+		&::-webkit-scrollbar {
+			display: none;
+		}
+	}
+}
+
+.menuShell[data-open="true"] .dropdown {
+	opacity: 1;
+	transform: translateY(-50%) translateX(0) scale(1);
+	pointer-events: auto;
+}
+
+.menuLink {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 2.5rem;
+	padding: 0.7rem 0.7rem;
+	border-radius: 0.85rem;
+	color: rgba(255, 255, 255, 0.82);
+	text-decoration: none;
+	font-size: 0.94rem;
+	line-height: 1;
+	transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+
+	&:hover {
+		background: rgba(255, 255, 255, 0.07);
+		color: #fff;
+		transform: translateY(-1px);
+	}
+}
+
+.menuLinkActive {
+	color: var(--color-accent);
+	background: rgba(201, 169, 77, 0.1);
+}

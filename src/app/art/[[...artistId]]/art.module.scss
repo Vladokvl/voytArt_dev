@@ -1,0 +1,407 @@
+@use "~/styles/mixins" as *;
+
+// ── Wrapper ───────────────────────────────────────────────────────────────────
+.wrapper {
+  position: relative;
+  min-height: 100vh;
+}
+
+.lockedScroll {
+  height: 100vh;
+  overflow: hidden;
+  touch-action: none;
+}
+
+// ── Hero Section ──────────────────────────────────────────────────────────────
+.hero {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: visible; // щоб pull-tab виходив за межі
+
+}
+
+// ── Clip slider overflow without clipping pull-tab ────────────────────────────
+.sliderClip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+// ── Mobile horizontal slider wrapper ─────────────────────────────────────────
+.sliderWrapper {
+  display: flex;
+  width: 100%;
+  height: 100%;
+
+  @include mobile {
+    width: 200vw;
+    height: 100vh;
+    will-change: transform;
+  }
+}
+
+// Pull-tab — кнопка повернення (шторка)
+.pullTab {
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 40px;
+  border-radius: 0 0 40px 40px;
+  background: #111;
+  border: none;
+  cursor: pointer;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: #333;
+  }
+}
+
+.pullTabIcon {
+  transition: transform 0.3s ease;
+}
+
+// ── Columns (Ліва та Права секції) ────────────────────────────────────────────
+.column {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+
+  @include mobile {
+    flex: 0 0 100vw;
+    height: 100vh;
+  }
+}
+
+// Фони та Оверлеї
+.colBgLeft {
+  position: absolute;
+  inset: 0;
+  background: url("/artPageAssets/IvankaBackground.jpg") center / cover no-repeat;
+}
+
+.colBgRight {
+  position: absolute;
+  inset: 0;
+  background: url("/artPageAssets/SashaBackground.jpg") center / cover no-repeat;
+}
+
+.colOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.6);
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+
+  @include mobile {
+    background: rgba(0, 0, 0, 0.45); // Трохи світліше на телефоні
+  }
+}
+
+.colOverlayHidden {
+  opacity: 0;
+}
+
+// ── Typography (Заголовки та Текст) ───────────────────────────────────────────
+.mobileTitle {
+  display: none; // Сховано на ПК
+  
+  @include mobile {
+    display: block;
+    text-align: center; // Завжди по центру секції
+    font-size: 1.8rem;
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #fff;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 5;
+    transition: opacity 0.5s ease;
+  }
+}
+
+.desktopTitle {
+  @include mobile {
+    display: none; // Ховаємо десктопний тайтл на мобілці
+  }
+}
+
+.colName {
+  font-size: clamp(1.75rem, 2.5vw, 3rem);
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1;
+  margin-bottom: 1.25rem;
+}
+
+// Текстовий блок
+.colText {
+  position: absolute;
+  right: 2.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  max-width: 260px;
+  color: #fff;
+  text-align: right;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+
+  @include mobile {
+    max-width: 36vw;
+    right: 1rem;
+  }
+}
+
+.colTextRight {
+  right: auto;
+  left: 2.5rem;
+  text-align: left;
+
+  @include mobile {
+    left: 1rem;
+    right: auto;
+  }
+}
+
+.colTextHidden {
+  opacity: 0;
+}
+
+.colDesc {
+  font-size: 0.82rem;
+  line-height: 1.8;
+  opacity: 0.85;
+
+  @include mobile {
+    font-size: 0.75rem;
+    line-height: 1.6;
+  }
+}
+
+// ── Portraits (Картинки з обтіканням) ─────────────────────────────────────────
+.portraitWrapLeft,
+.portraitWrapRight {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 60%;
+  z-index: 2;
+
+  @include mobile {
+    width: 60vw;
+    height: 100%;
+  }
+}
+
+.portraitWrapLeft {
+  left: 0;
+}
+
+.portraitWrapRight {
+  right: 0;
+}
+
+.portraitImg {
+  object-fit: cover;
+  object-position: top center;
+}
+
+// ── Gallery Section (Нижня частина сторінки) ──────────────────────────────────
+.gallery {
+  position: relative;
+  z-index: 1;
+  padding: 6rem 4rem 8rem;
+  background: var(--color-bg, #fff);
+
+  @include mobile {
+    padding: 4rem 1.5rem 6rem;
+  }
+}
+
+.galleryTitle {
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  font-weight: 300;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.masonry {
+  columns: 1;
+  column-gap: 1.5rem;
+
+  @include tablet {
+    columns: 2;
+  }
+
+  @include desktop {
+    columns: 3;
+  }
+}
+
+.masonryItem {
+  break-inside: avoid;
+  margin-bottom: 1.5rem;
+}
+
+.empty {
+  text-align: center;
+  color: var(--color-text-muted, #888);
+  padding: 4rem 0;
+}
+
+.cardMeta {
+  font-size: 0.78rem;
+  color: var(--color-text-muted, #888);
+  letter-spacing: 0.03em;
+}
+
+// ── Swipe Indicator (mobile only) ─────────────────────────────────────────────
+.swipeIndicator {
+  display: none;
+
+  @include mobile {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+    background: #d8ff00;
+    border-radius: 50px;
+    padding: 0.75rem 1.5rem;
+    color: #111;
+    pointer-events: none;
+    animation: swipePulse 2s ease-in-out infinite;
+  }
+}
+
+.swipeArrow {
+  font-size: 0.9rem;
+  color: #111;
+}
+
+.swipeText {
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #111;
+}
+
+@keyframes swipePulse {
+  0%, 100% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
+// ── Collection Filter ─────────────────────────────────────────────────────────
+.collectionFilter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  margin-bottom: 3rem;
+}
+
+.collectionChip {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.375rem 1rem 0.375rem 0.375rem;
+  border: 1.5px solid rgba(0, 0, 0, 0.14);
+  border-radius: 100px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.825rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: #1a1a1a;
+  transition: border-color 0.18s, background 0.18s, color 0.18s;
+  white-space: nowrap;
+
+  &:hover {
+    border-color: #111;
+    background: #f5f5f5;
+  }
+}
+
+.collectionChipActive {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+
+  .chipIconAll {
+    background: #d8ff00;
+    color: #111;
+  }
+
+  .chipImgPlaceholder {
+    background: linear-gradient(135deg, #444, #666);
+  }
+}
+
+.chipIconWrap {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chipIconAll {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #111;
+  color: #d8ff00;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  transition: background 0.18s, color 0.18s;
+}
+
+.chipImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.chipImgPlaceholder {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #d1d5db, #9ca3af);
+  transition: background 0.18s;
+}
+

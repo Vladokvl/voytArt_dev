@@ -1,0 +1,122 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.box {
+  position: relative;
+  max-width: 1100px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: scaleIn 0.22s ease;
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+// ── Image ─────────────────────────────────────────────────────────────────────
+.image {
+  object-fit: contain;
+  max-height: 90vh;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  border-radius: 6px;
+  display: block;
+}
+
+// ── Video ─────────────────────────────────────────────────────────────────────
+.video {
+  width: 100%;
+  max-height: 80vh;
+  border-radius: 6px;
+  display: block;
+  background: #000;
+}
+
+// ── Close button ──────────────────────────────────────────────────────────────
+.close {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  z-index: 1001;
+  line-height: 1;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.28);
+  }
+}
+
+// ── Nav arrows ────────────────────────────────────────────────────────────────
+.prev,
+.next {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  z-index: 1001;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  &:disabled {
+    opacity: 0.25;
+    cursor: default;
+  }
+}
+
+.prev { left: 1rem; }
+.next { right: 1rem; }
+
+// ── Counter ───────────────────────────────────────────────────────────────────
+.counter {
+  position: fixed;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.1em;
+  z-index: 1001;
+}

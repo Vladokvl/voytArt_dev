@@ -1,0 +1,320 @@
+@use "~/styles/mixins" as *;
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Hero.module.scss — стилі scroll-інфраструктури
+// Використовується в HeroDesktop.tsx та HeroMobile.tsx
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ── Контейнер задає "висоту скролу" ───────────────────────────────────────
+// 800vh = 8 довжин екрану → достатньо місця для всіх scroll-анімацій
+.container {
+  height: 800vh;
+  position: relative;
+}
+
+// ── Sticky wrapper залишається у viewport під час скролу ──────────────────
+.sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: #111; // запобігає білому флешу коли відео ще не відрендерилось
+}
+
+// ── Відео — покриває весь екран ───────────────────────────────────────────
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.heroLoader {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(18, 18, 18, 0.5) 0%, rgba(0, 0, 0, 0.9) 75%);
+  color: rgba(255, 255, 255, 0.92);
+  pointer-events: none;
+}
+
+.heroLoaderTitle {
+  margin: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.heroLoaderProgress {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.heroLoaderTrack {
+  width: min(320px, 72vw);
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.heroLoaderFill {
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #e8c46d 0%, #f7df98 100%);
+  transition: width 0.2s ease-out;
+}
+
+.heroLoaderMeta {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.66);
+}
+
+// ── Темний напівпрозорий шар для читабельності тексту ─────────────────────
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.25) 0%,
+    rgba(0, 0, 0, 0.1) 50%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  z-index: 1;
+}
+
+// ── Базовий стиль панелі — позиціонується зліва по центру ─────────────────
+// Початковий стан (opacity, x / y) задається через gsap.set() в useLayoutEffect.
+// pointer-events: none — панель не клікабельна коли прихована;
+// GSAP вмикає auto коли панель стає видимою і повертає none коли ховає.
+.panel {
+  position: absolute;
+  top: 50%;
+  left: 8%;
+  transform: translateY(-50%);
+  z-index: 10;
+  max-width: 480px;
+  pointer-events: none;
+
+  // ── Мобільні overrides (max-width: 899px) ──────────────────────────────
+  // Змінюй тут позицію, розмір та вирівнювання панелей для телефону
+  @include mobile {
+    top: auto; // ← вимикаємо top: 50% (вертикальний центр)
+    bottom: 20%; // ← панель внизу екрану; змінюй % за потребою
+    left: 50%; // ← горизонтально по центру
+    transform: translateX(-50%); // ← центруємо по X (замінює translateY)
+    max-width: 90vw; // ← ширина на всю ширину з відступами
+    text-align: center; // ← текст по центру
+  }
+}
+
+.panelOverlay {
+  position: absolute;
+  top: 50%;
+  width: 180vh;
+  height: 180vh;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  z-index: 6;
+  pointer-events: none;
+  filter: blur(22px);
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(0, 0, 0, 0.9) 0%,
+      rgba(0, 0, 0, 0.8) 46%,
+      rgba(0, 0, 0, 0.42) 72%,
+      rgba(0, 0, 0, 0.2) 84%,
+      rgba(0, 0, 0, 0.07) 93%,
+      rgba(0, 0, 0, 0) 100%
+    );
+
+  @include mobile {
+    display: none;
+  }
+}
+
+.panelOverlayLeft {
+  left: -125vh;
+}
+
+.panelOverlayRight {
+  right: -125vh;
+}
+
+.panelOverlayMobile {
+  display: none;
+
+  @include mobile {
+    display: block;
+    position: absolute;
+    left: 50%;
+    bottom: -140vw;
+    width: 220vw;
+    height: 250vw;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    z-index: 6;
+    pointer-events: none;
+    filter: blur(24px);
+    background:
+      radial-gradient(
+        circle at center,
+        rgba(0, 0, 0, 0.9) 0%,
+        rgba(0, 0, 0, 0.8) 46%,
+        rgba(0, 0, 0, 0.46) 72%,
+        rgba(0, 0, 0, 0.22) 84%,
+        rgba(0, 0, 0, 0.08) 93%,
+        rgba(0, 0, 0, 0) 100%
+      );
+  }
+}
+
+// ── Модифікатор панелі справа (для Art shop) ──────────────────────────────
+.panelRight {
+  @include desktop {
+    left: auto;
+    right: 8%;
+    text-align: right;
+  }
+}
+
+// ── Центрований враппер для hero / логотипу ───────────────────────────────
+// top: 0; bottom: 0 → займає повну висоту sticky (100vh), без відрахування хедера
+// z-index 5 → над overlay (1), під панелями (10)
+.aboutWrap {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  color: #fff;
+  width: min(90%, 780px);
+  text-align: center;
+  pointer-events: auto;
+}
+
+// ── HUD — фіксований контейнер для прогрес-бара і scroll-підказки ─────────
+// Живе ПОЗА scroll-контейнерами → жодна GSAP-анімація його не чіпає
+.fixedHud {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  pointer-events: none; // не блокує кліки на контент під ним
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+// ── Прогрес-бар — у межах fixedHud (батько вже fixed) ────────────────────
+.progressTrack {
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.progressBar {
+  height: 100%;
+  width: 0%;
+  background: var(--color-accent);
+  transition: width 0.05s linear;
+}
+
+// ── Підказка "scroll" — у межах fixedHud (позиціонується flexbox'ом) ──────
+.scrollHint {
+  margin-bottom: 2.5rem; // ← відступ від прогрес-бара знизу
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  animation: fadeInUp 1s ease 1.5s both;
+}
+
+.scrollLine {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0)
+  );
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px); // translateX(-50%) більше не потрібен — центрує flexbox
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scrollPulse {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1.3);
+    transform-origin: top;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// NEON SECTION TRANSITION
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ── Neon scroll container ─────────────────────────────────────────────────
+// ↓↓ NEON HEIGHT — змінюй щоб довше/коротше залишатися в неон-сцені
+.neonContainer {
+  height: 200vh;
+  position: relative;
+}
+
+// ── Темний фон для neon sticky ────────────────────────────────────────────
+// Щоб на початку neon-сцени екран був чорним (не прозорим).
+.stickyDark {
+  background: #000;
+}
+
+// ── Чорна ширма — перехід між основним відео і neon ──────────────────────
+// Slide up: gsap.set(curtain, { y: "100%" }) → gsap.to(curtain, { y: "0%" })
+// Початковий стан y: "100%" задається через gsap.set() в useLayoutEffect.
+.curtain {
+  position: absolute;
+  inset: 0;
+  height: 110%;      // ← трохи більше 100% щоб mask-gradient не обрізався
+  background: #000;
+  z-index: 30;       // поверх відео (без z-index) і панелей (z-index: 10)
+  // М'який fade на верхньому краї (0% = прозорий → 6% = суцільний чорний)
+  // ↓↓ Змінюй 6% щоб збільшити/зменшити "перехідну зону" fade
+  mask-image: linear-gradient(to bottom, transparent 0%, black 10%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10%);
+}
