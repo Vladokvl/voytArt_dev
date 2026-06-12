@@ -215,12 +215,52 @@
   justify-content: space-between;
   padding: 1.5rem;
   gap: 1rem;
-  overflow-y: auto;
+  overflow: hidden;
   background: var(--modal-info-bg);
   transition: background 0.4s ease;
+  flex-grow: 1;
 
   @media (min-width: 768px) {
     width: 36%;
+    height: 100%;
+  }
+}
+
+.scrollableContent {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 4px;
+  -webkit-overflow-scrolling: touch;
+
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+
+  /* Chrome/Safari */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+  }
+
+  :global([data-neon]) & {
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  @media (min-width: 768px) {
+    overflow-y: visible;
+    flex: 1;
+    min-height: 0;
   }
 }
 
@@ -320,6 +360,42 @@
   }
   ul {
     padding-left: 1.25rem;
+  }
+
+  // Mobile by default:
+  overflow-y: visible;
+  max-height: none;
+
+  // Desktop override:
+  @media (min-width: 768px) {
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    padding-right: 4px;
+    -webkit-overflow-scrolling: touch;
+
+    /* Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+
+    /* Chrome/Safari */
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+    }
+
+    :global([data-neon]) & {
+      scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+      &::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+    }
   }
 }
 

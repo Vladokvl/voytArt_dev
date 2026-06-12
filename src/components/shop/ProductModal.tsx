@@ -157,7 +157,7 @@ export default function ProductModal({ product, onClose, onAddToCart }: ProductM
 
           {/* ── Info panel ──────────────────────────────────── */}
           <div className={styles.info}>
-            <div>
+            <div className={styles.scrollableContent} data-lenis-prevent>
               <p className={styles.authorLabel}>
                 {product.author.firstName} {product.author.lastName}
               </p>
@@ -169,6 +169,7 @@ export default function ProductModal({ product, onClose, onAddToCart }: ProductM
               {product.description && (
                 <div
                   className={styles.description}
+                  data-lenis-prevent
                   dangerouslySetInnerHTML={{ __html: product.description }}
                 />
               )}

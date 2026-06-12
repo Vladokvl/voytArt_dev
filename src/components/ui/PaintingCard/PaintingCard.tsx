@@ -204,12 +204,11 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
 
           {/* ── Info panel ──────────────────────────────────── */}
           <div className={styles.info}>
-            <div>
+            <div className={styles.scrollableContent} data-lenis-prevent>
               <p className={styles.authorLabel}>
                 {painting.author.firstName} {painting.author.lastName}
               </p>
               <Dialog.Title className={styles.title}>{painting.title}</Dialog.Title>
-
               {hasNeonMedia && (
                 <label className={styles.switchWrap} aria-label="Toggle neon mode">
                   <span className={styles.switchTrack}>
@@ -227,6 +226,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
               {painting.description && (
                 <div
                   className={styles.description}
+                  data-lenis-prevent
                   dangerouslySetInnerHTML={{ __html: painting.description }}
                 />
               )}

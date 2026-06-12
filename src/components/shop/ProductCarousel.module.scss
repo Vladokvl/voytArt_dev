@@ -2,15 +2,34 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  padding: 16px 0;
+  padding: 24px;
   width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 3rem;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    padding: 20px;
+    border-radius: 20px;
+    margin-bottom: 2.5rem;
+  }
+
+  @media (max-width: 640px) {
+    padding: 16px;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+  }
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 1rem;
+  padding: 0 4px;
 }
 
 .title {
@@ -19,7 +38,7 @@
   font-weight: 700;
   font-size: 22px;
   line-height: 140%;
-  color: #fff;
+  color: var(--color-text, #1a1a1a);
 }
 
 .buttons {
@@ -31,9 +50,9 @@
   width: 32px;
   height: 32px;
   padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(26, 26, 26, 0.1);
   background-color: transparent;
-  color: #fff;
+  color: var(--color-text, #1a1a1a);
   border-radius: 50%;
   cursor: pointer;
   display: flex;
@@ -42,11 +61,12 @@
   transition: background-color 200ms ease, border-color 200ms ease;
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(26, 26, 26, 0.05);
+    border-color: rgba(26, 26, 26, 0.2);
   }
 
   &:active {
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(26, 26, 26, 0.1);
   }
 }
 
@@ -57,7 +77,7 @@
   scroll-behavior: smooth;
   scrollbar-width: none;
   gap: 16px;
-  padding: 0 1rem; /* pad first and last */
+  padding: 4px; /* prevents shadows from clipping */
 
   &::-webkit-scrollbar {
     display: none;
@@ -76,44 +96,53 @@
 
 /* Card styles similar to the main grid */
 .productCard {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.04);
   border-radius: 16px;
   overflow: hidden;
-  transition: transform 0.3s ease, border-color 0.3s ease;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
   height: 100%;
   display: flex;
   flex-direction: column;
 
   &:hover {
-    transform: translateY(-4px);
-    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+    border-color: rgba(0, 0, 0, 0.08);
   }
 }
 
 .imageWrapper {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 5;
-  background: rgba(0, 0, 0, 0.2);
+  aspect-ratio: 1 / 1;
+  background: #f3f3f3;
   cursor: pointer;
+  overflow: hidden;
 }
 
 .productImage {
   object-fit: cover;
+  transition: transform 0.5s ease;
+
+  .productCard:hover & {
+    transform: scale(1.04);
+  }
 }
 
 .soldOut {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  background: rgba(0, 0, 0, 0.8);
-  color: #fff;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  backdrop-filter: blur(8px);
+  inset: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1a1a1a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .cardInfo {
@@ -124,24 +153,26 @@
 }
 
 .authorName {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.6);
-  margin-bottom: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-muted, #666);
+  margin-bottom: 0.35rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
 }
 
 .productTitle {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--color-text, #1a1a1a);
   margin-bottom: 1rem;
   cursor: pointer;
   transition: color 0.2s ease;
   flex: 1;
+  line-height: 1.4;
 
   &:hover {
-    color: var(--color-accent);
+    text-decoration: underline;
   }
 }
 
@@ -153,14 +184,14 @@
 }
 
 .price {
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: #e5e5e5;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text, #1a1a1a);
 }
 
 .addToCartBtn {
-  background: #fff;
-  color: #000;
+  background: var(--color-text, #1a1a1a);
+  color: #fff;
   border: none;
   padding: 0.5rem 1.25rem;
   border-radius: 8px;
@@ -171,7 +202,7 @@
 
   &:hover:not(:disabled) {
     transform: scale(1.05);
-    background: #e6e6e6;
+    background: rgba(26, 26, 26, 0.85);
   }
 
   &:disabled {
