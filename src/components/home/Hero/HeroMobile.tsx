@@ -25,18 +25,15 @@ const getMobileFrameSrc = (index: number) =>
 export default function HeroMobile() {
   const [isMainReady, setIsMainReady] = useState(false);
   const [loaderProgress, setLoaderProgress] = useState(0);
-  const [useVideoFallback, setUseVideoFallback] = useState(false);
   const [loaderTitle, setLoaderTitle] = useState("Loading Mobile Frames");
   const [loaderHint, setLoaderHint] = useState("Preparing first frames");
 
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fallbackVideoRef = useRef<HTMLVideoElement>(null);
   const imageCacheRef = useRef<Map<number, HTMLImageElement>>(new Map());
   const pendingLoadsRef = useRef<Set<number>>(new Set());
   const currentFrameRef = useRef(1);
   const frameTweenRef = useRef<gsap.core.Tween | null>(null);
-  const fallbackVideoTweenRef = useRef<gsap.core.Animation | null>(null);
   const prefetchAbortRef = useRef<AbortController | null>(null);
   const prefetchedFramesRef = useRef<Set<number>>(new Set());
   const prefetchStartedRef = useRef(false);
@@ -61,10 +58,10 @@ export default function HeroMobile() {
     heroWindow.__voytHeroReady = true;
     window.dispatchEvent(
       new CustomEvent(HERO_READY_EVENT, {
-        detail: { source: useVideoFallback ? "mobile-fallback-video" : "mobile-frames" },
+        detail: { source: "mobile-frames" },
       }),
     );
-  }, [isMainReady, useVideoFallback]);
+  }, [isMainReady]);
 
   // useLayoutEffect — виставляємо початкові стани ДО першого рендеру
   useLayoutEffect(() => {
@@ -89,7 +86,6 @@ export default function HeroMobile() {
   useEffect(() => {
     const container = containerRef.current;
     const canvas = canvasRef.current;
-    const fallbackVideo = fallbackVideoRef.current;
     const hero = heroRef.current;
     const panel0 = panel0Ref.current;
     const panel1 = panel1Ref.current;
@@ -281,54 +277,6 @@ export default function HeroMobile() {
       });
     };
 
-    const initFallbackVideoScroll = () => {
-      if (!fallbackVideo) return;
-
-      setUseVideoFallback(true);
-      setLoaderTitle("Switching To Video Fallback");
-      setLoaderHint("Frame preload threshold not reached");
-
-      fallbackVideoTweenRef.current?.kill();
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: container,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 1.2,
-          onUpdate: (self) => {
-            if (bar) {
-              bar.style.width = `${self.progress * MAIN_PROGRESS_FRAC * 100}%`;
-            }
-          },
-        },
-      });
-
-      const startVideoAnimation = () => {
-        fallbackVideo
-          .play()
-          .then(() => fallbackVideo.pause())
-          .catch(() => {
-            // autoplay unlock може бути заблокований політикою браузера
-          });
-
-        fallbackVideoTweenRef.current = tl.to(fallbackVideo, {
-          currentTime: fallbackVideo.duration,
-          ease: "none",
-        });
-
-        setLoaderProgress(100);
-        setIsMainReady(true);
-      };
-
-      if (fallbackVideo.readyState >= 1) {
-        startVideoAnimation();
-      } else {
-        fallbackVideo.addEventListener("loadedmetadata", startVideoAnimation, {
-          once: true,
-        });
-      }
-    };
-
     let settledCritical = 0;
     let loadedCritical = 0;
     let mainScrollInitialized = false;
@@ -349,9 +297,12 @@ export default function HeroMobile() {
         drawFrame(1);
       }
 
-      if (!mainScrollInitialized && loadedCritical >= MOBILE_PRELOAD_READY_THRESHOLD) {
+      if (
+        !mainScrollInitialized &&
+        (loadedCritical >= MOBILE_PRELOAD_READY_THRESHOLD ||
+          settledCritical >= MOBILE_PRELOAD_CRITICAL_FRAMES)
+      ) {
         mainScrollInitialized = true;
-        setUseVideoFallback(false);
         setLoaderTitle("Loading Mobile Frames");
         setLoaderHint("Ready");
         setIsMainReady(true);
@@ -359,14 +310,6 @@ export default function HeroMobile() {
         window.setTimeout(() => {
           void prefetchFramesInBackground(MOBILE_PRELOAD_CRITICAL_FRAMES + 1);
         }, 1000);
-      }
-
-      if (
-        !mainScrollInitialized &&
-        settledCritical >= MOBILE_PRELOAD_CRITICAL_FRAMES
-      ) {
-        mainScrollInitialized = true;
-        initFallbackVideoScroll();
       }
     };
 
@@ -579,17 +522,10 @@ export default function HeroMobile() {
 
       frameTweenRef.current?.kill();
       frameTweenRef.current = null;
-      fallbackVideoTweenRef.current?.kill();
-      fallbackVideoTweenRef.current = null;
       prefetchAbortRef.current?.abort();
       prefetchAbortRef.current = null;
       prefetchedFrames.clear();
       prefetchStartedRef.current = false;
-
-      if (fallbackVideo) {
-        fallbackVideo.pause();
-        fallbackVideo.currentTime = 0;
-      }
 
       ctx.revert();
     };
@@ -630,18 +566,6 @@ export default function HeroMobile() {
           ref={canvasRef}
           className={styles.video}
           data-video="mainMobile"
-          style={{ opacity: useVideoFallback ? 0 : 1 }}
-        />
-
-        {/* fallback на існуюче відео, якщо mobile_frames поки відсутні */}
-        <video
-          ref={fallbackVideoRef}
-          className={styles.video}
-          src="/mainPageVideos/final_mobile_h264.mp4"
-          data-video="mainMobileFallback"
-          muted
-          playsInline
-          style={{ opacity: useVideoFallback ? 1 : 0 }}
         />
 
         {/* Hero: логотип та назва галереї */}

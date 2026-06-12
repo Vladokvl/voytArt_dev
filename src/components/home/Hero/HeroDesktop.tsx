@@ -20,7 +20,7 @@ const BUFFER_BACKWARD = 8;
 const HERO_READY_EVENT = "voyt:hero-ready";
 
 const getDesktopFrameSrc = (index: number) =>
-  `/mainPageVideos/originals/desktop_frames_light/frame_${String(index).padStart(4, "0")}.webp`;
+  `/mainPageVideos/originals/desktop_frames/frame_${String(index).padStart(4, "0")}.webp`;
 
 export default function HeroDesktop() {
   const [isMainReady, setIsMainReady] = useState(false);
