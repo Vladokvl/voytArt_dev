@@ -19,12 +19,12 @@ export async function generateMetadata({
     });
     if (author) {
       const name = `${author.firstName} ${author.lastName}`;
-      const desc = author.bio ?? `Картини художника ${name}`;
+      const desc = author.bio ?? `Paintings by artist ${name}`;
       return {
-        title: `${name} - Картини | VoytArt Gallery`,
+        title: `${name} - Paintings | VoytArt Gallery`,
         description: desc,
         openGraph: {
-          title: `${name} - Картини`,
+          title: `${name} - Paintings`,
           description: desc,
         },
       };
@@ -37,12 +37,12 @@ export async function generateMetadata({
       select: { title: true, author: { select: { firstName: true, lastName: true } } },
     });
     if (coll) {
-      const desc = `Колекція "${coll.title}" від ${coll.author.firstName} ${coll.author.lastName}`;
+      const desc = `Collection "${coll.title}" by ${coll.author.firstName} ${coll.author.lastName}`;
       return {
-        title: `Колекція: ${coll.title} | VoytArt Gallery`,
+        title: `Collection: ${coll.title} | VoytArt Gallery`,
         description: desc,
         openGraph: {
-          title: `Колекція: ${coll.title}`,
+          title: `Collection: ${coll.title}`,
           description: desc,
         },
       };
@@ -50,8 +50,8 @@ export async function generateMetadata({
   }
 
   return {
-    title: "Наші Картини | VoytArt Gallery",
-    description: "Оригінальні картини від українських художників",
+    title: "Our Paintings | VoytArt Gallery",
+    description: "Original paintings by Ukrainian artists",
   };
 }
 

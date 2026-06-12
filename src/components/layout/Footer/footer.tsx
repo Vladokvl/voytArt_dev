@@ -56,7 +56,7 @@ export default function Footer() {
           <p className={styles.blockTitle}>Navigate</p>
           <nav className={styles.quickNav} aria-label="Footer navigation">
             <Link href="/" className={`${styles.quickLink} ${styles.quickLinkHome}`}>
-              На головну
+              Home
             </Link>
             <Link href="/art" className={styles.quickLink}>
               Art

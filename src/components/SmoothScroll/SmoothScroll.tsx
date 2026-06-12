@@ -6,6 +6,12 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 
+declare global {
+  interface Window {
+    lenis: Lenis;
+  }
+}
+
 export default function SmoothScroll({ children }: { children: ReactNode }) {
   useEffect(() => {
     // GSAP керує Lenis через свій ticker — вони завжди в одному кадрі.
@@ -19,6 +25,9 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
       smoothWheel: true,
       anchors: true,
     })
+
+    // Expose lenis to window so we can stop it from modals
+    window.lenis = lenis;
 
     const driverFn = (time: number) => lenis.raf(time * 1000)
     gsap.ticker.add(driverFn)

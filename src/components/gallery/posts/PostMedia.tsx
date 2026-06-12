@@ -37,7 +37,7 @@ export default function PostMedia({ items }: { items: MediaItem[] }) {
                 key={item.id}
                 className={styles.item}
                 onClick={() => setActiveIndex(idx)}
-                aria-label={item.type === "VIDEO" ? "Відкрити відео" : "Відкрити фото"}
+                aria-label={item.type === "VIDEO" ? "Open video" : "Open photo"}
               >
                 <Image
                   src={item.type === "VIDEO" ? videoPoster(item.url) : item.url}

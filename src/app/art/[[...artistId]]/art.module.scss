@@ -84,6 +84,11 @@
   }
 }
 
+.loadingColumn {
+  cursor: wait !important;
+  pointer-events: none;
+}
+
 // Фони та Оверлеї
 .colBgLeft {
   position: absolute;

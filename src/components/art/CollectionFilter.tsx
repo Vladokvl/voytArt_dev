@@ -37,7 +37,7 @@ export default function CollectionFilter({
         <span className={styles.chipIconWrap}>
           <span className={styles.chipIconAll}>✦</span>
         </span>
-        Всі роботи
+        All paintings
       </button>
 
       {collections.map((col) => (

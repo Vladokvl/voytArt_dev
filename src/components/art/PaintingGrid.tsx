@@ -68,7 +68,7 @@ export default function PaintingGrid({
   return (
     <>
       {paintings.length === 0 ? (
-        <p className={styles.empty}>Ще немає жодної картини.</p>
+        <p className={styles.empty}>No paintings found.</p>
       ) : (
         <>
           <div className={styles.masonry}>
@@ -86,7 +86,7 @@ export default function PaintingGrid({
                 disabled={loading}
                 className={styles.loadMoreBtn}
               >
-                {loading ? "Завантаження..." : "Показати більше"}
+                {loading ? "Loading..." : "Show more"}
               </button>
             </div>
           )}

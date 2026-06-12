@@ -26,6 +26,7 @@ export default function ArtHero({
   const prevArtistRef      = useRef<string | null>(artistParam);
   const [leftHovered, setLeftHovered]   = useState(false);
   const [rightHovered, setRightHovered] = useState(false);
+  const [loadingArtistId, setLoadingArtistId] = useState<number | null>(null);
 
   const router = useRouter();
   const isArtistSelected = !!artistParam;
@@ -56,6 +57,9 @@ export default function ArtHero({
     if (prev === curr) return;
     prevArtistRef.current = curr;
 
+    // Reset loading state when the navigation is completed
+    setLoadingArtistId(null);
+
     // Якщо анімацію вже запустили вручну (click) — пропускаємо
     if (animatingRef.current) {
       animatingRef.current = false;
@@ -66,7 +70,7 @@ export default function ArtHero({
 
     if (curr) {
       document.body.style.overflow = "";
-      gsap.to(heroRef.current, { y: "-100vh", duration: 1, ease: "power2.inOut" });
+      gsap.to(heroRef.current, { y: "-100vh", duration: 1, delay: 0.15, ease: "power2.inOut" });
     } else {
       document.body.style.overflow = "hidden";
       if (isMobile) {
@@ -89,9 +93,8 @@ export default function ArtHero({
   // ── Клік по колонці → галерея ───────────────────────────────────────────────
   const handleSelectArtist = (authorId: number) => {
     if (isArtistSelected) return;
-    animatingRef.current = true;
-    document.body.style.overflow = "";
-    gsap.to(heroRef.current, { y: "-100vh", duration: 1, ease: "power2.inOut" });
+    setLoadingArtistId(authorId);
+    animatingRef.current = false; // Let useEffect handle the slide up after rendering
     router.push("/art?artist=" + authorId);
   };
 
@@ -114,8 +117,15 @@ export default function ArtHero({
       }
     }
 
-    gsap.to(heroRef.current, { y: 0, duration: 1, ease: "power2.inOut" });
-    router.push("/art");
+    // Slide down completely before triggering page update
+    gsap.to(heroRef.current, {
+      y: 0,
+      duration: 1,
+      ease: "power2.inOut",
+      onComplete: () => {
+        router.push("/art");
+      }
+    });
   };
 
   // ── Swipe обробники ─────────────────────────────────────────────────────────
@@ -170,7 +180,10 @@ export default function ArtHero({
       <div ref={sliderWrapperRef} className={styles.sliderWrapper}>
 
         {/* Ліва колонка — перший автор */}
-        <div className={styles.column} onClick={() => handleSelectArtist(leftAuthorId)}>
+        <div 
+          className={`${styles.column} ${loadingArtistId === leftAuthorId ? styles.loadingColumn : ""}`} 
+          onClick={() => handleSelectArtist(leftAuthorId)}
+        >
           <div className={styles.colBgLeft} />
           <div className={`${styles.colOverlay} ${leftHovered ? styles.colOverlayHidden : ""}`} />
 
@@ -199,7 +212,7 @@ export default function ArtHero({
 
         {/* Права колонка — другий автор */}
         <div
-          className={`${styles.column} ${styles.columnRight}`}
+          className={`${styles.column} ${styles.columnRight} ${loadingArtistId === rightAuthorId ? styles.loadingColumn : ""}`}
           onClick={() => handleSelectArtist(rightAuthorId)}
         >
           <div className={styles.colBgRight} />
@@ -243,7 +256,7 @@ export default function ArtHero({
         ref={pullTabRef}
         className={styles.pullTab}
         onClick={handleBack}
-        aria-label="Повернутися до вибору художника"
+        aria-label="Back to artist selection"
       >
         <svg
           className={styles.pullTabIcon}

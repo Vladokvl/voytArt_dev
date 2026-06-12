@@ -3,7 +3,14 @@
 import Image from "next/image";
 import * as Dialog from "@radix-ui/react-dialog";
 import styles from "./paintingCard.module.scss";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    lenis: any;
+  }
+}
 
 type MediaItem = {
   id: number;
@@ -44,7 +51,6 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
   const [open, setOpen] = useState(false);
   const [isNeon, setIsNeon] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isZoomed, setIsZoomed] = useState(false);
   const [loadedSet, setLoadedSet] = useState<Set<string>>(new Set());
 
   const activeItems = isNeon ? neonMedia : defaultItems;
@@ -55,7 +61,6 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
     if (!next) {
       setIsNeon(false);
       setActiveIndex(0);
-      setIsZoomed(false);
       setLoadedSet(new Set());
     }
   };
@@ -63,7 +68,6 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
   const handleModeToggle = () => {
     setIsNeon((v) => !v);
     setActiveIndex(0);
-    setIsZoomed(false);
     setLoadedSet(new Set());
   };
 
@@ -72,17 +76,39 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
     setActiveIndex((i) =>
       dir === "prev" ? (i === 0 ? len - 1 : i - 1) : (i === len - 1 ? 0 : i + 1)
     );
-    setIsZoomed(false);
   };
 
   const markLoaded = (url: string) => {
     setLoadedSet((s) => new Set([...s, url]));
   };
 
-  // Show spinner until all image-type items in the active set are loaded
-  const allLoaded = activeItems
-    .filter((m) => m.type === "IMAGE")
-    .every((m) => loadedSet.has(m.url));
+  // Show spinner until the currently active image is loaded
+  const currentItem = activeItems[activeIndex];
+  const isCurrentLoaded =
+    currentItem?.type === "VIDEO"
+      ? true
+      : currentItem
+      ? loadedSet.has(currentItem.url)
+      : true;
+
+  // Block Lenis scroll when modal is open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+      if (typeof window !== "undefined" && window.lenis) window.lenis.stop();
+    } else {
+      document.body.style.overflow = "";
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+      if (typeof window !== "undefined" && window.lenis) window.lenis.start();
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+      if (typeof window !== "undefined" && window.lenis) window.lenis.start();
+    };
+  }, [open]);
 
   return (
     <Dialog.Root open={open} onOpenChange={handleOpenChange}>
@@ -107,8 +133,8 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
         >
           {/* ── Slider area ─────────────────────────────────── */}
           <div className={styles.imageWrap}>
-            {/* Spinner shown while images load */}
-            {!allLoaded && <div className={styles.spinner} aria-hidden="true" />}
+            {/* Spinner shown while active image loads */}
+            {!isCurrentLoaded && <div className={styles.spinner} aria-hidden="true" />}
 
             {/* All slides pre-rendered; translateX reveals active slide */}
             <div
@@ -116,14 +142,27 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
               style={{ transform: `translateX(-${activeIndex * 100}%)` }}
             >
               {activeItems.map((item, idx) => (
-                <div className={styles.slide} key={`${item.id}-${item.url}`}>
+                <div
+                  className={styles.slide}
+                  key={`${item.id}-${item.url}`}
+                  onMouseMove={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 100;
+                    const y = ((e.clientY - rect.top) / rect.height) * 100;
+                    e.currentTarget.style.setProperty("--mouse-x", `${x}%`);
+                    e.currentTarget.style.setProperty("--mouse-y", `${y}%`);
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.setProperty("--mouse-x", `50%`);
+                    e.currentTarget.style.setProperty("--mouse-y", `50%`);
+                  }}
+                >
                   {item.type === "VIDEO" ? (
                     <video
                       className={styles.mediaEl}
                       controls
                       autoPlay={idx === activeIndex}
                       playsInline
-                      data-zoomed={isZoomed ? "true" : undefined}
                     >
                       <source src={item.url} />
                     </video>
@@ -134,7 +173,6 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                       fill
                       className={styles.mediaEl}
                       sizes="(max-width: 768px) 100vw, 66vw"
-                      data-zoomed={isZoomed ? "true" : undefined}
                       onLoad={() => markLoaded(item.url)}
                     />
                   )}
@@ -142,29 +180,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
               ))}
             </div>
 
-            {/* Zoom button */}
-            <button
-              type="button"
-              className={styles.zoomBtn}
-              onClick={() => setIsZoomed((z) => !z)}
-              aria-label={isZoomed ? "Показати повністю" : "Наблизити"}
-            >
-              {isZoomed ? (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="4 14 10 14 10 20" />
-                  <polyline points="20 10 14 10 14 4" />
-                  <line x1="10" y1="14" x2="3" y2="21" />
-                  <line x1="21" y1="3" x2="14" y2="10" />
-                </svg>
-              ) : (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="15 3 21 3 21 9" />
-                  <polyline points="9 21 3 21 3 15" />
-                  <line x1="21" y1="3" x2="14" y2="10" />
-                  <line x1="3" y1="21" x2="10" y2="14" />
-                </svg>
-              )}
-            </button>
+            {/* Zoom button removed as per zoom hover logic */}
 
             {/* Navigation */}
             {hasMultiple && (
@@ -173,7 +189,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                   type="button"
                   className={`${styles.navBtn} ${styles.navPrev}`}
                   onClick={() => navigate("prev")}
-                  aria-label="Попереднє"
+                  aria-label="Previous"
                 >
                   ‹
                 </button>
@@ -181,7 +197,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                   type="button"
                   className={`${styles.navBtn} ${styles.navNext}`}
                   onClick={() => navigate("next")}
-                  aria-label="Наступне"
+                  aria-label="Next"
                 >
                   ›
                 </button>
@@ -201,7 +217,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
               <Dialog.Title className={styles.title}>{painting.title}</Dialog.Title>
 
               {hasNeonMedia && (
-                <label className={styles.switchWrap} aria-label="Переключити режим">
+                <label className={styles.switchWrap} aria-label="Toggle neon mode">
                   <span className={styles.switchTrack}>
                     <input
                       type="checkbox"
@@ -224,9 +240,9 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
 
             <div className={styles.actions}>
               <a href="mailto:contact@voytart.com" className={styles.btnPrimary}>
-                Зв&apos;язатись щодо картини
+                Inquire about this painting
               </a>
-              <Dialog.Close className={styles.btnGhost}>Закрити</Dialog.Close>
+              <Dialog.Close className={styles.btnGhost}>Close</Dialog.Close>
             </div>
           </div>
         </Dialog.Content>
