@@ -3,6 +3,7 @@ import { useActionState, useRef, useState, useTransition } from "react";
 import { createPaintingAction } from "./_actions";
 import { type Author } from "@/types/Author";
 import styles from "../paintings.module.scss";
+import { uploadToCloudinary } from "~/lib/cloudinary-client";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 
@@ -57,17 +58,11 @@ export default function PaintingForm({ authors, collections }: { authors: Author
     let imageUrl = "";
 
     if (file) {
-      const data = new FormData();
-      data.append("file", file);
-      data.append("upload_preset", "voytart_unsigned");
-      data.append("folder", "voytart/paintings");
-
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        { method: "POST", body: data },
-      );
-      const json = (await res.json()) as { secure_url: string };
-      imageUrl = json.secure_url;
+      try {
+        imageUrl = await uploadToCloudinary(file, "voytart/paintings");
+      } catch (err) {
+        console.error(err);
+      }
     }
 
     setUploading(false);

@@ -4,6 +4,7 @@ import { updateCollectionAction } from "../../_actions";
 import { type Author } from "@/types/Author";
 import styles from "../../../_formStyles.module.scss";
 import Image from "next/image";
+import { uploadToCloudinary } from "~/lib/cloudinary-client";
 
 type CollectionForEdit = {
   id: number;
@@ -32,18 +33,14 @@ export default function CollectionEditForm({
     if (!file) return;
 
     setUploading(true);
-    const data = new FormData();
-    data.append("file", file);
-    data.append("upload_preset", "voytart_unsigned");
-    data.append("folder", "voytart/collections");
-
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-      { method: "POST", body: data },
-    );
-    const json = (await res.json()) as { secure_url: string };
-    setCoverPhotoUrl(json.secure_url);
-    setUploading(false);
+    try {
+      const secureUrl = await uploadToCloudinary(file, "voytart/collections");
+      setCoverPhotoUrl(secureUrl);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setUploading(false);
+    }
   }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {

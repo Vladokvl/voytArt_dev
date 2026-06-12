@@ -2,6 +2,7 @@
 import { useActionState, useRef, useState, useTransition } from "react";
 import { createPostAction } from "../_actions";
 import styles from "../../_formStyles.module.scss";
+import { uploadToCloudinary } from "~/lib/cloudinary-client";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 
@@ -42,17 +43,11 @@ export default function PostForm() {
     let coverUrl = "";
 
     if (file) {
-      const data = new FormData();
-      data.append("file", file);
-      data.append("upload_preset", "voytart_unsigned");
-      data.append("folder", "voytart/posts");
-
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        { method: "POST", body: data },
-      );
-      const json = (await res.json()) as { secure_url: string };
-      coverUrl = json.secure_url;
+      try {
+        coverUrl = await uploadToCloudinary(file, "voytart/posts");
+      } catch (err) {
+        console.error(err);
+      }
     }
 
     setUploading(false);

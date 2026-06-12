@@ -1,6 +1,9 @@
+"use client";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./GalleryPosts.module.scss";
+import { fetchPaginatedPosts } from "~/app/gallery/_actions";
 
 type Post = {
   id: number;
@@ -23,7 +26,39 @@ function formatDate(date: Date | null): string {
   }).format(new Date(date));
 }
 
-export default function GalleryPosts({ posts }: { posts: Post[] }) {
+export default function GalleryPosts({
+  initialPosts,
+  initialHasMore,
+  limit,
+}: {
+  initialPosts: Post[];
+  initialHasMore: boolean;
+  limit: number;
+}) {
+  const [posts, setPosts] = useState<Post[]>(initialPosts);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [loading, setLoading] = useState(false);
+
+  const loadMore = async () => {
+    if (loading) return;
+    setLoading(true);
+
+    try {
+      const res = await fetchPaginatedPosts(posts.length, limit);
+      // Map post dates back to Date objects from JSON string
+      const newPosts = res.posts.map((p) => ({
+        ...p,
+        date: p.date ? new Date(p.date) : null,
+      }));
+      setPosts((prev) => [...prev, ...newPosts]);
+      setHasMore(res.hasMore);
+    } catch (error) {
+      console.error("Failed to load more posts:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section className={styles.section}>
       <div className={styles.inner}>
@@ -66,6 +101,18 @@ export default function GalleryPosts({ posts }: { posts: Post[] }) {
             ))
           )}
         </div>
+
+        {hasMore && (
+          <div className={styles.loadMoreContainer}>
+            <button
+              onClick={loadMore}
+              disabled={loading}
+              className={styles.loadMoreBtn}
+            >
+              {loading ? "Loading..." : "Show More"}
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

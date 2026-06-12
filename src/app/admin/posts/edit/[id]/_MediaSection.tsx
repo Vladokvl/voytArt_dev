@@ -2,6 +2,7 @@
 import { useRef, useState, useTransition } from "react";
 import { addPostMediaAction, deletePostMediaAction } from "./_media-actions";
 import styles from "@/app/admin/_formStyles.module.scss";
+import { uploadToCloudinary } from "~/lib/cloudinary-client";
 
 type MediaItem = { id: number; url: string; type: "IMAGE" | "VIDEO"; order: number };
 
@@ -28,24 +29,21 @@ export default function PostMediaSection({
     if (!file) return;
 
     setUploading(true);
-    const data = new FormData();
-    data.append("file", file);
-    data.append("upload_preset", "voytart_unsigned");
-    data.append("folder", folder);
-    data.append("resource_type", resourceType);
-
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`,
-      { method: "POST", body: data },
-    );
-    const json = (await res.json()) as { secure_url: string };
+    let secureUrl = "";
+    try {
+      secureUrl = await uploadToCloudinary(file, folder, resourceType);
+    } catch (err) {
+      console.error(err);
+      setUploading(false);
+      return;
+    }
     setUploading(false);
     setPreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
 
     const fd = new FormData();
     fd.set("postId", String(postId));
-    fd.set("url", json.secure_url);
+    fd.set("url", secureUrl);
     fd.set("type", mediaType);
     startTransition(() => { void addPostMediaAction(fd); });
   }

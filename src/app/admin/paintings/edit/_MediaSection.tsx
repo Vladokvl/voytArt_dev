@@ -2,6 +2,7 @@
 import { useRef, useState, useTransition } from "react";
 import { addPaintingMediaAction, deletePaintingMediaAction } from "./_media-actions";
 import styles from "../paintings.module.scss";
+import { uploadToCloudinary } from "~/lib/cloudinary-client";
 
 type MediaItem = { id: number; url: string; isNeon: boolean; order: number };
 
@@ -25,21 +26,19 @@ export default function MediaSection({
     if (!file) return;
 
     setUploading(true);
-    const data = new FormData();
-    data.append("file", file);
-    data.append("upload_preset", "voytart_unsigned");
-    data.append("folder", "voytart/paintings");
-
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-      { method: "POST", body: data },
-    );
-    const json = (await res.json()) as { secure_url: string };
+    let secureUrl = "";
+    try {
+      secureUrl = await uploadToCloudinary(file, "voytart/paintings");
+    } catch (err) {
+      console.error(err);
+      setUploading(false);
+      return;
+    }
     setUploading(false);
 
     const fd = new FormData();
     fd.set("paintingId", String(paintingId));
-    fd.set("url", json.secure_url);
+    fd.set("url", secureUrl);
     fd.set("isNeon", String(isNeon));
 
     startTransition(() => {

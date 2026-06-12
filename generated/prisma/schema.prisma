@@ -67,7 +67,7 @@ model Painting {
   sortOrder Int     @default(0) @map("sort_order")
   year      Int?
 
-  author   Author @relation(fields: [authorId], references: [id])
+  author   Author @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId Int    @map("author_id")
 
   collection   Collection? @relation(fields: [collectionId], references: [id])
@@ -122,7 +122,7 @@ model Product {
   category   Category @relation(fields: [categoryId], references: [id])
   categoryId Int      @map("category_id")
 
-  author   Author @relation(fields: [authorId], references: [id])
+  author   Author @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId Int    @map("author_id")
 
   images ProductImage[]

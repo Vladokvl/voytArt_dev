@@ -3,6 +3,7 @@ import { useActionState, useRef, useState, useTransition } from "react";
 import { createCollectionAction } from "../_actions";
 import { type Author } from "@/types/Author";
 import styles from "../../_formStyles.module.scss";
+import { uploadToCloudinary } from "~/lib/cloudinary-client";
 
 export default function CollectionNewForm({ authors }: { authors: Author[] }) {
   const [state, formAction] = useActionState(createCollectionAction, undefined);
@@ -21,18 +22,13 @@ export default function CollectionNewForm({ authors }: { authors: Author[] }) {
     let coverPhotoUrl = "";
     if (file) {
       setUploading(true);
-      const data = new FormData();
-      data.append("file", file);
-      data.append("upload_preset", "voytart_unsigned");
-      data.append("folder", "voytart/collections");
-
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        { method: "POST", body: data },
-      );
-      const json = (await res.json()) as { secure_url: string };
-      coverPhotoUrl = json.secure_url;
-      setUploading(false);
+      try {
+        coverPhotoUrl = await uploadToCloudinary(file, "voytart/collections");
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setUploading(false);
+      }
     }
 
     const actionData = new FormData(form);

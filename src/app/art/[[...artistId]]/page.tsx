@@ -1,8 +1,59 @@
 import ArtHero from "../../../components/art/ArtHero";
-import PaintingCard from "~/components/ui/PaintingCard/PaintingCard";
 import CollectionFilter from "../../../components/art/CollectionFilter";
+import PaintingGrid from "~/components/art/PaintingGrid";
 import { db } from "~/lib/db";
 import styles from "./art.module.scss";
+import { type Metadata } from "next";
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ artist?: string; collection?: string }>;
+}): Promise<Metadata> {
+  const { artist, collection } = await searchParams;
+
+  if (artist) {
+    const author = await db.author.findUnique({
+      where: { id: Number(artist) },
+      select: { firstName: true, lastName: true, bio: true },
+    });
+    if (author) {
+      const name = `${author.firstName} ${author.lastName}`;
+      const desc = author.bio ?? `Картини художника ${name}`;
+      return {
+        title: `${name} - Картини | VoytArt Gallery`,
+        description: desc,
+        openGraph: {
+          title: `${name} - Картини`,
+          description: desc,
+        },
+      };
+    }
+  }
+
+  if (collection) {
+    const coll = await db.collection.findUnique({
+      where: { id: Number(collection) },
+      select: { title: true, author: { select: { firstName: true, lastName: true } } },
+    });
+    if (coll) {
+      const desc = `Колекція "${coll.title}" від ${coll.author.firstName} ${coll.author.lastName}`;
+      return {
+        title: `Колекція: ${coll.title} | VoytArt Gallery`,
+        description: desc,
+        openGraph: {
+          title: `Колекція: ${coll.title}`,
+          description: desc,
+        },
+      };
+    }
+  }
+
+  return {
+    title: "Наші Картини | VoytArt Gallery",
+    description: "Оригінальні картини від українських художників",
+  };
+}
 
 export default async function ArtPage({
   searchParams,
@@ -14,7 +65,8 @@ export default async function ArtPage({
   const selectedAuthorId = artist ? Number(artist) : null;
   const selectedCollectionId = collection ? Number(collection) : null;
 
-  const [paintings, authors, collections] = await Promise.all([
+  const limit = 9;
+  const [paintings, totalPaintings, authors, collections] = await Promise.all([
     db.painting.findMany({
       where: {
         ...(selectedAuthorId ? { authorId: selectedAuthorId } : {}),
@@ -27,6 +79,13 @@ export default async function ArtPage({
         },
       },
       orderBy: { sortOrder: "asc" },
+      take: limit,
+    }),
+    db.painting.count({
+      where: {
+        ...(selectedAuthorId ? { authorId: selectedAuthorId } : {}),
+        ...(selectedCollectionId ? { collectionId: selectedCollectionId } : {}),
+      },
     }),
     db.author.findMany({ orderBy: { id: "asc" }, take: 2 }),
     selectedAuthorId
@@ -42,6 +101,8 @@ export default async function ArtPage({
   const selectedAuthor = selectedAuthorId
     ? authors.find((a) => a.id === selectedAuthorId)
     : null;
+
+  const hasMore = paintings.length < totalPaintings;
 
   return (
     <div
@@ -66,17 +127,13 @@ export default async function ArtPage({
           />
         )}
 
-        {paintings.length === 0 ? (
-          <p className={styles.empty}>Ще немає жодної картини.</p>
-        ) : (
-          <div className={styles.masonry}>
-            {paintings.map((painting) => (
-              <div key={painting.id} className={styles.masonryItem}>
-                <PaintingCard painting={painting} />
-              </div>
-            ))}
-          </div>
-        )}
+        <PaintingGrid
+          initialPaintings={paintings}
+          initialHasMore={hasMore}
+          limit={limit}
+          artistId={selectedAuthorId}
+          collectionId={selectedCollectionId}
+        />
       </section>
     </div>
   );

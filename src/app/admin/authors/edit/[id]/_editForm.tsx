@@ -2,6 +2,7 @@
 import { useActionState, useRef, useState, useTransition } from "react";
 import { updateAuthorAction } from "../../_actions";
 import styles from "@/app/admin/_formStyles.module.scss";
+import { uploadToCloudinary } from "~/lib/cloudinary-client";
 
 type Author = { id: number; firstName: string; lastName: string; bio: string | null; photoUrl: string | null };
 
@@ -35,19 +36,14 @@ export default function AuthorEditForm({ author }: { author: Author }) {
 
     if (file) {
       setUploading(true);
-      const data = new FormData();
-      data.append("file", file);
-      data.append("upload_preset", "voytart_unsigned");
-      data.append("folder", "voytart/authors");
-
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        { method: "POST", body: data },
-      );
-      const json = (await res.json()) as { secure_url: string };
-      finalPhotoUrl = json.secure_url;
-      setPhotoUrl(finalPhotoUrl);
-      setUploading(false);
+      try {
+        finalPhotoUrl = await uploadToCloudinary(file, "voytart/authors");
+        setPhotoUrl(finalPhotoUrl);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setUploading(false);
+      }
     }
 
     const actionData = new FormData(form);

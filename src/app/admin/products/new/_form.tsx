@@ -2,6 +2,7 @@
 import { useActionState, useRef, useState, useTransition } from "react";
 import { createProductAction } from "../_actions";
 import styles from "../../_formStyles.module.scss";
+import { uploadToCloudinary } from "~/lib/cloudinary-client";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 
@@ -36,16 +37,12 @@ export default function ProductForm({
     const localPreviews: string[] = [];
     for (const file of Array.from(files)) {
       localPreviews.push(URL.createObjectURL(file));
-      const data = new FormData();
-      data.append("file", file);
-      data.append("upload_preset", "voytart_unsigned");
-      data.append("folder", "voytart/products");
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        { method: "POST", body: data },
-      );
-      const json = (await res.json()) as { secure_url: string };
-      urls.push(json.secure_url);
+      try {
+        const secureUrl = await uploadToCloudinary(file, "voytart/products");
+        urls.push(secureUrl);
+      } catch (err) {
+        console.error(err);
+      }
     }
     return { urls, localPreviews };
   }

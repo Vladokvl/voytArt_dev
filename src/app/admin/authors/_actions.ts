@@ -56,19 +56,78 @@ export async function updateAuthorAction(
 export async function deleteAuthorAction(id: number): Promise<void> {
   const author = await db.author.findUnique({
     where: { id },
-    select: { photoUrl: true, photoPublicId: true },
+    select: {
+      photoUrl: true,
+      photoPublicId: true,
+      paintings: {
+        select: {
+          coverUrl: true,
+          coverPublicId: true,
+          media: { select: { url: true, publicId: true, type: true } },
+        },
+      },
+      collections: {
+        select: {
+          coverPhotoUrl: true,
+          coverPhotoPublicId: true,
+        },
+      },
+      products: {
+        select: {
+          images: { select: { url: true, publicId: true } },
+        },
+      },
+    },
   });
+
+  if (!author) return;
 
   await db.author.delete({ where: { id } });
 
-  const publicId = author?.photoPublicId ?? (author?.photoUrl ? getPublicIdFromCloudinaryUrl(author.photoUrl) : null);
-  if (publicId) {
-    await deleteAsset(publicId, "image").catch(() => undefined);
+  const deleteTasks: Promise<void>[] = [];
+
+  const authorPhotoPublicId = author.photoPublicId ?? (author.photoUrl ? getPublicIdFromCloudinaryUrl(author.photoUrl) : null);
+  if (authorPhotoPublicId) {
+    deleteTasks.push(deleteAsset(authorPhotoPublicId, "image").catch(() => undefined));
   }
+
+  for (const collection of author.collections) {
+    const collPublicId = collection.coverPhotoPublicId ?? (collection.coverPhotoUrl ? getPublicIdFromCloudinaryUrl(collection.coverPhotoUrl) : null);
+    if (collPublicId) {
+      deleteTasks.push(deleteAsset(collPublicId, "image").catch(() => undefined));
+    }
+  }
+
+  for (const painting of author.paintings) {
+    const paintingCoverPublicId = painting.coverPublicId ?? (painting.coverUrl ? getPublicIdFromCloudinaryUrl(painting.coverUrl) : null);
+    if (paintingCoverPublicId) {
+      deleteTasks.push(deleteAsset(paintingCoverPublicId, "image").catch(() => undefined));
+    }
+    for (const media of painting.media) {
+      const mediaPublicId = media.publicId ?? getPublicIdFromCloudinaryUrl(media.url);
+      if (mediaPublicId) {
+        const resourceType = media.type === "VIDEO" ? "video" : "image";
+        deleteTasks.push(deleteAsset(mediaPublicId, resourceType).catch(() => undefined));
+      }
+    }
+  }
+
+  for (const product of author.products) {
+    for (const image of product.images) {
+      const imagePublicId = image.publicId ?? getPublicIdFromCloudinaryUrl(image.url);
+      if (imagePublicId) {
+        deleteTasks.push(deleteAsset(imagePublicId, "image").catch(() => undefined));
+      }
+    }
+  }
+
+  void Promise.allSettled(deleteTasks);
 
   revalidatePath("/admin/authors");
   revalidatePath("/admin");
   revalidatePath("/admin/paintings/new");
   revalidatePath("/admin/collections/new");
   revalidatePath("/admin/products/new");
+  revalidatePath("/shop");
+  revalidatePath("/art");
 }
