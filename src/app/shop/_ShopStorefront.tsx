@@ -1,14 +1,16 @@
 "use client";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import * as Dialog from "@radix-ui/react-dialog";
+
 import styles from "./shop.module.scss";
+import ProductCarousel from "~/components/shop/ProductCarousel";
+import ProductModal from "~/components/shop/ProductModal";
 
 type ProductImage = { id: number; url: string; order: number };
 type Author = { id: number; firstName: string; lastName: string };
 type Category = { id: number; name: string; slug: string };
 
-type Product = {
+export type Product = {
   id: number;
   title: string;
   description: string | null;
@@ -19,6 +21,8 @@ type Product = {
   authorId: number;
   author: Author;
   category: Category;
+  coverUrl: string;
+  isFeatured: boolean;
   images: ProductImage[];
 };
 
@@ -137,6 +141,14 @@ export default function ShopStorefront({
         </div>
       </section>
 
+      {/* ── Featured Products Carousel ──────────────────────── */}
+      <ProductCarousel 
+        title="Featured" 
+        products={initialProducts.filter((p) => p.isFeatured)} 
+        onProductClick={setSelectedProduct} 
+        onAddToCart={addToCart} 
+      />
+
       {/* ── Shop Navigation & Cart Trigger ──────────────────── */}
       <div className={styles.shopNav}>
         <div className={styles.categories}>
@@ -176,7 +188,8 @@ export default function ShopStorefront({
         ) : (
           <div className={styles.productGrid}>
             {filteredProducts.map((product) => {
-              const coverImg = product.images[0]?.url ?? "/voyt.svg";
+              // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+              const coverImg = product.coverUrl || product.images[0]?.url || "/voyt.svg";
               return (
                 <div key={product.id} className={styles.productCard}>
                   <div
@@ -221,74 +234,11 @@ export default function ShopStorefront({
       </section>
 
       {/* ── Product Details Modal ────────────────────────────── */}
-      <Dialog.Root open={!!selectedProduct} onOpenChange={(open) => !open && setSelectedProduct(null)}>
-        <Dialog.Portal>
-          <Dialog.Overlay className={styles.overlay} />
-          {selectedProduct && (
-            <Dialog.Content className={styles.modal}>
-              <div className={styles.modalGrid}>
-                {/* Image Gallery */}
-                <div className={styles.modalImages}>
-                  <div className={styles.mainImageWrapper}>
-                    <Image
-                      src={selectedProduct.images[0]?.url ?? "/voyt.svg"}
-                      alt={selectedProduct.title}
-                      fill
-                      className={styles.modalMainImg}
-                    />
-                  </div>
-                </div>
-
-                {/* Details Panel */}
-                <div className={styles.modalDetails}>
-                  <div>
-                    <span className={styles.modalAuthor}>
-                      {selectedProduct.author.firstName} {selectedProduct.author.lastName}
-                    </span>
-                    <Dialog.Title className={styles.modalTitle}>
-                      {selectedProduct.title}
-                    </Dialog.Title>
-                    <span className={styles.modalPrice}>
-                      ${selectedProduct.price.toLocaleString()}
-                    </span>
-
-                    {selectedProduct.description && (
-                      <div
-                        className={styles.modalDesc}
-                        dangerouslySetInnerHTML={{ __html: selectedProduct.description }}
-                      />
-                    )}
-
-                    <div className={styles.stockStatus}>
-                      {selectedProduct.stock > 0 ? (
-                        <span className={styles.inStock}>In Stock ({selectedProduct.stock})</span>
-                      ) : (
-                        <span className={styles.outOfStock}>Out of stock</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className={styles.modalActions}>
-                    <button
-                      onClick={() => {
-                        addToCart(selectedProduct);
-                        setSelectedProduct(null);
-                      }}
-                      disabled={selectedProduct.stock <= 0}
-                      className={styles.modalPrimaryBtn}
-                    >
-                      Add to Cart
-                    </button>
-                    <Dialog.Close className={styles.modalCloseBtn}>
-                      Close
-                    </Dialog.Close>
-                  </div>
-                </div>
-              </div>
-            </Dialog.Content>
-          )}
-        </Dialog.Portal>
-      </Dialog.Root>
+      <ProductModal 
+        product={selectedProduct} 
+        onClose={() => setSelectedProduct(null)} 
+        onAddToCart={addToCart} 
+      />
 
       {/* ── Sliding Cart Drawer ──────────────────────────────── */}
       <div className={styles.drawerShell} data-open={isCartOpen}>
@@ -317,7 +267,8 @@ export default function ShopStorefront({
                       <div key={item.product.id} className={styles.cartItem}>
                         <div className={styles.itemThumb}>
                           <Image
-                            src={item.product.images[0]?.url ?? "/voyt.svg"}
+                            // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+                            src={item.product.coverUrl || item.product.images[0]?.url || "/voyt.svg"}
                             alt={item.product.title}
                             fill
                           />

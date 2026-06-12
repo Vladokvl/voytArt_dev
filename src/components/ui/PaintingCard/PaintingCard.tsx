@@ -5,12 +5,6 @@ import * as Dialog from "@radix-ui/react-dialog";
 import styles from "./paintingCard.module.scss";
 import { useState, useEffect } from "react";
 
-declare global {
-  interface Window {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    lenis: any;
-  }
-}
 
 type MediaItem = {
   id: number;
@@ -95,18 +89,18 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-      if (typeof window !== "undefined" && window.lenis) window.lenis.stop();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
+      if (typeof window !== "undefined" && (window as any).lenis) (window as any).lenis.stop();
     } else {
       document.body.style.overflow = "";
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-      if (typeof window !== "undefined" && window.lenis) window.lenis.start();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
+      if (typeof window !== "undefined" && (window as any).lenis) (window as any).lenis.start();
     }
 
     return () => {
       document.body.style.overflow = "";
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-      if (typeof window !== "undefined" && window.lenis) window.lenis.start();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
+      if (typeof window !== "undefined" && (window as any).lenis) (window as any).lenis.start();
     };
   }, [open]);
 

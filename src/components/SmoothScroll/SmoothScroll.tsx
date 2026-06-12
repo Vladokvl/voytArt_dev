@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 "use client"
 import { useEffect, type ReactNode } from 'react'
 import Lenis from 'lenis'
@@ -5,12 +6,6 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
-
-declare global {
-  interface Window {
-    lenis: Lenis;
-  }
-}
 
 export default function SmoothScroll({ children }: { children: ReactNode }) {
   useEffect(() => {
@@ -27,7 +22,8 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
     })
 
     // Expose lenis to window so we can stop it from modals
-    window.lenis = lenis;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    ;(window as any).lenis = lenis;
 
     const driverFn = (time: number) => lenis.raf(time * 1000)
     gsap.ticker.add(driverFn)

@@ -393,3 +393,8 @@
     transform: rotate(360deg);
   }
 }
+
+.modalPrice { font-size: 1.25rem; font-weight: 600; color: #fff; margin-top: 0.5rem; display: block; }
+.stockStatus { margin-top: 1rem; font-size: 0.9rem; font-weight: 500; }
+.inStock { color: #4caf50; }
+.outOfStock { color: #f44336; }

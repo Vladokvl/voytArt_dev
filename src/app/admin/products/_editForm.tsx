@@ -8,7 +8,6 @@ import StarterKit from "@tiptap/starter-kit";
 
 type Author = { id: number; firstName: string; lastName: string };
 type Category = { id: number; name: string };
-type ProductImage = { id: number; url: string; order: number };
 type Product = {
   id: number;
   title: string;
@@ -16,9 +15,10 @@ type Product = {
   price: number;
   stock: number;
   sortOrder: number;
+  isFeatured: boolean;
   authorId: number;
   categoryId: number;
-  images: ProductImage[];
+  coverUrl: string;
 };
 
 export default function ProductEditForm({
@@ -34,8 +34,7 @@ export default function ProductEditForm({
   const [uploading, setUploading] = useState(false);
   const [pending, startTransition] = useTransition();
   const [description, setDescription] = useState(product.description ?? "");
-  const [previews, setPreviews] = useState<string[]>(product.images.map((i) => i.url));
-  const [imageUrls, setImageUrls] = useState<string[]>(product.images.map((i) => i.url));
+  const [preview, setPreview] = useState<string | null>(product.coverUrl || null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -46,41 +45,39 @@ export default function ProductEditForm({
     onUpdate: ({ editor }) => setDescription(editor.getHTML()),
   });
 
-  async function uploadFiles(files: FileList) {
-    const urls: string[] = [];
-    const localPreviews: string[] = [];
-    for (const file of Array.from(files)) {
-      localPreviews.push(URL.createObjectURL(file));
-      try {
-        const secureUrl = await uploadToCloudinary(file, "voytart/products");
-        urls.push(secureUrl);
-      } catch (err) {
-        console.error(err);
-      }
-    }
-    return { urls, localPreviews };
+  async function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    if (fileInputRef.current) fileInputRef.current.files = dt.files;
+    setPreview(URL.createObjectURL(file));
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
-    const fileInput = form.elements.namedItem("images") as HTMLInputElement;
-    const files = fileInput.files;
+    const fileInput = form.elements.namedItem("image") as HTMLInputElement;
+    const file = fileInput.files?.[0];
 
     setUploading(true);
-    let uploadedUrls = imageUrls;
-    if (files && files.length > 0) {
-      const { urls, localPreviews } = await uploadFiles(files);
-      uploadedUrls = [...imageUrls, ...urls];
-      setPreviews((prev) => [...prev, ...localPreviews]);
-      setImageUrls(uploadedUrls);
+    let coverUrl = product.coverUrl;
+
+    if (file) {
+      try {
+        coverUrl = await uploadToCloudinary(file, "voytart/products");
+      } catch (err) {
+        console.error(err);
+      }
     }
+
     setUploading(false);
 
     const actionData = new FormData(form);
-    actionData.delete("images");
-    actionData.delete("imageUrls");
-    for (const url of uploadedUrls) actionData.append("imageUrls", url);
+    actionData.delete("image");
+    actionData.set("coverUrl", coverUrl);
 
     startTransition(() => formAction(actionData));
   }
@@ -111,6 +108,12 @@ export default function ProductEditForm({
           <label className={styles.label}>Порядок сортування</label>
           <input className={styles.input} name="sortOrder" type="number" defaultValue={product.sortOrder} />
         </div>
+      </div>
+
+      <div className={styles.field}>
+        <label className={styles.checkboxLabel}>
+          <input name="isFeatured" type="checkbox" defaultChecked={product.isFeatured} /> Рекомендований товар (Featured)
+        </label>
       </div>
 
       <div className={styles.row}>
@@ -149,47 +152,27 @@ export default function ProductEditForm({
       </div>
 
       <div className={styles.field}>
-        <label className={styles.label}>Фото</label>
+        <label className={styles.label}>Головне фото товару *</label>
         <div
           className={`${styles.dropZone} ${dragOver ? styles.dragOver : ""}`}
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
           onDragLeave={() => setDragOver(false)}
-          onDrop={async (e) => {
-            e.preventDefault();
-            setDragOver(false);
-            if (e.dataTransfer.files.length === 0) return;
-            setUploading(true);
-            const { urls, localPreviews } = await uploadFiles(e.dataTransfer.files);
-            setPreviews((prev) => [...prev, ...localPreviews]);
-            setImageUrls((prev) => [...prev, ...urls]);
-            setUploading(false);
-          }}
+          onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
         >
-          {previews.length > 0 ? (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-              {previews.map((src, i) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img key={i} src={src} alt="" className={styles.previewImg} style={{ width: 80, height: 80, objectFit: "cover" }} />
-              ))}
-            </div>
+          {preview ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={preview} alt="preview" className={styles.preview} />
           ) : (
-            <span>Перетягни фото або клікни для вибору</span>
+            <span>Перетягніть фото або клікніть для вибору</span>
           )}
         </div>
-        <input ref={fileInputRef} type="file" name="images" accept="image/*" multiple style={{ display: "none" }}
-          onChange={async (e) => {
-            if (!e.target.files) return;
-            setUploading(true);
-            const { urls, localPreviews } = await uploadFiles(e.target.files);
-            setPreviews((prev) => [...prev, ...localPreviews]);
-            setImageUrls((prev) => [...prev, ...urls]);
-            setUploading(false);
+        <input ref={fileInputRef} type="file" name="image" accept="image/*" style={{ display: "none" }}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) setPreview(URL.createObjectURL(file));
           }}
         />
-        {imageUrls.map((url, i) => (
-          <input key={i} type="hidden" name="imageUrls" value={url} />
-        ))}
       </div>
 
       <button type="submit" className={styles.submitBtn} disabled={uploading || pending}>

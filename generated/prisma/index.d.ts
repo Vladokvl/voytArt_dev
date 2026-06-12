@@ -7817,6 +7817,9 @@ export namespace Prisma {
     price: number | null
     stock: number | null
     sortOrder: number | null
+    isFeatured: boolean | null
+    coverUrl: string | null
+    coverPublicId: string | null
     categoryId: number | null
     authorId: number | null
     createdAt: Date | null
@@ -7830,6 +7833,9 @@ export namespace Prisma {
     price: number | null
     stock: number | null
     sortOrder: number | null
+    isFeatured: boolean | null
+    coverUrl: string | null
+    coverPublicId: string | null
     categoryId: number | null
     authorId: number | null
     createdAt: Date | null
@@ -7843,6 +7849,9 @@ export namespace Prisma {
     price: number
     stock: number
     sortOrder: number
+    isFeatured: number
+    coverUrl: number
+    coverPublicId: number
     categoryId: number
     authorId: number
     createdAt: number
@@ -7876,6 +7885,9 @@ export namespace Prisma {
     price?: true
     stock?: true
     sortOrder?: true
+    isFeatured?: true
+    coverUrl?: true
+    coverPublicId?: true
     categoryId?: true
     authorId?: true
     createdAt?: true
@@ -7889,6 +7901,9 @@ export namespace Prisma {
     price?: true
     stock?: true
     sortOrder?: true
+    isFeatured?: true
+    coverUrl?: true
+    coverPublicId?: true
     categoryId?: true
     authorId?: true
     createdAt?: true
@@ -7902,6 +7917,9 @@ export namespace Prisma {
     price?: true
     stock?: true
     sortOrder?: true
+    isFeatured?: true
+    coverUrl?: true
+    coverPublicId?: true
     categoryId?: true
     authorId?: true
     createdAt?: true
@@ -8002,6 +8020,9 @@ export namespace Prisma {
     price: number
     stock: number
     sortOrder: number
+    isFeatured: boolean
+    coverUrl: string
+    coverPublicId: string
     categoryId: number
     authorId: number
     createdAt: Date
@@ -8034,6 +8055,9 @@ export namespace Prisma {
     price?: boolean
     stock?: boolean
     sortOrder?: boolean
+    isFeatured?: boolean
+    coverUrl?: boolean
+    coverPublicId?: boolean
     categoryId?: boolean
     authorId?: boolean
     createdAt?: boolean
@@ -8051,6 +8075,9 @@ export namespace Prisma {
     price?: boolean
     stock?: boolean
     sortOrder?: boolean
+    isFeatured?: boolean
+    coverUrl?: boolean
+    coverPublicId?: boolean
     categoryId?: boolean
     authorId?: boolean
     createdAt?: boolean
@@ -8066,6 +8093,9 @@ export namespace Prisma {
     price?: boolean
     stock?: boolean
     sortOrder?: boolean
+    isFeatured?: boolean
+    coverUrl?: boolean
+    coverPublicId?: boolean
     categoryId?: boolean
     authorId?: boolean
     createdAt?: boolean
@@ -8081,13 +8111,16 @@ export namespace Prisma {
     price?: boolean
     stock?: boolean
     sortOrder?: boolean
+    isFeatured?: boolean
+    coverUrl?: boolean
+    coverPublicId?: boolean
     categoryId?: boolean
     authorId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "price" | "stock" | "sortOrder" | "categoryId" | "authorId" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
+  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "price" | "stock" | "sortOrder" | "isFeatured" | "coverUrl" | "coverPublicId" | "categoryId" | "authorId" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
   export type ProductInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     category?: boolean | CategoryDefaultArgs<ExtArgs>
     author?: boolean | AuthorDefaultArgs<ExtArgs>
@@ -8117,6 +8150,9 @@ export namespace Prisma {
       price: number
       stock: number
       sortOrder: number
+      isFeatured: boolean
+      coverUrl: string
+      coverPublicId: string
       categoryId: number
       authorId: number
       createdAt: Date
@@ -8553,6 +8589,9 @@ export namespace Prisma {
     readonly price: FieldRef<"Product", 'Float'>
     readonly stock: FieldRef<"Product", 'Int'>
     readonly sortOrder: FieldRef<"Product", 'Int'>
+    readonly isFeatured: FieldRef<"Product", 'Boolean'>
+    readonly coverUrl: FieldRef<"Product", 'String'>
+    readonly coverPublicId: FieldRef<"Product", 'String'>
     readonly categoryId: FieldRef<"Product", 'Int'>
     readonly authorId: FieldRef<"Product", 'Int'>
     readonly createdAt: FieldRef<"Product", 'DateTime'>
@@ -13462,6 +13501,9 @@ export namespace Prisma {
     price: 'price',
     stock: 'stock',
     sortOrder: 'sortOrder',
+    isFeatured: 'isFeatured',
+    coverUrl: 'coverUrl',
+    coverPublicId: 'coverPublicId',
     categoryId: 'categoryId',
     authorId: 'authorId',
     createdAt: 'createdAt',
@@ -14013,6 +14055,9 @@ export namespace Prisma {
     price?: FloatFilter<"Product"> | number
     stock?: IntFilter<"Product"> | number
     sortOrder?: IntFilter<"Product"> | number
+    isFeatured?: BoolFilter<"Product"> | boolean
+    coverUrl?: StringFilter<"Product"> | string
+    coverPublicId?: StringFilter<"Product"> | string
     categoryId?: IntFilter<"Product"> | number
     authorId?: IntFilter<"Product"> | number
     createdAt?: DateTimeFilter<"Product"> | Date | string
@@ -14029,6 +14074,9 @@ export namespace Prisma {
     price?: SortOrder
     stock?: SortOrder
     sortOrder?: SortOrder
+    isFeatured?: SortOrder
+    coverUrl?: SortOrder
+    coverPublicId?: SortOrder
     categoryId?: SortOrder
     authorId?: SortOrder
     createdAt?: SortOrder
@@ -14048,6 +14096,9 @@ export namespace Prisma {
     price?: FloatFilter<"Product"> | number
     stock?: IntFilter<"Product"> | number
     sortOrder?: IntFilter<"Product"> | number
+    isFeatured?: BoolFilter<"Product"> | boolean
+    coverUrl?: StringFilter<"Product"> | string
+    coverPublicId?: StringFilter<"Product"> | string
     categoryId?: IntFilter<"Product"> | number
     authorId?: IntFilter<"Product"> | number
     createdAt?: DateTimeFilter<"Product"> | Date | string
@@ -14064,6 +14115,9 @@ export namespace Prisma {
     price?: SortOrder
     stock?: SortOrder
     sortOrder?: SortOrder
+    isFeatured?: SortOrder
+    coverUrl?: SortOrder
+    coverPublicId?: SortOrder
     categoryId?: SortOrder
     authorId?: SortOrder
     createdAt?: SortOrder
@@ -14085,6 +14139,9 @@ export namespace Prisma {
     price?: FloatWithAggregatesFilter<"Product"> | number
     stock?: IntWithAggregatesFilter<"Product"> | number
     sortOrder?: IntWithAggregatesFilter<"Product"> | number
+    isFeatured?: BoolWithAggregatesFilter<"Product"> | boolean
+    coverUrl?: StringWithAggregatesFilter<"Product"> | string
+    coverPublicId?: StringWithAggregatesFilter<"Product"> | string
     categoryId?: IntWithAggregatesFilter<"Product"> | number
     authorId?: IntWithAggregatesFilter<"Product"> | number
     createdAt?: DateTimeWithAggregatesFilter<"Product"> | Date | string
@@ -14730,6 +14787,9 @@ export namespace Prisma {
     price: number
     stock?: number
     sortOrder?: number
+    isFeatured?: boolean
+    coverUrl?: string
+    coverPublicId?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     category: CategoryCreateNestedOneWithoutProductsInput
@@ -14744,6 +14804,9 @@ export namespace Prisma {
     price: number
     stock?: number
     sortOrder?: number
+    isFeatured?: boolean
+    coverUrl?: string
+    coverPublicId?: string
     categoryId: number
     authorId: number
     createdAt?: Date | string
@@ -14757,6 +14820,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    coverUrl?: StringFieldUpdateOperationsInput | string
+    coverPublicId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneRequiredWithoutProductsNestedInput
@@ -14771,6 +14837,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    coverUrl?: StringFieldUpdateOperationsInput | string
+    coverPublicId?: StringFieldUpdateOperationsInput | string
     categoryId?: IntFieldUpdateOperationsInput | number
     authorId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -14785,6 +14854,9 @@ export namespace Prisma {
     price: number
     stock?: number
     sortOrder?: number
+    isFeatured?: boolean
+    coverUrl?: string
+    coverPublicId?: string
     categoryId: number
     authorId: number
     createdAt?: Date | string
@@ -14797,6 +14869,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    coverUrl?: StringFieldUpdateOperationsInput | string
+    coverPublicId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -14808,6 +14883,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    coverUrl?: StringFieldUpdateOperationsInput | string
+    coverPublicId?: StringFieldUpdateOperationsInput | string
     categoryId?: IntFieldUpdateOperationsInput | number
     authorId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15546,6 +15624,9 @@ export namespace Prisma {
     price?: SortOrder
     stock?: SortOrder
     sortOrder?: SortOrder
+    isFeatured?: SortOrder
+    coverUrl?: SortOrder
+    coverPublicId?: SortOrder
     categoryId?: SortOrder
     authorId?: SortOrder
     createdAt?: SortOrder
@@ -15568,6 +15649,9 @@ export namespace Prisma {
     price?: SortOrder
     stock?: SortOrder
     sortOrder?: SortOrder
+    isFeatured?: SortOrder
+    coverUrl?: SortOrder
+    coverPublicId?: SortOrder
     categoryId?: SortOrder
     authorId?: SortOrder
     createdAt?: SortOrder
@@ -15581,6 +15665,9 @@ export namespace Prisma {
     price?: SortOrder
     stock?: SortOrder
     sortOrder?: SortOrder
+    isFeatured?: SortOrder
+    coverUrl?: SortOrder
+    coverPublicId?: SortOrder
     categoryId?: SortOrder
     authorId?: SortOrder
     createdAt?: SortOrder
@@ -16605,6 +16692,9 @@ export namespace Prisma {
     price: number
     stock?: number
     sortOrder?: number
+    isFeatured?: boolean
+    coverUrl?: string
+    coverPublicId?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     category: CategoryCreateNestedOneWithoutProductsInput
@@ -16618,6 +16708,9 @@ export namespace Prisma {
     price: number
     stock?: number
     sortOrder?: number
+    isFeatured?: boolean
+    coverUrl?: string
+    coverPublicId?: string
     categoryId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -16724,6 +16817,9 @@ export namespace Prisma {
     price?: FloatFilter<"Product"> | number
     stock?: IntFilter<"Product"> | number
     sortOrder?: IntFilter<"Product"> | number
+    isFeatured?: BoolFilter<"Product"> | boolean
+    coverUrl?: StringFilter<"Product"> | string
+    coverPublicId?: StringFilter<"Product"> | string
     categoryId?: IntFilter<"Product"> | number
     authorId?: IntFilter<"Product"> | number
     createdAt?: DateTimeFilter<"Product"> | Date | string
@@ -17113,6 +17209,9 @@ export namespace Prisma {
     price: number
     stock?: number
     sortOrder?: number
+    isFeatured?: boolean
+    coverUrl?: string
+    coverPublicId?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     author: AuthorCreateNestedOneWithoutProductsInput
@@ -17126,6 +17225,9 @@ export namespace Prisma {
     price: number
     stock?: number
     sortOrder?: number
+    isFeatured?: boolean
+    coverUrl?: string
+    coverPublicId?: string
     authorId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -17326,6 +17428,9 @@ export namespace Prisma {
     price: number
     stock?: number
     sortOrder?: number
+    isFeatured?: boolean
+    coverUrl?: string
+    coverPublicId?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     category: CategoryCreateNestedOneWithoutProductsInput
@@ -17339,6 +17444,9 @@ export namespace Prisma {
     price: number
     stock?: number
     sortOrder?: number
+    isFeatured?: boolean
+    coverUrl?: string
+    coverPublicId?: string
     categoryId: number
     authorId: number
     createdAt?: Date | string
@@ -17367,6 +17475,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    coverUrl?: StringFieldUpdateOperationsInput | string
+    coverPublicId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneRequiredWithoutProductsNestedInput
@@ -17380,6 +17491,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    coverUrl?: StringFieldUpdateOperationsInput | string
+    coverPublicId?: StringFieldUpdateOperationsInput | string
     categoryId?: IntFieldUpdateOperationsInput | number
     authorId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17528,6 +17642,9 @@ export namespace Prisma {
     price: number
     stock?: number
     sortOrder?: number
+    isFeatured?: boolean
+    coverUrl?: string
+    coverPublicId?: string
     categoryId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -17613,6 +17730,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    coverUrl?: StringFieldUpdateOperationsInput | string
+    coverPublicId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneRequiredWithoutProductsNestedInput
@@ -17626,6 +17746,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    coverUrl?: StringFieldUpdateOperationsInput | string
+    coverPublicId?: StringFieldUpdateOperationsInput | string
     categoryId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17639,6 +17762,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    coverUrl?: StringFieldUpdateOperationsInput | string
+    coverPublicId?: StringFieldUpdateOperationsInput | string
     categoryId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17747,6 +17873,9 @@ export namespace Prisma {
     price: number
     stock?: number
     sortOrder?: number
+    isFeatured?: boolean
+    coverUrl?: string
+    coverPublicId?: string
     authorId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -17758,6 +17887,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    coverUrl?: StringFieldUpdateOperationsInput | string
+    coverPublicId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     author?: AuthorUpdateOneRequiredWithoutProductsNestedInput
@@ -17771,6 +17903,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    coverUrl?: StringFieldUpdateOperationsInput | string
+    coverPublicId?: StringFieldUpdateOperationsInput | string
     authorId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17784,6 +17919,9 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    coverUrl?: StringFieldUpdateOperationsInput | string
+    coverPublicId?: StringFieldUpdateOperationsInput | string
     authorId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

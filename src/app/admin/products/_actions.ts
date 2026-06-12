@@ -15,10 +15,11 @@ export async function createProductAction(
   const sortOrder = parseInt(formData.get("sortOrder") as string, 10) || 0;
   const authorId = parseInt(formData.get("authorId") as string, 10);
   const categoryId = parseInt(formData.get("categoryId") as string, 10);
-  const imageUrls = formData.getAll("imageUrls") as string[];
+  const isFeatured = formData.get("isFeatured") === "on";
+  const coverUrl = formData.get("coverUrl") as string;
 
-  if (!title || !authorId || !categoryId || isNaN(price)) {
-    return { error: "Заповніть обовʼязкові поля" };
+  if (!title || !authorId || !categoryId || isNaN(price) || !coverUrl) {
+    return { error: "Заповніть обовʼязкові поля (вкл. фото)" };
   }
 
   await db.product.create({
@@ -28,13 +29,11 @@ export async function createProductAction(
       price,
       stock: isNaN(stock) ? 0 : stock,
       sortOrder,
+      isFeatured,
       authorId,
       categoryId,
-      images: {
-        create: imageUrls
-          .filter(Boolean)
-          .map((url, i) => ({ url, publicId: getPublicIdFromCloudinaryUrl(url) ?? "", order: i })),
-      },
+      coverUrl,
+      coverPublicId: getPublicIdFromCloudinaryUrl(coverUrl) ?? "",
     },
   });
 
@@ -54,54 +53,44 @@ export async function updateProductAction(
   const sortOrder = parseInt(formData.get("sortOrder") as string, 10) || 0;
   const authorId = parseInt(formData.get("authorId") as string, 10);
   const categoryId = parseInt(formData.get("categoryId") as string, 10);
-  const imageUrls = formData.getAll("imageUrls") as string[];
+  const isFeatured = formData.get("isFeatured") === "on";
+  
+  const coverUrl = formData.get("coverUrl") as string;
 
   if (!id || !title || !authorId || !categoryId || isNaN(price)) {
     return { error: "Заповніть обовʼязкові поля" };
   }
 
+  const dataToUpdate: Record<string, unknown> = {
+    title,
+    description,
+    price,
+    stock: isNaN(stock) ? 0 : stock,
+    sortOrder,
+    isFeatured,
+    authorId,
+    categoryId,
+  };
+
+  if (coverUrl) {
+    dataToUpdate.coverUrl = coverUrl;
+    dataToUpdate.coverPublicId = getPublicIdFromCloudinaryUrl(coverUrl) ?? "";
+    
+    // Attempt to delete old cover from Cloudinary
+    const oldProduct = await db.product.findUnique({
+      where: { id },
+      select: { coverPublicId: true, coverUrl: true },
+    });
+    if (oldProduct && oldProduct.coverUrl !== coverUrl) {
+      const publicId = oldProduct.coverPublicId || getPublicIdFromCloudinaryUrl(oldProduct.coverUrl);
+      if (publicId) void deleteAsset(publicId, "image");
+    }
+  }
+
   await db.product.update({
     where: { id },
-    data: {
-      title,
-      description,
-      price,
-      stock: isNaN(stock) ? 0 : stock,
-      sortOrder,
-      authorId,
-      categoryId,
-    },
+    data: dataToUpdate,
   });
-
-  if (imageUrls.length > 0) {
-    const existingImages = await db.productImage.findMany({
-      where: { productId: id },
-      select: { url: true, publicId: true },
-    });
-
-    const nextUrlSet = new Set(imageUrls.filter(Boolean));
-    const toDelete = existingImages.filter((img) => !nextUrlSet.has(img.url));
-
-    await Promise.allSettled(
-      toDelete.map((img) => {
-        const publicId = img.publicId || getPublicIdFromCloudinaryUrl(img.url);
-        if (!publicId) return Promise.resolve();
-        return deleteAsset(publicId, "image");
-      }),
-    );
-
-    await db.productImage.deleteMany({ where: { productId: id } });
-    await db.productImage.createMany({
-      data: imageUrls
-        .filter(Boolean)
-        .map((url, i) => ({
-          url,
-          publicId: getPublicIdFromCloudinaryUrl(url) ?? "",
-          order: i,
-          productId: id,
-        })),
-    });
-  }
 
   revalidatePath("/admin/products");
   redirect("/admin/products");
@@ -113,10 +102,20 @@ export async function deleteProductAction(id: number): Promise<void> {
     select: { url: true, publicId: true },
   });
 
+  const product = await db.product.findUnique({
+    where: { id },
+    select: { coverUrl: true, coverPublicId: true },
+  });
+
   await db.product.delete({ where: { id } });
 
+  const toDelete = [...images];
+  if (product?.coverUrl) {
+    toDelete.push({ url: product.coverUrl, publicId: product.coverPublicId });
+  }
+
   await Promise.allSettled(
-    images.map((img) => {
+    toDelete.map((img) => {
       const publicId = img.publicId || getPublicIdFromCloudinaryUrl(img.url);
       if (!publicId) return Promise.resolve();
       return deleteAsset(publicId, "image");
