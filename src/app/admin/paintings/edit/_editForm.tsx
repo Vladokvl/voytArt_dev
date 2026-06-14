@@ -8,7 +8,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Image from "next/image";
 import MediaSection from "./_MediaSection";
 
-type PaintingMedia = { id: number; url: string; isNeon: boolean; order: number };
+type PaintingMedia = { id: number; url: string; isNeon: boolean; order: number; type: "IMAGE" | "VIDEO" };
 
 type PaintingForEdit = {
   id: number;

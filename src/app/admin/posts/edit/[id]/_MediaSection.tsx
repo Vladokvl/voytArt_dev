@@ -24,16 +24,49 @@ export default function PostMediaSection({
   const accept = mediaType === "VIDEO" ? "video/*" : "image/*";
   const resourceType = mediaType === "VIDEO" ? "video" : "image";
 
+  function validateFile(file: File): boolean {
+    const isVideo = mediaType === "VIDEO" || file.type.startsWith("video/");
+    const isImage = mediaType === "IMAGE" || file.type.startsWith("image/");
+    
+    if (isVideo) {
+      const maxSize = 15 * 1024 * 1024; // 15 MB
+      if (file.size > maxSize) {
+        const sizeInMb = (file.size / (1024 * 1024)).toFixed(1);
+        alert(
+          `Помилка: Відео занадто велике (${sizeInMb} MB).\n\n` +
+          `Максимальний дозволений розмір для відео — 15 MB.\n` +
+          `Будь ласка, стисніть це відео перед завантаженням (наприклад, скористайтеся безкоштовним сервісом clideo.com або online-convert.com).`
+        );
+        return false;
+      }
+    } else if (isImage) {
+      const maxSize = 5 * 1024 * 1024; // 5 MB
+      if (file.size > maxSize) {
+        const sizeInMb = (file.size / (1024 * 1024)).toFixed(1);
+        alert(
+          `Помилка: Зображення занадто велике (${sizeInMb} MB).\n\n` +
+          `Максимальний дозволений розмір для зображення — 5 MB.\n` +
+          `Будь ласка, зменшіть роздільну здатність або стисніть фото перед завантаженням.`
+        );
+        return false;
+      }
+    }
+    return true;
+  }
+
   async function handleUpload() {
     const file = fileInputRef.current?.files?.[0];
     if (!file) return;
+
+    if (!validateFile(file)) return;
 
     setUploading(true);
     let secureUrl = "";
     try {
       secureUrl = await uploadToCloudinary(file, folder, resourceType);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      alert(err.message || "Не вдалося завантажити файл на Cloudinary. Спробуйте ще раз.");
       setUploading(false);
       return;
     }
@@ -53,6 +86,13 @@ export default function PostMediaSection({
     setDragOver(false);
     const file = e.dataTransfer.files[0];
     if (!file) return;
+
+    if (!validateFile(file)) {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      setPreview(null);
+      return;
+    }
+
     const dt = new DataTransfer();
     dt.items.add(file);
     if (fileInputRef.current) fileInputRef.current.files = dt.files;
@@ -101,6 +141,13 @@ export default function PostMediaSection({
         <input ref={fileInputRef} type="file" accept={accept} hidden onChange={(e) => {
           const f = e.target.files?.[0];
           if (!f) return;
+
+          if (!validateFile(f)) {
+            if (fileInputRef.current) fileInputRef.current.value = "";
+            setPreview(null);
+            return;
+          }
+
           if (mediaType === "IMAGE") setPreview(URL.createObjectURL(f));
           else setPreview(f.name);
         }} />

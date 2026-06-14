@@ -7,6 +7,8 @@ export async function addPaintingMediaAction(formData: FormData) {
   const paintingId = Number(formData.get("paintingId"));
   const url = formData.get("url") as string;
   const isNeon = formData.get("isNeon") === "true";
+  const typeVal = formData.get("type") as string || "IMAGE";
+  const type = typeVal === "VIDEO" ? "VIDEO" : "IMAGE";
 
   if (!paintingId || !url) return { error: "Невірні дані" };
 
@@ -22,6 +24,7 @@ export async function addPaintingMediaAction(formData: FormData) {
       publicId: getPublicIdFromCloudinaryUrl(url) ?? "",
       isNeon,
       order: (last?.order ?? -1) + 1,
+      type,
     },
   });
 
