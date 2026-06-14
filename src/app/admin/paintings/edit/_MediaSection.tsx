@@ -63,9 +63,10 @@ export default function MediaSection({
     const resourceType = file.type.startsWith("video/") ? "video" : "image";
     try {
       secureUrl = await uploadToCloudinary(file, "voytart/paintings", resourceType);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      alert(err.message || "Не вдалося завантажити файл на Cloudinary. Спробуйте ще раз.");
+      const errMsg = err instanceof Error ? err.message : "Не вдалося завантажити файл на Cloudinary. Спробуйте ще раз.";
+      alert(errMsg);
       setUploading(false);
       return;
     }

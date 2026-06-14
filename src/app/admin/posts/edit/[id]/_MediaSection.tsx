@@ -64,9 +64,10 @@ export default function PostMediaSection({
     let secureUrl = "";
     try {
       secureUrl = await uploadToCloudinary(file, folder, resourceType);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      alert(err.message || "Не вдалося завантажити файл на Cloudinary. Спробуйте ще раз.");
+      const errMsg = err instanceof Error ? err.message : "Не вдалося завантажити файл на Cloudinary. Спробуйте ще раз.";
+      alert(errMsg);
       setUploading(false);
       return;
     }

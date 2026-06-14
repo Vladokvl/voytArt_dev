@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 "use client"
 import { useEffect, type ReactNode } from 'react'
 import Lenis from 'lenis'
