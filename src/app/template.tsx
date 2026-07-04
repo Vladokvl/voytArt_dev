@@ -23,12 +23,11 @@ export default function Template({ children }: { children: React.ReactNode }) {
 
   const isAdmin = pathname.startsWith("/admin");
   const isHome = pathname === "/";
-  const wasHome = lastPathname === "/";
   const isArtToArt = pathname.startsWith("/art") && lastPathname.startsWith("/art");
   const isFirstLoad = !lastPathname;
 
-  // Skip transitions for admin, home page, same-page art navigation, or first load
-  const shouldSkipTransition = isAdmin || isHome || wasHome || isArtToArt || isFirstLoad;
+  // Skip transitions for admin, going to home page, same-page art navigation, or first load
+  const shouldSkipTransition = isAdmin || isHome || isArtToArt || isFirstLoad;
 
   // Synchronously compute direction on render using the last recorded path
   const prevIdx = getRouteIndex(lastPathname);
