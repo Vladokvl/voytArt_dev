@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import styles from "./GalleryPosts.module.scss";
 import { fetchPaginatedPosts } from "~/app/gallery/_actions";
+import { motion } from "framer-motion";
 
 type Post = {
   id: number;
@@ -71,33 +72,40 @@ export default function GalleryPosts({
             <p className={styles.empty}>No posts yet.</p>
           ) : (
             posts.map((post) => (
-              <Link
+              <motion.div
                 key={post.id}
-                href={`/gallery/${post.id}`}
-                className={styles.card}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
               >
-                <div className={styles.coverWrapper}>
-                  {post.coverUrl ? (
-                    <Image
-                      src={post.coverUrl}
-                      alt={post.title}
-                      fill
-                      className={styles.coverImage}
-                    />
-                  ) : (
-                    <div className={styles.noImage}>🖼</div>
-                  )}
-                </div>
+                <Link
+                  href={`/gallery/${post.id}`}
+                  className={styles.card}
+                >
+                  <div className={styles.coverWrapper}>
+                    {post.coverUrl ? (
+                      <Image
+                        src={post.coverUrl}
+                        alt={post.title}
+                        fill
+                        className={styles.coverImage}
+                      />
+                    ) : (
+                      <div className={styles.noImage}>🖼</div>
+                    )}
+                  </div>
 
-                <div className={styles.cardBody}>
-                  {post.date && (
-                    <span className={styles.date}>{formatDate(post.date)}</span>
-                  )}
-                  <h3 className={styles.title}>{post.title}</h3>
-                  <p className={styles.excerpt}>{stripHtml(post.content)}</p>
-                  <span className={styles.readMore}>Learn more →</span>
-                </div>
-              </Link>
+                  <div className={styles.cardBody}>
+                    {post.date && (
+                      <span className={styles.date}>{formatDate(post.date)}</span>
+                    )}
+                    <h3 className={styles.title}>{post.title}</h3>
+                    <p className={styles.excerpt}>{stripHtml(post.content)}</p>
+                    <span className={styles.readMore}>Learn more →</span>
+                  </div>
+                </Link>
+              </motion.div>
             ))
           )}
         </div>

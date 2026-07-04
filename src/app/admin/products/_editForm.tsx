@@ -5,6 +5,8 @@ import styles from "../_formStyles.module.scss";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { useImageCrop } from "~/hooks/use-image-crop";
+import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
 
 type Author = { id: number; firstName: string; lastName: string };
 type Category = { id: number; name: string };
@@ -45,16 +47,16 @@ export default function ProductEditForm({
     onUpdate: ({ editor }) => setDescription(editor.getHTML()),
   });
 
-  async function handleDrop(e: React.DragEvent) {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files[0];
-    if (!file) return;
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    if (fileInputRef.current) fileInputRef.current.files = dt.files;
-    setPreview(URL.createObjectURL(file));
-  }
+  const {
+    cropFile,
+    handleFileChange,
+    handleFileDrop,
+    onCropSave,
+    onCropCancel,
+  } = useImageCrop({
+    fileInputRef,
+    setPreview,
+  });
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -157,7 +159,10 @@ export default function ProductEditForm({
           className={`${styles.dropZone} ${dragOver ? styles.dragOver : ""}`}
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
           onDragLeave={() => setDragOver(false)}
-          onDrop={handleDrop}
+          onDrop={(e) => {
+            setDragOver(false);
+            handleFileDrop(e);
+          }}
           onClick={() => fileInputRef.current?.click()}
         >
           {preview ? (
@@ -168,12 +173,18 @@ export default function ProductEditForm({
           )}
         </div>
         <input ref={fileInputRef} type="file" name="image" accept="image/*" style={{ display: "none" }}
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) setPreview(URL.createObjectURL(file));
-          }}
+          onChange={handleFileChange}
         />
       </div>
+
+      {cropFile && (
+        <ImageCropModal
+          open={!!cropFile}
+          imageFile={cropFile}
+          onCropSave={onCropSave}
+          onCancel={onCropCancel}
+        />
+      )}
 
       <button type="submit" className={styles.submitBtn} disabled={uploading || pending}>
         {uploading ? "Завантаження фото..." : pending ? "Збереження..." : "Зберегти зміни"}

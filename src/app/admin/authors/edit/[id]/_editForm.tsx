@@ -3,6 +3,8 @@ import { useActionState, useRef, useState, useTransition } from "react";
 import { updateAuthorAction } from "../../_actions";
 import styles from "@/app/admin/_formStyles.module.scss";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
+import { useImageCrop } from "~/hooks/use-image-crop";
+import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
 
 type Author = { id: number; firstName: string; lastName: string; bio: string | null; photoUrl: string | null };
 
@@ -15,16 +17,16 @@ export default function AuthorEditForm({ author }: { author: Author }) {
   const [photoUrl, setPhotoUrl] = useState(author.photoUrl ?? "");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  function handleDrop(e: React.DragEvent) {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files[0];
-    if (!file) return;
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    if (fileInputRef.current) fileInputRef.current.files = dt.files;
-    setPreview(URL.createObjectURL(file));
-  }
+  const {
+    cropFile,
+    handleFileChange,
+    handleFileDrop,
+    onCropSave,
+    onCropCancel,
+  } = useImageCrop({
+    fileInputRef,
+    setPreview,
+  });
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -81,7 +83,10 @@ export default function AuthorEditForm({ author }: { author: Author }) {
           className={`${styles.dropZone} ${dragOver ? styles.dragOver : ""}`}
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
           onDragLeave={() => setDragOver(false)}
-          onDrop={handleDrop}
+          onDrop={(e) => {
+            setDragOver(false);
+            handleFileDrop(e);
+          }}
           onClick={() => fileInputRef.current?.click()}
         >
           {preview ? (
@@ -92,13 +97,19 @@ export default function AuthorEditForm({ author }: { author: Author }) {
           )}
         </div>
         <input ref={fileInputRef} type="file" name="image" accept="image/*" style={{ display: "none" }}
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) setPreview(URL.createObjectURL(f));
-          }}
+          onChange={handleFileChange}
         />
         <input type="hidden" name="photoUrl" value={photoUrl} />
       </div>
+
+      {cropFile && (
+        <ImageCropModal
+          open={!!cropFile}
+          imageFile={cropFile}
+          onCropSave={onCropSave}
+          onCancel={onCropCancel}
+        />
+      )}
 
       <button type="submit" className={styles.submitBtn} disabled={uploading || pending}>
         {uploading ? "Завантаження фото..." : pending ? "Збереження..." : "Зберегти зміни"}

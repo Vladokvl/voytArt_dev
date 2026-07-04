@@ -5,6 +5,8 @@ import { type Author } from "@/types/Author";
 import styles from "../../../_formStyles.module.scss";
 import Image from "next/image";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
+import { useImageCrop } from "~/hooks/use-image-crop";
+import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
 
 type CollectionForEdit = {
   id: number;
@@ -28,6 +30,17 @@ export default function CollectionEditForm({
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const {
+    cropFile,
+    handleFileChange,
+    handleFileDrop,
+    onCropSave,
+    onCropCancel,
+  } = useImageCrop({
+    fileInputRef,
+    setPreview,
+  });
+
   async function handleUpload() {
     const file = fileInputRef.current?.files?.[0];
     if (!file) return;
@@ -40,6 +53,7 @@ export default function CollectionEditForm({
       console.error(err);
     } finally {
       setUploading(false);
+      setPreview(null);
     }
   }
 
@@ -47,17 +61,6 @@ export default function CollectionEditForm({
     e.preventDefault();
     const actionData = new FormData(e.currentTarget);
     startTransition(() => formAction(actionData));
-  }
-
-  function handleDrop(e: React.DragEvent) {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files[0];
-    if (!file) return;
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    if (fileInputRef.current) fileInputRef.current.files = dt.files;
-    setPreview(URL.createObjectURL(file));
   }
 
   return (
@@ -109,7 +112,10 @@ export default function CollectionEditForm({
           className={`${styles.dropZone} ${dragOver ? styles.dragOver : ""}`}
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
           onDragLeave={() => setDragOver(false)}
-          onDrop={handleDrop}
+          onDrop={(e) => {
+            setDragOver(false);
+            handleFileDrop(e);
+          }}
           onClick={() => fileInputRef.current?.click()}
         >
           {preview ? (
@@ -123,12 +129,18 @@ export default function CollectionEditForm({
             type="file"
             accept="image/*"
             hidden
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) setPreview(URL.createObjectURL(file));
-            }}
+            onChange={handleFileChange}
           />
         </div>
+
+        {cropFile && (
+          <ImageCropModal
+            open={!!cropFile}
+            imageFile={cropFile}
+            onCropSave={onCropSave}
+            onCancel={onCropCancel}
+          />
+        )}
         {preview && (
           <button
             type="button"

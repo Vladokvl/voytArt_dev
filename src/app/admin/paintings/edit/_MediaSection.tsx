@@ -3,6 +3,8 @@ import { useRef, useState, useTransition } from "react";
 import { addPaintingMediaAction, deletePaintingMediaAction } from "./_media-actions";
 import styles from "../paintings.module.scss";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
+import { useImageCrop } from "~/hooks/use-image-crop";
+import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
 
 type MediaItem = { id: number; url: string; isNeon: boolean; order: number; type: "IMAGE" | "VIDEO" };
 
@@ -22,41 +24,21 @@ export default function MediaSection({
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  function validateFile(file: File): boolean {
-    const isVideo = file.type.startsWith("video/");
-    const isImage = file.type.startsWith("image/");
-    
-    if (isVideo) {
-      const maxSize = 15 * 1024 * 1024; // 15 MB
-      if (file.size > maxSize) {
-        const sizeInMb = (file.size / (1024 * 1024)).toFixed(1);
-        alert(
-          `Помилка: Відео занадто велике (${sizeInMb} MB).\n\n` +
-          `Максимальний дозволений розмір для відео — 15 MB.\n` +
-          `Будь ласка, стисніть це відео перед завантаженням (наприклад, скористайтеся безкоштовним сервісом clideo.com або online-convert.com).`
-        );
-        return false;
-      }
-    } else if (isImage) {
-      const maxSize = 5 * 1024 * 1024; // 5 MB
-      if (file.size > maxSize) {
-        const sizeInMb = (file.size / (1024 * 1024)).toFixed(1);
-        alert(
-          `Помилка: Зображення занадто велике (${sizeInMb} MB).\n\n` +
-          `Максимальний дозволений розмір для зображення — 5 MB.\n` +
-          `Будь ласка, зменшіть роздільну здатність або стисніть фото перед завантаженням.`
-        );
-        return false;
-      }
-    }
-    return true;
-  }
+  const {
+    cropFile,
+    handleFileChange,
+    handleFileDrop,
+    onCropSave,
+    onCropCancel,
+  } = useImageCrop({
+    fileInputRef,
+    setPreview,
+    setPreviewType,
+  });
 
   async function handleUpload() {
     const file = fileInputRef.current?.files?.[0];
     if (!file) return;
-
-    if (!validateFile(file)) return;
 
     setUploading(true);
     let secureUrl = "";
@@ -87,25 +69,6 @@ export default function MediaSection({
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  function handleDrop(e: React.DragEvent) {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files[0];
-    if (!file) return;
-
-    if (!validateFile(file)) {
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      setPreview(null);
-      setPreviewType(null);
-      return;
-    }
-
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    if (fileInputRef.current) fileInputRef.current.files = dt.files;
-    setPreview(URL.createObjectURL(file));
-    setPreviewType(file.type.startsWith("video/") ? "video" : "image");
-  }
 
   function handleDelete(id: number) {
     const fd = new FormData();
@@ -155,7 +118,10 @@ export default function MediaSection({
           setDragOver(true);
         }}
         onDragLeave={() => setDragOver(false)}
-        onDrop={handleDrop}
+        onDrop={(e) => {
+          setDragOver(false);
+          handleFileDrop(e);
+        }}
         onClick={() => fileInputRef.current?.click()}
       >
         {preview ? (
@@ -175,22 +141,18 @@ export default function MediaSection({
           type="file"
           accept="image/*,video/*"
           hidden
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-
-            if (!validateFile(file)) {
-              if (fileInputRef.current) fileInputRef.current.value = "";
-              setPreview(null);
-              setPreviewType(null);
-              return;
-            }
-
-            setPreview(URL.createObjectURL(file));
-            setPreviewType(file.type.startsWith("video/") ? "video" : "image");
-          }}
+          onChange={handleFileChange}
         />
       </div>
+
+      {cropFile && (
+        <ImageCropModal
+          open={!!cropFile}
+          imageFile={cropFile}
+          onCropSave={onCropSave}
+          onCancel={onCropCancel}
+        />
+      )}
 
       {preview && (
         <button

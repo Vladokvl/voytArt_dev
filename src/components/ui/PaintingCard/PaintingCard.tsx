@@ -4,6 +4,7 @@ import Image from "next/image";
 import * as Dialog from "@radix-ui/react-dialog";
 import styles from "./paintingCard.module.scss";
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 
 
 type MediaItem = {
@@ -107,7 +108,13 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
   return (
     <Dialog.Root open={open} onOpenChange={handleOpenChange}>
       <Dialog.Trigger asChild>
-        <div className={styles.card}>
+        <motion.div
+          className={styles.card}
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
           <Image
             src={painting.coverUrl}
             alt={painting.title}
@@ -116,7 +123,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
             className={styles.cardImage}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
-        </div>
+        </motion.div>
       </Dialog.Trigger>
 
       <Dialog.Portal>

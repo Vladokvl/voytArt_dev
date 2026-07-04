@@ -3,6 +3,8 @@ import { useRef, useState, useTransition } from "react";
 import { addProductMediaAction, deleteProductMediaAction } from "../../_media-actions";
 import styles from "../../../_formStyles.module.scss";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
+import { useImageCrop } from "~/hooks/use-image-crop";
+import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
 
 type MediaItem = { id: number; url: string; order: number };
 
@@ -18,6 +20,17 @@ export default function MediaSection({
   const [preview, setPreview] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const {
+    cropFile,
+    handleFileChange,
+    handleFileDrop,
+    onCropSave,
+    onCropCancel,
+  } = useImageCrop({
+    fileInputRef,
+    setPreview,
+  });
 
   async function handleUpload() {
     const file = fileInputRef.current?.files?.[0];
@@ -44,17 +57,6 @@ export default function MediaSection({
 
     setPreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
-  }
-
-  function handleDrop(e: React.DragEvent) {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files[0];
-    if (!file) return;
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    if (fileInputRef.current) fileInputRef.current.files = dt.files;
-    setPreview(URL.createObjectURL(file));
   }
 
   function handleDelete(id: number) {
@@ -104,7 +106,10 @@ export default function MediaSection({
           setDragOver(true);
         }}
         onDragLeave={() => setDragOver(false)}
-        onDrop={handleDrop}
+        onDrop={(e) => {
+          setDragOver(false);
+          handleFileDrop(e);
+        }}
         onClick={() => fileInputRef.current?.click()}
       >
         {preview ? (
@@ -118,12 +123,18 @@ export default function MediaSection({
           type="file"
           accept="image/*"
           hidden
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) setPreview(URL.createObjectURL(file));
-          }}
+          onChange={handleFileChange}
         />
       </div>
+
+      {cropFile && (
+        <ImageCropModal
+          open={!!cropFile}
+          imageFile={cropFile}
+          onCropSave={onCropSave}
+          onCancel={onCropCancel}
+        />
+      )}
 
       {preview && (
         <button

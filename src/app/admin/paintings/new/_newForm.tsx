@@ -6,6 +6,8 @@ import styles from "../paintings.module.scss";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { useImageCrop } from "~/hooks/use-image-crop";
+import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
 
 export default function PaintingForm({ authors, collections }: { authors: Author[]; collections: { id: number; title: string; authorId: number }[] }) {
   const [state, formAction] = useActionState(createPaintingAction, undefined);
@@ -80,17 +82,16 @@ export default function PaintingForm({ authors, collections }: { authors: Author
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  function handleDrop(e: React.DragEvent) {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files[0];
-    if (!file) return;
-    // Підставити файл у hidden input
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    if (fileInputRef.current) fileInputRef.current.files = dt.files;
-    setPreview(URL.createObjectURL(file));
-  }
+  const {
+    cropFile,
+    handleFileChange,
+    handleFileDrop,
+    onCropSave,
+    onCropCancel,
+  } = useImageCrop({
+    fileInputRef,
+    setPreview,
+  });
 
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
@@ -216,7 +217,10 @@ export default function PaintingForm({ authors, collections }: { authors: Author
             setDragOver(true);
           }}
           onDragLeave={() => setDragOver(false)}
-          onDrop={handleDrop}
+          onDrop={(e) => {
+            setDragOver(false);
+            handleFileDrop(e);
+          }}
           onClick={() => fileInputRef.current?.click()}
         >
           {preview ? (
@@ -232,13 +236,19 @@ export default function PaintingForm({ authors, collections }: { authors: Author
             accept="image/*"
             required
             hidden
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) setPreview(URL.createObjectURL(file));
-            }}
+            onChange={handleFileChange}
           />
         </div>
       </div>
+
+      {cropFile && (
+        <ImageCropModal
+          open={!!cropFile}
+          imageFile={cropFile}
+          onCropSave={onCropSave}
+          onCancel={onCropCancel}
+        />
+      )}
 
       <button
         type="submit"

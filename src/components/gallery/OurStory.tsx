@@ -1,9 +1,18 @@
+"use client";
+
 import styles from "./OurStory.module.scss";
+import { motion } from "framer-motion";
 
 export default function OurStory() {
   return (
     <section className={styles.section}>
-      <div className={styles.inner}>
+      <motion.div
+        className={styles.inner}
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
         <span className={styles.eyebrow}>Our Story</span>
         <h2 className={styles.heading}>Where Art Meets Community</h2>
         <div className={styles.body}>
@@ -18,7 +27,7 @@ export default function OurStory() {
           </p>
         </div>
         <div className={styles.divider} />
-      </div>
+      </motion.div>
     </section>
   );
 }

@@ -3,6 +3,8 @@ import { useRef, useState, useTransition } from "react";
 import { addPostMediaAction, deletePostMediaAction } from "./_media-actions";
 import styles from "@/app/admin/_formStyles.module.scss";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
+import { useImageCrop } from "~/hooks/use-image-crop";
+import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
 
 type MediaItem = { id: number; url: string; type: "IMAGE" | "VIDEO"; order: number };
 
@@ -24,41 +26,20 @@ export default function PostMediaSection({
   const accept = mediaType === "VIDEO" ? "video/*" : "image/*";
   const resourceType = mediaType === "VIDEO" ? "video" : "image";
 
-  function validateFile(file: File): boolean {
-    const isVideo = mediaType === "VIDEO" || file.type.startsWith("video/");
-    const isImage = mediaType === "IMAGE" || file.type.startsWith("image/");
-    
-    if (isVideo) {
-      const maxSize = 15 * 1024 * 1024; // 15 MB
-      if (file.size > maxSize) {
-        const sizeInMb = (file.size / (1024 * 1024)).toFixed(1);
-        alert(
-          `Помилка: Відео занадто велике (${sizeInMb} MB).\n\n` +
-          `Максимальний дозволений розмір для відео — 15 MB.\n` +
-          `Будь ласка, стисніть це відео перед завантаженням (наприклад, скористайтеся безкоштовним сервісом clideo.com або online-convert.com).`
-        );
-        return false;
-      }
-    } else if (isImage) {
-      const maxSize = 5 * 1024 * 1024; // 5 MB
-      if (file.size > maxSize) {
-        const sizeInMb = (file.size / (1024 * 1024)).toFixed(1);
-        alert(
-          `Помилка: Зображення занадто велике (${sizeInMb} MB).\n\n` +
-          `Максимальний дозволений розмір для зображення — 5 MB.\n` +
-          `Будь ласка, зменшіть роздільну здатність або стисніть фото перед завантаженням.`
-        );
-        return false;
-      }
-    }
-    return true;
-  }
+  const {
+    cropFile,
+    handleFileChange,
+    handleFileDrop,
+    onCropSave,
+    onCropCancel,
+  } = useImageCrop({
+    fileInputRef,
+    setPreview,
+  });
 
   async function handleUpload() {
     const file = fileInputRef.current?.files?.[0];
     if (!file) return;
-
-    if (!validateFile(file)) return;
 
     setUploading(true);
     let secureUrl = "";
@@ -80,25 +61,6 @@ export default function PostMediaSection({
     fd.set("url", secureUrl);
     fd.set("type", mediaType);
     startTransition(() => { void addPostMediaAction(fd); });
-  }
-
-  function handleDrop(e: React.DragEvent) {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files[0];
-    if (!file) return;
-
-    if (!validateFile(file)) {
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      setPreview(null);
-      return;
-    }
-
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    if (fileInputRef.current) fileInputRef.current.files = dt.files;
-    if (mediaType === "IMAGE") setPreview(URL.createObjectURL(file));
-    else setPreview(file.name);
   }
 
   return (
@@ -128,31 +90,33 @@ export default function PostMediaSection({
         style={{ marginBottom: "0.75rem" }}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
-        onDrop={handleDrop}
+        onDrop={(e) => {
+          setDragOver(false);
+          handleFileDrop(e);
+        }}
         onClick={() => fileInputRef.current?.click()}
       >
         {preview && mediaType === "IMAGE" ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={preview} alt="preview" className={styles.previewImg} />
         ) : preview ? (
-          <span style={{ fontSize: "0.875rem" }}>📹 {preview}</span>
+          <span style={{ fontSize: "0.875rem" }}>
+            📹 {fileInputRef.current?.files?.[0]?.name ?? "Відео"}
+          </span>
         ) : (
           <span>Перетягніть файл або клікніть</span>
         )}
-        <input ref={fileInputRef} type="file" accept={accept} hidden onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (!f) return;
-
-          if (!validateFile(f)) {
-            if (fileInputRef.current) fileInputRef.current.value = "";
-            setPreview(null);
-            return;
-          }
-
-          if (mediaType === "IMAGE") setPreview(URL.createObjectURL(f));
-          else setPreview(f.name);
-        }} />
+        <input ref={fileInputRef} type="file" accept={accept} hidden onChange={handleFileChange} />
       </div>
+
+      {cropFile && (
+        <ImageCropModal
+          open={!!cropFile}
+          imageFile={cropFile}
+          onCropSave={onCropSave}
+          onCancel={onCropCancel}
+        />
+      )}
 
       <button
         type="button"

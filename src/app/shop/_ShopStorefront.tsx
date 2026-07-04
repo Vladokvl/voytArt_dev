@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 import styles from "./shop.module.scss";
 import ProductCarousel from "~/components/shop/ProductCarousel";
@@ -191,7 +192,14 @@ export default function ShopStorefront({
               // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
               const coverImg = product.coverUrl || product.images[0]?.url || "/voyt.svg";
               return (
-                <div key={product.id} className={styles.productCard}>
+                <motion.div
+                  key={product.id}
+                  className={styles.productCard}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                >
                   <div
                     onClick={() => setSelectedProduct(product)}
                     className={styles.imageWrapper}
@@ -226,7 +234,7 @@ export default function ShopStorefront({
                       </button>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>

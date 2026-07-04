@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import styles from "./GalleryHero.module.scss";
+import { motion } from "framer-motion";
 
 export default function GalleryHero() {
   return (
@@ -15,11 +18,30 @@ export default function GalleryHero() {
         <div className={styles.overlay} />
 
         <div className={styles.content}>
-          <span className={styles.eyebrow}>VoytArt Gallery</span>
-          <h1 className={styles.heading}>Discover Our Gallery</h1>
-          <p className={styles.subheading}>
+          <motion.span
+            className={styles.eyebrow}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            VoytArt Gallery
+          </motion.span>
+          <motion.h1
+            className={styles.heading}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.15 }}
+          >
+            Discover Our Gallery
+          </motion.h1>
+          <motion.p
+            className={styles.subheading}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
             Stories, events and moments captured through art and photography
-          </p>
+          </motion.p>
         </div>
 
         <div className={styles.scrollHint}>
