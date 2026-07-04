@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import styles from "@/app/art/[[...artistId]]/art.module.scss";
 
 type Collection = {
@@ -19,11 +19,14 @@ export default function CollectionFilter({
   artistParam: string | null;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isNeon = searchParams.get("neon") === "true";
 
   function select(id: number | null) {
     const params = new URLSearchParams();
     if (artistParam) params.set("artist", artistParam);
     if (id !== null) params.set("collection", String(id));
+    if (isNeon) params.set("neon", "true");
     router.push("/art?" + params.toString());
   }
 

@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import gsap from "gsap";
 import styles from "@/app/art/[[...artistId]]/art.module.scss";
 
@@ -29,6 +29,8 @@ export default function ArtHero({
   const [loadingArtistId, setLoadingArtistId] = useState<number | null>(null);
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isNeon = searchParams.get("neon") === "true";
   const isArtistSelected = !!artistParam;
 
   // ── Початковий стан ─────────────────────────────────────────────────────────
@@ -95,7 +97,10 @@ export default function ArtHero({
     if (isArtistSelected) return;
     setLoadingArtistId(authorId);
     animatingRef.current = false; // Let useEffect handle the slide up after rendering
-    router.push("/art?artist=" + authorId);
+    const params = new URLSearchParams();
+    params.set("artist", String(authorId));
+    if (isNeon) params.set("neon", "true");
+    router.push("/art?" + params.toString());
   };
 
   // ── Кнопка повернення ───────────────────────────────────────────────────────
@@ -123,7 +128,10 @@ export default function ArtHero({
       duration: 1,
       ease: "power2.inOut",
       onComplete: () => {
-        router.push("/art");
+        const params = new URLSearchParams();
+        if (isNeon) params.set("neon", "true");
+        const queryStr = params.toString();
+        router.push("/art" + (queryStr ? "?" + queryStr : ""));
       }
     });
   };

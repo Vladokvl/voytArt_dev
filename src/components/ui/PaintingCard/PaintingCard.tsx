@@ -5,6 +5,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import styles from "./paintingCard.module.scss";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useSearchParams } from "next/navigation";
 
 
 type MediaItem = {
@@ -26,9 +27,16 @@ type PaintingCardProps = {
 };
 
 export default function PaintingCard({ painting }: { painting: PaintingCardProps }) {
+  const searchParams = useSearchParams();
+  const isGlobalNeon = searchParams.get("neon") === "true";
+
   const defaultMedia = painting.media.filter((m) => !m.isNeon);
   const neonMedia = painting.media.filter((m) => m.isNeon);
   const hasNeonMedia = neonMedia.length > 0;
+
+  // Global neon cover override if global neon mode is enabled and painting has neon media
+  const showNeonCover = isGlobalNeon && hasNeonMedia;
+  const gridCoverUrl = showNeonCover && neonMedia[0] ? neonMedia[0].url : painting.coverUrl;
 
   // Cover is always first in default mode; deduplicate if it's already in media
   const coverItem: MediaItem = {
@@ -44,9 +52,13 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
   ];
 
   const [open, setOpen] = useState(false);
-  const [isNeon, setIsNeon] = useState(false);
+  const [isNeon, setIsNeon] = useState(isGlobalNeon && hasNeonMedia);
   const [activeIndex, setActiveIndex] = useState(0);
   const [loadedSet, setLoadedSet] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    setIsNeon(isGlobalNeon && hasNeonMedia);
+  }, [isGlobalNeon, hasNeonMedia]);
 
   const activeItems = isNeon ? neonMedia : defaultItems;
   const hasMultiple = activeItems.length > 1;
@@ -110,13 +122,14 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
       <Dialog.Trigger asChild>
         <motion.div
           className={styles.card}
+          data-no-neon={isGlobalNeon && !hasNeonMedia ? "true" : undefined}
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <Image
-            src={painting.coverUrl}
+            src={gridCoverUrl}
             alt={painting.title}
             width={1200}
             height={1200}

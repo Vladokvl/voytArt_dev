@@ -4,6 +4,8 @@ import PaintingGrid from "~/components/art/PaintingGrid";
 import { db } from "~/lib/db";
 import styles from "./art.module.scss";
 import { type Metadata } from "next";
+import { Suspense } from "react";
+import NeonToggle from "~/components/art/NeonToggle";
 
 export async function generateMetadata({
   searchParams,
@@ -58,9 +60,10 @@ export async function generateMetadata({
 export default async function ArtPage({
   searchParams,
 }: {
-  searchParams: Promise<{ artist?: string; collection?: string }>;
+  searchParams: Promise<{ artist?: string; collection?: string; neon?: string }>;
 }) {
-  const { artist, collection } = await searchParams;
+  const { artist, collection, neon } = await searchParams;
+  const isNeonMode = neon === "true";
   const isArtistSelected = !!artist;
   const selectedAuthorId = artist ? Number(artist) : null;
   const selectedCollectionId = collection ? Number(collection) : null;
@@ -107,17 +110,25 @@ export default async function ArtPage({
   return (
     <div
       className={`${styles.wrapper} ${!isArtistSelected ? styles.lockedScroll : ""}`}
+      data-neon-mode={isNeonMode ? "true" : undefined}
     >
-      <ArtHero
-        leftAuthorId={leftAuthor?.id ?? 0}
-        rightAuthorId={rightAuthor?.id ?? 0}
-        artistParam={artist ?? null}
-      />
+      <Suspense fallback={null}>
+        <ArtHero
+          leftAuthorId={leftAuthor?.id ?? 0}
+          rightAuthorId={rightAuthor?.id ?? 0}
+          artistParam={artist ?? null}
+        />
+      </Suspense>
 
       <section className={styles.gallery}>
-        <h2 className={styles.galleryTitle}>
-          {selectedAuthor ? `${selectedAuthor.firstName} — Works` : "Our Paintings"}
-        </h2>
+        <div className={styles.galleryHeader}>
+          <h2 className={styles.galleryTitle}>
+            {selectedAuthor ? `${selectedAuthor.firstName} — Works` : "Our Paintings"}
+          </h2>
+          <Suspense fallback={null}>
+            <NeonToggle />
+          </Suspense>
+        </div>
 
         {collections.length > 0 && (
           <CollectionFilter

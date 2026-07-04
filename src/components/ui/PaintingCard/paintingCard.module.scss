@@ -36,6 +36,17 @@
   &:hover img {
     opacity: 0.85;
   }
+
+  &[data-no-neon="true"] {
+    filter: grayscale(40%) brightness(60%);
+    opacity: 0.75;
+    transition: filter 0.4s ease, opacity 0.4s ease;
+
+    &:hover {
+      filter: none;
+      opacity: 1;
+    }
+  }
 }
 
 .cardImage {
