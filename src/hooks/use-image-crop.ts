@@ -11,7 +11,7 @@ export function useImageCrop({
   fileInputRef,
   setPreview,
   setPreviewType,
-  maxVideoSizeMb = 15,
+  maxVideoSizeMb = 50,
 }: UseImageCropProps) {
   const [cropFile, setCropFile] = useState<File | null>(null);
 
