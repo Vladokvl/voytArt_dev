@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import PaintingCard from "~/components/ui/PaintingCard/PaintingCard";
 import styles from "~/app/art/[[...artistId]]/art.module.scss";
 import { fetchPaginatedPaintings } from "~/app/art/_actions";
@@ -35,6 +36,9 @@ export default function PaintingGrid({
   artistId: number | null;
   collectionId: number | null;
 }) {
+  const searchParams = useSearchParams();
+  const isNeon = searchParams.get("neon") === "true";
+
   const [paintings, setPaintings] = useState<Painting[]>(initialPaintings);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
@@ -54,7 +58,8 @@ export default function PaintingGrid({
         paintings.length,
         limit,
         artistId,
-        collectionId
+        collectionId,
+        isNeon
       );
       setPaintings((prev) => [...prev, ...(res.paintings as Painting[])]);
       setHasMore(res.hasMore);

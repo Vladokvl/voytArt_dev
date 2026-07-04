@@ -74,6 +74,7 @@ export default async function ArtPage({
       where: {
         ...(selectedAuthorId ? { authorId: selectedAuthorId } : {}),
         ...(selectedCollectionId ? { collectionId: selectedCollectionId } : {}),
+        ...(isNeonMode ? { hasNeon: true } : {}),
       },
       include: {
         author: true,
@@ -88,6 +89,7 @@ export default async function ArtPage({
       where: {
         ...(selectedAuthorId ? { authorId: selectedAuthorId } : {}),
         ...(selectedCollectionId ? { collectionId: selectedCollectionId } : {}),
+        ...(isNeonMode ? { hasNeon: true } : {}),
       },
     }),
     db.author.findMany({ orderBy: { id: "asc" }, take: 2 }),
@@ -138,13 +140,15 @@ export default async function ArtPage({
           />
         )}
 
-        <PaintingGrid
-          initialPaintings={paintings}
-          initialHasMore={hasMore}
-          limit={limit}
-          artistId={selectedAuthorId}
-          collectionId={selectedCollectionId}
-        />
+        <Suspense fallback={null}>
+          <PaintingGrid
+            initialPaintings={paintings}
+            initialHasMore={hasMore}
+            limit={limit}
+            artistId={selectedAuthorId}
+            collectionId={selectedCollectionId}
+          />
+        </Suspense>
       </section>
     </div>
   );

@@ -5,12 +5,14 @@ export async function fetchPaginatedPaintings(
   offset: number,
   limit: number,
   artistId?: number | null,
-  collectionId?: number | null
+  collectionId?: number | null,
+  isNeonMode?: boolean
 ) {
   const paintings = await db.painting.findMany({
     where: {
       ...(artistId ? { authorId: artistId } : {}),
       ...(collectionId ? { collectionId: collectionId } : {}),
+      ...(isNeonMode ? { hasNeon: true } : {}),
     },
     include: {
       author: true,
@@ -25,6 +27,7 @@ export async function fetchPaginatedPaintings(
     where: {
       ...(artistId ? { authorId: artistId } : {}),
       ...(collectionId ? { collectionId: collectionId } : {}),
+      ...(isNeonMode ? { hasNeon: true } : {}),
     },
   });
 

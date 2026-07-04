@@ -20,7 +20,7 @@ export default function NeonSection() {
       <p className={styles.description}>
         A UV-lit concept room where special pigments reveal hidden layers of selected works.
       </p>
-      <Link href="/gallery" className={styles.cta}>
+      <Link href="/art?neon=true" className={styles.cta}>
         Explore neon →
       </Link>
     </>
