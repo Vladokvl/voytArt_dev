@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   description: "Browse and buy original art products by Ukrainian artists",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function ShopPage() {
   const [products, categories] = await Promise.all([
     db.product.findMany({

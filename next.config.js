@@ -6,8 +6,10 @@
 /** @type {import("next").NextConfig} */
 const config = {
   allowedDevOrigins: ["testing.zhovtok.work"],
-  serverActions: {
-    bodySizeLimit: "10mb",
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "10mb",
+    },
   },
   images: {
     remotePatterns: [

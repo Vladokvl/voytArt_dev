@@ -3,6 +3,8 @@ import GalleryHero from "~/components/gallery/GalleryHero";
 import OurStory from "~/components/gallery/OurStory";
 import GalleryPosts from "~/components/gallery/GalleryPosts";
 
+export const dynamic = "force-dynamic";
+
 export default async function GalleryPage() {
   const limit = 6;
   const posts = await db.galleryPost.findMany({
