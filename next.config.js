@@ -6,6 +6,7 @@
 /** @type {import("next").NextConfig} */
 const config = {
   allowedDevOrigins: ["testing.zhovtok.work"],
+  output: "standalone",
   experimental: {
     serverActions: {
       bodySizeLimit: "10mb",
