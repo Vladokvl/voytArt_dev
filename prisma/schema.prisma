@@ -22,8 +22,14 @@ model Author {
     firstName String  @map("first_name")
     lastName  String  @map("last_name")
     bio       String?
+    shortDesc String? @map("short_desc")
     photoUrl  String? @map("photo_url")
     photoPublicId String @default("") @map("photo_public_id")
+
+    bgPhotoUrl        String? @map("bg_photo_url")
+    bgPhotoPublicId   String  @default("") @map("bg_photo_public_id")
+    order             Int     @default(0)
+    active            Boolean @default(true)
 
     paintings   Painting[]
     collections Collection[]

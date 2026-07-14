@@ -125,8 +125,13 @@ exports.Prisma.AuthorScalarFieldEnum = {
   firstName: 'firstName',
   lastName: 'lastName',
   bio: 'bio',
+  shortDesc: 'shortDesc',
   photoUrl: 'photoUrl',
   photoPublicId: 'photoPublicId',
+  bgPhotoUrl: 'bgPhotoUrl',
+  bgPhotoPublicId: 'bgPhotoPublicId',
+  order: 'order',
+  active: 'active',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
