@@ -92,7 +92,7 @@ export default async function ArtPage({
         ...(isNeonMode ? { hasNeon: true } : {}),
       },
     }),
-    db.author.findMany({ orderBy: { id: "asc" }, take: 2 }),
+    db.author.findMany({ orderBy: { id: "asc" } }),
     selectedAuthorId
       ? db.collection.findMany({
           where: { authorId: selectedAuthorId },
@@ -101,8 +101,6 @@ export default async function ArtPage({
       : Promise.resolve([]),
   ]);
 
-  const leftAuthor = authors[0];
-  const rightAuthor = authors[1];
   const selectedAuthor = selectedAuthorId
     ? authors.find((a) => a.id === selectedAuthorId)
     : null;
@@ -116,8 +114,6 @@ export default async function ArtPage({
     >
       <Suspense fallback={null}>
         <ArtHero
-          leftAuthorId={leftAuthor?.id ?? 0}
-          rightAuthorId={rightAuthor?.id ?? 0}
           artistParam={artist ?? null}
         />
       </Suspense>

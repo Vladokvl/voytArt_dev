@@ -73,10 +73,11 @@
 
 // ── Columns (Ліва та Права секції) ────────────────────────────────────────────
 .column {
-  flex: 1;
+  flex: 0 0 33.333vw;
   position: relative;
   overflow: hidden;
   cursor: pointer;
+  height: 100%;
 
   @include mobile {
     flex: 0 0 100vw;
@@ -90,28 +91,29 @@
 }
 
 // Фони та Оверлеї
-.colBgLeft {
+.colBg {
   position: absolute;
   inset: 0;
-  background: url("/artPageAssets/IvankaBackground.jpg") center / cover no-repeat;
-}
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 
-.colBgRight {
-  position: absolute;
-  inset: 0;
-  background: url("/artPageAssets/SashaBackground.jpg") center / cover no-repeat;
+  .column:hover & {
+    transform: scale(1.03);
+  }
 }
 
 .colOverlay {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.63);
   transition: opacity 0.5s ease;
   pointer-events: none;
 
   @include mobile {
-    background: rgba(0, 0, 0, 0.45); // Трохи світліше на телефоні
+    background: rgba(0, 0, 0, 0.45);
   }
 }
 
@@ -120,33 +122,8 @@
 }
 
 // ── Typography (Заголовки та Текст) ───────────────────────────────────────────
-.mobileTitle {
-  display: none; // Сховано на ПК
-  
-  @include mobile {
-    display: block;
-    text-align: center; // Завжди по центру секції
-    font-size: 1.8rem;
-    font-weight: 300;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #fff;
-    margin-top: 1.5rem;
-    margin-bottom: 0.5rem;
-    position: relative;
-    z-index: 5;
-    transition: opacity 0.5s ease;
-  }
-}
-
-.desktopTitle {
-  @include mobile {
-    display: none; // Ховаємо десктопний тайтл на мобілці
-  }
-}
-
 .colName {
-  font-size: clamp(1.75rem, 2.5vw, 3rem);
+  font-size: clamp(1.6rem, 2.2vw, 2.75rem);
   font-weight: 300;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -154,33 +131,42 @@
   margin-bottom: 1.25rem;
 }
 
-// Текстовий блок
 .colText {
   position: absolute;
-  right: 2.5rem;
   top: 50%;
   transform: translateY(-50%);
   z-index: 3;
-  max-width: 260px;
+  width: 280px;
+  max-width: 85%;
   color: #fff;
-  text-align: right;
   transition: opacity 0.5s ease;
   pointer-events: none;
 
   @include mobile {
-    max-width: 36vw;
-    right: 1rem;
+    max-width: 45vw;
+    top: 50%;
+  }
+}
+
+.colTextLeft {
+  left: 2.5rem;
+  right: auto;
+  text-align: left;
+
+  @include mobile {
+    left: 1.5rem;
+    right: auto;
   }
 }
 
 .colTextRight {
-  right: auto;
-  left: 2.5rem;
-  text-align: left;
+  right: 2.5rem;
+  left: auto;
+  text-align: right;
 
   @include mobile {
-    left: 1rem;
-    right: auto;
+    right: 1.5rem;
+    left: auto;
   }
 }
 
@@ -189,42 +175,59 @@
 }
 
 .colDesc {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   line-height: 1.8;
   opacity: 0.85;
 
   @include mobile {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     line-height: 1.6;
   }
 }
 
-// ── Portraits (Картинки з обтіканням) ─────────────────────────────────────────
-.portraitWrapLeft,
-.portraitWrapRight {
+// ── Portraits (Портрети / Силуети) ────────────────────────────────────────────
+.portraitWrap {
   position: absolute;
   top: 0;
   height: 100%;
-  width: 60%;
   z-index: 2;
+  transition: transform 0.5s ease;
+  will-change: transform, left;
+  pointer-events: none;
+}
+
+// Стилізація для мок-портретів (як карти, що ширяють, бо мають свій фон)
+.portraitCard {
+  bottom: 12% !important;
+  top: auto !important;
+  height: 60% !important;
+  aspect-ratio: 2 / 3;
+  border-radius: 16px;
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6);
+  border: 3.5px solid rgba(255, 255, 255, 0.9);
+  overflow: hidden;
+  background: #1e1e1e;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.6s ease;
+
+  .column:hover & {
+    transform: translateX(-50%) translateY(-10px) scale(1.02) !important;
+    box-shadow: 0 45px 80px -20px rgba(0, 0, 0, 0.8);
+  }
 
   @include mobile {
-    width: 60vw;
-    height: 100%;
+    bottom: 16% !important;
+    height: 52% !important;
   }
-}
-
-.portraitWrapLeft {
-  left: 0;
-}
-
-.portraitWrapRight {
-  right: 0;
 }
 
 .portraitImg {
   object-fit: cover;
   object-position: top center;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.portraitImgHover {
+  transform: scale(1.05);
 }
 
 // ── Gallery Section (Нижня частина сторінки) ──────────────────────────────────
@@ -577,5 +580,42 @@
     color: #999;
     cursor: not-allowed;
   }
+}
+
+// ── Mobile Dots Indicators ──
+.dotsContainer {
+  display: none;
+
+  @include mobile {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    position: absolute;
+    bottom: 2.2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+  }
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.8);
+  }
+}
+
+.dotActive {
+  background: #d8ff00;
+  transform: scale(1.2);
+  box-shadow: 0 0 10px rgba(216, 255, 0, 0.8);
 }
 
