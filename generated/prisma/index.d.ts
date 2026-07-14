@@ -1919,10 +1919,12 @@ export namespace Prisma {
 
   export type AuthorAvgAggregateOutputType = {
     id: number | null
+    order: number | null
   }
 
   export type AuthorSumAggregateOutputType = {
     id: number | null
+    order: number | null
   }
 
   export type AuthorMinAggregateOutputType = {
@@ -1932,6 +1934,10 @@ export namespace Prisma {
     bio: string | null
     photoUrl: string | null
     photoPublicId: string | null
+    bgPhotoUrl: string | null
+    bgPhotoPublicId: string | null
+    order: number | null
+    active: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1943,6 +1949,10 @@ export namespace Prisma {
     bio: string | null
     photoUrl: string | null
     photoPublicId: string | null
+    bgPhotoUrl: string | null
+    bgPhotoPublicId: string | null
+    order: number | null
+    active: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1954,6 +1964,10 @@ export namespace Prisma {
     bio: number
     photoUrl: number
     photoPublicId: number
+    bgPhotoUrl: number
+    bgPhotoPublicId: number
+    order: number
+    active: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -1962,10 +1976,12 @@ export namespace Prisma {
 
   export type AuthorAvgAggregateInputType = {
     id?: true
+    order?: true
   }
 
   export type AuthorSumAggregateInputType = {
     id?: true
+    order?: true
   }
 
   export type AuthorMinAggregateInputType = {
@@ -1975,6 +1991,10 @@ export namespace Prisma {
     bio?: true
     photoUrl?: true
     photoPublicId?: true
+    bgPhotoUrl?: true
+    bgPhotoPublicId?: true
+    order?: true
+    active?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1986,6 +2006,10 @@ export namespace Prisma {
     bio?: true
     photoUrl?: true
     photoPublicId?: true
+    bgPhotoUrl?: true
+    bgPhotoPublicId?: true
+    order?: true
+    active?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1997,6 +2021,10 @@ export namespace Prisma {
     bio?: true
     photoUrl?: true
     photoPublicId?: true
+    bgPhotoUrl?: true
+    bgPhotoPublicId?: true
+    order?: true
+    active?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -2095,6 +2123,10 @@ export namespace Prisma {
     bio: string | null
     photoUrl: string | null
     photoPublicId: string
+    bgPhotoUrl: string | null
+    bgPhotoPublicId: string
+    order: number
+    active: boolean
     createdAt: Date
     updatedAt: Date
     _count: AuthorCountAggregateOutputType | null
@@ -2125,6 +2157,10 @@ export namespace Prisma {
     bio?: boolean
     photoUrl?: boolean
     photoPublicId?: boolean
+    bgPhotoUrl?: boolean
+    bgPhotoPublicId?: boolean
+    order?: boolean
+    active?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     paintings?: boolean | Author$paintingsArgs<ExtArgs>
@@ -2140,6 +2176,10 @@ export namespace Prisma {
     bio?: boolean
     photoUrl?: boolean
     photoPublicId?: boolean
+    bgPhotoUrl?: boolean
+    bgPhotoPublicId?: boolean
+    order?: boolean
+    active?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["author"]>
@@ -2151,6 +2191,10 @@ export namespace Prisma {
     bio?: boolean
     photoUrl?: boolean
     photoPublicId?: boolean
+    bgPhotoUrl?: boolean
+    bgPhotoPublicId?: boolean
+    order?: boolean
+    active?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["author"]>
@@ -2162,11 +2206,15 @@ export namespace Prisma {
     bio?: boolean
     photoUrl?: boolean
     photoPublicId?: boolean
+    bgPhotoUrl?: boolean
+    bgPhotoPublicId?: boolean
+    order?: boolean
+    active?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type AuthorOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "firstName" | "lastName" | "bio" | "photoUrl" | "photoPublicId" | "createdAt" | "updatedAt", ExtArgs["result"]["author"]>
+  export type AuthorOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "firstName" | "lastName" | "bio" | "photoUrl" | "photoPublicId" | "bgPhotoUrl" | "bgPhotoPublicId" | "order" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["author"]>
   export type AuthorInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     paintings?: boolean | Author$paintingsArgs<ExtArgs>
     collections?: boolean | Author$collectionsArgs<ExtArgs>
@@ -2190,6 +2238,10 @@ export namespace Prisma {
       bio: string | null
       photoUrl: string | null
       photoPublicId: string
+      bgPhotoUrl: string | null
+      bgPhotoPublicId: string
+      order: number
+      active: boolean
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["author"]>
@@ -2624,6 +2676,10 @@ export namespace Prisma {
     readonly bio: FieldRef<"Author", 'String'>
     readonly photoUrl: FieldRef<"Author", 'String'>
     readonly photoPublicId: FieldRef<"Author", 'String'>
+    readonly bgPhotoUrl: FieldRef<"Author", 'String'>
+    readonly bgPhotoPublicId: FieldRef<"Author", 'String'>
+    readonly order: FieldRef<"Author", 'Int'>
+    readonly active: FieldRef<"Author", 'Boolean'>
     readonly createdAt: FieldRef<"Author", 'DateTime'>
     readonly updatedAt: FieldRef<"Author", 'DateTime'>
   }
@@ -13431,6 +13487,10 @@ export namespace Prisma {
     bio: 'bio',
     photoUrl: 'photoUrl',
     photoPublicId: 'photoPublicId',
+    bgPhotoUrl: 'bgPhotoUrl',
+    bgPhotoPublicId: 'bgPhotoPublicId',
+    order: 'order',
+    active: 'active',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -13619,6 +13679,13 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
    * Reference to a field of type 'DateTime'
    */
   export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -13629,13 +13696,6 @@ export namespace Prisma {
    * Reference to a field of type 'DateTime[]'
    */
   export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Boolean'
-   */
-  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -13680,6 +13740,10 @@ export namespace Prisma {
     bio?: StringNullableFilter<"Author"> | string | null
     photoUrl?: StringNullableFilter<"Author"> | string | null
     photoPublicId?: StringFilter<"Author"> | string
+    bgPhotoUrl?: StringNullableFilter<"Author"> | string | null
+    bgPhotoPublicId?: StringFilter<"Author"> | string
+    order?: IntFilter<"Author"> | number
+    active?: BoolFilter<"Author"> | boolean
     createdAt?: DateTimeFilter<"Author"> | Date | string
     updatedAt?: DateTimeFilter<"Author"> | Date | string
     paintings?: PaintingListRelationFilter
@@ -13694,6 +13758,10 @@ export namespace Prisma {
     bio?: SortOrderInput | SortOrder
     photoUrl?: SortOrderInput | SortOrder
     photoPublicId?: SortOrder
+    bgPhotoUrl?: SortOrderInput | SortOrder
+    bgPhotoPublicId?: SortOrder
+    order?: SortOrder
+    active?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     paintings?: PaintingOrderByRelationAggregateInput
@@ -13711,6 +13779,10 @@ export namespace Prisma {
     bio?: StringNullableFilter<"Author"> | string | null
     photoUrl?: StringNullableFilter<"Author"> | string | null
     photoPublicId?: StringFilter<"Author"> | string
+    bgPhotoUrl?: StringNullableFilter<"Author"> | string | null
+    bgPhotoPublicId?: StringFilter<"Author"> | string
+    order?: IntFilter<"Author"> | number
+    active?: BoolFilter<"Author"> | boolean
     createdAt?: DateTimeFilter<"Author"> | Date | string
     updatedAt?: DateTimeFilter<"Author"> | Date | string
     paintings?: PaintingListRelationFilter
@@ -13725,6 +13797,10 @@ export namespace Prisma {
     bio?: SortOrderInput | SortOrder
     photoUrl?: SortOrderInput | SortOrder
     photoPublicId?: SortOrder
+    bgPhotoUrl?: SortOrderInput | SortOrder
+    bgPhotoPublicId?: SortOrder
+    order?: SortOrder
+    active?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: AuthorCountOrderByAggregateInput
@@ -13744,6 +13820,10 @@ export namespace Prisma {
     bio?: StringNullableWithAggregatesFilter<"Author"> | string | null
     photoUrl?: StringNullableWithAggregatesFilter<"Author"> | string | null
     photoPublicId?: StringWithAggregatesFilter<"Author"> | string
+    bgPhotoUrl?: StringNullableWithAggregatesFilter<"Author"> | string | null
+    bgPhotoPublicId?: StringWithAggregatesFilter<"Author"> | string
+    order?: IntWithAggregatesFilter<"Author"> | number
+    active?: BoolWithAggregatesFilter<"Author"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"Author"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Author"> | Date | string
   }
@@ -14397,6 +14477,10 @@ export namespace Prisma {
     bio?: string | null
     photoUrl?: string | null
     photoPublicId?: string
+    bgPhotoUrl?: string | null
+    bgPhotoPublicId?: string
+    order?: number
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     paintings?: PaintingCreateNestedManyWithoutAuthorInput
@@ -14411,6 +14495,10 @@ export namespace Prisma {
     bio?: string | null
     photoUrl?: string | null
     photoPublicId?: string
+    bgPhotoUrl?: string | null
+    bgPhotoPublicId?: string
+    order?: number
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     paintings?: PaintingUncheckedCreateNestedManyWithoutAuthorInput
@@ -14424,6 +14512,10 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
+    bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    bgPhotoPublicId?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paintings?: PaintingUpdateManyWithoutAuthorNestedInput
@@ -14438,6 +14530,10 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
+    bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    bgPhotoPublicId?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paintings?: PaintingUncheckedUpdateManyWithoutAuthorNestedInput
@@ -14452,6 +14548,10 @@ export namespace Prisma {
     bio?: string | null
     photoUrl?: string | null
     photoPublicId?: string
+    bgPhotoUrl?: string | null
+    bgPhotoPublicId?: string
+    order?: number
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -14462,6 +14562,10 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
+    bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    bgPhotoPublicId?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -14473,6 +14577,10 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
+    bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    bgPhotoPublicId?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15178,6 +15286,11 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -15231,12 +15344,17 @@ export namespace Prisma {
     bio?: SortOrder
     photoUrl?: SortOrder
     photoPublicId?: SortOrder
+    bgPhotoUrl?: SortOrder
+    bgPhotoPublicId?: SortOrder
+    order?: SortOrder
+    active?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type AuthorAvgOrderByAggregateInput = {
     id?: SortOrder
+    order?: SortOrder
   }
 
   export type AuthorMaxOrderByAggregateInput = {
@@ -15246,6 +15364,10 @@ export namespace Prisma {
     bio?: SortOrder
     photoUrl?: SortOrder
     photoPublicId?: SortOrder
+    bgPhotoUrl?: SortOrder
+    bgPhotoPublicId?: SortOrder
+    order?: SortOrder
+    active?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -15257,12 +15379,17 @@ export namespace Prisma {
     bio?: SortOrder
     photoUrl?: SortOrder
     photoPublicId?: SortOrder
+    bgPhotoUrl?: SortOrder
+    bgPhotoPublicId?: SortOrder
+    order?: SortOrder
+    active?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type AuthorSumOrderByAggregateInput = {
     id?: SortOrder
+    order?: SortOrder
   }
 
   export type IntWithAggregatesFilter<$PrismaModel = never> = {
@@ -15315,6 +15442,14 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -15374,11 +15509,6 @@ export namespace Prisma {
   export type CollectionSumOrderByAggregateInput = {
     id?: SortOrder
     authorId?: SortOrder
-  }
-
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
   export type IntNullableFilter<$PrismaModel = never> = {
@@ -15469,14 +15599,6 @@ export namespace Prisma {
     year?: SortOrder
     authorId?: SortOrder
     collectionId?: SortOrder
-  }
-
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -15934,6 +16056,18 @@ export namespace Prisma {
     set?: string | null
   }
 
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
   }
@@ -15978,14 +16112,6 @@ export namespace Prisma {
     update?: ProductUpdateWithWhereUniqueWithoutAuthorInput | ProductUpdateWithWhereUniqueWithoutAuthorInput[]
     updateMany?: ProductUpdateManyWithWhereWithoutAuthorInput | ProductUpdateManyWithWhereWithoutAuthorInput[]
     deleteMany?: ProductScalarWhereInput | ProductScalarWhereInput[]
-  }
-
-  export type IntFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type PaintingUncheckedUpdateManyWithoutAuthorNestedInput = {
@@ -16110,10 +16236,6 @@ export namespace Prisma {
     connectOrCreate?: PaintingMediaCreateOrConnectWithoutPaintingInput | PaintingMediaCreateOrConnectWithoutPaintingInput[]
     createMany?: PaintingMediaCreateManyPaintingInputEnvelope
     connect?: PaintingMediaWhereUniqueInput | PaintingMediaWhereUniqueInput[]
-  }
-
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
   }
 
   export type NullableIntFieldUpdateOperationsInput = {
@@ -16421,6 +16543,11 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type NestedDateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -16504,6 +16631,14 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -16516,19 +16651,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
-  }
-
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
-  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -16832,6 +16954,10 @@ export namespace Prisma {
     bio?: string | null
     photoUrl?: string | null
     photoPublicId?: string
+    bgPhotoUrl?: string | null
+    bgPhotoPublicId?: string
+    order?: number
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     paintings?: PaintingCreateNestedManyWithoutAuthorInput
@@ -16845,6 +16971,10 @@ export namespace Prisma {
     bio?: string | null
     photoUrl?: string | null
     photoPublicId?: string
+    bgPhotoUrl?: string | null
+    bgPhotoPublicId?: string
+    order?: number
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     paintings?: PaintingUncheckedCreateNestedManyWithoutAuthorInput
@@ -16914,6 +17044,10 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
+    bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    bgPhotoPublicId?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paintings?: PaintingUpdateManyWithoutAuthorNestedInput
@@ -16927,6 +17061,10 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
+    bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    bgPhotoPublicId?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paintings?: PaintingUncheckedUpdateManyWithoutAuthorNestedInput
@@ -16955,6 +17093,10 @@ export namespace Prisma {
     bio?: string | null
     photoUrl?: string | null
     photoPublicId?: string
+    bgPhotoUrl?: string | null
+    bgPhotoPublicId?: string
+    order?: number
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     collections?: CollectionCreateNestedManyWithoutAuthorInput
@@ -16968,6 +17110,10 @@ export namespace Prisma {
     bio?: string | null
     photoUrl?: string | null
     photoPublicId?: string
+    bgPhotoUrl?: string | null
+    bgPhotoPublicId?: string
+    order?: number
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     collections?: CollectionUncheckedCreateNestedManyWithoutAuthorInput
@@ -17047,6 +17193,10 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
+    bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    bgPhotoPublicId?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     collections?: CollectionUpdateManyWithoutAuthorNestedInput
@@ -17060,6 +17210,10 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
+    bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    bgPhotoPublicId?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     collections?: CollectionUncheckedUpdateManyWithoutAuthorNestedInput
@@ -17286,6 +17440,10 @@ export namespace Prisma {
     bio?: string | null
     photoUrl?: string | null
     photoPublicId?: string
+    bgPhotoUrl?: string | null
+    bgPhotoPublicId?: string
+    order?: number
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     paintings?: PaintingCreateNestedManyWithoutAuthorInput
@@ -17299,6 +17457,10 @@ export namespace Prisma {
     bio?: string | null
     photoUrl?: string | null
     photoPublicId?: string
+    bgPhotoUrl?: string | null
+    bgPhotoPublicId?: string
+    order?: number
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     paintings?: PaintingUncheckedCreateNestedManyWithoutAuthorInput
@@ -17376,6 +17538,10 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
+    bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    bgPhotoPublicId?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paintings?: PaintingUpdateManyWithoutAuthorNestedInput
@@ -17389,6 +17555,10 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
+    bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    bgPhotoPublicId?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paintings?: PaintingUncheckedUpdateManyWithoutAuthorNestedInput

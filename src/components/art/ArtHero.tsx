@@ -5,50 +5,33 @@ import { useRouter, useSearchParams } from "next/navigation";
 import gsap from "gsap";
 import styles from "@/app/art/[[...artistId]]/art.module.scss";
 
-// ── Мок-дані авторів для нової Hero-секції ─────────────────────────────────────
-const MOCK_AUTHORS = [
-  {
-    id: 1, // Ivanka (Real ID in Database)
-    firstName: "Ivanka",
-    lastName: "Voyt",
-    bio: "Ivanka Voyt's works are distinguished by deep sensitivity, expressive brushstrokes, and a unique canvas texture.",
-    photoUrl: "/artPageAssets/Ivanka.png",
-    bgPhotoUrl: "/artPageAssets/IvankaBackground.jpg",
-    styleConfig: { x: 35, width: 55, textAlignment: "right" as const }
-  },
-  {
-    id: 2, // Oleksander (Real ID in Database)
-    firstName: "Oleksander",
-    lastName: "Voyt",
-    bio: "Oleksander Voyt explores the boundaries of color and light, creating monumental abstract compositions.",
-    photoUrl: "/artPageAssets/Sasha.png",
-    bgPhotoUrl: "/artPageAssets/SashaBackground.jpg",
-    styleConfig: { x: 65, width: 55, textAlignment: "left" as const }
-  },
-  {
-    id: 3, // Mock Artist 3
-    firstName: "Mariya",
-    lastName: "Koval",
-    bio: "Mariya Koval combines traditional Ukrainian ornaments with modern digital media and collage.",
-    photoUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop",
-    bgPhotoUrl: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=1200&auto=format&fit=crop",
-    styleConfig: { x: 50, width: 45, textAlignment: "right" as const }
-  },
-  {
-    id: 4, // Mock Artist 4
-    firstName: "Dmytro",
-    lastName: "Petrenko",
-    bio: "Dmytro Petrenko focuses on urban themes, creating vibrant neon art installations.",
-    photoUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=600&auto=format&fit=crop",
-    bgPhotoUrl: "https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?q=80&w=1200&auto=format&fit=crop",
-    styleConfig: { x: 50, width: 45, textAlignment: "left" as const }
-  }
+type DBAuthor = {
+  id: number;
+  firstName: string;
+  lastName: string;
+  bio: string | null;
+  photoUrl: string | null;
+  bgPhotoUrl: string | null;
+  order: number;
+  active: boolean;
+};
+
+const DEFAULT_BG_PHOTOS = [
+  "/artPageAssets/IvankaBackground.jpg",
+  "/artPageAssets/SashaBackground.jpg"
+];
+
+const DEFAULT_PORTRAIT_PHOTOS = [
+  "/artPageAssets/Ivanka.png",
+  "/artPageAssets/Sasha.png"
 ];
 
 export default function ArtHero({
   artistParam,
+  authors = []
 }: {
   artistParam: string | null;
+  authors: DBAuthor[];
 }) {
   const heroRef = useRef<HTMLDivElement>(null);
   const sliderWrapperRef = useRef<HTMLDivElement>(null);
@@ -78,20 +61,22 @@ export default function ArtHero({
 
   // ── Початковий стан ─────────────────────────────────────────────────────────
   useLayoutEffect(() => {
-    const isMobile = window.innerWidth <= 899;
-    isMobileRef.current = isMobile;
+    isMobileRef.current = window.innerWidth <= 899;
+    const isMobile = isMobileRef.current;
     setIsMobileState(isMobile);
+
+    if (authors.length === 0) return;
 
     // Визначаємо початковий індекс автора (якщо відкритий через URL)
     const initialArtistId = Number(artistParam);
-    const initialIndex = initialArtistId ? MOCK_AUTHORS.findIndex(a => a.id === initialArtistId) : 0;
+    const initialIndex = initialArtistId ? authors.findIndex(a => a.id === initialArtistId) : 0;
     const startIndex = initialIndex >= 0 ? initialIndex : 0;
 
     if (isMobile) {
       gsap.set(sliderWrapperRef.current, { x: `-${startIndex * 100}vw` });
       setActiveMobileIndex(startIndex);
     } else {
-      const maxTranslateVw = Math.max(0, MOCK_AUTHORS.length * 33.333 - 100);
+      const maxTranslateVw = Math.max(0, authors.length * 33.333 - 100);
       let targetXVw = startIndex * 33.333;
       if (targetXVw > maxTranslateVw) targetXVw = maxTranslateVw;
 
@@ -114,6 +99,7 @@ export default function ArtHero({
     const handleWheel = (e: WheelEvent) => {
       if (isArtistSelected) return; // не скролимо, якщо відкрита галерея
       if (isMobileRef.current) return; // вимикаємо на мобілках
+      if (authors.length === 0) return;
 
       // Скасовуємо стандартний вертикальний скрол сторінки
       e.preventDefault();
@@ -123,7 +109,7 @@ export default function ArtHero({
       let nextX = currentXVw.current + delta * 0.04;
 
       // Максимальний зсув слайдера (кількість авторів * 33.33vw - 100vw)
-      const maxTranslateVw = Math.max(0, MOCK_AUTHORS.length * 33.333 - 100);
+      const maxTranslateVw = Math.max(0, authors.length * 33.333 - 100);
 
       if (nextX < 0) nextX = 0;
       if (nextX > maxTranslateVw) nextX = maxTranslateVw;
@@ -152,7 +138,7 @@ export default function ArtHero({
         heroElement.removeEventListener("wheel", handleWheel);
       }
     };
-  }, [isArtistSelected]);
+  }, [isArtistSelected, authors]);
 
   // ── Реакція на зміну artistParam (в т.ч. навігація кнопками браузера) ─────────
   useEffect(() => {
@@ -183,7 +169,8 @@ export default function ArtHero({
       }
       gsap.to(heroRef.current, { y: 0, duration: 1, ease: "power2.inOut" });
     }
-  }, [artistParam, activeMobileIndex]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [artistParam]);
 
   // ── Клік по колонці автора ──────────────────────────────────────────────────
   const handleSelectArtist = (authorId: number) => {
@@ -235,7 +222,7 @@ export default function ArtHero({
       if (newIndex > 0) newIndex--;
     } else {
       // свайп вліво -> гортаємо вперед
-      if (newIndex < MOCK_AUTHORS.length - 1) newIndex++;
+      if (newIndex < authors.length - 1) newIndex++;
     }
 
     setActiveMobileIndex(newIndex);
@@ -256,6 +243,8 @@ export default function ArtHero({
     });
   };
 
+  if (authors.length === 0) return null;
+
   return (
     <div
       ref={heroRef}
@@ -267,10 +256,14 @@ export default function ArtHero({
         <div 
           ref={sliderWrapperRef} 
           className={styles.sliderWrapper}
-          style={{ width: `${MOCK_AUTHORS.length * 33.333}vw` }}
+          style={{ width: `${authors.length * 33.333}vw` }}
         >
-          {MOCK_AUTHORS.map((author, index) => {
+          {authors.map((author, index) => {
             const isHovered = isMobileState ? activeMobileIndex === index : hoveredIndex === index;
+
+            // Визначаємо фото та фон з урахуванням дефолтних значень
+            const photoUrl = author.photoUrl ?? DEFAULT_PORTRAIT_PHOTOS[index % DEFAULT_PORTRAIT_PHOTOS.length] ?? "/artPageAssets/Ivanka.png";
+            const bgPhotoUrl = author.bgPhotoUrl ?? DEFAULT_BG_PHOTOS[index % DEFAULT_BG_PHOTOS.length] ?? "/artPageAssets/IvankaBackground.jpg";
 
             return (
               <div
@@ -286,7 +279,7 @@ export default function ArtHero({
                 <div
                   className={styles.colBg}
                   style={{
-                    backgroundImage: `url(${author.bgPhotoUrl})`,
+                    backgroundImage: `url(${bgPhotoUrl})`,
                   }}
                 />
 
@@ -306,7 +299,7 @@ export default function ArtHero({
                     isHovered ? styles.colTextVisible : ""
                   }`}
                 >
-                  <p className={styles.colDesc}>{author.bio}</p>
+                  <p className={styles.colDesc}>{author.bio ?? ""}</p>
                 </div>
 
                 {/* Контейнер рамки портрета автора (зсувається вниз при ховері) */}
@@ -316,7 +309,7 @@ export default function ArtHero({
                   }`}
                 >
                   <Image
-                    src={author.photoUrl}
+                    src={photoUrl}
                     alt={`${author.firstName} ${author.lastName}`}
                     fill
                     sizes="(max-width: 768px) 100vw, 30vw"
@@ -331,7 +324,7 @@ export default function ArtHero({
       </div>
 
       {/* ── Лінія прогресу скролу (тільки для десктопу) ── */}
-      {!isMobileRef.current && MOCK_AUTHORS.length * 33.333 > 100 && (
+      {!isMobileRef.current && authors.length * 33.333 > 100 && (
         <div className={styles.progressBarContainer}>
           <div 
             className={styles.progressBarActive} 
@@ -342,7 +335,7 @@ export default function ArtHero({
 
       {/* ── Крапки-індикатори для мобілок ── */}
       <div className={styles.dotsContainer}>
-        {MOCK_AUTHORS.map((_, index) => (
+        {authors.map((_, index) => (
           <button
             key={index}
             className={`${styles.dot} ${activeMobileIndex === index ? styles.dotActive : ""}`}
@@ -378,6 +371,3 @@ export default function ArtHero({
     </div>
   );
 }
-
-
-

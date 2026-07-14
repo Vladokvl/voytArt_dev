@@ -92,7 +92,10 @@ export default async function ArtPage({
         ...(isNeonMode ? { hasNeon: true } : {}),
       },
     }),
-    db.author.findMany({ orderBy: { id: "asc" } }),
+    db.author.findMany({
+      where: { active: true },
+      orderBy: { order: "asc" },
+    }),
     selectedAuthorId
       ? db.collection.findMany({
           where: { authorId: selectedAuthorId },
@@ -115,6 +118,7 @@ export default async function ArtPage({
       <Suspense fallback={null}>
         <ArtHero
           artistParam={artist ?? null}
+          authors={authors}
         />
       </Suspense>
 

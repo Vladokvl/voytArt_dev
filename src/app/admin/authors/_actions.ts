@@ -14,11 +14,28 @@ export async function createAuthorAction(
   const photoUrl = (formData.get("photoUrl") as string) || null;
   const photoPublicId = photoUrl ? (getPublicIdFromCloudinaryUrl(photoUrl) ?? "") : "";
 
+  const bgPhotoUrl = (formData.get("bgPhotoUrl") as string) || null;
+  const bgPhotoPublicId = bgPhotoUrl ? (getPublicIdFromCloudinaryUrl(bgPhotoUrl) ?? "") : "";
+  const order = Number(formData.get("order")) || 0;
+  const active = formData.get("active") === "on";
+
   if (!firstName || !lastName) {
     return { error: "Заповніть обовʼязкові поля" };
   }
 
-  await db.author.create({ data: { firstName, lastName, bio, photoUrl, photoPublicId } });
+  await db.author.create({
+    data: {
+      firstName,
+      lastName,
+      bio,
+      photoUrl,
+      photoPublicId,
+      bgPhotoUrl,
+      bgPhotoPublicId,
+      order,
+      active,
+    },
+  });
 
   revalidatePath("/admin/authors");
   revalidatePath("/admin");
@@ -39,11 +56,29 @@ export async function updateAuthorAction(
   const photoUrl = (formData.get("photoUrl") as string) || null;
   const photoPublicId = photoUrl ? (getPublicIdFromCloudinaryUrl(photoUrl) ?? "") : "";
 
+  const bgPhotoUrl = (formData.get("bgPhotoUrl") as string) || null;
+  const bgPhotoPublicId = bgPhotoUrl ? (getPublicIdFromCloudinaryUrl(bgPhotoUrl) ?? "") : "";
+  const order = Number(formData.get("order")) || 0;
+  const active = formData.get("active") === "on";
+
   if (!id || !firstName || !lastName) {
     return { error: "Заповніть обовʼязкові поля" };
   }
 
-  await db.author.update({ where: { id }, data: { firstName, lastName, bio, photoUrl, photoPublicId } });
+  await db.author.update({
+    where: { id },
+    data: {
+      firstName,
+      lastName,
+      bio,
+      photoUrl,
+      photoPublicId,
+      bgPhotoUrl,
+      bgPhotoPublicId,
+      order,
+      active,
+    },
+  });
 
   revalidatePath("/admin/authors");
   revalidatePath("/admin");
@@ -59,6 +94,8 @@ export async function deleteAuthorAction(id: number): Promise<void> {
     select: {
       photoUrl: true,
       photoPublicId: true,
+      bgPhotoUrl: true,
+      bgPhotoPublicId: true,
       paintings: {
         select: {
           coverUrl: true,
@@ -89,6 +126,11 @@ export async function deleteAuthorAction(id: number): Promise<void> {
   const authorPhotoPublicId = author.photoPublicId ?? (author.photoUrl ? getPublicIdFromCloudinaryUrl(author.photoUrl) : null);
   if (authorPhotoPublicId) {
     deleteTasks.push(deleteAsset(authorPhotoPublicId, "image").catch(() => undefined));
+  }
+
+  const authorBgPhotoPublicId = author.bgPhotoPublicId ?? (author.bgPhotoUrl ? getPublicIdFromCloudinaryUrl(author.bgPhotoUrl) : null);
+  if (authorBgPhotoPublicId) {
+    deleteTasks.push(deleteAsset(authorBgPhotoPublicId, "image").catch(() => undefined));
   }
 
   for (const collection of author.collections) {
