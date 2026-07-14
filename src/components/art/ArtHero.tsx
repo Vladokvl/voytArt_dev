@@ -52,7 +52,6 @@ export default function ArtHero({
 }) {
   const heroRef = useRef<HTMLDivElement>(null);
   const sliderWrapperRef = useRef<HTMLDivElement>(null);
-  const swipeIndicatorRef = useRef<HTMLDivElement>(null);
   const pullTabRef = useRef<HTMLButtonElement>(null);
   const touchStartXRef = useRef(0);
   const isMobileRef = useRef(false);
@@ -68,6 +67,9 @@ export default function ArtHero({
   const [activeMobileIndex, setActiveMobileIndex] = useState(0);
   const [loadingArtistId, setLoadingArtistId] = useState<number | null>(null);
 
+  // Прогрес скролу на десктопі (від 0 до 100)
+  const [scrollProgress, setScrollProgress] = useState(0);
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const isNeon = searchParams.get("neon") === "true";
@@ -79,13 +81,12 @@ export default function ArtHero({
     const isMobile = isMobileRef.current;
 
     if (isMobile) {
-      // Початково центруємо перший слайд на мобільних
       gsap.set(sliderWrapperRef.current, { x: "0vw" });
       setActiveMobileIndex(0);
     } else {
-      // Скидаємо X позицію на десктопі
       gsap.set(sliderWrapperRef.current, { x: "0vw" });
       currentXVw.current = 0;
+      setScrollProgress(0);
     }
 
     if (isArtistSelected) {
@@ -94,7 +95,8 @@ export default function ArtHero({
     } else {
       document.body.style.overflow = "hidden";
     }
-  }, [isArtistSelected]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Реакція на зміну скролу коліщатком миші (h-scroll для десктопу) ───────────
   useEffect(() => {
@@ -116,6 +118,10 @@ export default function ArtHero({
       if (nextX > maxTranslateVw) nextX = maxTranslateVw;
 
       currentXVw.current = nextX;
+
+      // Оновлюємо відсоток прогресу для лінії індикатора
+      const progress = maxTranslateVw > 0 ? (nextX / maxTranslateVw) * 100 : 0;
+      setScrollProgress(progress);
 
       gsap.to(sliderWrapperRef.current, {
         x: `-${nextX}vw`,
@@ -161,18 +167,10 @@ export default function ArtHero({
       if (isMobile) {
         gsap.set(sliderWrapperRef.current, { x: "0vw" });
         setActiveMobileIndex(0);
-        if (swipeIndicatorRef.current) {
-          swipeIndicatorRef.current.style.display = "";
-          swipeIndicatorRef.current.style.animation = "";
-          gsap.fromTo(
-            swipeIndicatorRef.current,
-            { opacity: 0, scale: 0.9 },
-            { opacity: 1, scale: 1, duration: 0.8, delay: 0.3, ease: "power2.out" },
-          );
-        }
       } else {
         gsap.set(sliderWrapperRef.current, { x: "0vw" });
         currentXVw.current = 0;
+        setScrollProgress(0);
       }
       gsap.to(heroRef.current, { y: 0, duration: 1, ease: "power2.inOut" });
     }
@@ -197,18 +195,10 @@ export default function ArtHero({
     if (isMobileRef.current) {
       gsap.set(sliderWrapperRef.current, { x: "0vw" });
       setActiveMobileIndex(0);
-      if (swipeIndicatorRef.current) {
-        swipeIndicatorRef.current.style.display = "";
-        swipeIndicatorRef.current.style.animation = "";
-        gsap.fromTo(
-          swipeIndicatorRef.current,
-          { opacity: 0, scale: 0.9 },
-          { opacity: 1, scale: 1, duration: 0.8, delay: 0.3, ease: "power2.out" },
-        );
-      }
     } else {
       gsap.set(sliderWrapperRef.current, { x: "0vw" });
       currentXVw.current = 0;
+      setScrollProgress(0);
     }
 
     gsap.to(heroRef.current, {
@@ -236,16 +226,6 @@ export default function ArtHero({
     if (!touch) return;
     const delta = touch.clientX - touchStartXRef.current;
     if (Math.abs(delta) < 40) return;
-
-    if (swipeIndicatorRef.current) swipeIndicatorRef.current.style.animation = "none";
-    gsap.to(swipeIndicatorRef.current, {
-      opacity: 0,
-      scale: 0.8,
-      duration: 0.35,
-      onComplete: () => {
-        if (swipeIndicatorRef.current) swipeIndicatorRef.current.style.display = "none";
-      },
-    });
 
     let newIndex = activeMobileIndex;
     if (delta > 0) {
@@ -354,12 +334,15 @@ export default function ArtHero({
         </div>
       </div>
 
-      {/* ── Swipe indicator (мобільний) ── */}
-      <div ref={swipeIndicatorRef} className={styles.swipeIndicator}>
-        <span className={styles.swipeArrow}>←</span>
-        <span className={styles.swipeText}>swipe</span>
-        <span className={styles.swipeArrow}>→</span>
-      </div>
+      {/* ── Лінія прогресу скролу (тільки для десктопу) ── */}
+      {!isMobileRef.current && MOCK_AUTHORS.length * 33.333 > 100 && (
+        <div className={styles.progressBarContainer}>
+          <div 
+            className={styles.progressBarActive} 
+            style={{ width: `${scrollProgress}%` }}
+          />
+        </div>
+      )}
 
       {/* ── Крапки-індикатори для мобілок ── */}
       <div className={styles.dotsContainer}>
