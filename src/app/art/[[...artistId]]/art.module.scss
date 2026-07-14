@@ -123,55 +123,47 @@
 
 // ── Typography (Заголовки та Текст) ───────────────────────────────────────────
 .colName {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: clamp(1.6rem, 2.2vw, 2.75rem);
   font-weight: 300;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   line-height: 1;
-  margin-bottom: 1.25rem;
+  text-align: center;
+  width: 100%;
+  z-index: 5;
+  color: #fff;
+
+  @include mobile {
+    top: 10%;
+  }
 }
 
 .colText {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -40%);
   z-index: 3;
-  width: 280px;
-  max-width: 85%;
+  width: 80%;
+  max-width: 280px;
   color: #fff;
-  transition: opacity 0.5s ease;
-  pointer-events: none;
-
-  @include mobile {
-    max-width: 45vw;
-    top: 50%;
-  }
-}
-
-.colTextLeft {
-  left: 2.5rem;
-  right: auto;
-  text-align: left;
-
-  @include mobile {
-    left: 1.5rem;
-    right: auto;
-  }
-}
-
-.colTextRight {
-  right: 2.5rem;
-  left: auto;
-  text-align: right;
-
-  @include mobile {
-    right: 1.5rem;
-    left: auto;
-  }
-}
-
-.colTextHidden {
+  text-align: center;
   opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+
+  @include mobile {
+    top: 45%;
+  }
+}
+
+.colTextVisible {
+  opacity: 1;
+  transform: translate(-50%, -50%);
 }
 
 .colDesc {
@@ -185,38 +177,36 @@
   }
 }
 
-// ── Portraits (Портрети / Силуети) ────────────────────────────────────────────
+// ── Portraits (Портрети / Силуети у рамках) ────────────────────────────────────
 .portraitWrap {
   position: absolute;
-  top: 0;
-  height: 100%;
+  bottom: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(160px, 14vw, 220px);
+  aspect-ratio: 3 / 4;
   z-index: 2;
-  transition: transform 0.5s ease;
-  will-change: transform, left;
-  pointer-events: none;
-}
-
-// Стилізація для мок-портретів (як карти, що ширяють, бо мають свій фон)
-.portraitCard {
-  bottom: 12% !important;
-  top: auto !important;
-  height: 60% !important;
-  aspect-ratio: 2 / 3;
-  border-radius: 16px;
-  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6);
-  border: 3.5px solid rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  border: 3.5px solid rgba(255, 255, 255, 0.95);
   overflow: hidden;
   background: #1e1e1e;
+  pointer-events: none;
   transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.6s ease;
-
-  .column:hover & {
-    transform: translateX(-50%) translateY(-10px) scale(1.02) !important;
-    box-shadow: 0 45px 80px -20px rgba(0, 0, 0, 0.8);
-  }
+  will-change: transform;
 
   @include mobile {
-    bottom: 16% !important;
-    height: 52% !important;
+    bottom: 16%;
+    width: clamp(140px, 45vw, 180px);
+  }
+}
+
+.portraitWrapDown {
+  transform: translateX(-50%) translateY(80px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+
+  @include mobile {
+    transform: translateX(-50%) translateY(55px);
   }
 }
 
@@ -224,10 +214,6 @@
   object-fit: cover;
   object-position: top center;
   transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.portraitImgHover {
-  transform: scale(1.05);
 }
 
 // ── Gallery Section (Нижня частина сторінки) ──────────────────────────────────

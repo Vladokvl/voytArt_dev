@@ -69,6 +69,7 @@ export default function ArtHero({
 
   // Прогрес скролу на десктопі (від 0 до 100)
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [isMobileState, setIsMobileState] = useState(false);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -77,8 +78,9 @@ export default function ArtHero({
 
   // ── Початковий стан ─────────────────────────────────────────────────────────
   useLayoutEffect(() => {
-    isMobileRef.current = window.innerWidth <= 899;
-    const isMobile = isMobileRef.current;
+    const isMobile = window.innerWidth <= 899;
+    isMobileRef.current = isMobile;
+    setIsMobileState(isMobile);
 
     // Визначаємо початковий індекс автора (якщо відкритий через URL)
     const initialArtistId = Number(artistParam);
@@ -268,9 +270,7 @@ export default function ArtHero({
           style={{ width: `${MOCK_AUTHORS.length * 33.333}vw` }}
         >
           {MOCK_AUTHORS.map((author, index) => {
-            const config = author.styleConfig;
-            const isExternal = author.photoUrl.startsWith("http");
-            const isHovered = hoveredIndex === index;
+            const isHovered = isMobileState ? activeMobileIndex === index : hoveredIndex === index;
 
             return (
               <div
@@ -279,8 +279,8 @@ export default function ArtHero({
                   loadingArtistId === author.id ? styles.loadingColumn : ""
                 }`}
                 onClick={() => handleSelectArtist(author.id)}
-                onMouseEnter={() => !isMobileRef.current && setHoveredIndex(index)}
-                onMouseLeave={() => !isMobileRef.current && setHoveredIndex(null)}
+                onMouseEnter={() => !isMobileState && setHoveredIndex(index)}
+                onMouseLeave={() => !isMobileState && setHoveredIndex(null)}
               >
                 {/* Фонове зображення карти */}
                 <div
@@ -297,36 +297,32 @@ export default function ArtHero({
                   }`}
                 />
 
-                {/* Контейнер силуету/портрета автора */}
+                {/* Ім'я автора зверху по центру */}
+                <h2 className={styles.colName}>{author.firstName}</h2>
+
+                {/* Біографія автора по центру */}
+                <div
+                  className={`${styles.colText} ${
+                    isHovered ? styles.colTextVisible : ""
+                  }`}
+                >
+                  <p className={styles.colDesc}>{author.bio}</p>
+                </div>
+
+                {/* Контейнер рамки портрета автора (зсувається вниз при ховері) */}
                 <div
                   className={`${styles.portraitWrap} ${
-                    isExternal ? styles.portraitCard : ""
+                    isHovered ? styles.portraitWrapDown : ""
                   }`}
-                  style={{
-                    left: `${config.x}%`,
-                    width: `${config.width}%`,
-                  }}
                 >
                   <Image
                     src={author.photoUrl}
                     alt={`${author.firstName} ${author.lastName}`}
                     fill
                     sizes="(max-width: 768px) 100vw, 30vw"
-                    className={`${styles.portraitImg} ${
-                      isHovered ? styles.portraitImgHover : ""
-                    }`}
+                    className={styles.portraitImg}
                     priority={index < 3}
                   />
-                </div>
-
-                {/* Текст (опис та ім'я) */}
-                <div
-                  className={`${styles.colText} ${
-                    config.textAlignment === "left" ? styles.colTextLeft : styles.colTextRight
-                  } ${isHovered ? styles.colTextHidden : ""}`}
-                >
-                  <h2 className={styles.colName}>{author.firstName}</h2>
-                  <p className={styles.colDesc}>{author.bio}</p>
                 </div>
               </div>
             );
