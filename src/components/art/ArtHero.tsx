@@ -10,6 +10,7 @@ type DBAuthor = {
   firstName: string;
   lastName: string;
   bio: string | null;
+  shortDesc: string | null;
   photoUrl: string | null;
   bgPhotoUrl: string | null;
   order: number;
@@ -299,7 +300,7 @@ export default function ArtHero({
                     isHovered ? styles.colTextVisible : ""
                   }`}
                 >
-                  <p className={styles.colDesc}>{author.bio ?? ""}</p>
+                  <p className={styles.colDesc}>{author.shortDesc ?? ""}</p>
                 </div>
 
                 {/* Контейнер рамки портрета автора (зсувається вниз при ховері) */}

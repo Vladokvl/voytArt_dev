@@ -1932,6 +1932,7 @@ export namespace Prisma {
     firstName: string | null
     lastName: string | null
     bio: string | null
+    shortDesc: string | null
     photoUrl: string | null
     photoPublicId: string | null
     bgPhotoUrl: string | null
@@ -1947,6 +1948,7 @@ export namespace Prisma {
     firstName: string | null
     lastName: string | null
     bio: string | null
+    shortDesc: string | null
     photoUrl: string | null
     photoPublicId: string | null
     bgPhotoUrl: string | null
@@ -1962,6 +1964,7 @@ export namespace Prisma {
     firstName: number
     lastName: number
     bio: number
+    shortDesc: number
     photoUrl: number
     photoPublicId: number
     bgPhotoUrl: number
@@ -1989,6 +1992,7 @@ export namespace Prisma {
     firstName?: true
     lastName?: true
     bio?: true
+    shortDesc?: true
     photoUrl?: true
     photoPublicId?: true
     bgPhotoUrl?: true
@@ -2004,6 +2008,7 @@ export namespace Prisma {
     firstName?: true
     lastName?: true
     bio?: true
+    shortDesc?: true
     photoUrl?: true
     photoPublicId?: true
     bgPhotoUrl?: true
@@ -2019,6 +2024,7 @@ export namespace Prisma {
     firstName?: true
     lastName?: true
     bio?: true
+    shortDesc?: true
     photoUrl?: true
     photoPublicId?: true
     bgPhotoUrl?: true
@@ -2121,6 +2127,7 @@ export namespace Prisma {
     firstName: string
     lastName: string
     bio: string | null
+    shortDesc: string | null
     photoUrl: string | null
     photoPublicId: string
     bgPhotoUrl: string | null
@@ -2155,6 +2162,7 @@ export namespace Prisma {
     firstName?: boolean
     lastName?: boolean
     bio?: boolean
+    shortDesc?: boolean
     photoUrl?: boolean
     photoPublicId?: boolean
     bgPhotoUrl?: boolean
@@ -2174,6 +2182,7 @@ export namespace Prisma {
     firstName?: boolean
     lastName?: boolean
     bio?: boolean
+    shortDesc?: boolean
     photoUrl?: boolean
     photoPublicId?: boolean
     bgPhotoUrl?: boolean
@@ -2189,6 +2198,7 @@ export namespace Prisma {
     firstName?: boolean
     lastName?: boolean
     bio?: boolean
+    shortDesc?: boolean
     photoUrl?: boolean
     photoPublicId?: boolean
     bgPhotoUrl?: boolean
@@ -2204,6 +2214,7 @@ export namespace Prisma {
     firstName?: boolean
     lastName?: boolean
     bio?: boolean
+    shortDesc?: boolean
     photoUrl?: boolean
     photoPublicId?: boolean
     bgPhotoUrl?: boolean
@@ -2214,7 +2225,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type AuthorOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "firstName" | "lastName" | "bio" | "photoUrl" | "photoPublicId" | "bgPhotoUrl" | "bgPhotoPublicId" | "order" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["author"]>
+  export type AuthorOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "firstName" | "lastName" | "bio" | "shortDesc" | "photoUrl" | "photoPublicId" | "bgPhotoUrl" | "bgPhotoPublicId" | "order" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["author"]>
   export type AuthorInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     paintings?: boolean | Author$paintingsArgs<ExtArgs>
     collections?: boolean | Author$collectionsArgs<ExtArgs>
@@ -2236,6 +2247,7 @@ export namespace Prisma {
       firstName: string
       lastName: string
       bio: string | null
+      shortDesc: string | null
       photoUrl: string | null
       photoPublicId: string
       bgPhotoUrl: string | null
@@ -2674,6 +2686,7 @@ export namespace Prisma {
     readonly firstName: FieldRef<"Author", 'String'>
     readonly lastName: FieldRef<"Author", 'String'>
     readonly bio: FieldRef<"Author", 'String'>
+    readonly shortDesc: FieldRef<"Author", 'String'>
     readonly photoUrl: FieldRef<"Author", 'String'>
     readonly photoPublicId: FieldRef<"Author", 'String'>
     readonly bgPhotoUrl: FieldRef<"Author", 'String'>
@@ -13485,6 +13498,7 @@ export namespace Prisma {
     firstName: 'firstName',
     lastName: 'lastName',
     bio: 'bio',
+    shortDesc: 'shortDesc',
     photoUrl: 'photoUrl',
     photoPublicId: 'photoPublicId',
     bgPhotoUrl: 'bgPhotoUrl',
@@ -13738,6 +13752,7 @@ export namespace Prisma {
     firstName?: StringFilter<"Author"> | string
     lastName?: StringFilter<"Author"> | string
     bio?: StringNullableFilter<"Author"> | string | null
+    shortDesc?: StringNullableFilter<"Author"> | string | null
     photoUrl?: StringNullableFilter<"Author"> | string | null
     photoPublicId?: StringFilter<"Author"> | string
     bgPhotoUrl?: StringNullableFilter<"Author"> | string | null
@@ -13756,6 +13771,7 @@ export namespace Prisma {
     firstName?: SortOrder
     lastName?: SortOrder
     bio?: SortOrderInput | SortOrder
+    shortDesc?: SortOrderInput | SortOrder
     photoUrl?: SortOrderInput | SortOrder
     photoPublicId?: SortOrder
     bgPhotoUrl?: SortOrderInput | SortOrder
@@ -13777,6 +13793,7 @@ export namespace Prisma {
     firstName?: StringFilter<"Author"> | string
     lastName?: StringFilter<"Author"> | string
     bio?: StringNullableFilter<"Author"> | string | null
+    shortDesc?: StringNullableFilter<"Author"> | string | null
     photoUrl?: StringNullableFilter<"Author"> | string | null
     photoPublicId?: StringFilter<"Author"> | string
     bgPhotoUrl?: StringNullableFilter<"Author"> | string | null
@@ -13795,6 +13812,7 @@ export namespace Prisma {
     firstName?: SortOrder
     lastName?: SortOrder
     bio?: SortOrderInput | SortOrder
+    shortDesc?: SortOrderInput | SortOrder
     photoUrl?: SortOrderInput | SortOrder
     photoPublicId?: SortOrder
     bgPhotoUrl?: SortOrderInput | SortOrder
@@ -13818,6 +13836,7 @@ export namespace Prisma {
     firstName?: StringWithAggregatesFilter<"Author"> | string
     lastName?: StringWithAggregatesFilter<"Author"> | string
     bio?: StringNullableWithAggregatesFilter<"Author"> | string | null
+    shortDesc?: StringNullableWithAggregatesFilter<"Author"> | string | null
     photoUrl?: StringNullableWithAggregatesFilter<"Author"> | string | null
     photoPublicId?: StringWithAggregatesFilter<"Author"> | string
     bgPhotoUrl?: StringNullableWithAggregatesFilter<"Author"> | string | null
@@ -14475,6 +14494,7 @@ export namespace Prisma {
     firstName: string
     lastName: string
     bio?: string | null
+    shortDesc?: string | null
     photoUrl?: string | null
     photoPublicId?: string
     bgPhotoUrl?: string | null
@@ -14493,6 +14513,7 @@ export namespace Prisma {
     firstName: string
     lastName: string
     bio?: string | null
+    shortDesc?: string | null
     photoUrl?: string | null
     photoPublicId?: string
     bgPhotoUrl?: string | null
@@ -14510,6 +14531,7 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     bio?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
     bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14528,6 +14550,7 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     bio?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
     bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14546,6 +14569,7 @@ export namespace Prisma {
     firstName: string
     lastName: string
     bio?: string | null
+    shortDesc?: string | null
     photoUrl?: string | null
     photoPublicId?: string
     bgPhotoUrl?: string | null
@@ -14560,6 +14584,7 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     bio?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
     bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14575,6 +14600,7 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     bio?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
     bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15342,6 +15368,7 @@ export namespace Prisma {
     firstName?: SortOrder
     lastName?: SortOrder
     bio?: SortOrder
+    shortDesc?: SortOrder
     photoUrl?: SortOrder
     photoPublicId?: SortOrder
     bgPhotoUrl?: SortOrder
@@ -15362,6 +15389,7 @@ export namespace Prisma {
     firstName?: SortOrder
     lastName?: SortOrder
     bio?: SortOrder
+    shortDesc?: SortOrder
     photoUrl?: SortOrder
     photoPublicId?: SortOrder
     bgPhotoUrl?: SortOrder
@@ -15377,6 +15405,7 @@ export namespace Prisma {
     firstName?: SortOrder
     lastName?: SortOrder
     bio?: SortOrder
+    shortDesc?: SortOrder
     photoUrl?: SortOrder
     photoPublicId?: SortOrder
     bgPhotoUrl?: SortOrder
@@ -16952,6 +16981,7 @@ export namespace Prisma {
     firstName: string
     lastName: string
     bio?: string | null
+    shortDesc?: string | null
     photoUrl?: string | null
     photoPublicId?: string
     bgPhotoUrl?: string | null
@@ -16969,6 +16999,7 @@ export namespace Prisma {
     firstName: string
     lastName: string
     bio?: string | null
+    shortDesc?: string | null
     photoUrl?: string | null
     photoPublicId?: string
     bgPhotoUrl?: string | null
@@ -17042,6 +17073,7 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     bio?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
     bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -17059,6 +17091,7 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     bio?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
     bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -17091,6 +17124,7 @@ export namespace Prisma {
     firstName: string
     lastName: string
     bio?: string | null
+    shortDesc?: string | null
     photoUrl?: string | null
     photoPublicId?: string
     bgPhotoUrl?: string | null
@@ -17108,6 +17142,7 @@ export namespace Prisma {
     firstName: string
     lastName: string
     bio?: string | null
+    shortDesc?: string | null
     photoUrl?: string | null
     photoPublicId?: string
     bgPhotoUrl?: string | null
@@ -17191,6 +17226,7 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     bio?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
     bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -17208,6 +17244,7 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     bio?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
     bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -17438,6 +17475,7 @@ export namespace Prisma {
     firstName: string
     lastName: string
     bio?: string | null
+    shortDesc?: string | null
     photoUrl?: string | null
     photoPublicId?: string
     bgPhotoUrl?: string | null
@@ -17455,6 +17493,7 @@ export namespace Prisma {
     firstName: string
     lastName: string
     bio?: string | null
+    shortDesc?: string | null
     photoUrl?: string | null
     photoPublicId?: string
     bgPhotoUrl?: string | null
@@ -17536,6 +17575,7 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     bio?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
     bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -17553,6 +17593,7 @@ export namespace Prisma {
     firstName?: StringFieldUpdateOperationsInput | string
     lastName?: StringFieldUpdateOperationsInput | string
     bio?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
     bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null

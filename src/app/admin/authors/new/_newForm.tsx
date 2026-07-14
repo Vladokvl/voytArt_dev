@@ -16,11 +16,12 @@ export default function AuthorForm() {
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Фон (без кропу)
+  // Фон (з кропом)
   const [bgPreview, setBgPreview] = useState<string | null>(null);
   const [bgDragOver, setBgDragOver] = useState(false);
   const bgFileInputRef = useRef<HTMLInputElement>(null);
 
+  // 1. Кроп портрета
   const {
     cropFile,
     handleFileChange,
@@ -32,35 +33,17 @@ export default function AuthorForm() {
     setPreview,
   });
 
-  function handleBgFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setBgPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-
-  function handleBgFileDrop(e: React.DragEvent<HTMLDivElement>) {
-    e.preventDefault();
-    setBgDragOver(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setBgPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-
-      if (bgFileInputRef.current) {
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(file);
-        bgFileInputRef.current.files = dataTransfer.files;
-      }
-    }
-  }
+  // 2. Кроп фону
+  const {
+    cropFile: bgCropFile,
+    handleFileChange: handleBgFileChange,
+    handleFileDrop: handleBgFileDrop,
+    onCropSave: onBgCropSave,
+    onCropCancel: onBgCropCancel,
+  } = useImageCrop({
+    fileInputRef: bgFileInputRef,
+    setPreview: setBgPreview,
+  });
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -112,8 +95,13 @@ export default function AuthorForm() {
       </div>
 
       <div className={styles.field}>
+        <label className={styles.label}>Короткий опис (для слайдера)</label>
+        <input className={styles.input} name="shortDesc" placeholder="Короткий опис автора для відображення в слайдері" />
+      </div>
+
+      <div className={styles.field}>
         <label className={styles.label}>Біографія</label>
-        <textarea className={styles.textarea} name="bio" placeholder="Біографія автора" />
+        <textarea className={styles.textarea} name="bio" placeholder="Повна біографія автора" />
       </div>
 
       <div className={styles.row}>
@@ -149,7 +137,10 @@ export default function AuthorForm() {
             className={`${styles.dropZone} ${bgDragOver ? styles.dragOver : ""}`}
             onDragOver={(e) => { e.preventDefault(); setBgDragOver(true); }}
             onDragLeave={() => setBgDragOver(false)}
-            onDrop={handleBgFileDrop}
+            onDrop={(e) => {
+              setBgDragOver(false);
+              handleBgFileDrop(e);
+            }}
             onClick={() => bgFileInputRef.current?.click()}
           >
             {bgPreview ? (
@@ -184,6 +175,15 @@ export default function AuthorForm() {
           imageFile={cropFile}
           onCropSave={onCropSave}
           onCancel={onCropCancel}
+        />
+      )}
+
+      {bgCropFile && (
+        <ImageCropModal
+          open={!!bgCropFile}
+          imageFile={bgCropFile}
+          onCropSave={onBgCropSave}
+          onCancel={onBgCropCancel}
         />
       )}
 

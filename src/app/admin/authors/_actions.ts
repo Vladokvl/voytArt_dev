@@ -11,6 +11,7 @@ export async function createAuthorAction(
   const firstName = formData.get("firstName") as string;
   const lastName = formData.get("lastName") as string;
   const bio = (formData.get("bio") as string) || null;
+  const shortDesc = (formData.get("shortDesc") as string) || null;
   const photoUrl = (formData.get("photoUrl") as string) || null;
   const photoPublicId = photoUrl ? (getPublicIdFromCloudinaryUrl(photoUrl) ?? "") : "";
 
@@ -28,6 +29,7 @@ export async function createAuthorAction(
       firstName,
       lastName,
       bio,
+      shortDesc,
       photoUrl,
       photoPublicId,
       bgPhotoUrl,
@@ -53,6 +55,7 @@ export async function updateAuthorAction(
   const firstName = formData.get("firstName") as string;
   const lastName = formData.get("lastName") as string;
   const bio = (formData.get("bio") as string) || null;
+  const shortDesc = (formData.get("shortDesc") as string) || null;
   const photoUrl = (formData.get("photoUrl") as string) || null;
   const photoPublicId = photoUrl ? (getPublicIdFromCloudinaryUrl(photoUrl) ?? "") : "";
 
@@ -71,6 +74,7 @@ export async function updateAuthorAction(
       firstName,
       lastName,
       bio,
+      shortDesc,
       photoUrl,
       photoPublicId,
       bgPhotoUrl,
