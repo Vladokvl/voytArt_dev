@@ -11,7 +11,7 @@ const MOCK_AUTHORS = [
     id: 1, // Ivanka (Real ID in Database)
     firstName: "Ivanka",
     lastName: "Voyt",
-    bio: "Роботи Іванки Войт відрізняються глибокою чуттєвістю, експресивними мазками та унікальною текстурою полотна.",
+    bio: "Ivanka Voyt's works are distinguished by deep sensitivity, expressive brushstrokes, and a unique canvas texture.",
     photoUrl: "/artPageAssets/Ivanka.png",
     bgPhotoUrl: "/artPageAssets/IvankaBackground.jpg",
     styleConfig: { x: 35, width: 55, textAlignment: "right" as const }
@@ -20,25 +20,25 @@ const MOCK_AUTHORS = [
     id: 2, // Oleksander (Real ID in Database)
     firstName: "Oleksander",
     lastName: "Voyt",
-    bio: "Олександр Войт досліджує межі кольору та світла, створюючи монументальні абстрактні композиції.",
+    bio: "Oleksander Voyt explores the boundaries of color and light, creating monumental abstract compositions.",
     photoUrl: "/artPageAssets/Sasha.png",
     bgPhotoUrl: "/artPageAssets/SashaBackground.jpg",
     styleConfig: { x: 65, width: 55, textAlignment: "left" as const }
   },
   {
     id: 3, // Mock Artist 3
-    firstName: "Марія",
-    lastName: "Коваль",
-    bio: "Марія Коваль поєднує українські традиційні орнаменти з сучасними цифровими медіа та колажем.",
+    firstName: "Mariya",
+    lastName: "Koval",
+    bio: "Mariya Koval combines traditional Ukrainian ornaments with modern digital media and collage.",
     photoUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop",
     bgPhotoUrl: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=1200&auto=format&fit=crop",
     styleConfig: { x: 50, width: 45, textAlignment: "right" as const }
   },
   {
     id: 4, // Mock Artist 4
-    firstName: "Дмитро",
-    lastName: "Петренко",
-    bio: "Дмитро Петренко фокусується на темах урбанізму, створюючи неонові картини-інсталяції.",
+    firstName: "Dmytro",
+    lastName: "Petrenko",
+    bio: "Dmytro Petrenko focuses on urban themes, creating vibrant neon art installations.",
     photoUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=600&auto=format&fit=crop",
     bgPhotoUrl: "https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?q=80&w=1200&auto=format&fit=crop",
     styleConfig: { x: 50, width: 45, textAlignment: "left" as const }

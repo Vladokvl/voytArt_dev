@@ -149,7 +149,7 @@
   transform: translate(-50%, -40%);
   z-index: 3;
   width: 80%;
-  max-width: 280px;
+  max-width: 320px;
   color: #fff;
   text-align: center;
   opacity: 0;
@@ -167,12 +167,12 @@
 }
 
 .colDesc {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   line-height: 1.8;
   opacity: 0.85;
 
   @include mobile {
-    font-size: 0.72rem;
+    font-size: 0.8rem;
     line-height: 1.6;
   }
 }
@@ -183,7 +183,7 @@
   bottom: 12%;
   left: 50%;
   transform: translateX(-50%);
-  width: clamp(160px, 14vw, 220px);
+  width: clamp(180px, 16vw, 260px);
   aspect-ratio: 3 / 4;
   z-index: 2;
   border-radius: 12px;
@@ -197,16 +197,16 @@
 
   @include mobile {
     bottom: 16%;
-    width: clamp(140px, 45vw, 180px);
+    width: clamp(160px, 50vw, 210px);
   }
 }
 
 .portraitWrapDown {
-  transform: translateX(-50%) translateY(80px);
+  transform: translateX(-50%) translateY(95px);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
 
   @include mobile {
-    transform: translateX(-50%) translateY(55px);
+    transform: translateX(-50%) translateY(65px);
   }
 }
 
