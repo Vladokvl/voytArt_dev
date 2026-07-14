@@ -315,7 +315,7 @@ export default function AuthorForm() {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={preview || "/artPageAssets/Ivanka.png"}
+              src={preview ?? "/artPageAssets/Ivanka.png"}
               alt="portrait preview"
               className={artStyles.portraitImg}
               style={{
