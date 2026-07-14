@@ -78,6 +78,7 @@
   overflow: hidden;
   cursor: pointer;
   height: 100%;
+  container-type: inline-size; // Для адаптивного розміру тексту через cqw
 
   @include mobile {
     flex: 0 0 100vw;
@@ -125,6 +126,8 @@
 .infoWrap {
   position: absolute;
   top: 15%;
+  // Розрахунок нижньої межі: висота портрета + зсув вниз на ховері + відступ 20px
+  bottom: calc(12% - 95px + (4 / 3 * clamp(180px, 16vw, 260px)) + 20px);
   left: 50%;
   transform: translateX(-50%);
   width: 90%;
@@ -136,7 +139,9 @@
   pointer-events: none;
 
   @include mobile {
-    top: 10%;
+    top: 8%;
+    // На мобільному: зсув вниз 65px + відступ 15px
+    bottom: calc(16% - 65px + (4 / 3 * clamp(160px, 50vw, 210px)) + 15px);
     gap: 15px;
   }
 }
@@ -153,13 +158,18 @@
 }
 
 .colText {
-  width: 80%;
+  width: 90%;
+  flex: 1; // Займає всю доступну висоту до портрета
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
   color: #fff;
   text-align: center;
   opacity: 0;
   pointer-events: none;
   transform: translateY(15px);
   transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  overflow: hidden; // Гарантує, що текст не вийде за межі контейнера і не налізе на портрет
 }
 
 .colTextVisible {
@@ -168,14 +178,20 @@
 }
 
 .colDesc {
-  font-size: 1.5rem;
-  line-height: 1.8;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  font-size: 1.15rem;
+  line-height: 1.6;
   opacity: 0.85;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  overflow: hidden; // Запобігає виходу тексту за рамки
 
   @include mobile {
-    font-size: 0.8rem;
-    line-height: 1.6;
+    font-size: 1.2rem;
+    line-height: 1.5;
   }
 }
 

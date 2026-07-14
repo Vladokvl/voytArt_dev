@@ -302,7 +302,9 @@ export default function ArtHero({
                       isHovered ? styles.colTextVisible : ""
                     }`}
                   >
-                    <p className={styles.colDesc}>{author.shortDesc ?? ""}</p>
+                    <p className={styles.colDesc}>
+                      {author.shortDesc ?? ""}
+                    </p>
                   </div>
                 </div>
 
