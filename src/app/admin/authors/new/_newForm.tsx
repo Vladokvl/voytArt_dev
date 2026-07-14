@@ -157,10 +157,6 @@ export default function AuthorForm() {
       </div>
 
       <div className={styles.row} style={{ alignItems: "center" }}>
-        <div className={styles.field}>
-          <label className={styles.label}>Порядок відображення (Order)</label>
-          <input className={styles.input} type="number" name="order" defaultValue="0" min="0" required />
-        </div>
         <div className={styles.field} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem" }}>
           <input type="checkbox" name="active" defaultChecked id="active" style={{ width: "20px", height: "20px", cursor: "pointer" }} />
           <label className={styles.label} htmlFor="active" style={{ marginBottom: 0, cursor: "pointer" }}>

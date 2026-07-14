@@ -287,20 +287,23 @@ export default function ArtHero({
                 {/* Затемнюючий оверлей */}
                 <div
                   className={`${styles.colOverlay} ${
-                    isHovered ? styles.colOverlayHidden : ""
+                    isHovered ? styles.colOverlayVisible : ""
                   }`}
                 />
 
-                {/* Ім'я автора зверху по центру */}
-                <h2 className={styles.colName}>{author.firstName}</h2>
+                {/* Контейнер імені та короткого опису */}
+                <div className={styles.infoWrap}>
+                  {/* Ім'я автора зверху по центру */}
+                  <h2 className={styles.colName}>{author.firstName}</h2>
 
-                {/* Біографія автора по центру */}
-                <div
-                  className={`${styles.colText} ${
-                    isHovered ? styles.colTextVisible : ""
-                  }`}
-                >
-                  <p className={styles.colDesc}>{author.shortDesc ?? ""}</p>
+                  {/* Біографія автора по центру */}
+                  <div
+                    className={`${styles.colText} ${
+                      isHovered ? styles.colTextVisible : ""
+                    }`}
+                  >
+                    <p className={styles.colDesc}>{author.shortDesc ?? ""}</p>
+                  </div>
                 </div>
 
                 {/* Контейнер рамки портрета автора (зсувається вниз при ховері) */}

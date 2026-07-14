@@ -17,7 +17,11 @@ export async function createAuthorAction(
 
   const bgPhotoUrl = (formData.get("bgPhotoUrl") as string) || null;
   const bgPhotoPublicId = bgPhotoUrl ? (getPublicIdFromCloudinaryUrl(bgPhotoUrl) ?? "") : "";
-  const order = Number(formData.get("order")) || 0;
+
+  // Автоматично виставляємо як останній у списку
+  const maxOrderAgg = await db.author.aggregate({ _max: { order: true } });
+  const order = (maxOrderAgg._max.order ?? -1) + 1;
+
   const active = formData.get("active") === "on";
 
   if (!firstName || !lastName) {
@@ -175,5 +179,31 @@ export async function deleteAuthorAction(id: number): Promise<void> {
   revalidatePath("/admin/collections/new");
   revalidatePath("/admin/products/new");
   revalidatePath("/shop");
+  revalidatePath("/art");
+}
+
+export async function swapAuthorOrderAction(idA: number, idB: number) {
+  const [a, b] = await Promise.all([
+    db.author.findUnique({ where: { id: idA }, select: { order: true } }),
+    db.author.findUnique({ where: { id: idB }, select: { order: true } }),
+  ]);
+  if (!a || !b) return;
+  await Promise.all([
+    db.author.update({ where: { id: idA }, data: { order: b.order } }),
+    db.author.update({ where: { id: idB }, data: { order: a.order } }),
+  ]);
+  revalidatePath("/admin/authors");
+  revalidatePath("/art");
+}
+
+export async function moveAuthorToPositionAction(id: number, targetIndex: number) {
+  const all = await db.author.findMany({ orderBy: { order: "asc" }, select: { id: true } });
+  const without = all.filter((p) => p.id !== id);
+  const clamped = Math.max(0, Math.min(targetIndex, without.length));
+  without.splice(clamped, 0, { id });
+  await Promise.all(
+    without.map((p, i) => db.author.update({ where: { id: p.id }, data: { order: i } })),
+  );
+  revalidatePath("/admin/authors");
   revalidatePath("/art");
 }

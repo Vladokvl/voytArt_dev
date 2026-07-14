@@ -108,67 +108,70 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: rgba(0, 0, 0, 0.63);
-  transition: opacity 0.5s ease;
+  background: rgba(0, 0, 0, 0.25);
+  transition: background 0.45s ease-in-out;
   pointer-events: none;
 
   @include mobile {
-    background: rgba(0, 0, 0, 0.45);
+    background: rgba(0, 0, 0, 0.4);
   }
 }
 
-.colOverlayHidden {
-  opacity: 0;
+.colOverlayVisible {
+  background: rgba(0, 0, 0, 0.65);
 }
 
 // ── Typography (Заголовки та Текст) ───────────────────────────────────────────
-.colName {
+.infoWrap {
   position: absolute;
   top: 15%;
   left: 50%;
   transform: translateX(-50%);
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  z-index: 5;
+  pointer-events: none;
+
+  @include mobile {
+    top: 10%;
+    gap: 15px;
+  }
+}
+
+.colName {
   font-size: clamp(1.6rem, 2.2vw, 2.75rem);
   font-weight: 300;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   line-height: 1;
   text-align: center;
-  width: 100%;
-  z-index: 5;
   color: #fff;
-
-  @include mobile {
-    top: 10%;
-  }
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.75), 0 1px 3px rgba(0, 0, 0, 0.85);
 }
 
 .colText {
-  position: absolute;
-  top: 45%;
-  left: 50%;
-  transform: translate(-50%, -40%);
-  z-index: 3;
   width: 80%;
   color: #fff;
   text-align: center;
   opacity: 0;
   pointer-events: none;
+  transform: translateY(15px);
   transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-
-  @include mobile {
-    top: 45%;
-  }
 }
 
 .colTextVisible {
   opacity: 1;
-  transform: translate(-50%, -50%);
+  transform: translateY(0);
 }
 
 .colDesc {
   font-size: 1.5rem;
   line-height: 1.8;
   opacity: 0.85;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 
   @include mobile {
     font-size: 0.8rem;
