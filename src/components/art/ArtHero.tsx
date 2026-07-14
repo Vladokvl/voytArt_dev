@@ -80,13 +80,22 @@ export default function ArtHero({
     isMobileRef.current = window.innerWidth <= 899;
     const isMobile = isMobileRef.current;
 
+    // Визначаємо початковий індекс автора (якщо відкритий через URL)
+    const initialArtistId = Number(artistParam);
+    const initialIndex = initialArtistId ? MOCK_AUTHORS.findIndex(a => a.id === initialArtistId) : 0;
+    const startIndex = initialIndex >= 0 ? initialIndex : 0;
+
     if (isMobile) {
-      gsap.set(sliderWrapperRef.current, { x: "0vw" });
-      setActiveMobileIndex(0);
+      gsap.set(sliderWrapperRef.current, { x: `-${startIndex * 100}vw` });
+      setActiveMobileIndex(startIndex);
     } else {
-      gsap.set(sliderWrapperRef.current, { x: "0vw" });
-      currentXVw.current = 0;
-      setScrollProgress(0);
+      const maxTranslateVw = Math.max(0, MOCK_AUTHORS.length * 33.333 - 100);
+      let targetXVw = startIndex * 33.333;
+      if (targetXVw > maxTranslateVw) targetXVw = maxTranslateVw;
+
+      gsap.set(sliderWrapperRef.current, { x: `-${targetXVw}vw` });
+      currentXVw.current = targetXVw;
+      setScrollProgress(maxTranslateVw > 0 ? (targetXVw / maxTranslateVw) * 100 : 0);
     }
 
     if (isArtistSelected) {
@@ -164,17 +173,15 @@ export default function ArtHero({
       gsap.to(heroRef.current, { y: "-100vh", duration: 1, delay: 0.15, ease: "power2.inOut" });
     } else {
       document.body.style.overflow = "hidden";
+      // При поверненні назад відновлюємо ту позицію слайдера, яка збережена в стані/рефі
       if (isMobile) {
-        gsap.set(sliderWrapperRef.current, { x: "0vw" });
-        setActiveMobileIndex(0);
+        gsap.set(sliderWrapperRef.current, { x: `-${activeMobileIndex * 100}vw` });
       } else {
-        gsap.set(sliderWrapperRef.current, { x: "0vw" });
-        currentXVw.current = 0;
-        setScrollProgress(0);
+        gsap.set(sliderWrapperRef.current, { x: `-${currentXVw.current}vw` });
       }
       gsap.to(heroRef.current, { y: 0, duration: 1, ease: "power2.inOut" });
     }
-  }, [artistParam]);
+  }, [artistParam, activeMobileIndex]);
 
   // ── Клік по колонці автора ──────────────────────────────────────────────────
   const handleSelectArtist = (authorId: number) => {
@@ -192,14 +199,7 @@ export default function ArtHero({
     animatingRef.current = true;
     document.body.style.overflow = "hidden";
 
-    if (isMobileRef.current) {
-      gsap.set(sliderWrapperRef.current, { x: "0vw" });
-      setActiveMobileIndex(0);
-    } else {
-      gsap.set(sliderWrapperRef.current, { x: "0vw" });
-      currentXVw.current = 0;
-      setScrollProgress(0);
-    }
+    // НЕ скидаємо координати в 0 при натисканні назад — залишаємо слайдер у поточному стані
 
     gsap.to(heroRef.current, {
       y: 0,
