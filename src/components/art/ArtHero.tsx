@@ -309,11 +309,7 @@ export default function ArtHero({
                 </div>
 
                 {/* Контейнер рамки портрета автора (зсувається вниз при ховері) */}
-                <div
-                  className={`${styles.portraitWrap} ${
-                    isHovered ? styles.portraitWrapDown : ""
-                  }`}
-                >
+                <div className={styles.portraitWrap}>
                   <Image
                     src={photoUrl}
                     alt={`${author.firstName} ${author.lastName}`}

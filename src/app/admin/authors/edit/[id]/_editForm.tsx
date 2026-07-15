@@ -151,6 +151,7 @@ export default function AuthorEditForm({ author }: { author: Author }) {
         <h1 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "1.5rem" }}>Редагувати автора</h1>
         {state?.error && <p className={styles.error}>{state.error}</p>}
         <input type="hidden" name="id" value={author.id} />
+        <input type="hidden" name="order" value={author.order} />
 
         <div className={styles.row}>
           <div className={styles.field}>
@@ -331,11 +332,7 @@ export default function AuthorEditForm({ author }: { author: Author }) {
           </div>
 
           {/* Контейнер рамки портрета */}
-          <div
-            className={`${artStyles.portraitWrap} ${
-              isHovered ? artStyles.portraitWrapDown : ""
-            }`}
-          >
+          <div className={artStyles.portraitWrap}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={preview ?? "/artPageAssets/Ivanka.png"}
