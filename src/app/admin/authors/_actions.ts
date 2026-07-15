@@ -65,7 +65,8 @@ export async function updateAuthorAction(
 
   const bgPhotoUrl = (formData.get("bgPhotoUrl") as string) || null;
   const bgPhotoPublicId = bgPhotoUrl ? (getPublicIdFromCloudinaryUrl(bgPhotoUrl) ?? "") : "";
-  const order = Number(formData.get("order")) || 0;
+  const orderInput = formData.get("order");
+  const order = orderInput !== null ? Number(orderInput) : undefined;
   const active = formData.get("active") === "on";
 
   if (!id || !firstName || !lastName) {
@@ -83,7 +84,7 @@ export async function updateAuthorAction(
       photoPublicId,
       bgPhotoUrl,
       bgPhotoPublicId,
-      order,
+      ...(order !== undefined ? { order } : {}),
       active,
     },
   });

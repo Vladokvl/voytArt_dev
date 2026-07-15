@@ -308,11 +308,7 @@ export default function AuthorForm() {
           </div>
 
           {/* Контейнер рамки портрета */}
-          <div
-            className={`${artStyles.portraitWrap} ${
-              isHovered ? artStyles.portraitWrapDown : ""
-            }`}
-          >
+          <div className={artStyles.portraitWrap}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={preview ?? "/artPageAssets/Ivanka.png"}

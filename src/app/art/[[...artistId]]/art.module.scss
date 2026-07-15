@@ -126,8 +126,8 @@
 .infoWrap {
   position: absolute;
   top: 15%;
-  // Розрахунок нижньої межі: висота портрета + зсув вниз на ховері + відступ 20px
-  bottom: calc(12% - 95px + (4 / 3 * clamp(180px, 16vw, 260px)) + 20px);
+  // Розрахунок нижньої межі: висота статичного портрета (без рамки і зсуву) + відступ 20px
+  bottom: calc((4 / 3 * clamp(220px, 20vw, 320px)) + 20px);
   left: 50%;
   transform: translateX(-50%);
   width: 90%;
@@ -140,8 +140,8 @@
 
   @include mobile {
     top: 8%;
-    // На мобільному: зсув вниз 65px + відступ 15px
-    bottom: calc(16% - 65px + (4 / 3 * clamp(160px, 50vw, 210px)) + 15px);
+    // На мобільному: висота статичного портрета + відступ 15px
+    bottom: calc((4 / 3 * clamp(180px, 55vw, 240px)) + 15px);
     gap: 15px;
   }
 }
@@ -198,34 +198,24 @@
 // ── Portraits (Портрети / Силуети у рамках) ────────────────────────────────────
 .portraitWrap {
   position: absolute;
-  bottom: 12%;
+  bottom: 0; // Притиснутий до самого низу
   left: 50%;
   transform: translateX(-50%);
-  width: clamp(180px, 16vw, 260px);
+  width: clamp(220px, 20vw, 320px); // Збільшений розмір
   aspect-ratio: 3 / 4;
   z-index: 2;
-  border-radius: 12px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
-  border: 3.5px solid rgba(255, 255, 255, 0.95);
-  overflow: hidden;
-  background: #1e1e1e;
   pointer-events: none;
-  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.6s ease;
-  will-change: transform;
+  filter: drop-shadow(0 15px 20px rgba(0, 0, 0, 0.65)); // Тінь за контуром силуету
 
   @include mobile {
-    bottom: 16%;
-    width: clamp(160px, 50vw, 210px);
+    bottom: 0;
+    width: clamp(180px, 55vw, 240px); // Збільшений мобільний розмір
   }
 }
 
+// Залишаємо пустим для запобігання помилок імпорту, але без зміщення на ховері
 .portraitWrapDown {
-  transform: translateX(-50%) translateY(95px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
-
-  @include mobile {
-    transform: translateX(-50%) translateY(65px);
-  }
+  transform: translateX(-50%);
 }
 
 .portraitImg {

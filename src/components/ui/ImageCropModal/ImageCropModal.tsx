@@ -30,6 +30,9 @@ export async function getCroppedImg(
   canvas.width = pixelCrop.width;
   canvas.height = pixelCrop.height;
 
+  // Очищення canvas (для прозорого PNG фону)
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
   ctx.drawImage(
     image,
     pixelCrop.x,
@@ -42,6 +45,13 @@ export async function getCroppedImg(
     pixelCrop.height
   );
 
+  // Визначаємо формат файлу (для збереження прозорості)
+  const isPng = fileName.toLowerCase().endsWith(".png");
+  const mimeType = isPng ? "image/png" : "image/jpeg";
+  const outputFileName = isPng
+    ? fileName.replace(/\.[^/.]+$/, "") + ".png"
+    : fileName.replace(/\.[^/.]+$/, "") + ".jpg";
+
   return new Promise<File>((resolve, reject) => {
     canvas.toBlob(
       (blob) => {
@@ -49,15 +59,14 @@ export async function getCroppedImg(
           reject(new Error("Canvas порожній"));
           return;
         }
-        // Save as jpeg to optimize size
-        const file = new File([blob], fileName.replace(/\.[^/.]+$/, "") + ".jpg", {
-          type: "image/jpeg",
+        const file = new File([blob], outputFileName, {
+          type: mimeType,
           lastModified: Date.now(),
         });
         resolve(file);
       },
-      "image/jpeg",
-      quality
+      mimeType,
+      mimeType === "image/jpeg" ? quality : undefined
     );
   });
 }
@@ -77,6 +86,8 @@ export default function ImageCropModal({
   onCancel,
   maxSizeMb = 5,
 }: ImageCropModalProps) {
+  // Локальний стан файлу (для заміни на версію без фону)
+  const [currentFile, setCurrentFile] = useState<File>(imageFile);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -87,16 +98,28 @@ export default function ImageCropModal({
   const [isCompressing, startCompression] = useTransition();
   const [originalAspect, setOriginalAspect] = useState<number | undefined>(undefined);
 
-  const originalSizeMb = imageFile.size / (1024 * 1024);
+  // Стани AI-видалення фону
+  const [isRemovingBg, setIsRemovingBg] = useState(false);
+  const [bgProgress, setBgProgress] = useState<number | null>(null);
+  const [bgRemovalError, setBgRemovalError] = useState<string | null>(null);
+
+  const originalSizeMb = currentFile.size / (1024 * 1024);
+
+  // Синхронізація локального файлу при зміні пропу
+  useEffect(() => {
+    setCurrentFile(imageFile);
+    setBgRemovalError(null);
+    setBgProgress(null);
+  }, [imageFile]);
 
   // Generate URL for crop library
   useEffect(() => {
-    const url = URL.createObjectURL(imageFile);
+    const url = URL.createObjectURL(currentFile);
     setImageSrc(url);
     return () => {
       URL.revokeObjectURL(url);
     };
-  }, [imageFile]);
+  }, [currentFile]);
 
   // Handle cropping completion event
   const onCropComplete = (croppedArea: Area, croppedAreaPixels: Area) => {
@@ -114,7 +137,7 @@ export default function ImageCropModal({
             imageSrc,
             croppedAreaPixels,
             quality,
-            imageFile.name
+            currentFile.name
           );
           setCompressedSize(file.size);
         } catch (e) {
@@ -124,7 +147,7 @@ export default function ImageCropModal({
     }, 150); // debounce slightly to avoid heavy canvas drawing on fast slider movements
 
     return () => clearTimeout(timer);
-  }, [croppedAreaPixels, quality, imageSrc, imageFile.name]);
+  }, [croppedAreaPixels, quality, imageSrc, currentFile.name]);
 
   const handleSave = async () => {
     if (!imageSrc || !croppedAreaPixels) return;
@@ -133,12 +156,48 @@ export default function ImageCropModal({
         imageSrc,
         croppedAreaPixels,
         quality,
-        imageFile.name
+        currentFile.name
       );
       onCropSave(croppedFile);
     } catch (e) {
       console.error(e);
       alert("Не вдалося обрізати зображення");
+    }
+  };
+
+  // Функція виклику нейромережі видалення фону
+  const handleRemoveBackground = async () => {
+    setIsRemovingBg(true);
+    setBgProgress(0);
+    setBgRemovalError(null);
+    try {
+      // Динамічний імпорт для збереження швидкості завантаження сторінки
+      const { removeBackground } = await import("@imgly/background-removal");
+      
+      const blob = await removeBackground(currentFile, {
+        progress: (key, current, total) => {
+          const pct = Math.round((current / total) * 100);
+          setBgProgress(pct);
+        }
+      });
+
+      const noBgFile = new File(
+        [blob],
+        currentFile.name.replace(/\.[^/.]+$/, "") + "-nobg.png",
+        {
+          type: "image/png",
+          lastModified: Date.now(),
+        }
+      );
+
+      setCurrentFile(noBgFile);
+      setBgProgress(null);
+    } catch (err) {
+      console.error("Помилка видалення фону:", err);
+      setBgRemovalError("Не вдалося видалити фон. Спробуйте інше фото.");
+      setBgProgress(null);
+    } finally {
+      setIsRemovingBg(false);
     }
   };
 
@@ -232,6 +291,51 @@ export default function ImageCropModal({
                 </div>
               </div>
 
+              {/* AI Tools (Background Removal) */}
+              <div className={styles.section}>
+                <span className={styles.sectionLabel}>AI Інструменти</span>
+                <button
+                  type="button"
+                  onClick={handleRemoveBackground}
+                  disabled={isRemovingBg}
+                  style={{
+                    width: "100%",
+                    padding: "0.65rem",
+                    background: isRemovingBg ? "#333" : "#d7ff01",
+                    color: isRemovingBg ? "#aaa" : "#000",
+                    border: "none",
+                    borderRadius: "6px",
+                    fontWeight: 600,
+                    cursor: isRemovingBg ? "not-allowed" : "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.5rem",
+                    transition: "all 0.2s ease"
+                  }}
+                >
+                  {isRemovingBg ? (
+                    <span>Обробка: {bgProgress !== null ? `${bgProgress}%` : "запуск..."}</span>
+                  ) : (
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="6" cy="6" r="3"></circle>
+                        <circle cx="6" cy="18" r="3"></circle>
+                        <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
+                        <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
+                        <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
+                      </svg>
+                      <span>Видалити фон (AI)</span>
+                    </>
+                  )}
+                </button>
+                {bgRemovalError && (
+                  <div style={{ color: "#ff6b6b", fontSize: "0.75rem", marginTop: "0.35rem" }}>
+                    ⚠️ {bgRemovalError}
+                  </div>
+                )}
+              </div>
+
               {/* Zoom Slider */}
               <div className={styles.section}>
                 <div className={styles.sliderLabelRow}>
@@ -306,7 +410,7 @@ export default function ImageCropModal({
               type="button"
               className={styles.saveBtn}
               onClick={handleSave}
-              disabled={isTooLarge || isCompressing}
+              disabled={isTooLarge || isCompressing || isRemovingBg}
             >
               Зберегти та закрити
             </button>
