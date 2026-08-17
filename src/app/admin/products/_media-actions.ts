@@ -6,11 +6,13 @@ import { deleteAsset, getPublicIdFromCloudinaryUrl } from "~/lib/cloudinary";
 export async function addProductMediaAction(formData: FormData) {
   const productId = parseInt(formData.get("productId") as string, 10);
   const url = formData.get("url") as string;
+  const rawVariantId = formData.get("variantId") as string;
+  const variantId = rawVariantId ? parseInt(rawVariantId, 10) : null;
+
   if (!productId || !url) return;
 
   const publicId = getPublicIdFromCloudinaryUrl(url) ?? "";
   
-  // Find highest order to append
   const maxOrder = await db.productImage.aggregate({
     where: { productId },
     _max: { order: true },
@@ -23,10 +25,26 @@ export async function addProductMediaAction(formData: FormData) {
       publicId,
       order: nextOrder,
       productId,
+      variantId: variantId && !isNaN(variantId) ? variantId : null,
     },
   });
 
   revalidatePath(`/admin/products/edit/${productId}`);
+  revalidatePath(`/shop/${productId}`);
+}
+
+export async function updateProductMediaVariantAction(id: number, productId: number, variantId: number | null) {
+  if (!id || !productId) return;
+
+  await db.productImage.update({
+    where: { id },
+    data: {
+      variantId: variantId && !isNaN(variantId) ? variantId : null,
+    },
+  });
+
+  revalidatePath(`/admin/products/edit/${productId}`);
+  revalidatePath(`/shop/${productId}`);
 }
 
 export async function deleteProductMediaAction(formData: FormData) {
@@ -45,4 +63,5 @@ export async function deleteProductMediaAction(formData: FormData) {
   await db.productImage.delete({ where: { id } });
 
   revalidatePath(`/admin/products/edit/${productId}`);
+  revalidatePath(`/shop/${productId}`);
 }

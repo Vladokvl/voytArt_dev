@@ -11,6 +11,7 @@ const sectionLabels: Record<string, { title: string; newLabel: string }> = {
   paintings: { title: "Картини", newLabel: "Нова картина" },
   authors: { title: "Автори", newLabel: "Новий автор" },
   products: { title: "Товари", newLabel: "Новий товар" },
+  orders: { title: "Замовлення", newLabel: "Замовлення" },
   posts: { title: "Пости", newLabel: "Новий пост" },
   categories: { title: "Категорії", newLabel: "Нова категорія" },
   collections: { title: "Колекції", newLabel: "Нова колекція" },

@@ -8,18 +8,21 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
   const [product, authors, categories] = await Promise.all([
     db.product.findUnique({
       where: { id: Number(id) },
-      include: { images: { orderBy: { order: "asc" } } },
+      include: {
+        images: { orderBy: { order: "asc" } },
+        variants: { orderBy: { sortOrder: "asc" } },
+      },
     }),
     db.author.findMany({ orderBy: { lastName: "asc" } }),
     db.category.findMany({ orderBy: { name: "asc" } }),
   ]);
-  
+
   if (!product) notFound();
-  
+
   return (
-    <div>
+    <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
       <ProductEditForm product={product} authors={authors} categories={categories} />
-      <MediaSection productId={product.id} items={product.images} />
+      <MediaSection productId={product.id} items={product.images} variants={product.variants} />
     </div>
   );
 }

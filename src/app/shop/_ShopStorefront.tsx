@@ -1,13 +1,15 @@
 "use client";
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
 
 import styles from "./shop.module.scss";
 import ProductCarousel from "~/components/shop/ProductCarousel";
-import ProductModal from "~/components/shop/ProductModal";
+import { createOrderAction } from "./_actions/checkout";
 
 type ProductImage = { id: number; url: string; order: number };
+type ProductVariant = { id: number; title: string; price: number | null; stock: number };
 type Author = { id: number; firstName: string; lastName: string };
 type Category = { id: number; name: string; slug: string };
 
@@ -25,10 +27,20 @@ export type Product = {
   coverUrl: string;
   isFeatured: boolean;
   images: ProductImage[];
+  variants?: ProductVariant[];
 };
 
 type CartItem = {
-  product: Product;
+  product: {
+    id: number;
+    title: string;
+    price: number;
+    coverUrl: string;
+    author: Author;
+    category?: Category;
+  };
+  variantId?: number | null;
+  variantTitle?: string | null;
   quantity: number;
 };
 
@@ -42,19 +54,21 @@ export default function ShopStorefront({
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   // Checkout Form State
-  const [checkoutStep, setCheckoutStep] = useState<"cart" | "form" | "loading" | "success">("cart");
+  const [checkoutStep, setCheckoutStep] = useState<"cart" | "form" | "loading" | "success" | "error">("cart");
+  const [orderNumber, setOrderNumber] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
+    city: "",
     address: "",
+    comment: "",
   });
 
-  // Load cart from localStorage on mount
-  useEffect(() => {
+  const loadCart = () => {
     const savedCart = localStorage.getItem("voyt_art_cart");
     if (savedCart) {
       try {
@@ -62,7 +76,22 @@ export default function ShopStorefront({
       } catch (e) {
         console.error("Failed to parse cart:", e);
       }
+    } else {
+      setCart([]);
     }
+  };
+
+  // Load cart from localStorage on mount & listen to cart updates
+  useEffect(() => {
+    loadCart();
+
+    const handleCartSync = () => {
+      loadCart();
+      setIsCartOpen(true);
+    };
+
+    window.addEventListener("cartUpdated", handleCartSync);
+    return () => window.removeEventListener("cartUpdated", handleCartSync);
   }, []);
 
   // Save cart to localStorage
@@ -73,28 +102,52 @@ export default function ShopStorefront({
 
   const addToCart = (product: Product) => {
     if (product.stock <= 0) return;
-    const existing = cart.find((item) => item.product.id === product.id);
+
+    // If product has variants, direct to product page
+    if (product.variants && product.variants.length > 0) {
+      window.location.href = `/shop/${product.id}`;
+      return;
+    }
+
+    const existingIndex = cart.findIndex(
+      (item) => item.product.id === product.id && !item.variantId
+    );
+
     let newCart: CartItem[];
-    if (existing) {
-      newCart = cart.map((item) =>
-        item.product.id === product.id
+    if (existingIndex > -1) {
+      newCart = cart.map((item, idx) =>
+        idx === existingIndex
           ? { ...item, quantity: Math.min(product.stock, item.quantity + 1) }
           : item
       );
     } else {
-      newCart = [...cart, { product, quantity: 1 }];
+      newCart = [
+        ...cart,
+        {
+          product: {
+            id: product.id,
+            title: product.title,
+            price: product.price,
+            coverUrl: product.coverUrl,
+            author: product.author,
+          },
+          variantId: null,
+          variantTitle: null,
+          quantity: 1,
+        },
+      ];
     }
     saveCart(newCart);
     setIsCartOpen(true);
   };
 
-  const updateQuantity = (productId: number, delta: number) => {
+  const updateQuantity = (index: number, delta: number) => {
     const newCart = cart
-      .map((item) => {
-        if (item.product.id === productId) {
+      .map((item, idx) => {
+        if (idx === index) {
           const newQty = item.quantity + delta;
           if (newQty <= 0) return null;
-          return { ...item, quantity: Math.min(item.product.stock, newQty) };
+          return { ...item, quantity: newQty };
         }
         return item;
       })
@@ -102,8 +155,8 @@ export default function ShopStorefront({
     saveCart(newCart);
   };
 
-  const removeFromCart = (productId: number) => {
-    const newCart = cart.filter((item) => item.product.id !== productId);
+  const removeFromCart = (index: number) => {
+    const newCart = cart.filter((_, idx) => idx !== index);
     saveCart(newCart);
   };
 
@@ -112,17 +165,39 @@ export default function ShopStorefront({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleCheckoutSubmit = (e: React.FormEvent) => {
+  const handleCheckoutSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.phone || !formData.address) return;
+    if (!formData.name || !formData.phone || !formData.city || !formData.address) return;
 
     setCheckoutStep("loading");
-    // Simulate order placement
-    setTimeout(() => {
+    setErrorMessage("");
+
+    const res = await createOrderAction({
+      customerName: formData.name,
+      customerPhone: formData.phone,
+      customerEmail: formData.email,
+      deliveryCity: formData.city,
+      deliveryAddress: formData.address,
+      comment: formData.comment,
+      items: cart.map((item) => ({
+        productId: item.product.id,
+        variantId: item.variantId || null,
+        title: item.product.title,
+        variantTitle: item.variantTitle || null,
+        price: item.product.price,
+        quantity: item.quantity,
+      })),
+    });
+
+    if (res.success && res.orderNumber) {
+      setOrderNumber(res.orderNumber);
       setCheckoutStep("success");
       localStorage.removeItem("voyt_art_cart");
       setCart([]);
-    }, 2000);
+    } else {
+      setErrorMessage(res.error || "Не вдалося оформити замовлення");
+      setCheckoutStep("error");
+    }
   };
 
   const filteredProducts = selectedCategory
@@ -137,16 +212,15 @@ export default function ShopStorefront({
       {/* ── Shop Header ────────────────────────────────────── */}
       <section className={styles.shopHero}>
         <div className={styles.heroInner}>
-          <h1 className={styles.shopTitle}>Art Shop</h1>
-          <p className={styles.shopSub}>Exquisite creations and art supplies curated for collectors</p>
+          <h1 className={styles.shopTitle}>Арт-Магазин</h1>
+          <p className={styles.shopSub}>Оригінальний мерч, ексклюзивні принти та сувеніри від художників VoytArt</p>
         </div>
       </section>
 
       {/* ── Featured Products Carousel ──────────────────────── */}
       <ProductCarousel 
-        title="Featured" 
+        title="Рекомендовані товари" 
         products={initialProducts.filter((p) => p.isFeatured)} 
-        onProductClick={setSelectedProduct} 
         onAddToCart={addToCart} 
       />
 
@@ -157,7 +231,7 @@ export default function ShopStorefront({
             onClick={() => setSelectedCategory(null)}
             className={`${styles.catButton} ${selectedCategory === null ? styles.catButtonActive : ""}`}
           >
-            All Products
+            Усі товари
           </button>
           {categories.map((cat) => (
             <button
@@ -176,21 +250,25 @@ export default function ShopStorefront({
             setIsCartOpen(true);
           }}
           className={styles.cartTrigger}
-          aria-label="Open cart"
+          aria-label="Відкрити кошик"
         >
-          Cart ({totalItems})
+          Кошик ({totalItems})
         </button>
       </div>
 
       {/* ── Products Grid ───────────────────────────────────── */}
       <section className={styles.gridSection}>
         {filteredProducts.length === 0 ? (
-          <p className={styles.empty}>No products found in this category.</p>
+          <p className={styles.empty}>У цій категорії поки що немає товарів.</p>
         ) : (
           <div className={styles.productGrid}>
             {filteredProducts.map((product) => {
               // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
               const coverImg = product.coverUrl || product.images[0]?.url || "/voyt.svg";
+              const hasMultiplePrices =
+                product.variants &&
+                product.variants.some((v) => v.price && v.price !== product.price);
+
               return (
                 <motion.div
                   key={product.id}
@@ -200,10 +278,7 @@ export default function ShopStorefront({
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.5, ease: "easeOut" }}
                 >
-                  <div
-                    onClick={() => setSelectedProduct(product)}
-                    className={styles.imageWrapper}
-                  >
+                  <Link href={`/shop/${product.id}`} className={styles.imageWrapper}>
                     <Image
                       src={coverImg}
                       alt={product.title}
@@ -212,25 +287,30 @@ export default function ShopStorefront({
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
                     {product.stock <= 0 && (
-                      <div className={styles.soldOut}>Out of stock</div>
+                      <div className={styles.soldOut}>Немає в наявності</div>
                     )}
-                  </div>
+                  </Link>
 
                   <div className={styles.cardInfo}>
                     <p className={styles.authorName}>
                       {product.author.firstName} {product.author.lastName}
                     </p>
-                    <h3 onClick={() => setSelectedProduct(product)} className={styles.productTitle}>
-                      {product.title}
-                    </h3>
+                    <Link href={`/shop/${product.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                      <h3 className={styles.productTitle}>
+                        {product.title}
+                      </h3>
+                    </Link>
                     <div className={styles.cardFooter}>
-                      <span className={styles.price}>${product.price.toLocaleString()}</span>
+                      <span className={styles.price}>
+                        {hasMultiplePrices ? `від ` : ""}
+                        {product.price.toLocaleString("uk-UA")} ₴
+                      </span>
                       <button
                         onClick={() => addToCart(product)}
                         disabled={product.stock <= 0}
                         className={styles.addToCartBtn}
                       >
-                        Add
+                        {product.variants && product.variants.length > 0 ? "Обрати" : "Купити"}
                       </button>
                     </div>
                   </div>
@@ -241,19 +321,12 @@ export default function ShopStorefront({
         )}
       </section>
 
-      {/* ── Product Details Modal ────────────────────────────── */}
-      <ProductModal 
-        product={selectedProduct} 
-        onClose={() => setSelectedProduct(null)} 
-        onAddToCart={addToCart} 
-      />
-
       {/* ── Sliding Cart Drawer ──────────────────────────────── */}
       <div className={styles.drawerShell} data-open={isCartOpen}>
         <div className={styles.drawerOverlay} onClick={() => setIsCartOpen(false)} />
         <div className={styles.cartDrawer}>
           <div className={styles.drawerHeader}>
-            <h2>Your Cart</h2>
+            <h2>Ваш кошик</h2>
             <button onClick={() => setIsCartOpen(false)} className={styles.drawerClose}>
               ✕
             </button>
@@ -263,38 +336,44 @@ export default function ShopStorefront({
             <div className={styles.drawerContent}>
               {cart.length === 0 ? (
                 <div className={styles.emptyCart}>
-                  <p>Your cart is empty</p>
+                  <p>Кошик порожній</p>
                   <button onClick={() => setIsCartOpen(false)} className={styles.continueShopping}>
-                    Continue Shopping
+                    Продовжити покупки
                   </button>
                 </div>
               ) : (
                 <>
                   <div className={styles.cartItems}>
-                    {cart.map((item) => (
-                      <div key={item.product.id} className={styles.cartItem}>
+                    {cart.map((item, idx) => (
+                      <div key={`${item.product.id}_${item.variantId}_${idx}`} className={styles.cartItem}>
                         <div className={styles.itemThumb}>
                           <Image
                             // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-                            src={item.product.coverUrl || item.product.images[0]?.url || "/voyt.svg"}
+                            src={item.product.coverUrl || "/voyt.svg"}
                             alt={item.product.title}
                             fill
                           />
                         </div>
                         <div className={styles.itemDetails}>
                           <h4>{item.product.title}</h4>
+                          {item.variantTitle && (
+                            <span style={{ fontSize: "0.78rem", color: "#7c3aed", fontWeight: 600 }}>
+                              {item.variantTitle}
+                            </span>
+                          )}
                           <span className={styles.itemPrice}>
-                            ${item.product.price.toLocaleString()}
+                            {item.product.price.toLocaleString("uk-UA")} ₴
                           </span>
                           <div className={styles.qtyControl}>
-                            <button onClick={() => updateQuantity(item.product.id, -1)}>-</button>
+                            <button onClick={() => updateQuantity(idx, -1)}>-</button>
                             <span>{item.quantity}</span>
-                            <button onClick={() => updateQuantity(item.product.id, 1)}>+</button>
+                            <button onClick={() => updateQuantity(idx, 1)}>+</button>
                           </div>
                         </div>
                         <button
-                          onClick={() => removeFromCart(item.product.id)}
+                          onClick={() => removeFromCart(idx)}
                           className={styles.itemRemove}
+                          title="Видалити з кошика"
                         >
                           ✕
                         </button>
@@ -304,14 +383,14 @@ export default function ShopStorefront({
 
                   <div className={styles.drawerFooter}>
                     <div className={styles.totals}>
-                      <span>Total</span>
-                      <span>${totalPrice.toLocaleString()}</span>
+                      <span>Разом до сплати</span>
+                      <span>{totalPrice.toLocaleString("uk-UA")} ₴</span>
                     </div>
                     <button
                       onClick={() => setCheckoutStep("form")}
                       className={styles.checkoutBtn}
                     >
-                      Proceed to Checkout
+                      Оформити замовлення
                     </button>
                   </div>
                 </>
@@ -322,34 +401,22 @@ export default function ShopStorefront({
           {checkoutStep === "form" && (
             <div className={styles.drawerContent}>
               <form onSubmit={handleCheckoutSubmit} className={styles.checkoutForm}>
-                <h3>Delivery Details</h3>
+                <h3>Доставка Новою Поштою</h3>
 
                 <div className={styles.formField}>
-                  <label>Full Name</label>
+                  <label>Прізвище та імʼя одержувача *</label>
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
                     required
-                    placeholder="John Doe"
+                    placeholder="Шевченко Тарас"
                   />
                 </div>
 
                 <div className={styles.formField}>
-                  <label>Email Address</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    placeholder="john@example.com"
-                  />
-                </div>
-
-                <div className={styles.formField}>
-                  <label>Phone Number</label>
+                  <label>Номер телефону *</label>
                   <input
                     type="tel"
                     name="phone"
@@ -361,19 +428,53 @@ export default function ShopStorefront({
                 </div>
 
                 <div className={styles.formField}>
-                  <label>Shipping Address</label>
-                  <textarea
+                  <label>Email адреса</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="taras@example.com"
+                  />
+                </div>
+
+                <div className={styles.formField}>
+                  <label>Місто доставки *</label>
+                  <input
+                    type="text"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="Київ / Львів / Одеса"
+                  />
+                </div>
+
+                <div className={styles.formField}>
+                  <label>Відділення або Поштомат Нової Пошти *</label>
+                  <input
+                    type="text"
                     name="address"
                     value={formData.address}
                     onChange={handleInputChange}
                     required
-                    placeholder="City, Street, House, Zip"
+                    placeholder="Відділення №12 (вул. Хрещатик, 1)"
+                  />
+                </div>
+
+                <div className={styles.formField}>
+                  <label>Коментар (опціонально)</label>
+                  <textarea
+                    name="comment"
+                    value={formData.comment}
+                    onChange={handleInputChange}
+                    placeholder="Побажання щодо пакування тощо"
                   />
                 </div>
 
                 <div className={styles.formTotals}>
-                  <span>Total Amount</span>
-                  <span>${totalPrice.toLocaleString()}</span>
+                  <span>Сума замовлення</span>
+                  <span>{totalPrice.toLocaleString("uk-UA")} ₴</span>
                 </div>
 
                 <div className={styles.formButtons}>
@@ -382,10 +483,10 @@ export default function ShopStorefront({
                     onClick={() => setCheckoutStep("cart")}
                     className={styles.backBtn}
                   >
-                    Back
+                    Назад
                   </button>
                   <button type="submit" className={styles.submitOrderBtn}>
-                    Place Order (Simulate)
+                    Підтвердити замовлення
                   </button>
                 </div>
               </form>
@@ -395,15 +496,29 @@ export default function ShopStorefront({
           {checkoutStep === "loading" && (
             <div className={styles.loadingState}>
               <div className={styles.spinner} />
-              <p>Processing your order...</p>
+              <p>Оформлюємо замовлення...</p>
+            </div>
+          )}
+
+          {checkoutStep === "error" && (
+            <div className={styles.successState}>
+              <span className={styles.successIcon} style={{ background: "#ef4444", color: "#fff" }}>!</span>
+              <h3>Помилка</h3>
+              <p>{errorMessage}</p>
+              <button
+                onClick={() => setCheckoutStep("form")}
+                className={styles.closeSuccessBtn}
+              >
+                Спробувати знову
+              </button>
             </div>
           )}
 
           {checkoutStep === "success" && (
             <div className={styles.successState}>
               <span className={styles.successIcon}>✓</span>
-              <h3>Order Placed!</h3>
-              <p>Thank you for your purchase. We have sent a simulated confirmation email to <strong>{formData.email}</strong>.</p>
+              <h3>Замовлення #{orderNumber} прийнято!</h3>
+              <p>Дякуємо за покупку! Наш менеджер незабаром звʼяжеться з вами за номером <strong>{formData.phone}</strong> для підтвердження відправки Новою Поштою.</p>
               <button
                 onClick={() => {
                   setIsCartOpen(false);
@@ -411,7 +526,7 @@ export default function ShopStorefront({
                 }}
                 className={styles.closeSuccessBtn}
               >
-                Close Drawer
+                Закрити
               </button>
             </div>
           )}

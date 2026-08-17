@@ -196,12 +196,52 @@ exports.Prisma.ProductScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.ProductVariantScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  price: 'price',
+  stock: 'stock',
+  sku: 'sku',
+  sortOrder: 'sortOrder',
+  productId: 'productId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.ProductImageScalarFieldEnum = {
   id: 'id',
   url: 'url',
   publicId: 'publicId',
   order: 'order',
-  productId: 'productId'
+  productId: 'productId',
+  variantId: 'variantId'
+};
+
+exports.Prisma.OrderScalarFieldEnum = {
+  id: 'id',
+  orderNumber: 'orderNumber',
+  customerName: 'customerName',
+  customerEmail: 'customerEmail',
+  customerPhone: 'customerPhone',
+  deliveryCity: 'deliveryCity',
+  deliveryAddress: 'deliveryAddress',
+  comment: 'comment',
+  totalAmount: 'totalAmount',
+  status: 'status',
+  paymentMethod: 'paymentMethod',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.OrderItemScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  variantTitle: 'variantTitle',
+  price: 'price',
+  quantity: 'quantity',
+  orderId: 'orderId',
+  productId: 'productId',
+  variantId: 'variantId'
 };
 
 exports.Prisma.GalleryPostScalarFieldEnum = {
@@ -251,6 +291,19 @@ exports.MediaType = exports.$Enums.MediaType = {
   VIDEO: 'VIDEO'
 };
 
+exports.OrderStatus = exports.$Enums.OrderStatus = {
+  NEW: 'NEW',
+  PAID: 'PAID',
+  SHIPPED: 'SHIPPED',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED'
+};
+
+exports.PaymentMethod = exports.$Enums.PaymentMethod = {
+  COD: 'COD',
+  CARD: 'CARD'
+};
+
 exports.Prisma.ModelName = {
   Author: 'Author',
   Collection: 'Collection',
@@ -258,7 +311,10 @@ exports.Prisma.ModelName = {
   PaintingMedia: 'PaintingMedia',
   Category: 'Category',
   Product: 'Product',
+  ProductVariant: 'ProductVariant',
   ProductImage: 'ProductImage',
+  Order: 'Order',
+  OrderItem: 'OrderItem',
   GalleryPost: 'GalleryPost',
   GalleryPostMedia: 'GalleryPostMedia',
   AdminUser: 'AdminUser'

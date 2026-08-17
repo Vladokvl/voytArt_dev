@@ -1,0 +1,390 @@
+.pageContainer {
+  min-height: 100vh;
+  padding: 6rem 2rem 4rem;
+  max-width: 1300px;
+  margin: 0 auto;
+  color: #1a1a1a;
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 2rem;
+
+  a {
+    color: #666;
+    text-decoration: none;
+    transition: color 0.15s;
+
+    &:hover {
+      color: #000;
+    }
+  }
+
+  .current {
+    color: #000;
+    font-weight: 600;
+  }
+}
+
+.productLayout {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 3.5rem;
+  align-items: start;
+
+  @media (max-width: 960px) {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+}
+
+// ── Gallery Column ────────────────────────────────────────────────────────────
+.galleryCol {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: sticky;
+  top: 6rem;
+
+  @media (max-width: 960px) {
+    position: static;
+  }
+}
+
+.mainImageWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #f5f5f5;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #eaeaea;
+}
+
+.mainImage {
+  object-fit: cover;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.03);
+  }
+}
+
+.thumbsList {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #ddd;
+    border-radius: 2px;
+  }
+}
+
+.thumbBtn {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  background: #f0f0f0;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: #999;
+  }
+}
+
+.thumbBtnActive {
+  border-color: #111;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+// ── Details Column ────────────────────────────────────────────────────────────
+.detailsCol {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.headerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.categoryBadge {
+  align-self: flex-start;
+  padding: 0.3rem 0.75rem;
+  background: #f0f0f0;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #555;
+}
+
+.title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #111;
+  margin: 0;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+
+  @media (max-width: 640px) {
+    font-size: 1.75rem;
+  }
+}
+
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-top: 0.25rem;
+}
+
+.price {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #111;
+}
+
+// ── Variant Selector ──────────────────────────────────────────────────────────
+.variantSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sectionLabel {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #555;
+}
+
+.variantChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.chip {
+  padding: 0.6rem 1.15rem;
+  border-radius: 8px;
+  border: 1.5px solid #e0e0e0;
+  background: #fff;
+  color: #222;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover:not(:disabled) {
+    border-color: #111;
+    background: #f9f9f9;
+  }
+}
+
+.chipActive {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+
+  &:hover {
+    background: #222;
+    color: #fff;
+  }
+}
+
+.chipDisabled {
+  opacity: 0.4;
+  border-style: dashed;
+  cursor: not-allowed;
+  text-decoration: line-through;
+  background: #f5f5f5;
+}
+
+// ── Stock & Quantity & Purchase ───────────────────────────────────────────────
+.stockStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.stockIn {
+  color: #16a34a;
+}
+
+.stockOut {
+  color: #dc2626;
+}
+
+.purchaseActions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 0.5rem;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.qtyPicker {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  height: 52px;
+}
+
+.qtyBtn {
+  width: 44px;
+  height: 100%;
+  border: none;
+  background: transparent;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+  transition: background 0.15s;
+
+  &:hover:not(:disabled) {
+    background: #f0f0f0;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
+.qtyVal {
+  width: 40px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.addToCartBtn {
+  flex: 1;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover:not(:disabled) {
+    background: #2b2b2b;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  }
+
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+}
+
+// ── Description & Author Block ────────────────────────────────────────────────
+.descriptionBox {
+  padding-top: 1.5rem;
+  border-top: 1px solid #eaeaea;
+  line-height: 1.7;
+  color: #444;
+  font-size: 0.95rem;
+
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #111;
+    margin: 0 0 0.75rem;
+  }
+
+  p {
+    margin: 0 0 0.75rem;
+  }
+}
+
+.authorCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  margin-top: 1rem;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: #cbd5e1;
+    background: #f1f5f9;
+    transform: translateX(2px);
+  }
+}
+
+.authorMeta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.authorAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.authorName {
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.authorSubtitle {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0;
+}

@@ -4,6 +4,7 @@ import {
   Palette,
   Users,
   ShoppingBag,
+  Package,
   FileText,
   ArrowRight,
   PlusCircle,
@@ -11,11 +12,12 @@ import {
 import styles from "./dashboard.module.scss";
 
 export default async function AdminDashboard() {
-  const [paintingsCount, authorsCount, productsCount, postsCount] =
+  const [paintingsCount, authorsCount, productsCount, ordersCount, postsCount] =
     await Promise.all([
       db.painting.count(),
       db.author.count(),
       db.product.count(),
+      db.order.count(),
       db.galleryPost.count(),
     ]);
 
@@ -37,12 +39,20 @@ export default async function AdminDashboard() {
       iconColor: "#7c3aed",
     },
     {
-      label: "Товари (Мерч)",
+      label: "Товари",
       count: productsCount,
       href: "/admin/products",
       icon: ShoppingBag,
       bgColor: "#ecfdf5",
       iconColor: "#059669",
+    },
+    {
+      label: "Замовлення",
+      count: ordersCount,
+      href: "/admin/orders",
+      icon: Package,
+      bgColor: "#fef2f2",
+      iconColor: "#dc2626",
     },
     {
       label: "Пости блогу",
@@ -58,6 +68,7 @@ export default async function AdminDashboard() {
     { label: "Додати картину", href: "/admin/paintings/new" },
     { label: "Додати автора", href: "/admin/authors/new" },
     { label: "Створити товар", href: "/admin/products/new" },
+    { label: "Переглянути замовлення", href: "/admin/orders" },
     { label: "Опублікувати пост", href: "/admin/posts/new" },
   ];
 
@@ -68,7 +79,7 @@ export default async function AdminDashboard() {
         <div className={styles.welcomeText}>
           <h1 className={styles.heading}>Панель керування VoytArt</h1>
           <p className={styles.subheading}>
-            Огляд контенту, картин, авторів та асортименту інтернет-магазину
+            Огляд контенту, картин, авторів, асортименту та замовлень інтернет-магазину
           </p>
         </div>
       </div>

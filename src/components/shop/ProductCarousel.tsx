@@ -1,18 +1,18 @@
 "use client";
 import React, { useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import styles from "./ProductCarousel.module.scss";
-
 import type { Product } from "~/app/shop/_ShopStorefront";
 
 interface ProductCarouselProps {
   title: string;
   products: Product[];
-  onProductClick: (product: Product) => void;
+  onProductClick?: (product: Product) => void;
   onAddToCart: (product: Product) => void;
 }
 
-export default function ProductCarousel({ title, products, onProductClick, onAddToCart }: ProductCarouselProps) {
+export default function ProductCarousel({ title, products, onAddToCart }: ProductCarouselProps) {
   const trackRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: "left" | "right") => {
@@ -52,7 +52,7 @@ export default function ProductCarousel({ title, products, onProductClick, onAdd
           return (
             <div key={product.id} className={styles.slide}>
               <div className={styles.productCard}>
-                <div onClick={() => onProductClick(product)} className={styles.imageWrapper}>
+                <Link href={`/shop/${product.id}`} className={styles.imageWrapper}>
                   <Image
                     src={coverImg}
                     alt={product.title}
@@ -60,24 +60,26 @@ export default function ProductCarousel({ title, products, onProductClick, onAdd
                     className={styles.productImage}
                     sizes="(max-width: 640px) 100vw, 300px"
                   />
-                  {product.stock <= 0 && <div className={styles.soldOut}>Out of stock</div>}
-                </div>
+                  {product.stock <= 0 && <div className={styles.soldOut}>Немає в наявності</div>}
+                </Link>
 
                 <div className={styles.cardInfo}>
                   <p className={styles.authorName}>
                     {product.author.firstName} {product.author.lastName}
                   </p>
-                  <h3 onClick={() => onProductClick(product)} className={styles.productTitle}>
-                    {product.title}
-                  </h3>
+                  <Link href={`/shop/${product.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                    <h3 className={styles.productTitle}>
+                      {product.title}
+                    </h3>
+                  </Link>
                   <div className={styles.cardFooter}>
-                    <span className={styles.price}>${product.price.toLocaleString()}</span>
+                    <span className={styles.price}>{product.price.toLocaleString("uk-UA")} ₴</span>
                     <button
                       onClick={() => onAddToCart(product)}
                       disabled={product.stock <= 0}
                       className={styles.addToCartBtn}
                     >
-                      Add
+                      Купити
                     </button>
                   </div>
                 </div>
