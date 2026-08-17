@@ -1,4 +1,4 @@
-import { db } from "~/lib/db";
+import { db, type Prisma } from "~/lib/db";
 import styles from "../admin-table.module.scss";
 import Link from "next/link";
 import { Plus, Edit2, Calendar } from "lucide-react";
@@ -21,7 +21,7 @@ export default async function PostsPage({
   const { sortBy = "createdAt", sortDir = "desc" } = await searchParams;
   const validSortDir: "asc" | "desc" = sortDir === "asc" ? "asc" : "desc";
 
-  let orderByQuery: Record<string, any> = { createdAt: validSortDir };
+  let orderByQuery: Prisma.GalleryPostOrderByWithRelationInput = { createdAt: validSortDir };
   if (sortBy === "title") {
     orderByQuery = { title: validSortDir };
   } else if (sortBy === "date") {

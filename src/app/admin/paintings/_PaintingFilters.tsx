@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { Filter, X, User, Layers } from "lucide-react";
+import { X, User, Layers } from "lucide-react";
 import styles from "../admin-table.module.scss";
 
 type AuthorOption = { id: number; firstName: string; lastName: string };

@@ -1,4 +1,4 @@
-import { db } from "~/lib/db";
+import { db, type Prisma } from "~/lib/db";
 import styles from "../admin-table.module.scss";
 import { MapPin, Clock } from "lucide-react";
 import OrderStatusSelect from "./_OrderStatusSelect";
@@ -21,13 +21,13 @@ export default async function OrdersPage({
   const { sortBy = "createdAt", sortDir = "desc" } = await searchParams;
   const validSortDir: "asc" | "desc" = sortDir === "asc" ? "asc" : "desc";
 
-  let orderByQuery: Record<string, any> = { createdAt: validSortDir };
+  let orderByQuery: Prisma.OrderOrderByWithRelationInput = { createdAt: validSortDir };
   if (sortBy === "customerName") {
     orderByQuery = { customerName: validSortDir };
   } else if (sortBy === "deliveryCity") {
     orderByQuery = { deliveryCity: validSortDir };
   } else if (sortBy === "total") {
-    orderByQuery = { total: validSortDir };
+    orderByQuery = { totalAmount: validSortDir };
   } else if (sortBy === "status") {
     orderByQuery = { status: validSortDir };
   } else if (sortBy === "createdAt") {

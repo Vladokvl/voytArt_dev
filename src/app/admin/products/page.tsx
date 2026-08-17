@@ -1,4 +1,4 @@
-import { db } from "~/lib/db";
+import { db, type Prisma } from "~/lib/db";
 import styles from "../admin-table.module.scss";
 import Link from "next/link";
 import { Plus, Edit2, ArrowUp, ArrowDown, ArrowRight } from "lucide-react";
@@ -22,7 +22,7 @@ export default async function ProductsPage({
   const { sortBy = "sortOrder", sortDir = "asc" } = await searchParams;
   const validSortDir: "asc" | "desc" = sortDir === "desc" ? "desc" : "asc";
 
-  let orderByQuery: Record<string, any> = { sortOrder: validSortDir };
+  let orderByQuery: Prisma.ProductOrderByWithRelationInput = { sortOrder: validSortDir };
   if (sortBy === "title") {
     orderByQuery = { title: validSortDir };
   } else if (sortBy === "author") {

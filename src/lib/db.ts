@@ -1,6 +1,9 @@
 import { Pool } from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from '../../generated/prisma'
+import { PrismaClient, type Prisma } from '../../generated/prisma'
+
+export type { Prisma }
+export { PrismaClient }
 
 type DbClient = PrismaClient
 
@@ -19,3 +22,4 @@ export const db: DbClient = globalForPrisma.prisma ?? createPrismaClient()
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = db
 }
+

@@ -1,4 +1,4 @@
-import { db } from "~/lib/db";
+import { db, type Prisma } from "~/lib/db";
 import tableStyles from "../admin-table.module.scss";
 import Link from "next/link";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
@@ -37,7 +37,7 @@ export default async function PaintingsPage({
   const collectionFilter = collectionId ? Number(collectionId) : undefined;
   const validSortDir: "asc" | "desc" = sortDir === "desc" ? "desc" : "asc";
 
-  let orderByQuery: Record<string, any> = { sortOrder: validSortDir };
+  let orderByQuery: Prisma.PaintingOrderByWithRelationInput = { sortOrder: validSortDir };
   if (sortBy === "title") {
     orderByQuery = { title: validSortDir };
   } else if (sortBy === "author") {
