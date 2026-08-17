@@ -273,10 +273,9 @@ export default function ShopStorefront({
                 <motion.div
                   key={product.id}
                   className={styles.productCard}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
                 >
                   <Link href={`/shop/${product.id}`} className={styles.imageWrapper}>
                     <Image
