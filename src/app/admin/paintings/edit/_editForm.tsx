@@ -7,6 +7,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "next/image";
 import MediaSection from "./_MediaSection";
+import { useSetBreadcrumb } from "@/app/admin/_components/BreadcrumbContext";
 
 type PaintingMedia = { id: number; url: string; isNeon: boolean; order: number; type: "IMAGE" | "VIDEO" };
 
@@ -32,6 +33,7 @@ export default function PaintingEditForm({
   authors: Author[];
   collections: { id: number; title: string; authorId: number }[];
 }) {
+  useSetBreadcrumb(painting.title);
   const [state, formAction] = useActionState(updatePaintingAction, undefined);
   const [pending, startTransition] = useTransition();
   const [description, setDescription] = useState(painting.description ?? "");

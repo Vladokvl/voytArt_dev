@@ -2,10 +2,12 @@
 import { useActionState, useTransition } from "react";
 import { updateCategoryAction } from "../../_actions";
 import styles from "@/app/admin/_formStyles.module.scss";
+import { useSetBreadcrumb } from "@/app/admin/_components/BreadcrumbContext";
 
 type Category = { id: number; name: string; slug: string };
 
 export default function CategoryEditForm({ category }: { category: Category }) {
+  useSetBreadcrumb(category.name);
   const [state, formAction] = useActionState(updateCategoryAction, undefined);
   const [pending, startTransition] = useTransition();
 

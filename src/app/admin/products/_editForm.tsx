@@ -7,6 +7,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { useImageCrop } from "~/hooks/use-image-crop";
 import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
+import { useSetBreadcrumb } from "@/app/admin/_components/BreadcrumbContext";
 
 type Author = { id: number; firstName: string; lastName: string };
 type Category = { id: number; name: string };
@@ -32,6 +33,7 @@ export default function ProductEditForm({
   authors: Author[];
   categories: Category[];
 }) {
+  useSetBreadcrumb(product.title);
   const [state, formAction] = useActionState(updateProductAction, undefined);
   const [uploading, setUploading] = useState(false);
   const [pending, startTransition] = useTransition();
