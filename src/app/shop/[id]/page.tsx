@@ -48,7 +48,7 @@ export default async function ProductDetailPage({ params }: Props) {
       },
     }),
     db.product.findMany({
-      where: { id: { not: productId } },
+      where: { id: { not: productId }, isActive: true },
       take: 4,
       include: {
         author: true,

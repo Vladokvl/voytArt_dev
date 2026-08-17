@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Trash2, Sparkles, Layers } from "lucide-react";
 import styles from "../_formStyles.module.scss";
 
@@ -15,14 +15,24 @@ export type VariantItem = {
 export default function VariantEditor({
   initialVariants = [],
   basePrice = 0,
+  onChange,
 }: {
   initialVariants?: VariantItem[];
   basePrice?: number;
+  onChange?: (variants: VariantItem[]) => void;
 }) {
   const [variants, setVariants] = useState<VariantItem[]>(initialVariants);
 
+  const updateState = (updater: (prev: VariantItem[]) => VariantItem[]) => {
+    setVariants((prev) => {
+      const next = updater(prev);
+      onChange?.(next);
+      return next;
+    });
+  };
+
   const addVariant = (title = "", price = "", stock = 5) => {
-    setVariants((prev) => [
+    updateState((prev) => [
       ...prev,
       {
         title,
@@ -34,18 +44,18 @@ export default function VariantEditor({
   };
 
   const removeVariant = (index: number) => {
-    setVariants((prev) => prev.filter((_, i) => i !== index));
+    updateState((prev) => prev.filter((_, i) => i !== index));
   };
 
   const updateVariant = (index: number, field: keyof VariantItem, val: string | number) => {
-    setVariants((prev) =>
+    updateState((prev) =>
       prev.map((item, i) => (i === index ? { ...item, [field]: val } : item))
     );
   };
 
   const applyClothingSizes = () => {
     const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
-    setVariants(
+    updateState(() =>
       sizes.map((s) => ({
         title: s,
         price: "",
@@ -62,7 +72,7 @@ export default function VariantEditor({
       { title: "A2 (42×60 см)", price: Math.round(basePrice * 1.5) || "" },
       { title: "A1 (60×84 см)", price: Math.round(basePrice * 2.2) || "" },
     ];
-    setVariants(
+    updateState(() =>
       prints.map((p) => ({
         title: p.title,
         price: p.price,

@@ -1,13 +1,16 @@
 "use client";
+
 import { useActionState, useState, useTransition } from "react";
+import Link from "next/link";
 import { updatePaintingAction } from "./_actions";
 import { type Author } from "@/types/Author";
-import styles from "../paintings.module.scss";
+import formStyles from "@/app/admin/_formStyles.module.scss";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "next/image";
 import MediaSection from "./_MediaSection";
 import { useSetBreadcrumb } from "@/app/admin/_components/BreadcrumbContext";
+import { ArrowLeft, Save } from "lucide-react";
 
 type PaintingMedia = { id: number; url: string; isNeon: boolean; order: number; type: "IMAGE" | "VIDEO" };
 
@@ -80,142 +83,237 @@ export default function PaintingEditForm({
   }
 
   return (
-    <div className={styles.editLayout}>
-      <form onSubmit={handleSubmit} className={styles.form}>
-        {state?.error && <p className={styles.error}>{state.error}</p>}
-        <input type="hidden" name="id" value={String(painting.id)} />
-        <input type="hidden" name="coverUrl" value={painting.coverUrl} />
-
-        <div className={styles.field}>
-          <label className={styles.label}>Назва *</label>
-          <input
-            className={styles.input}
-            name="title"
-            placeholder="Назва"
-            defaultValue={painting.title}
-            required
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label className={styles.label}>Опис</label>
-          <div className={styles.editorWrapper}>
-            <div className={styles.toolbar}>
-              <button
-                type="button"
-                onClick={() => editor?.chain().focus().toggleBold().run()}
-                className={editor?.isActive("bold") ? styles.toolbarBtnActive : styles.toolbarBtn}
-              >
-                <b>B</b>
-              </button>
-              <button
-                type="button"
-                onClick={() => editor?.chain().focus().toggleItalic().run()}
-                className={editor?.isActive("italic") ? styles.toolbarBtnActive : styles.toolbarBtn}
-              >
-                <i>I</i>
-              </button>
-              <button
-                type="button"
-                onClick={() => editor?.chain().focus().toggleBulletList().run()}
-                className={editor?.isActive("bulletList") ? styles.toolbarBtnActive : styles.toolbarBtn}
-              >
-                ≡
-              </button>
-            </div>
-            <EditorContent editor={editor} className={styles.editorContent} />
+    <form onSubmit={handleSubmit} className={formStyles.form}>
+      {/* ── Sticky Top Bar ─────────────────────────────────── */}
+      <div className={formStyles.formHeaderSticky}>
+        <div className={formStyles.headerTitleWrap}>
+          <Link href="/admin/paintings" className={formStyles.cancelBtn} style={{ padding: "0.5rem 0.75rem" }}>
+            <ArrowLeft size={16} />
+            <span>До списку</span>
+          </Link>
+          <div>
+            <h1 className={formStyles.headerTitle}>Редагування картини: {painting.title}</h1>
+            <p style={{ margin: 0, fontSize: "0.8rem", color: "#64748b" }}>
+              ID: #{painting.id}
+            </p>
           </div>
-          <input type="hidden" name="description" value={description} />
         </div>
 
-        <div className={styles.field}>
-          <label className={styles.label}>Автор *</label>
-          <select
-            className={styles.select}
-            name="authorId"
-            required
-            value={selectedAuthorId}
-            onChange={handleAuthorChange}
-          >
-            <option value="">Оберіть автора</option>
-            {authors.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.firstName} {a.lastName}
-              </option>
-            ))}
-          </select>
-        </div>
+        <button type="submit" className={formStyles.submitBtn} disabled={pending}>
+          <Save size={16} />
+          <span>{pending ? "Збереження..." : "Зберегти"}</span>
+        </button>
+      </div>
 
-        <div className={styles.field}>
-          <label className={styles.label}>Колекція</label>
-          <select
-            className={styles.select}
-            name="collectionId"
-            value={selectedCollectionId}
-            onChange={handleCollectionChange}
-          >
-            <option value="">Без колекції</option>
-            {filteredCollections.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.title}
-              </option>
-            ))}
-          </select>
-        </div>
+      {state?.error && <p className={formStyles.error}>{state.error}</p>}
+      <input type="hidden" name="id" value={String(painting.id)} />
+      <input type="hidden" name="coverUrl" value={painting.coverUrl} />
 
-        <div className={styles.row}>
-          <div className={styles.field}>
-            <label className={styles.label}>Рік</label>
-            <input
-              className={styles.input}
-              name="year"
-              type="number"
-              placeholder="2024"
-              defaultValue={painting.year ?? ""}
+      {/* ── 2-Column Grid Layout ───────────────────────────── */}
+      <div className={formStyles.formGrid}>
+        {/* Main Column */}
+        <div className={formStyles.mainColumn}>
+          {/* Card 1: Основні дані */}
+          <div className={formStyles.card}>
+            <div className={formStyles.cardHeader}>
+              <h3 className={formStyles.cardTitle}>Основна інформація</h3>
+              <span className={formStyles.cardDesc}>Назва, автор та колекція</span>
+            </div>
+
+            <div className={formStyles.field}>
+              <label className={formStyles.label}>Назва картини *</label>
+              <input
+                className={formStyles.input}
+                name="title"
+                placeholder="Назва картини"
+                defaultValue={painting.title}
+                required
+              />
+            </div>
+
+            <div className={formStyles.row}>
+              <div className={formStyles.field}>
+                <label className={formStyles.label}>Автор *</label>
+                <select
+                  className={formStyles.select}
+                  name="authorId"
+                  required
+                  value={selectedAuthorId}
+                  onChange={handleAuthorChange}
+                >
+                  <option value="">Оберіть автора</option>
+                  {authors.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.firstName} {a.lastName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={formStyles.field}>
+                <label className={formStyles.label}>Колекція</label>
+                <select
+                  className={formStyles.select}
+                  name="collectionId"
+                  value={selectedCollectionId}
+                  onChange={handleCollectionChange}
+                >
+                  <option value="">Без колекції</option>
+                  {filteredCollections.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className={formStyles.row}>
+              <div className={formStyles.field}>
+                <label className={formStyles.label}>Рік створення</label>
+                <input
+                  className={formStyles.input}
+                  name="year"
+                  type="number"
+                  placeholder="2024"
+                  defaultValue={painting.year ?? ""}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Опис картини */}
+          <div className={formStyles.card}>
+            <div className={formStyles.cardHeader}>
+              <h3 className={formStyles.cardTitle}>Опис картини</h3>
+              <span className={formStyles.cardDesc}>Історія та деталі полотна</span>
+            </div>
+
+            <div className={formStyles.field}>
+              <div className={formStyles.editorWrapper}>
+                <div className={formStyles.toolbar}>
+                  <button
+                    type="button"
+                    onClick={() => editor?.chain().focus().toggleBold().run()}
+                    className={editor?.isActive("bold") ? formStyles.toolbarBtnActive : formStyles.toolbarBtn}
+                  >
+                    <b>B</b>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => editor?.chain().focus().toggleItalic().run()}
+                    className={editor?.isActive("italic") ? formStyles.toolbarBtnActive : formStyles.toolbarBtn}
+                  >
+                    <i>I</i>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => editor?.chain().focus().toggleBulletList().run()}
+                    className={editor?.isActive("bulletList") ? formStyles.toolbarBtnActive : formStyles.toolbarBtn}
+                  >
+                    ≡ Список
+                  </button>
+                </div>
+                <EditorContent editor={editor} className={formStyles.editorContent} />
+              </div>
+              <input type="hidden" name="description" value={description} />
+            </div>
+          </div>
+
+          {/* Card 3 & 4: Додаткові медіа (Звичайні та Неонові) */}
+          <div className={formStyles.card}>
+            <div className={formStyles.cardHeader}>
+              <h3 className={formStyles.cardTitle}>Додаткові фотографії картини</h3>
+            </div>
+            <MediaSection
+              paintingId={painting.id}
+              items={painting.media.filter((m) => !m.isNeon)}
+              isNeon={false}
+            />
+          </div>
+
+          <div className={formStyles.card}>
+            <div className={formStyles.cardHeader}>
+              <h3 className={formStyles.cardTitle}>⚡ Неонові версії картини (UV)</h3>
+            </div>
+            <MediaSection
+              paintingId={painting.id}
+              items={painting.media.filter((m) => m.isNeon)}
+              isNeon={true}
             />
           </div>
         </div>
 
-        <div className={styles.field}>
-          <label className={styles.checkboxLabel}>
-            <input name="hasNeon" type="checkbox" defaultChecked={painting.hasNeon} /> Є неонова версія
-          </label>
-          <label className={styles.checkboxLabel}>
-            <input name="isForSale" type="checkbox" defaultChecked={painting.isForSale} /> Продається
-          </label>
+        {/* Sidebar Column */}
+        <div className={formStyles.sidebarColumn}>
+          {/* Status & Options */}
+          <div className={formStyles.card}>
+            <div className={formStyles.cardHeader}>
+              <h3 className={formStyles.cardTitle}>Опції картини</h3>
+            </div>
+
+            <div className={formStyles.checkboxField}>
+              <div>
+                <span style={{ fontWeight: 600, display: "block" }}>⚡ Є неонова версія</span>
+                <span style={{ fontSize: "0.75rem", color: "#64748b" }}>
+                  Дозволяє перемикач UV на сторінці
+                </span>
+              </div>
+              <input
+                name="hasNeon"
+                type="checkbox"
+                id="hasNeon"
+                defaultChecked={painting.hasNeon}
+              />
+            </div>
+
+            <div className={formStyles.checkboxField}>
+              <div>
+                <span style={{ fontWeight: 600, display: "block" }}>🏷️ Продається</span>
+                <span style={{ fontSize: "0.75rem", color: "#64748b" }}>
+                  Показувати бейдж продажу
+                </span>
+              </div>
+              <input
+                name="isForSale"
+                type="checkbox"
+                id="isForSale"
+                defaultChecked={painting.isForSale}
+              />
+            </div>
+          </div>
+
+          {/* Cover Image */}
+          <div className={formStyles.card}>
+            <div className={formStyles.cardHeader}>
+              <h3 className={formStyles.cardTitle}>Головне фото</h3>
+            </div>
+
+            <div className={formStyles.previewWrap}>
+              <Image
+                src={painting.coverUrl}
+                alt={painting.title}
+                width={280}
+                height={280}
+                style={{ objectFit: "contain", borderRadius: "6px" }}
+              />
+            </div>
+            <p style={{ fontSize: "0.78rem", color: "#64748b", margin: 0, textAlign: "center" }}>
+              Головна обкладинка картини
+            </p>
+          </div>
         </div>
-
-        <div className={styles.field}>
-          <label className={styles.label}>Поточне фото</label>
-          <Image
-            src={painting.coverUrl}
-            alt={painting.title}
-            width={300}
-            height={300}
-            style={{ objectFit: "contain", borderRadius: 6 }}
-          />
-          <p style={{ fontSize: "0.8rem", color: "#6b7280" }}>
-            Зображення не змінюється через цю форму.
-          </p>
-        </div>
-
-        <button type="submit" className={styles.button} disabled={pending}>
-          {pending ? "Збереження..." : "Зберегти"}
-        </button>
-      </form>
-
-      <div className={styles.mediaSidebar}>
-        <MediaSection
-          paintingId={painting.id}
-          items={painting.media.filter((m) => !m.isNeon)}
-          isNeon={false}
-        />
-        <MediaSection
-          paintingId={painting.id}
-          items={painting.media.filter((m) => m.isNeon)}
-          isNeon={true}
-        />
       </div>
-    </div>
+
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: "1rem", marginTop: "1rem" }}>
+        <Link href="/admin/paintings" className={formStyles.cancelBtn}>
+          Скасувати
+        </Link>
+        <button type="submit" className={formStyles.submitBtn} disabled={pending}>
+          <Save size={16} />
+          <span>{pending ? "Збереження..." : "Зберегти зміни"}</span>
+        </button>
+      </div>
+    </form>
   );
 }

@@ -4,11 +4,11 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { deleteAsset, getPublicIdFromCloudinaryUrl } from "~/lib/cloudinary";
 
-type VariantInput = {
+export type VariantInput = {
   id?: number;
   title: string;
-  price?: number | null;
-  stock: number;
+  price?: number | string | null;
+  stock: number | string;
   sku?: string | null;
 };
 
@@ -24,6 +24,7 @@ export async function createProductAction(
   const authorId = parseInt(formData.get("authorId") as string, 10);
   const categoryId = parseInt(formData.get("categoryId") as string, 10);
   const isFeatured = formData.get("isFeatured") === "on";
+  const isActive = formData.get("isActive") === "on";
   const coverUrl = formData.get("coverUrl") as string;
   const variantsJson = formData.get("variantsJson") as string;
 
@@ -40,7 +41,6 @@ export async function createProductAction(
     }
   }
 
-  // Calculate total stock: if variants exist, sum of variant stocks; otherwise baseStock
   const totalStock = variants.length > 0
     ? variants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0)
     : (isNaN(baseStock) ? 0 : baseStock);
@@ -53,6 +53,7 @@ export async function createProductAction(
       stock: totalStock,
       sortOrder,
       isFeatured,
+      isActive,
       authorId,
       categoryId,
       coverUrl,
@@ -91,6 +92,7 @@ export async function updateProductAction(
   const authorId = parseInt(formData.get("authorId") as string, 10);
   const categoryId = parseInt(formData.get("categoryId") as string, 10);
   const isFeatured = formData.get("isFeatured") === "on";
+  const isActive = formData.get("isActive") === "on";
   const coverUrl = formData.get("coverUrl") as string;
   const variantsJson = formData.get("variantsJson") as string;
 
@@ -118,6 +120,7 @@ export async function updateProductAction(
     stock: totalStock,
     sortOrder,
     isFeatured,
+    isActive,
     authorId,
     categoryId,
   };
@@ -126,7 +129,6 @@ export async function updateProductAction(
     dataToUpdate.coverUrl = coverUrl;
     dataToUpdate.coverPublicId = getPublicIdFromCloudinaryUrl(coverUrl) ?? "";
 
-    // Attempt to delete old cover from Cloudinary
     const oldProduct = await db.product.findUnique({
       where: { id },
       select: { coverPublicId: true, coverUrl: true },
@@ -142,25 +144,71 @@ export async function updateProductAction(
     data: dataToUpdate,
   });
 
-  // Sync variants: replace all variants for this product
-  await db.productVariant.deleteMany({ where: { productId: id } });
-  if (variants.length > 0) {
-    await db.productVariant.createMany({
-      data: variants.map((v, i) => ({
-        productId: id,
-        title: v.title,
-        price: v.price ? Number(v.price) : null,
-        stock: Number(v.stock) || 0,
-        sku: v.sku || null,
-        sortOrder: i,
-      })),
+  // SMART SYNC VARIANTS (Preserves existing variant IDs so photo attachments remain intact!)
+  const existingVariants = await db.productVariant.findMany({
+    where: { productId: id },
+  });
+  const existingMap = new Map(existingVariants.map((v) => [v.id, v]));
+  const submittedIds = new Set<number>();
+
+  for (let i = 0; i < variants.length; i++) {
+    const v = variants[i]!;
+    const vPrice = v.price !== "" && v.price !== null && v.price !== undefined ? Number(v.price) : null;
+    const vStock = Number(v.stock) || 0;
+    const vSku = v.sku || null;
+
+    if (v.id && existingMap.has(v.id)) {
+      submittedIds.add(v.id);
+      await db.productVariant.update({
+        where: { id: v.id },
+        data: {
+          title: v.title,
+          price: vPrice,
+          stock: vStock,
+          sku: vSku,
+          sortOrder: i,
+        },
+      });
+    } else {
+      const created = await db.productVariant.create({
+        data: {
+          productId: id,
+          title: v.title,
+          price: vPrice,
+          stock: vStock,
+          sku: vSku,
+          sortOrder: i,
+        },
+      });
+      submittedIds.add(created.id);
+    }
+  }
+
+  // Delete only removed variants
+  const toDeleteIds = existingVariants
+    .filter((v) => !submittedIds.has(v.id))
+    .map((v) => v.id);
+
+  if (toDeleteIds.length > 0) {
+    await db.productVariant.deleteMany({
+      where: { id: { in: toDeleteIds } },
     });
   }
 
   revalidatePath("/admin/products");
+  revalidatePath(`/admin/products/edit/${id}`);
   revalidatePath(`/shop/${id}`);
   revalidatePath("/shop");
   redirect("/admin/products");
+}
+
+export async function toggleProductActiveAction(id: number, isActive: boolean) {
+  await db.product.update({
+    where: { id },
+    data: { isActive },
+  });
+  revalidatePath("/admin/products");
+  revalidatePath("/shop");
 }
 
 export async function deleteProductAction(id: number): Promise<void> {

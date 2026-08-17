@@ -12,6 +12,7 @@ export const dynamic = "force-dynamic";
 export default async function ShopPage() {
   const [products, categories] = await Promise.all([
     db.product.findMany({
+      where: { isActive: true },
       include: {
         images: { orderBy: { order: "asc" } },
         variants: { orderBy: { sortOrder: "asc" } },

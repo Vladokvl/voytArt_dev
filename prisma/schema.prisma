@@ -138,6 +138,7 @@ model Product {
     stock       Int     @default(0)
     sortOrder   Int     @default(0) @map("sort_order")
     isFeatured  Boolean @default(false) @map("is_featured")
+    isActive    Boolean @default(true) @map("is_active")
 
     coverUrl      String @default("") @map("cover_url")
     coverPublicId String @default("") @map("cover_public_id")

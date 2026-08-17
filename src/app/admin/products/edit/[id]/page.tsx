@@ -1,7 +1,6 @@
 import { db } from "~/lib/db";
 import { notFound } from "next/navigation";
 import ProductEditForm from "../../_editForm";
-import MediaSection from "./_MediaSection";
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -11,6 +10,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
       include: {
         images: { orderBy: { order: "asc" } },
         variants: { orderBy: { sortOrder: "asc" } },
+        category: true,
       },
     }),
     db.author.findMany({ orderBy: { lastName: "asc" } }),
@@ -19,10 +19,5 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
 
   if (!product) notFound();
 
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
-      <ProductEditForm product={product} authors={authors} categories={categories} />
-      <MediaSection productId={product.id} items={product.images} variants={product.variants} />
-    </div>
-  );
+  return <ProductEditForm product={product} authors={authors} categories={categories} />;
 }

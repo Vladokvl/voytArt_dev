@@ -1,5 +1,7 @@
 "use client";
+
 import { useActionState, useRef, useState, useTransition } from "react";
+import Link from "next/link";
 import { updateAuthorAction } from "../../_actions";
 import styles from "@/app/admin/_formStyles.module.scss";
 import artStyles from "@/app/art/[[...artistId]]/art.module.scss";
@@ -7,6 +9,7 @@ import { uploadToCloudinary } from "~/lib/cloudinary-client";
 import { useImageCrop } from "~/hooks/use-image-crop";
 import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
 import { useSetBreadcrumb } from "@/app/admin/_components/BreadcrumbContext";
+import { ArrowLeft, Save } from "lucide-react";
 
 type Author = {
   id: number;
@@ -112,7 +115,6 @@ export default function AuthorEditForm({ author }: { author: Author }) {
 
   return (
     <div style={{ display: "flex", width: "100%", position: "relative" }}>
-      {/* Підключення динамічних стилів для адаптивної верстки панелі */}
       <style dangerouslySetInnerHTML={{ __html: `
         .formColumn {
           flex: 1 1 500px;
@@ -151,125 +153,179 @@ export default function AuthorEditForm({ author }: { author: Author }) {
 
       {/* Основна форма */}
       <form onSubmit={handleSubmit} className={`${styles.form} formColumn`} style={{ margin: 0 }}>
-        <h1 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "1.5rem" }}>Редагувати автора</h1>
+        {/* ── Sticky Top Bar ─────────────────────────────────── */}
+        <div className={styles.formHeaderSticky}>
+          <div className={styles.headerTitleWrap}>
+            <Link href="/admin/authors" className={styles.cancelBtn} style={{ padding: "0.5rem 0.75rem" }}>
+              <ArrowLeft size={16} />
+              <span>До списку</span>
+            </Link>
+            <div>
+              <h1 className={styles.headerTitle}>Редагування автора: {author.firstName} {author.lastName}</h1>
+              <p style={{ margin: 0, fontSize: "0.8rem", color: "#64748b" }}>
+                ID: #{author.id}
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className={styles.submitBtn}
+            disabled={uploading || pending}
+          >
+            <Save size={16} />
+            <span>{uploading ? "Завантаження..." : pending ? "Збереження..." : "Зберегти"}</span>
+          </button>
+        </div>
+
         {state?.error && <p className={styles.error}>{state.error}</p>}
         <input type="hidden" name="id" value={author.id} />
         <input type="hidden" name="order" value={author.order} />
 
-        <div className={styles.row}>
+        <div className={styles.card}>
+          <div className={styles.cardHeader}>
+            <h3 className={styles.cardTitle}>Основні дані художника</h3>
+            <span className={styles.cardDesc}>Ім'я, прізвище та статус</span>
+          </div>
+
+          <div className={styles.row}>
+            <div className={styles.field}>
+              <label className={styles.label}>Імʼя *</label>
+              <input
+                className={styles.input}
+                name="firstName"
+                required
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+            </div>
+            <div className={styles.field}>
+              <label className={styles.label}>Прізвище *</label>
+              <input
+                className={styles.input}
+                name="lastName"
+                required
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </div>
+          </div>
+
           <div className={styles.field}>
-            <label className={styles.label}>Імʼя *</label>
+            <label className={styles.label}>Короткий опис (для відображення в слайдері)</label>
             <input
               className={styles.input}
-              name="firstName"
-              required
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              name="shortDesc"
+              placeholder="Короткий опис автора в слайдері"
+              value={shortDesc}
+              onChange={(e) => setShortDesc(e.target.value)}
             />
           </div>
+
           <div className={styles.field}>
-            <label className={styles.label}>Прізвище *</label>
+            <label className={styles.label}>Біографія (для сторінки робіт)</label>
+            <textarea
+              className={styles.textarea}
+              name="bio"
+              defaultValue={author.bio ?? ""}
+              rows={4}
+            />
+          </div>
+
+          <div className={styles.checkboxField}>
+            <div>
+              <span style={{ fontWeight: 600, display: "block" }}>Активний автор</span>
+              <span style={{ fontSize: "0.75rem", color: "#64748b" }}>
+                Відображається в головному слайдері та списку авторів
+              </span>
+            </div>
             <input
-              className={styles.input}
-              name="lastName"
-              required
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              type="checkbox"
+              name="active"
+              defaultChecked={author.active}
+              id="active"
             />
           </div>
         </div>
 
-        <div className={styles.field}>
-          <label className={styles.label}>Короткий опис (для відображення в слайдері)</label>
-          <input
-            className={styles.input}
-            name="shortDesc"
-            placeholder="Короткий опис автора в слайдері"
-            value={shortDesc}
-            onChange={(e) => setShortDesc(e.target.value)}
-          />
-        </div>
+        <div className={styles.card}>
+          <div className={styles.cardHeader}>
+            <h3 className={styles.cardTitle}>Медіа та портрет</h3>
+            <span className={styles.cardDesc}>Зображення для картки в слайдері</span>
+          </div>
 
-        <div className={styles.field}>
-          <label className={styles.label}>Біографія (для сторінки робіт)</label>
-          <textarea
-            className={styles.textarea}
-            name="bio"
-            defaultValue={author.bio ?? ""}
-          />
-        </div>
-
-        <div className={styles.row}>
-          {/* Фото автора */}
-          <div className={styles.field}>
-            <label className={styles.label}>Портрет автора</label>
-            <div
-              className={`${styles.dropZone} ${dragOver ? styles.dragOver : ""}`}
-              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={(e) => {
-                setDragOver(false);
-                handleFileDrop(e);
-              }}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              {preview ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={preview} alt="preview" className={styles.previewImg} />
-              ) : (
-                <span>Перетягни портрет або клікни</span>
-              )}
+          <div className={styles.row}>
+            {/* Фото автора */}
+            <div className={styles.field}>
+              <label className={styles.label}>Портрет автора</label>
+              <div
+                className={`${styles.dropZone} ${dragOver ? styles.dragOver : ""}`}
+                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={(e) => {
+                  setDragOver(false);
+                  handleFileDrop(e);
+                }}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {preview ? (
+                  <div className={styles.previewWrap}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={preview} alt="preview" className={styles.previewImg} />
+                  </div>
+                ) : (
+                  <span>Перетягни портрет або клікни</span>
+                )}
+              </div>
+              <input ref={fileInputRef} type="file" name="image" accept="image/*" style={{ display: "none" }}
+                onChange={handleFileChange}
+              />
+              <input type="hidden" name="photoUrl" value={photoUrl} />
             </div>
-            <input ref={fileInputRef} type="file" name="image" accept="image/*" style={{ display: "none" }}
-              onChange={handleFileChange}
-            />
-            <input type="hidden" name="photoUrl" value={photoUrl} />
-          </div>
 
-          {/* Фонова картина */}
-          <div className={styles.field}>
-            <label className={styles.label}>Фонове зображення</label>
-            <div
-              className={`${styles.dropZone} ${bgDragOver ? styles.dragOver : ""}`}
-              onDragOver={(e) => { e.preventDefault(); setBgDragOver(true); }}
-              onDragLeave={() => setBgDragOver(false)}
-              onDrop={(e) => {
-                setBgDragOver(false);
-                handleBgFileDrop(e);
-              }}
-              onClick={() => bgFileInputRef.current?.click()}
-            >
-              {bgPreview ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={bgPreview} alt="bg preview" className={styles.previewImg} />
-              ) : (
-                <span>Перетягни фон або клікни</span>
-              )}
+            {/* Фонова картина */}
+            <div className={styles.field}>
+              <label className={styles.label}>Фонове зображення</label>
+              <div
+                className={`${styles.dropZone} ${bgDragOver ? styles.dragOver : ""}`}
+                onDragOver={(e) => { e.preventDefault(); setBgDragOver(true); }}
+                onDragLeave={() => setBgDragOver(false)}
+                onDrop={(e) => {
+                  setBgDragOver(false);
+                  handleBgFileDrop(e);
+                }}
+                onClick={() => bgFileInputRef.current?.click()}
+              >
+                {bgPreview ? (
+                  <div className={styles.previewWrap}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={bgPreview} alt="bg preview" className={styles.previewImg} />
+                  </div>
+                ) : (
+                  <span>Перетягни фон або клікни</span>
+                )}
+              </div>
+              <input ref={bgFileInputRef} type="file" name="bgImage" accept="image/*" style={{ display: "none" }}
+                onChange={handleBgFileChange}
+              />
+              <input type="hidden" name="bgPhotoUrl" value={bgPhotoUrl} />
             </div>
-            <input ref={bgFileInputRef} type="file" name="bgImage" accept="image/*" style={{ display: "none" }}
-              onChange={handleBgFileChange}
-            />
-            <input type="hidden" name="bgPhotoUrl" value={bgPhotoUrl} />
           </div>
         </div>
 
-        <div className={styles.row} style={{ alignItems: "center" }}>
-          <div className={styles.field} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem" }}>
-            <input type="checkbox" name="active" defaultChecked={author.active} id="active" style={{ width: "20px", height: "20px", cursor: "pointer" }} />
-            <label className={styles.label} htmlFor="active" style={{ marginBottom: 0, cursor: "pointer" }}>
-              Активний (відображається в слайдері)
-            </label>
-          </div>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: "1rem", marginTop: "1rem", marginBottom: "2rem" }}>
+          <Link href="/admin/authors" className={styles.cancelBtn}>
+            Скасувати
+          </Link>
+          <button type="submit" className={styles.submitBtn} disabled={uploading || pending}>
+            <Save size={16} />
+            <span>{uploading ? "Завантаження фото..." : pending ? "Збереження..." : "Зберегти зміни"}</span>
+          </button>
         </div>
-
-        <button type="submit" className={styles.submitBtn} disabled={uploading || pending} style={{ marginTop: "2rem" }}>
-          {uploading ? "Завантаження фото..." : pending ? "Збереження..." : "Зберегти зміни"}
-        </button>
       </form>
 
       {/* Права колонка: Інтерактивне прев'ю картки 1-в-1 з Арт сторінкою */}
       <div className="previewPanel">
-        {/* Кнопка фіксації ховеру поверх прев'ю */}
         <button
           type="button"
           onClick={() => setPreviewHover(!previewHover)}
@@ -295,14 +351,12 @@ export default function AuthorEditForm({ author }: { author: Author }) {
           {previewHover ? "Зафіксовано: Ховер" : "Режим: Звичайний"}
         </button>
 
-        {/* Секція картки автогенерації з оригінальними стилями */}
         <div
           className={artStyles.column}
           onMouseEnter={() => setCardHovered(true)}
           onMouseLeave={() => setCardHovered(false)}
           style={{ width: "100%", height: "100%" }}
         >
-          {/* Фонове зображення карти */}
           <div
             className={artStyles.colBg}
             style={{
@@ -310,19 +364,14 @@ export default function AuthorEditForm({ author }: { author: Author }) {
             }}
           />
 
-          {/* Затемнюючий оверлей */}
           <div
             className={`${artStyles.colOverlay} ${
               isHovered ? artStyles.colOverlayVisible : ""
             }`}
           />
 
-          {/* Контейнер імені та короткого опису */}
           <div className={artStyles.infoWrap}>
-            {/* Ім'я автора */}
             <h2 className={artStyles.colName}>{firstName || "ІМʼЯ"}</h2>
-
-            {/* Короткий опис */}
             <div
               className={`${artStyles.colText} ${
                 isHovered ? artStyles.colTextVisible : ""
@@ -334,7 +383,6 @@ export default function AuthorEditForm({ author }: { author: Author }) {
             </div>
           </div>
 
-          {/* Контейнер рамки портрета */}
           <div className={artStyles.portraitWrap}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img

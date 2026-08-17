@@ -188,6 +188,7 @@ exports.Prisma.ProductScalarFieldEnum = {
   stock: 'stock',
   sortOrder: 'sortOrder',
   isFeatured: 'isFeatured',
+  isActive: 'isActive',
   coverUrl: 'coverUrl',
   coverPublicId: 'coverPublicId',
   categoryId: 'categoryId',

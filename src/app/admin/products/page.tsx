@@ -37,14 +37,15 @@ export default async function ProductsPage() {
               <th className={styles.th}>Автор</th>
               <th className={styles.th}>Категорія</th>
               <th className={styles.th}>Ціна</th>
-              <th className={styles.th}>Залишок на складі</th>
+              <th className={styles.th}>Залишок</th>
+              <th className={styles.th}>Статус</th>
               <th className={styles.th} style={{ textAlign: "right" }}>Дії</th>
             </tr>
           </thead>
           <tbody>
             {products.length === 0 ? (
               <tr>
-                <td colSpan={7} className={styles.empty}>
+                <td colSpan={8} className={styles.empty}>
                   Товарів у магазині ще немає
                 </td>
               </tr>
@@ -52,9 +53,14 @@ export default async function ProductsPage() {
               products.map((p) => (
                 <tr key={p.id}>
                   <td className={styles.td}>
-                    {p.images[0] ? (
+                    {/* eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing */}
+                    {p.coverUrl || p.images[0] ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={p.images[0].url} alt={p.title} className={styles.thumbnail} />
+                      <img
+                        src={p.coverUrl || p.images[0]?.url}
+                        alt={p.title}
+                        className={styles.thumbnail}
+                      />
                     ) : (
                       <div
                         className={styles.thumbnail}
@@ -79,11 +85,22 @@ export default async function ProductsPage() {
                   <td className={styles.td}>
                     {p.stock > 0 ? (
                       <span className={`${styles.badge} ${styles.badgeSuccess}`}>
-                        ● В наявності ({p.stock} шт)
+                        ● {p.stock} шт
                       </span>
                     ) : (
                       <span className={`${styles.badge} ${styles.badgeDanger}`}>
-                        ✕ Закінчився
+                        ✕ 0 шт
+                      </span>
+                    )}
+                  </td>
+                  <td className={styles.td}>
+                    {p.isActive ? (
+                      <span className={`${styles.badge} ${styles.badgeSuccess}`}>
+                        ● Активний
+                      </span>
+                    ) : (
+                      <span className={`${styles.badge} ${styles.badgeNeutral}`} style={{ opacity: 0.7 }}>
+                        ○ Приховано
                       </span>
                     )}
                   </td>
