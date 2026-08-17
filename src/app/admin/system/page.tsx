@@ -7,15 +7,6 @@ import {
   Cloud,
   Database,
   Server,
-  HardDrive,
-  Cpu,
-  RefreshCw,
-  Layers,
-  Palette,
-  ShoppingBag,
-  Package,
-  FileText,
-  Sparkles,
 } from "lucide-react";
 import styles from "./system.module.scss";
 

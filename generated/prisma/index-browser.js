@@ -277,6 +277,7 @@ exports.Prisma.AnalyticsEventScalarFieldEnum = {
   id: 'id',
   path: 'path',
   pageType: 'pageType',
+  targetId: 'targetId',
   country: 'country',
   city: 'city',
   device: 'device',
@@ -285,6 +286,20 @@ exports.Prisma.AnalyticsEventScalarFieldEnum = {
   referer: 'referer',
   visitorHash: 'visitorHash',
   createdAt: 'createdAt'
+};
+
+exports.Prisma.PaintingInquiryScalarFieldEnum = {
+  id: 'id',
+  inquiryNumber: 'inquiryNumber',
+  paintingId: 'paintingId',
+  customerName: 'customerName',
+  customerContact: 'customerContact',
+  preferredContact: 'preferredContact',
+  message: 'message',
+  status: 'status',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -319,6 +334,14 @@ exports.PaymentMethod = exports.$Enums.PaymentMethod = {
   CARD: 'CARD'
 };
 
+exports.InquiryStatus = exports.$Enums.InquiryStatus = {
+  NEW: 'NEW',
+  IN_PROGRESS: 'IN_PROGRESS',
+  CONTACTED: 'CONTACTED',
+  SOLD: 'SOLD',
+  CANCELLED: 'CANCELLED'
+};
+
 exports.Prisma.ModelName = {
   Author: 'Author',
   Collection: 'Collection',
@@ -333,7 +356,8 @@ exports.Prisma.ModelName = {
   GalleryPost: 'GalleryPost',
   GalleryPostMedia: 'GalleryPostMedia',
   AdminUser: 'AdminUser',
-  AnalyticsEvent: 'AnalyticsEvent'
+  AnalyticsEvent: 'AnalyticsEvent',
+  PaintingInquiry: 'PaintingInquiry'
 };
 
 /**

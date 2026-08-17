@@ -1,5 +1,6 @@
 import { db } from "~/lib/db";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Eye,
   Users,
@@ -9,7 +10,11 @@ import {
   TrendingUp,
   Monitor,
   ExternalLink,
+  Palette,
+  ShoppingBag,
+  MessageSquare,
 } from "lucide-react";
+import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import styles from "./analytics.module.scss";
 
 type PeriodOption = "today" | "7d" | "30d" | "all";
@@ -47,10 +52,13 @@ export default async function AnalyticsPage({
 
   const whereClause = startDate ? { createdAt: { gte: startDate } } : {};
 
-  // Fetch metrics in parallel
+  // Fetch metrics and database entities in parallel
   const [
     totalViews,
     events,
+    authors,
+    products,
+    paintings,
   ] = await Promise.all([
     db.analyticsEvent.count({ where: whereClause }),
     db.analyticsEvent.findMany({
@@ -59,6 +67,7 @@ export default async function AnalyticsPage({
         id: true,
         path: true,
         pageType: true,
+        targetId: true,
         country: true,
         device: true,
         browser: true,
@@ -68,9 +77,24 @@ export default async function AnalyticsPage({
       },
       orderBy: { createdAt: "desc" },
     }),
+    db.author.findMany({
+      select: { id: true, firstName: true, lastName: true, photoUrl: true },
+    }),
+    db.product.findMany({
+      select: { id: true, title: true, price: true, coverUrl: true, author: { select: { firstName: true, lastName: true } } },
+    }),
+    db.painting.findMany({
+      select: {
+        id: true,
+        title: true,
+        coverUrl: true,
+        author: { select: { id: true, firstName: true, lastName: true } },
+        inquiries: { select: { id: true } },
+      },
+    }),
   ]);
 
-  // Compute Unique Visitors
+  // Compute Unique Visitors & group metrics
   const uniqueHashes = new Set<string>();
   let mobileCount = 0;
   let desktopCount = 0;
@@ -79,6 +103,9 @@ export default async function AnalyticsPage({
   const refererMap: Record<string, number> = {};
   const pathMap: Record<string, { count: number; pageType: string; lastSeen: Date }> = {};
   const dailyTimelineMap: Record<string, { views: number; uniqueSet: Set<string> }> = {};
+  const productViewMap: Record<number, number> = {};
+  const authorViewMap: Record<number, number> = {};
+  const paintingViewMap: Record<number, number> = {};
 
   for (const ev of events) {
     if (ev.visitorHash) uniqueHashes.add(ev.visitorHash);
@@ -88,17 +115,49 @@ export default async function AnalyticsPage({
     else desktopCount++;
 
     // Country counts
-    const c = ev.country || "UNKNOWN";
-    countryMap[c] = (countryMap[c] || 0) + 1;
+    const c = ev.country ?? "UNKNOWN";
+    countryMap[c] = (countryMap[c] ?? 0) + 1;
 
     // Referrer counts
-    const r = ev.referer || "Direct";
-    refererMap[r] = (refererMap[r] || 0) + 1;
+    const r = ev.referer ?? "Direct";
+    refererMap[r] = (refererMap[r] ?? 0) + 1;
 
     // Path counts
     const currentPath = pathMap[ev.path] ?? { count: 0, pageType: ev.pageType, lastSeen: ev.createdAt };
     currentPath.count++;
     pathMap[ev.path] = currentPath;
+
+    // Painting modal open tracking
+    if (ev.pageType === "PAINTING" && ev.targetId) {
+      paintingViewMap[ev.targetId] = (paintingViewMap[ev.targetId] ?? 0) + 1;
+    } else if (ev.path.includes("painting=")) {
+      const match = /painting=(\d+)/.exec(ev.path);
+      if (match?.[1]) {
+        const pId = parseInt(match[1], 10);
+        if (!isNaN(pId)) paintingViewMap[pId] = (paintingViewMap[pId] ?? 0) + 1;
+      }
+    }
+
+    // Product tracking (e.g. /shop/12 or targetId)
+    if (ev.pageType === "PRODUCT" && ev.targetId) {
+      productViewMap[ev.targetId] = (productViewMap[ev.targetId] ?? 0) + 1;
+    } else if (ev.path.startsWith("/shop/")) {
+      const pId = parseInt(ev.path.replace("/shop/", ""), 10);
+      if (!isNaN(pId)) {
+        productViewMap[pId] = (productViewMap[pId] ?? 0) + 1;
+      }
+    }
+
+    // Author tracking (pageType === "ARTIST" or targetId or path query)
+    if (ev.pageType === "ARTIST" && ev.targetId) {
+      authorViewMap[ev.targetId] = (authorViewMap[ev.targetId] ?? 0) + 1;
+    } else if (ev.path.includes("artist=")) {
+      const match = /artist=(\d+)/.exec(ev.path);
+      if (match?.[1]) {
+        const aId = parseInt(match[1], 10);
+        if (!isNaN(aId)) authorViewMap[aId] = (authorViewMap[aId] ?? 0) + 1;
+      }
+    }
 
     // Daily timeline grouping
     const dateKey = ev.createdAt.toISOString().slice(5, 10); // MM-DD
@@ -133,6 +192,33 @@ export default async function AnalyticsPage({
     .sort((a, b) => b.count - a.count)
     .slice(0, 7);
 
+  // Top Viewed Products with entity details
+  const topProductsList = products
+    .map((prod) => ({
+      ...prod,
+      views: productViewMap[prod.id] ?? 0,
+    }))
+    .sort((a, b) => b.views - a.views)
+    .slice(0, 5);
+
+  // Top Viewed Authors with entity details
+  const topAuthorsList = authors
+    .map((author) => ({
+      ...author,
+      views: authorViewMap[author.id] ?? 0,
+    }))
+    .sort((a, b) => b.views - a.views);
+
+  // Top Paintings (ranked by views descending, then inquiries)
+  const topPaintingsList = paintings
+    .map((p) => ({
+      ...p,
+      views: paintingViewMap[p.id] ?? 0,
+      inquiriesCount: p.inquiries.length,
+    }))
+    .sort((a, b) => (b.views !== a.views ? b.views - a.views : b.inquiriesCount - a.inquiriesCount))
+    .slice(0, 6);
+
   // Top Pages list
   const sortedPages = Object.entries(pathMap)
     .map(([path, data]) => ({
@@ -143,7 +229,7 @@ export default async function AnalyticsPage({
       percent: totalViews > 0 ? Math.round((data.count / totalViews) * 100) : 0,
     }))
     .sort((a, b) => b.count - a.count)
-    .slice(0, 10);
+    .slice(0, 8);
 
   // Timeline list (reverse chronological for display left-to-right)
   const timelineEntries = Object.entries(dailyTimelineMap)
@@ -164,7 +250,7 @@ export default async function AnalyticsPage({
         <div>
           <h1 className={styles.title}>Статистика відвідувачів</h1>
           <p className={styles.subtitle}>
-            Реальний трафік, канали переходів та географія відвідувачів без блокувань AdBlock
+            Реальний трафік, інтерес до картин та товарів без блокувань AdBlock
           </p>
         </div>
 
@@ -292,6 +378,95 @@ export default async function AnalyticsPage({
         )}
       </div>
 
+      {/* ── 3-Column Entity Insights: Paintings, Authors, Products ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem" }}>
+        {/* 1. Paintings: Views & Inquiries */}
+        <div className={styles.panelCard}>
+          <div className={styles.panelHeader}>
+            <h3 className={styles.cardTitle}>Перегляди картин</h3>
+            <Palette size={18} color="#64748b" />
+          </div>
+          <div className={styles.listGroup}>
+            {topPaintingsList.map((p) => (
+              <div key={p.id} className={styles.listItem}>
+                <div className={styles.itemLeft}>
+                  <div style={{ width: 36, height: 36, position: "relative", borderRadius: 6, overflow: "hidden", background: "#f1f5f9", flexShrink: 0 }}>
+                    <Image src={getOptimizedImageUrl(p.coverUrl, { preset: "thumb" })} alt={p.title} fill style={{ objectFit: "cover" }} />
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+                    <span className={styles.itemName}>{p.title}</span>
+                    <span style={{ fontSize: "0.725rem", color: "#64748b" }}>{p.author.firstName} {p.author.lastName}</span>
+                  </div>
+                </div>
+                <div className={styles.itemRight} style={{ gap: "0.5rem" }}>
+                  <span style={{ fontSize: "0.8rem", fontWeight: 800, color: "#0f172a", display: "inline-flex", alignItems: "center", gap: 3 }} title="Кількість відкриттів модалки картини">
+                    <Eye size={13} color="#64748b" />
+                    {p.views}
+                  </span>
+                  {p.inquiriesCount > 0 && (
+                    <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#047857", background: "#ecfdf5", padding: "2px 6px", borderRadius: 4, display: "inline-flex", alignItems: "center", gap: 3 }} title="Кількість запитів на купівлю">
+                      <MessageSquare size={11} />
+                      {p.inquiriesCount}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 2. Top Viewed Artists */}
+        <div className={styles.panelCard}>
+          <div className={styles.panelHeader}>
+            <h3 className={styles.cardTitle}>Художники</h3>
+            <Users size={18} color="#64748b" />
+          </div>
+          <div className={styles.listGroup}>
+            {topAuthorsList.map((a) => (
+              <div key={a.id} className={styles.listItem}>
+                <div className={styles.itemLeft}>
+                  <div style={{ width: 36, height: 36, position: "relative", borderRadius: "50%", overflow: "hidden", background: "#f1f5f9", flexShrink: 0 }}>
+                    <Image src={a.photoUrl ? getOptimizedImageUrl(a.photoUrl, { preset: "thumb" }) : "/voyt.svg"} alt={a.firstName} fill style={{ objectFit: "cover" }} />
+                  </div>
+                  <span className={styles.itemName}>{a.firstName} {a.lastName}</span>
+                </div>
+                <div className={styles.itemRight}>
+                  <span className={styles.itemCount}>{a.views}</span>
+                  <span className={styles.itemPercent}>переглядів</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 3. Top Viewed Merch Products */}
+        <div className={styles.panelCard}>
+          <div className={styles.panelHeader}>
+            <h3 className={styles.cardTitle}>Популярні товари</h3>
+            <ShoppingBag size={18} color="#64748b" />
+          </div>
+          <div className={styles.listGroup}>
+            {topProductsList.map((prod) => (
+              <div key={prod.id} className={styles.listItem}>
+                <div className={styles.itemLeft}>
+                  <div style={{ width: 36, height: 36, position: "relative", borderRadius: 6, overflow: "hidden", background: "#f1f5f9", flexShrink: 0 }}>
+                    <Image src={getOptimizedImageUrl(prod.coverUrl, { preset: "thumb" })} alt={prod.title} fill style={{ objectFit: "cover" }} />
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+                    <span className={styles.itemName}>{prod.title}</span>
+                    <span style={{ fontSize: "0.725rem", color: "#64748b" }}>{prod.price} €</span>
+                  </div>
+                </div>
+                <div className={styles.itemRight}>
+                  <span className={styles.itemCount}>{prod.views}</span>
+                  <span className={styles.itemPercent}>переглядів</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* ── Two Columns: Countries & Referrers ── */}
       <div className={styles.twoColGrid}>
         {/* Countries Breakdown */}
@@ -365,7 +540,7 @@ export default async function AnalyticsPage({
       {/* ── Top Visited Pages & Products ── */}
       <div className={styles.tableCard}>
         <div className={styles.panelHeader}>
-          <h3 className={styles.cardTitle}>Найпопулярніші сторінки та товари</h3>
+          <h3 className={styles.cardTitle}>Найпопулярніші сторінки</h3>
           <Monitor size={18} color="#64748b" />
         </div>
 

@@ -16,6 +16,7 @@ import {
   LogOut,
   BarChart3,
   Activity,
+  MessageSquare,
 } from "lucide-react";
 import styles from "../admin.module.scss";
 import { logoutAction } from "../_action";
@@ -26,6 +27,7 @@ const navSections = [
     items: [
       { label: "Дашборд", href: "/admin", icon: LayoutDashboard, exact: true },
       { label: "Картини", href: "/admin/paintings", icon: Palette },
+      { label: "Запити на картини", href: "/admin/inquiries", icon: MessageSquare },
       { label: "Автори", href: "/admin/authors", icon: Users },
       { label: "Товари", href: "/admin/products", icon: ShoppingBag },
       { label: "Замовлення", href: "/admin/orders", icon: Package },

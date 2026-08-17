@@ -3,11 +3,21 @@
 import Image from "next/image";
 import * as Dialog from "@radix-ui/react-dialog";
 import styles from "./paintingCard.module.scss";
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useTransition } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
-
+import { createPaintingInquiryAction } from "~/app/art/_inquiryActions";
+import {
+  Send,
+  MessageCircle,
+  CheckCircle2,
+  Share2,
+  Sparkles,
+  Sun,
+  Moon,
+  ArrowLeft,
+} from "lucide-react";
 
 type MediaItem = {
   id: number;
@@ -57,6 +67,16 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
   const [activeIndex, setActiveIndex] = useState(0);
   const [loadedSet, setLoadedSet] = useState<Set<string>>(new Set());
 
+  // Inquiry form states
+  const [isInquiryOpen, setIsInquiryOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [customerName, setCustomerName] = useState("");
+  const [customerContact, setCustomerContact] = useState("");
+  const [preferredContact, setPreferredContact] = useState("TELEGRAM");
+  const [message, setMessage] = useState("");
+  const [inquiryResult, setInquiryResult] = useState<{ success: boolean; inquiryNumber?: string; error?: string } | null>(null);
+  const [copiedLink, setCopiedLink] = useState(false);
+
   useEffect(() => {
     setIsNeon(isGlobalNeon && hasNeonMedia);
   }, [isGlobalNeon, hasNeonMedia]);
@@ -66,10 +86,31 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
 
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
-    if (!next) {
+    if (next) {
+      // Send background analytics event for painting modal open
+      const payload = JSON.stringify({
+        path: `/art?painting=${painting.id}`,
+        pageType: "PAINTING",
+        targetId: painting.id,
+      });
+      if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+        navigator.sendBeacon("/api/analytics", new Blob([payload], { type: "application/json" }));
+      } else {
+        void fetch("/api/analytics", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: payload,
+          keepalive: true,
+        }).catch(() => {
+          // ignore analytics beacon errors
+        });
+      }
+    } else {
       setIsNeon(false);
       setActiveIndex(0);
       setLoadedSet(new Set());
+      setIsInquiryOpen(false);
+      setInquiryResult(null);
     }
   };
 
@@ -90,7 +131,6 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
     setLoadedSet((s) => new Set([...s, url]));
   };
 
-  // Show spinner until the currently active image is loaded
   const currentItem = activeItems[activeIndex];
   const isCurrentLoaded =
     currentItem?.type === "VIDEO"
@@ -101,22 +141,51 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
 
   // Block Lenis scroll when modal is open
   useEffect(() => {
+    const win = typeof window !== "undefined" ? (window as unknown as { lenis?: { start: () => void; stop: () => void } }) : null;
+
     if (open) {
       document.body.style.overflow = "hidden";
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
-      if (typeof window !== "undefined" && (window as any).lenis) (window as any).lenis.stop();
+      if (win?.lenis) win.lenis.stop();
     } else {
       document.body.style.overflow = "";
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
-      if (typeof window !== "undefined" && (window as any).lenis) (window as any).lenis.start();
+      if (win?.lenis) win.lenis.start();
     }
 
     return () => {
       document.body.style.overflow = "";
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
-      if (typeof window !== "undefined" && (window as any).lenis) (window as any).lenis.start();
+      if (win?.lenis) win.lenis.start();
     };
   }, [open]);
+
+  const handleInquirySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customerName.trim() || !customerContact.trim()) return;
+
+    startTransition(async () => {
+      const res = await createPaintingInquiryAction({
+        paintingId: painting.id,
+        customerName,
+        customerContact,
+        preferredContact,
+        message,
+      });
+      setInquiryResult(res);
+    });
+  };
+
+  const handleCopyLink = () => {
+    if (typeof window !== "undefined") {
+      const url = `${window.location.origin}/art?painting=${painting.id}`;
+      void navigator.clipboard.writeText(url).then(() => {
+        setCopiedLink(true);
+        setTimeout(() => setCopiedLink(false), 2000);
+      });
+    }
+  };
+
+  const telegramDirectUrl = `https://t.me/voytart?text=${encodeURIComponent(
+    `Привіт! Мене цікавить картина "${painting.title}" (${painting.author.firstName} ${painting.author.lastName})`
+  )}`;
 
   return (
     <Dialog.Root open={open} onOpenChange={handleOpenChange}>
@@ -195,16 +264,14 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
               ))}
             </div>
 
-            {/* Zoom button removed as per zoom hover logic */}
-
-            {/* Navigation */}
+            {/* Navigation arrows */}
             {hasMultiple && (
               <>
                 <button
                   type="button"
                   className={`${styles.navBtn} ${styles.navPrev}`}
                   onClick={() => navigate("prev")}
-                  aria-label="Previous"
+                  aria-label="Previous image"
                 >
                   ‹
                 </button>
@@ -212,7 +279,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                   type="button"
                   className={`${styles.navBtn} ${styles.navNext}`}
                   onClick={() => navigate("next")}
-                  aria-label="Next"
+                  aria-label="Next image"
                 >
                   ›
                 </button>
@@ -221,44 +288,259 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                 </div>
               </>
             )}
+
+            {/* Thumbnails row below active image */}
+            {hasMultiple && (
+              <div className={styles.thumbnailsBar}>
+                {activeItems.map((item, idx) => (
+                  <button
+                    key={`thumb-${item.id}-${item.url}`}
+                    type="button"
+                    className={`${styles.thumbBtn} ${idx === activeIndex ? styles.thumbBtnActive : ""}`}
+                    onClick={() => setActiveIndex(idx)}
+                    aria-label={`View image ${idx + 1}`}
+                  >
+                    <Image
+                      src={getOptimizedImageUrl(item.url, { preset: "thumb" })}
+                      alt=""
+                      width={44}
+                      height={44}
+                      className={styles.thumbImg}
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* ── Info panel ──────────────────────────────────── */}
+          {/* ── Info & Inquiry panel (right column) ──────────── */}
           <div className={styles.info}>
-            <div className={styles.scrollableContent} data-lenis-prevent>
-              <p className={styles.authorLabel}>
-                {painting.author.firstName} {painting.author.lastName}
-              </p>
-              <Dialog.Title className={styles.title}>{painting.title}</Dialog.Title>
-              {hasNeonMedia && (
-                <label className={styles.switchWrap} aria-label="Toggle neon mode">
-                  <span className={styles.switchTrack}>
-                    <input
-                      type="checkbox"
-                      className={styles.switchInput}
-                      checked={isNeon}
-                      onChange={handleModeToggle}
-                    />
-                    <span className={styles.switchThumb} />
-                  </span>
-                </label>
-              )}
+            <AnimatePresence mode="wait">
+              {!isInquiryOpen ? (
+                /* ── Standard Painting Info View ── */
+                <motion.div
+                  key="info-view"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.2 }}
+                  className={styles.panelContent}
+                >
+                  <div className={styles.scrollableContent} data-lenis-prevent>
+                    <div className={styles.authorHeader}>
+                      <span className={styles.authorLabel}>
+                        {painting.author.firstName} {painting.author.lastName}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleCopyLink}
+                        className={styles.shareBtn}
+                        title="Copy direct link"
+                        aria-label="Copy link to painting"
+                      >
+                        <Share2 size={15} />
+                        <span>{copiedLink ? "Copied!" : "Share"}</span>
+                      </button>
+                    </div>
 
-              {painting.description && (
-                <div
-                  className={styles.description}
-                  data-lenis-prevent
-                  dangerouslySetInnerHTML={{ __html: painting.description }}
-                />
-              )}
-            </div>
+                    <Dialog.Title className={styles.title}>{painting.title}</Dialog.Title>
 
-            <div className={styles.actions}>
-              <a href="mailto:contact@voytart.com" className={styles.btnPrimary}>
-                Inquire about this painting
-              </a>
-              <Dialog.Close className={styles.btnGhost}>Close</Dialog.Close>
-            </div>
+                    {/* Specs Badges */}
+                    <div className={styles.specsRow}>
+                      {painting.year && (
+                        <span className={styles.specBadge}>{painting.year}</span>
+                      )}
+                      <span className={styles.specBadge}>Original Artwork</span>
+                      {hasNeonMedia && (
+                        <span className={styles.specBadgeNeon}>
+                          <Sparkles size={12} />
+                          <span>UV Neon Glow</span>
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Premium Neon Switcher Pill */}
+                    {hasNeonMedia && (
+                      <div className={styles.neonPillSwitch} onClick={handleModeToggle}>
+                        <button
+                          type="button"
+                          className={`${styles.pillOption} ${!isNeon ? styles.pillOptionActive : ""}`}
+                        >
+                          <Sun size={14} />
+                          <span>Daylight</span>
+                        </button>
+                        <button
+                          type="button"
+                          className={`${styles.pillOption} ${isNeon ? styles.pillOptionNeonActive : ""}`}
+                        >
+                          <Moon size={14} />
+                          <span>Neon Glow</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {painting.description && (
+                      <div
+                        className={styles.description}
+                        data-lenis-prevent
+                        dangerouslySetInnerHTML={{ __html: painting.description }}
+                      />
+                    )}
+                  </div>
+
+                  <div className={styles.actions}>
+                    <button
+                      type="button"
+                      onClick={() => setIsInquiryOpen(true)}
+                      className={styles.btnPrimary}
+                    >
+                      <span>Interested ?</span>
+                    </button>
+                    <Dialog.Close className={styles.btnGhost}>Close</Dialog.Close>
+                  </div>
+                </motion.div>
+              ) : (
+                /* ── Inquiry Contact Form Sub-view ── */
+                <motion.div
+                  key="inquiry-view"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.2 }}
+                  className={styles.panelContent}
+                >
+                  <div className={styles.scrollableContent} data-lenis-prevent>
+                    <div className={styles.inquiryHeader}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsInquiryOpen(false);
+                          setInquiryResult(null);
+                        }}
+                        className={styles.backBtn}
+                      >
+                        <ArrowLeft size={16} />
+                        <span>Back</span>
+                      </button>
+                      <span className={styles.inquiryTitle}>Interested in this artwork</span>
+                    </div>
+
+                    {/* Painting Mini Preview */}
+                    <div className={styles.inquiryPaintingSnippet}>
+                      <div className={styles.snippetThumbWrap}>
+                        <Image
+                          src={getOptimizedImageUrl(painting.coverUrl, { preset: "thumb" })}
+                          alt={painting.title}
+                          fill
+                          className={styles.snippetImg}
+                        />
+                      </div>
+                      <div className={styles.snippetDetails}>
+                        <span className={styles.snippetTitle}>{painting.title}</span>
+                        <span className={styles.snippetAuthor}>
+                          {painting.author.firstName} {painting.author.lastName}
+                        </span>
+                      </div>
+                    </div>
+
+                    {inquiryResult?.success ? (
+                      <div className={styles.inquirySuccessBox}>
+                        <CheckCircle2 size={44} className={styles.successIcon} />
+                        <h4 className={styles.successTitle}>Inquiry Sent!</h4>
+                        <p className={styles.successText}>
+                          Reference: <strong>{inquiryResult.inquiryNumber}</strong>
+                        </p>
+                        <p className={styles.successSub}>
+                          We will reach out to you shortly to share details, private viewing opportunities, and acquisition info.
+                        </p>
+                      </div>
+                    ) : (
+                      <form onSubmit={handleInquirySubmit} className={styles.inquiryForm}>
+                        {inquiryResult?.error && (
+                          <div className={styles.inquiryError}>{inquiryResult.error}</div>
+                        )}
+
+                        <div className={styles.inquiryField}>
+                          <label className={styles.fieldLabel}>Your Name *</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="Alex"
+                            value={customerName}
+                            onChange={(e) => setCustomerName(e.target.value)}
+                            className={styles.inquiryInput}
+                          />
+                        </div>
+
+                        <div className={styles.inquiryField}>
+                          <label className={styles.fieldLabel}>Phone or @Telegram *</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="+380... or @username"
+                            value={customerContact}
+                            onChange={(e) => setCustomerContact(e.target.value)}
+                            className={styles.inquiryInput}
+                          />
+                        </div>
+
+                        <div className={styles.inquiryField}>
+                          <label className={styles.fieldLabel}>Preferred Contact Method</label>
+                          <div className={styles.preferredContactGroup}>
+                            {["TELEGRAM", "PHONE", "WHATSAPP", "EMAIL"].map((method) => (
+                              <button
+                                key={method}
+                                type="button"
+                                className={`${styles.prefBtn} ${preferredContact === method ? styles.prefBtnActive : ""}`}
+                                onClick={() => setPreferredContact(method)}
+                              >
+                                {method === "TELEGRAM" && "Telegram"}
+                                {method === "PHONE" && "Phone"}
+                                {method === "WHATSAPP" && "WhatsApp"}
+                                {method === "EMAIL" && "Email"}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className={styles.inquiryField}>
+                          <label className={styles.fieldLabel}>Message / Question (Optional)</label>
+                          <textarea
+                            placeholder="e.g. Inquiring about price, dimensions, or gallery viewing in Kyiv..."
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            className={styles.inquiryTextarea}
+                          />
+                        </div>
+
+                        <button
+                          type="submit"
+                          disabled={isPending}
+                          className={styles.inquirySubmitBtn}
+                        >
+                          <Send size={16} />
+                          <span>{isPending ? "Sending..." : "Submit Inquiry"}</span>
+                        </button>
+                      </form>
+                    )}
+
+                    {/* Direct Telegram Chat Option */}
+                    <div className={styles.directTelegramWrap}>
+                      <span className={styles.orDivider}>or contact us directly</span>
+                      <a
+                        href={telegramDirectUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.telegramDirectBtn}
+                      >
+                        <MessageCircle size={17} />
+                        <span>Chat directly on Telegram</span>
+                      </a>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </Dialog.Content>
       </Dialog.Portal>

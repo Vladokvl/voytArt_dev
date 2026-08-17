@@ -83,6 +83,11 @@ export type AdminUser = $Result.DefaultSelection<Prisma.$AdminUserPayload>
  * 
  */
 export type AnalyticsEvent = $Result.DefaultSelection<Prisma.$AnalyticsEventPayload>
+/**
+ * Model PaintingInquiry
+ * 
+ */
+export type PaintingInquiry = $Result.DefaultSelection<Prisma.$PaintingInquiryPayload>
 
 /**
  * Enums
@@ -107,6 +112,17 @@ export const OrderStatus: {
 export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus]
 
 
+export const InquiryStatus: {
+  NEW: 'NEW',
+  IN_PROGRESS: 'IN_PROGRESS',
+  CONTACTED: 'CONTACTED',
+  SOLD: 'SOLD',
+  CANCELLED: 'CANCELLED'
+};
+
+export type InquiryStatus = (typeof InquiryStatus)[keyof typeof InquiryStatus]
+
+
 export const PaymentMethod: {
   COD: 'COD',
   CARD: 'CARD'
@@ -123,6 +139,10 @@ export const MediaType: typeof $Enums.MediaType
 export type OrderStatus = $Enums.OrderStatus
 
 export const OrderStatus: typeof $Enums.OrderStatus
+
+export type InquiryStatus = $Enums.InquiryStatus
+
+export const InquiryStatus: typeof $Enums.InquiryStatus
 
 export type PaymentMethod = $Enums.PaymentMethod
 
@@ -388,6 +408,16 @@ export class PrismaClient<
     * ```
     */
   get analyticsEvent(): Prisma.AnalyticsEventDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.paintingInquiry`: Exposes CRUD operations for the **PaintingInquiry** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PaintingInquiries
+    * const paintingInquiries = await prisma.paintingInquiry.findMany()
+    * ```
+    */
+  get paintingInquiry(): Prisma.PaintingInquiryDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -835,7 +865,8 @@ export namespace Prisma {
     GalleryPost: 'GalleryPost',
     GalleryPostMedia: 'GalleryPostMedia',
     AdminUser: 'AdminUser',
-    AnalyticsEvent: 'AnalyticsEvent'
+    AnalyticsEvent: 'AnalyticsEvent',
+    PaintingInquiry: 'PaintingInquiry'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -851,7 +882,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "author" | "collection" | "painting" | "paintingMedia" | "category" | "product" | "productVariant" | "productImage" | "order" | "orderItem" | "galleryPost" | "galleryPostMedia" | "adminUser" | "analyticsEvent"
+      modelProps: "author" | "collection" | "painting" | "paintingMedia" | "category" | "product" | "productVariant" | "productImage" | "order" | "orderItem" | "galleryPost" | "galleryPostMedia" | "adminUser" | "analyticsEvent" | "paintingInquiry"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1891,6 +1922,80 @@ export namespace Prisma {
           }
         }
       }
+      PaintingInquiry: {
+        payload: Prisma.$PaintingInquiryPayload<ExtArgs>
+        fields: Prisma.PaintingInquiryFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PaintingInquiryFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaintingInquiryPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PaintingInquiryFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaintingInquiryPayload>
+          }
+          findFirst: {
+            args: Prisma.PaintingInquiryFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaintingInquiryPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PaintingInquiryFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaintingInquiryPayload>
+          }
+          findMany: {
+            args: Prisma.PaintingInquiryFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaintingInquiryPayload>[]
+          }
+          create: {
+            args: Prisma.PaintingInquiryCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaintingInquiryPayload>
+          }
+          createMany: {
+            args: Prisma.PaintingInquiryCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PaintingInquiryCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaintingInquiryPayload>[]
+          }
+          delete: {
+            args: Prisma.PaintingInquiryDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaintingInquiryPayload>
+          }
+          update: {
+            args: Prisma.PaintingInquiryUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaintingInquiryPayload>
+          }
+          deleteMany: {
+            args: Prisma.PaintingInquiryDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PaintingInquiryUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PaintingInquiryUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaintingInquiryPayload>[]
+          }
+          upsert: {
+            args: Prisma.PaintingInquiryUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaintingInquiryPayload>
+          }
+          aggregate: {
+            args: Prisma.PaintingInquiryAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePaintingInquiry>
+          }
+          groupBy: {
+            args: Prisma.PaintingInquiryGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PaintingInquiryGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PaintingInquiryCountArgs<ExtArgs>
+            result: $Utils.Optional<PaintingInquiryCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -2013,6 +2118,7 @@ export namespace Prisma {
     galleryPostMedia?: GalleryPostMediaOmit
     adminUser?: AdminUserOmit
     analyticsEvent?: AnalyticsEventOmit
+    paintingInquiry?: PaintingInquiryOmit
   }
 
   /* Types for Logging */
@@ -2174,10 +2280,12 @@ export namespace Prisma {
 
   export type PaintingCountOutputType = {
     media: number
+    inquiries: number
   }
 
   export type PaintingCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     media?: boolean | PaintingCountOutputTypeCountMediaArgs
+    inquiries?: boolean | PaintingCountOutputTypeCountInquiriesArgs
   }
 
   // Custom InputTypes
@@ -2196,6 +2304,13 @@ export namespace Prisma {
    */
   export type PaintingCountOutputTypeCountMediaArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PaintingMediaWhereInput
+  }
+
+  /**
+   * PaintingCountOutputType without action
+   */
+  export type PaintingCountOutputTypeCountInquiriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PaintingInquiryWhereInput
   }
 
 
@@ -5096,6 +5211,7 @@ export namespace Prisma {
     author?: boolean | AuthorDefaultArgs<ExtArgs>
     collection?: boolean | Painting$collectionArgs<ExtArgs>
     media?: boolean | Painting$mediaArgs<ExtArgs>
+    inquiries?: boolean | Painting$inquiriesArgs<ExtArgs>
     _count?: boolean | PaintingCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["painting"]>
 
@@ -5156,6 +5272,7 @@ export namespace Prisma {
     author?: boolean | AuthorDefaultArgs<ExtArgs>
     collection?: boolean | Painting$collectionArgs<ExtArgs>
     media?: boolean | Painting$mediaArgs<ExtArgs>
+    inquiries?: boolean | Painting$inquiriesArgs<ExtArgs>
     _count?: boolean | PaintingCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type PaintingIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5173,6 +5290,7 @@ export namespace Prisma {
       author: Prisma.$AuthorPayload<ExtArgs>
       collection: Prisma.$CollectionPayload<ExtArgs> | null
       media: Prisma.$PaintingMediaPayload<ExtArgs>[]
+      inquiries: Prisma.$PaintingInquiryPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -5585,6 +5703,7 @@ export namespace Prisma {
     author<T extends AuthorDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AuthorDefaultArgs<ExtArgs>>): Prisma__AuthorClient<$Result.GetResult<Prisma.$AuthorPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     collection<T extends Painting$collectionArgs<ExtArgs> = {}>(args?: Subset<T, Painting$collectionArgs<ExtArgs>>): Prisma__CollectionClient<$Result.GetResult<Prisma.$CollectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     media<T extends Painting$mediaArgs<ExtArgs> = {}>(args?: Subset<T, Painting$mediaArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaintingMediaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    inquiries<T extends Painting$inquiriesArgs<ExtArgs> = {}>(args?: Subset<T, Painting$inquiriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaintingInquiryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6068,6 +6187,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: PaintingMediaScalarFieldEnum | PaintingMediaScalarFieldEnum[]
+  }
+
+  /**
+   * Painting.inquiries
+   */
+  export type Painting$inquiriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaintingInquiry
+     */
+    select?: PaintingInquirySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaintingInquiry
+     */
+    omit?: PaintingInquiryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaintingInquiryInclude<ExtArgs> | null
+    where?: PaintingInquiryWhereInput
+    orderBy?: PaintingInquiryOrderByWithRelationInput | PaintingInquiryOrderByWithRelationInput[]
+    cursor?: PaintingInquiryWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PaintingInquiryScalarFieldEnum | PaintingInquiryScalarFieldEnum[]
   }
 
   /**
@@ -17736,16 +17879,19 @@ export namespace Prisma {
 
   export type AnalyticsEventAvgAggregateOutputType = {
     id: number | null
+    targetId: number | null
   }
 
   export type AnalyticsEventSumAggregateOutputType = {
     id: number | null
+    targetId: number | null
   }
 
   export type AnalyticsEventMinAggregateOutputType = {
     id: number | null
     path: string | null
     pageType: string | null
+    targetId: number | null
     country: string | null
     city: string | null
     device: string | null
@@ -17760,6 +17906,7 @@ export namespace Prisma {
     id: number | null
     path: string | null
     pageType: string | null
+    targetId: number | null
     country: string | null
     city: string | null
     device: string | null
@@ -17774,6 +17921,7 @@ export namespace Prisma {
     id: number
     path: number
     pageType: number
+    targetId: number
     country: number
     city: number
     device: number
@@ -17788,16 +17936,19 @@ export namespace Prisma {
 
   export type AnalyticsEventAvgAggregateInputType = {
     id?: true
+    targetId?: true
   }
 
   export type AnalyticsEventSumAggregateInputType = {
     id?: true
+    targetId?: true
   }
 
   export type AnalyticsEventMinAggregateInputType = {
     id?: true
     path?: true
     pageType?: true
+    targetId?: true
     country?: true
     city?: true
     device?: true
@@ -17812,6 +17963,7 @@ export namespace Prisma {
     id?: true
     path?: true
     pageType?: true
+    targetId?: true
     country?: true
     city?: true
     device?: true
@@ -17826,6 +17978,7 @@ export namespace Prisma {
     id?: true
     path?: true
     pageType?: true
+    targetId?: true
     country?: true
     city?: true
     device?: true
@@ -17927,6 +18080,7 @@ export namespace Prisma {
     id: number
     path: string
     pageType: string
+    targetId: number | null
     country: string | null
     city: string | null
     device: string | null
@@ -17960,6 +18114,7 @@ export namespace Prisma {
     id?: boolean
     path?: boolean
     pageType?: boolean
+    targetId?: boolean
     country?: boolean
     city?: boolean
     device?: boolean
@@ -17974,6 +18129,7 @@ export namespace Prisma {
     id?: boolean
     path?: boolean
     pageType?: boolean
+    targetId?: boolean
     country?: boolean
     city?: boolean
     device?: boolean
@@ -17988,6 +18144,7 @@ export namespace Prisma {
     id?: boolean
     path?: boolean
     pageType?: boolean
+    targetId?: boolean
     country?: boolean
     city?: boolean
     device?: boolean
@@ -18002,6 +18159,7 @@ export namespace Prisma {
     id?: boolean
     path?: boolean
     pageType?: boolean
+    targetId?: boolean
     country?: boolean
     city?: boolean
     device?: boolean
@@ -18012,7 +18170,7 @@ export namespace Prisma {
     createdAt?: boolean
   }
 
-  export type AnalyticsEventOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "path" | "pageType" | "country" | "city" | "device" | "browser" | "os" | "referer" | "visitorHash" | "createdAt", ExtArgs["result"]["analyticsEvent"]>
+  export type AnalyticsEventOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "path" | "pageType" | "targetId" | "country" | "city" | "device" | "browser" | "os" | "referer" | "visitorHash" | "createdAt", ExtArgs["result"]["analyticsEvent"]>
 
   export type $AnalyticsEventPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "AnalyticsEvent"
@@ -18021,6 +18179,7 @@ export namespace Prisma {
       id: number
       path: string
       pageType: string
+      targetId: number | null
       country: string | null
       city: string | null
       device: string | null
@@ -18455,6 +18614,7 @@ export namespace Prisma {
     readonly id: FieldRef<"AnalyticsEvent", 'Int'>
     readonly path: FieldRef<"AnalyticsEvent", 'String'>
     readonly pageType: FieldRef<"AnalyticsEvent", 'String'>
+    readonly targetId: FieldRef<"AnalyticsEvent", 'Int'>
     readonly country: FieldRef<"AnalyticsEvent", 'String'>
     readonly city: FieldRef<"AnalyticsEvent", 'String'>
     readonly device: FieldRef<"AnalyticsEvent", 'String'>
@@ -18835,6 +18995,1185 @@ export namespace Prisma {
 
 
   /**
+   * Model PaintingInquiry
+   */
+
+  export type AggregatePaintingInquiry = {
+    _count: PaintingInquiryCountAggregateOutputType | null
+    _avg: PaintingInquiryAvgAggregateOutputType | null
+    _sum: PaintingInquirySumAggregateOutputType | null
+    _min: PaintingInquiryMinAggregateOutputType | null
+    _max: PaintingInquiryMaxAggregateOutputType | null
+  }
+
+  export type PaintingInquiryAvgAggregateOutputType = {
+    id: number | null
+    paintingId: number | null
+  }
+
+  export type PaintingInquirySumAggregateOutputType = {
+    id: number | null
+    paintingId: number | null
+  }
+
+  export type PaintingInquiryMinAggregateOutputType = {
+    id: number | null
+    inquiryNumber: string | null
+    paintingId: number | null
+    customerName: string | null
+    customerContact: string | null
+    preferredContact: string | null
+    message: string | null
+    status: $Enums.InquiryStatus | null
+    notes: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PaintingInquiryMaxAggregateOutputType = {
+    id: number | null
+    inquiryNumber: string | null
+    paintingId: number | null
+    customerName: string | null
+    customerContact: string | null
+    preferredContact: string | null
+    message: string | null
+    status: $Enums.InquiryStatus | null
+    notes: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PaintingInquiryCountAggregateOutputType = {
+    id: number
+    inquiryNumber: number
+    paintingId: number
+    customerName: number
+    customerContact: number
+    preferredContact: number
+    message: number
+    status: number
+    notes: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type PaintingInquiryAvgAggregateInputType = {
+    id?: true
+    paintingId?: true
+  }
+
+  export type PaintingInquirySumAggregateInputType = {
+    id?: true
+    paintingId?: true
+  }
+
+  export type PaintingInquiryMinAggregateInputType = {
+    id?: true
+    inquiryNumber?: true
+    paintingId?: true
+    customerName?: true
+    customerContact?: true
+    preferredContact?: true
+    message?: true
+    status?: true
+    notes?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PaintingInquiryMaxAggregateInputType = {
+    id?: true
+    inquiryNumber?: true
+    paintingId?: true
+    customerName?: true
+    customerContact?: true
+    preferredContact?: true
+    message?: true
+    status?: true
+    notes?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PaintingInquiryCountAggregateInputType = {
+    id?: true
+    inquiryNumber?: true
+    paintingId?: true
+    customerName?: true
+    customerContact?: true
+    preferredContact?: true
+    message?: true
+    status?: true
+    notes?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type PaintingInquiryAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PaintingInquiry to aggregate.
+     */
+    where?: PaintingInquiryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PaintingInquiries to fetch.
+     */
+    orderBy?: PaintingInquiryOrderByWithRelationInput | PaintingInquiryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PaintingInquiryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PaintingInquiries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PaintingInquiries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PaintingInquiries
+    **/
+    _count?: true | PaintingInquiryCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PaintingInquiryAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PaintingInquirySumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PaintingInquiryMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PaintingInquiryMaxAggregateInputType
+  }
+
+  export type GetPaintingInquiryAggregateType<T extends PaintingInquiryAggregateArgs> = {
+        [P in keyof T & keyof AggregatePaintingInquiry]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePaintingInquiry[P]>
+      : GetScalarType<T[P], AggregatePaintingInquiry[P]>
+  }
+
+
+
+
+  export type PaintingInquiryGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PaintingInquiryWhereInput
+    orderBy?: PaintingInquiryOrderByWithAggregationInput | PaintingInquiryOrderByWithAggregationInput[]
+    by: PaintingInquiryScalarFieldEnum[] | PaintingInquiryScalarFieldEnum
+    having?: PaintingInquiryScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PaintingInquiryCountAggregateInputType | true
+    _avg?: PaintingInquiryAvgAggregateInputType
+    _sum?: PaintingInquirySumAggregateInputType
+    _min?: PaintingInquiryMinAggregateInputType
+    _max?: PaintingInquiryMaxAggregateInputType
+  }
+
+  export type PaintingInquiryGroupByOutputType = {
+    id: number
+    inquiryNumber: string
+    paintingId: number
+    customerName: string
+    customerContact: string
+    preferredContact: string
+    message: string | null
+    status: $Enums.InquiryStatus
+    notes: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: PaintingInquiryCountAggregateOutputType | null
+    _avg: PaintingInquiryAvgAggregateOutputType | null
+    _sum: PaintingInquirySumAggregateOutputType | null
+    _min: PaintingInquiryMinAggregateOutputType | null
+    _max: PaintingInquiryMaxAggregateOutputType | null
+  }
+
+  type GetPaintingInquiryGroupByPayload<T extends PaintingInquiryGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PaintingInquiryGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PaintingInquiryGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PaintingInquiryGroupByOutputType[P]>
+            : GetScalarType<T[P], PaintingInquiryGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PaintingInquirySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    inquiryNumber?: boolean
+    paintingId?: boolean
+    customerName?: boolean
+    customerContact?: boolean
+    preferredContact?: boolean
+    message?: boolean
+    status?: boolean
+    notes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    painting?: boolean | PaintingDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["paintingInquiry"]>
+
+  export type PaintingInquirySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    inquiryNumber?: boolean
+    paintingId?: boolean
+    customerName?: boolean
+    customerContact?: boolean
+    preferredContact?: boolean
+    message?: boolean
+    status?: boolean
+    notes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    painting?: boolean | PaintingDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["paintingInquiry"]>
+
+  export type PaintingInquirySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    inquiryNumber?: boolean
+    paintingId?: boolean
+    customerName?: boolean
+    customerContact?: boolean
+    preferredContact?: boolean
+    message?: boolean
+    status?: boolean
+    notes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    painting?: boolean | PaintingDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["paintingInquiry"]>
+
+  export type PaintingInquirySelectScalar = {
+    id?: boolean
+    inquiryNumber?: boolean
+    paintingId?: boolean
+    customerName?: boolean
+    customerContact?: boolean
+    preferredContact?: boolean
+    message?: boolean
+    status?: boolean
+    notes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type PaintingInquiryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "inquiryNumber" | "paintingId" | "customerName" | "customerContact" | "preferredContact" | "message" | "status" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["paintingInquiry"]>
+  export type PaintingInquiryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    painting?: boolean | PaintingDefaultArgs<ExtArgs>
+  }
+  export type PaintingInquiryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    painting?: boolean | PaintingDefaultArgs<ExtArgs>
+  }
+  export type PaintingInquiryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    painting?: boolean | PaintingDefaultArgs<ExtArgs>
+  }
+
+  export type $PaintingInquiryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PaintingInquiry"
+    objects: {
+      painting: Prisma.$PaintingPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      inquiryNumber: string
+      paintingId: number
+      customerName: string
+      customerContact: string
+      preferredContact: string
+      message: string | null
+      status: $Enums.InquiryStatus
+      notes: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["paintingInquiry"]>
+    composites: {}
+  }
+
+  type PaintingInquiryGetPayload<S extends boolean | null | undefined | PaintingInquiryDefaultArgs> = $Result.GetResult<Prisma.$PaintingInquiryPayload, S>
+
+  type PaintingInquiryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PaintingInquiryFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PaintingInquiryCountAggregateInputType | true
+    }
+
+  export interface PaintingInquiryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PaintingInquiry'], meta: { name: 'PaintingInquiry' } }
+    /**
+     * Find zero or one PaintingInquiry that matches the filter.
+     * @param {PaintingInquiryFindUniqueArgs} args - Arguments to find a PaintingInquiry
+     * @example
+     * // Get one PaintingInquiry
+     * const paintingInquiry = await prisma.paintingInquiry.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PaintingInquiryFindUniqueArgs>(args: SelectSubset<T, PaintingInquiryFindUniqueArgs<ExtArgs>>): Prisma__PaintingInquiryClient<$Result.GetResult<Prisma.$PaintingInquiryPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PaintingInquiry that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PaintingInquiryFindUniqueOrThrowArgs} args - Arguments to find a PaintingInquiry
+     * @example
+     * // Get one PaintingInquiry
+     * const paintingInquiry = await prisma.paintingInquiry.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PaintingInquiryFindUniqueOrThrowArgs>(args: SelectSubset<T, PaintingInquiryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PaintingInquiryClient<$Result.GetResult<Prisma.$PaintingInquiryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PaintingInquiry that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaintingInquiryFindFirstArgs} args - Arguments to find a PaintingInquiry
+     * @example
+     * // Get one PaintingInquiry
+     * const paintingInquiry = await prisma.paintingInquiry.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PaintingInquiryFindFirstArgs>(args?: SelectSubset<T, PaintingInquiryFindFirstArgs<ExtArgs>>): Prisma__PaintingInquiryClient<$Result.GetResult<Prisma.$PaintingInquiryPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PaintingInquiry that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaintingInquiryFindFirstOrThrowArgs} args - Arguments to find a PaintingInquiry
+     * @example
+     * // Get one PaintingInquiry
+     * const paintingInquiry = await prisma.paintingInquiry.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PaintingInquiryFindFirstOrThrowArgs>(args?: SelectSubset<T, PaintingInquiryFindFirstOrThrowArgs<ExtArgs>>): Prisma__PaintingInquiryClient<$Result.GetResult<Prisma.$PaintingInquiryPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PaintingInquiries that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaintingInquiryFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PaintingInquiries
+     * const paintingInquiries = await prisma.paintingInquiry.findMany()
+     * 
+     * // Get first 10 PaintingInquiries
+     * const paintingInquiries = await prisma.paintingInquiry.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const paintingInquiryWithIdOnly = await prisma.paintingInquiry.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PaintingInquiryFindManyArgs>(args?: SelectSubset<T, PaintingInquiryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaintingInquiryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PaintingInquiry.
+     * @param {PaintingInquiryCreateArgs} args - Arguments to create a PaintingInquiry.
+     * @example
+     * // Create one PaintingInquiry
+     * const PaintingInquiry = await prisma.paintingInquiry.create({
+     *   data: {
+     *     // ... data to create a PaintingInquiry
+     *   }
+     * })
+     * 
+     */
+    create<T extends PaintingInquiryCreateArgs>(args: SelectSubset<T, PaintingInquiryCreateArgs<ExtArgs>>): Prisma__PaintingInquiryClient<$Result.GetResult<Prisma.$PaintingInquiryPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PaintingInquiries.
+     * @param {PaintingInquiryCreateManyArgs} args - Arguments to create many PaintingInquiries.
+     * @example
+     * // Create many PaintingInquiries
+     * const paintingInquiry = await prisma.paintingInquiry.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PaintingInquiryCreateManyArgs>(args?: SelectSubset<T, PaintingInquiryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PaintingInquiries and returns the data saved in the database.
+     * @param {PaintingInquiryCreateManyAndReturnArgs} args - Arguments to create many PaintingInquiries.
+     * @example
+     * // Create many PaintingInquiries
+     * const paintingInquiry = await prisma.paintingInquiry.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PaintingInquiries and only return the `id`
+     * const paintingInquiryWithIdOnly = await prisma.paintingInquiry.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PaintingInquiryCreateManyAndReturnArgs>(args?: SelectSubset<T, PaintingInquiryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaintingInquiryPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PaintingInquiry.
+     * @param {PaintingInquiryDeleteArgs} args - Arguments to delete one PaintingInquiry.
+     * @example
+     * // Delete one PaintingInquiry
+     * const PaintingInquiry = await prisma.paintingInquiry.delete({
+     *   where: {
+     *     // ... filter to delete one PaintingInquiry
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PaintingInquiryDeleteArgs>(args: SelectSubset<T, PaintingInquiryDeleteArgs<ExtArgs>>): Prisma__PaintingInquiryClient<$Result.GetResult<Prisma.$PaintingInquiryPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PaintingInquiry.
+     * @param {PaintingInquiryUpdateArgs} args - Arguments to update one PaintingInquiry.
+     * @example
+     * // Update one PaintingInquiry
+     * const paintingInquiry = await prisma.paintingInquiry.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PaintingInquiryUpdateArgs>(args: SelectSubset<T, PaintingInquiryUpdateArgs<ExtArgs>>): Prisma__PaintingInquiryClient<$Result.GetResult<Prisma.$PaintingInquiryPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PaintingInquiries.
+     * @param {PaintingInquiryDeleteManyArgs} args - Arguments to filter PaintingInquiries to delete.
+     * @example
+     * // Delete a few PaintingInquiries
+     * const { count } = await prisma.paintingInquiry.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PaintingInquiryDeleteManyArgs>(args?: SelectSubset<T, PaintingInquiryDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PaintingInquiries.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaintingInquiryUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PaintingInquiries
+     * const paintingInquiry = await prisma.paintingInquiry.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PaintingInquiryUpdateManyArgs>(args: SelectSubset<T, PaintingInquiryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PaintingInquiries and returns the data updated in the database.
+     * @param {PaintingInquiryUpdateManyAndReturnArgs} args - Arguments to update many PaintingInquiries.
+     * @example
+     * // Update many PaintingInquiries
+     * const paintingInquiry = await prisma.paintingInquiry.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PaintingInquiries and only return the `id`
+     * const paintingInquiryWithIdOnly = await prisma.paintingInquiry.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PaintingInquiryUpdateManyAndReturnArgs>(args: SelectSubset<T, PaintingInquiryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaintingInquiryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PaintingInquiry.
+     * @param {PaintingInquiryUpsertArgs} args - Arguments to update or create a PaintingInquiry.
+     * @example
+     * // Update or create a PaintingInquiry
+     * const paintingInquiry = await prisma.paintingInquiry.upsert({
+     *   create: {
+     *     // ... data to create a PaintingInquiry
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PaintingInquiry we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PaintingInquiryUpsertArgs>(args: SelectSubset<T, PaintingInquiryUpsertArgs<ExtArgs>>): Prisma__PaintingInquiryClient<$Result.GetResult<Prisma.$PaintingInquiryPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PaintingInquiries.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaintingInquiryCountArgs} args - Arguments to filter PaintingInquiries to count.
+     * @example
+     * // Count the number of PaintingInquiries
+     * const count = await prisma.paintingInquiry.count({
+     *   where: {
+     *     // ... the filter for the PaintingInquiries we want to count
+     *   }
+     * })
+    **/
+    count<T extends PaintingInquiryCountArgs>(
+      args?: Subset<T, PaintingInquiryCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PaintingInquiryCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PaintingInquiry.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaintingInquiryAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PaintingInquiryAggregateArgs>(args: Subset<T, PaintingInquiryAggregateArgs>): Prisma.PrismaPromise<GetPaintingInquiryAggregateType<T>>
+
+    /**
+     * Group by PaintingInquiry.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaintingInquiryGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PaintingInquiryGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PaintingInquiryGroupByArgs['orderBy'] }
+        : { orderBy?: PaintingInquiryGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PaintingInquiryGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPaintingInquiryGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PaintingInquiry model
+   */
+  readonly fields: PaintingInquiryFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PaintingInquiry.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PaintingInquiryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    painting<T extends PaintingDefaultArgs<ExtArgs> = {}>(args?: Subset<T, PaintingDefaultArgs<ExtArgs>>): Prisma__PaintingClient<$Result.GetResult<Prisma.$PaintingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PaintingInquiry model
+   */
+  interface PaintingInquiryFieldRefs {
+    readonly id: FieldRef<"PaintingInquiry", 'Int'>
+    readonly inquiryNumber: FieldRef<"PaintingInquiry", 'String'>
+    readonly paintingId: FieldRef<"PaintingInquiry", 'Int'>
+    readonly customerName: FieldRef<"PaintingInquiry", 'String'>
+    readonly customerContact: FieldRef<"PaintingInquiry", 'String'>
+    readonly preferredContact: FieldRef<"PaintingInquiry", 'String'>
+    readonly message: FieldRef<"PaintingInquiry", 'String'>
+    readonly status: FieldRef<"PaintingInquiry", 'InquiryStatus'>
+    readonly notes: FieldRef<"PaintingInquiry", 'String'>
+    readonly createdAt: FieldRef<"PaintingInquiry", 'DateTime'>
+    readonly updatedAt: FieldRef<"PaintingInquiry", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PaintingInquiry findUnique
+   */
+  export type PaintingInquiryFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaintingInquiry
+     */
+    select?: PaintingInquirySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaintingInquiry
+     */
+    omit?: PaintingInquiryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaintingInquiryInclude<ExtArgs> | null
+    /**
+     * Filter, which PaintingInquiry to fetch.
+     */
+    where: PaintingInquiryWhereUniqueInput
+  }
+
+  /**
+   * PaintingInquiry findUniqueOrThrow
+   */
+  export type PaintingInquiryFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaintingInquiry
+     */
+    select?: PaintingInquirySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaintingInquiry
+     */
+    omit?: PaintingInquiryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaintingInquiryInclude<ExtArgs> | null
+    /**
+     * Filter, which PaintingInquiry to fetch.
+     */
+    where: PaintingInquiryWhereUniqueInput
+  }
+
+  /**
+   * PaintingInquiry findFirst
+   */
+  export type PaintingInquiryFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaintingInquiry
+     */
+    select?: PaintingInquirySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaintingInquiry
+     */
+    omit?: PaintingInquiryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaintingInquiryInclude<ExtArgs> | null
+    /**
+     * Filter, which PaintingInquiry to fetch.
+     */
+    where?: PaintingInquiryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PaintingInquiries to fetch.
+     */
+    orderBy?: PaintingInquiryOrderByWithRelationInput | PaintingInquiryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PaintingInquiries.
+     */
+    cursor?: PaintingInquiryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PaintingInquiries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PaintingInquiries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PaintingInquiries.
+     */
+    distinct?: PaintingInquiryScalarFieldEnum | PaintingInquiryScalarFieldEnum[]
+  }
+
+  /**
+   * PaintingInquiry findFirstOrThrow
+   */
+  export type PaintingInquiryFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaintingInquiry
+     */
+    select?: PaintingInquirySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaintingInquiry
+     */
+    omit?: PaintingInquiryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaintingInquiryInclude<ExtArgs> | null
+    /**
+     * Filter, which PaintingInquiry to fetch.
+     */
+    where?: PaintingInquiryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PaintingInquiries to fetch.
+     */
+    orderBy?: PaintingInquiryOrderByWithRelationInput | PaintingInquiryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PaintingInquiries.
+     */
+    cursor?: PaintingInquiryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PaintingInquiries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PaintingInquiries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PaintingInquiries.
+     */
+    distinct?: PaintingInquiryScalarFieldEnum | PaintingInquiryScalarFieldEnum[]
+  }
+
+  /**
+   * PaintingInquiry findMany
+   */
+  export type PaintingInquiryFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaintingInquiry
+     */
+    select?: PaintingInquirySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaintingInquiry
+     */
+    omit?: PaintingInquiryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaintingInquiryInclude<ExtArgs> | null
+    /**
+     * Filter, which PaintingInquiries to fetch.
+     */
+    where?: PaintingInquiryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PaintingInquiries to fetch.
+     */
+    orderBy?: PaintingInquiryOrderByWithRelationInput | PaintingInquiryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PaintingInquiries.
+     */
+    cursor?: PaintingInquiryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PaintingInquiries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PaintingInquiries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PaintingInquiries.
+     */
+    distinct?: PaintingInquiryScalarFieldEnum | PaintingInquiryScalarFieldEnum[]
+  }
+
+  /**
+   * PaintingInquiry create
+   */
+  export type PaintingInquiryCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaintingInquiry
+     */
+    select?: PaintingInquirySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaintingInquiry
+     */
+    omit?: PaintingInquiryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaintingInquiryInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PaintingInquiry.
+     */
+    data: XOR<PaintingInquiryCreateInput, PaintingInquiryUncheckedCreateInput>
+  }
+
+  /**
+   * PaintingInquiry createMany
+   */
+  export type PaintingInquiryCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PaintingInquiries.
+     */
+    data: PaintingInquiryCreateManyInput | PaintingInquiryCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PaintingInquiry createManyAndReturn
+   */
+  export type PaintingInquiryCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaintingInquiry
+     */
+    select?: PaintingInquirySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaintingInquiry
+     */
+    omit?: PaintingInquiryOmit<ExtArgs> | null
+    /**
+     * The data used to create many PaintingInquiries.
+     */
+    data: PaintingInquiryCreateManyInput | PaintingInquiryCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaintingInquiryIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PaintingInquiry update
+   */
+  export type PaintingInquiryUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaintingInquiry
+     */
+    select?: PaintingInquirySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaintingInquiry
+     */
+    omit?: PaintingInquiryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaintingInquiryInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PaintingInquiry.
+     */
+    data: XOR<PaintingInquiryUpdateInput, PaintingInquiryUncheckedUpdateInput>
+    /**
+     * Choose, which PaintingInquiry to update.
+     */
+    where: PaintingInquiryWhereUniqueInput
+  }
+
+  /**
+   * PaintingInquiry updateMany
+   */
+  export type PaintingInquiryUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PaintingInquiries.
+     */
+    data: XOR<PaintingInquiryUpdateManyMutationInput, PaintingInquiryUncheckedUpdateManyInput>
+    /**
+     * Filter which PaintingInquiries to update
+     */
+    where?: PaintingInquiryWhereInput
+    /**
+     * Limit how many PaintingInquiries to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PaintingInquiry updateManyAndReturn
+   */
+  export type PaintingInquiryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaintingInquiry
+     */
+    select?: PaintingInquirySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaintingInquiry
+     */
+    omit?: PaintingInquiryOmit<ExtArgs> | null
+    /**
+     * The data used to update PaintingInquiries.
+     */
+    data: XOR<PaintingInquiryUpdateManyMutationInput, PaintingInquiryUncheckedUpdateManyInput>
+    /**
+     * Filter which PaintingInquiries to update
+     */
+    where?: PaintingInquiryWhereInput
+    /**
+     * Limit how many PaintingInquiries to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaintingInquiryIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PaintingInquiry upsert
+   */
+  export type PaintingInquiryUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaintingInquiry
+     */
+    select?: PaintingInquirySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaintingInquiry
+     */
+    omit?: PaintingInquiryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaintingInquiryInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PaintingInquiry to update in case it exists.
+     */
+    where: PaintingInquiryWhereUniqueInput
+    /**
+     * In case the PaintingInquiry found by the `where` argument doesn't exist, create a new PaintingInquiry with this data.
+     */
+    create: XOR<PaintingInquiryCreateInput, PaintingInquiryUncheckedCreateInput>
+    /**
+     * In case the PaintingInquiry was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PaintingInquiryUpdateInput, PaintingInquiryUncheckedUpdateInput>
+  }
+
+  /**
+   * PaintingInquiry delete
+   */
+  export type PaintingInquiryDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaintingInquiry
+     */
+    select?: PaintingInquirySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaintingInquiry
+     */
+    omit?: PaintingInquiryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaintingInquiryInclude<ExtArgs> | null
+    /**
+     * Filter which PaintingInquiry to delete.
+     */
+    where: PaintingInquiryWhereUniqueInput
+  }
+
+  /**
+   * PaintingInquiry deleteMany
+   */
+  export type PaintingInquiryDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PaintingInquiries to delete
+     */
+    where?: PaintingInquiryWhereInput
+    /**
+     * Limit how many PaintingInquiries to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PaintingInquiry without action
+   */
+  export type PaintingInquiryDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaintingInquiry
+     */
+    select?: PaintingInquirySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaintingInquiry
+     */
+    omit?: PaintingInquiryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaintingInquiryInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -19044,6 +20383,7 @@ export namespace Prisma {
     id: 'id',
     path: 'path',
     pageType: 'pageType',
+    targetId: 'targetId',
     country: 'country',
     city: 'city',
     device: 'device',
@@ -19055,6 +20395,23 @@ export namespace Prisma {
   };
 
   export type AnalyticsEventScalarFieldEnum = (typeof AnalyticsEventScalarFieldEnum)[keyof typeof AnalyticsEventScalarFieldEnum]
+
+
+  export const PaintingInquiryScalarFieldEnum: {
+    id: 'id',
+    inquiryNumber: 'inquiryNumber',
+    paintingId: 'paintingId',
+    customerName: 'customerName',
+    customerContact: 'customerContact',
+    preferredContact: 'preferredContact',
+    message: 'message',
+    status: 'status',
+    notes: 'notes',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type PaintingInquiryScalarFieldEnum = (typeof PaintingInquiryScalarFieldEnum)[keyof typeof PaintingInquiryScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -19188,6 +20545,20 @@ export namespace Prisma {
    * Reference to a field of type 'PaymentMethod[]'
    */
   export type ListEnumPaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentMethod[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'InquiryStatus'
+   */
+  export type EnumInquiryStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InquiryStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'InquiryStatus[]'
+   */
+  export type ListEnumInquiryStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InquiryStatus[]'>
     
   /**
    * Deep Input Types
@@ -19387,6 +20758,7 @@ export namespace Prisma {
     author?: XOR<AuthorScalarRelationFilter, AuthorWhereInput>
     collection?: XOR<CollectionNullableScalarRelationFilter, CollectionWhereInput> | null
     media?: PaintingMediaListRelationFilter
+    inquiries?: PaintingInquiryListRelationFilter
   }
 
   export type PaintingOrderByWithRelationInput = {
@@ -19406,6 +20778,7 @@ export namespace Prisma {
     author?: AuthorOrderByWithRelationInput
     collection?: CollectionOrderByWithRelationInput
     media?: PaintingMediaOrderByRelationAggregateInput
+    inquiries?: PaintingInquiryOrderByRelationAggregateInput
   }
 
   export type PaintingWhereUniqueInput = Prisma.AtLeast<{
@@ -19428,6 +20801,7 @@ export namespace Prisma {
     author?: XOR<AuthorScalarRelationFilter, AuthorWhereInput>
     collection?: XOR<CollectionNullableScalarRelationFilter, CollectionWhereInput> | null
     media?: PaintingMediaListRelationFilter
+    inquiries?: PaintingInquiryListRelationFilter
   }, "id">
 
   export type PaintingOrderByWithAggregationInput = {
@@ -20224,6 +21598,7 @@ export namespace Prisma {
     id?: IntFilter<"AnalyticsEvent"> | number
     path?: StringFilter<"AnalyticsEvent"> | string
     pageType?: StringFilter<"AnalyticsEvent"> | string
+    targetId?: IntNullableFilter<"AnalyticsEvent"> | number | null
     country?: StringNullableFilter<"AnalyticsEvent"> | string | null
     city?: StringNullableFilter<"AnalyticsEvent"> | string | null
     device?: StringNullableFilter<"AnalyticsEvent"> | string | null
@@ -20238,6 +21613,7 @@ export namespace Prisma {
     id?: SortOrder
     path?: SortOrder
     pageType?: SortOrder
+    targetId?: SortOrderInput | SortOrder
     country?: SortOrderInput | SortOrder
     city?: SortOrderInput | SortOrder
     device?: SortOrderInput | SortOrder
@@ -20255,6 +21631,7 @@ export namespace Prisma {
     NOT?: AnalyticsEventWhereInput | AnalyticsEventWhereInput[]
     path?: StringFilter<"AnalyticsEvent"> | string
     pageType?: StringFilter<"AnalyticsEvent"> | string
+    targetId?: IntNullableFilter<"AnalyticsEvent"> | number | null
     country?: StringNullableFilter<"AnalyticsEvent"> | string | null
     city?: StringNullableFilter<"AnalyticsEvent"> | string | null
     device?: StringNullableFilter<"AnalyticsEvent"> | string | null
@@ -20269,6 +21646,7 @@ export namespace Prisma {
     id?: SortOrder
     path?: SortOrder
     pageType?: SortOrder
+    targetId?: SortOrderInput | SortOrder
     country?: SortOrderInput | SortOrder
     city?: SortOrderInput | SortOrder
     device?: SortOrderInput | SortOrder
@@ -20291,6 +21669,7 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"AnalyticsEvent"> | number
     path?: StringWithAggregatesFilter<"AnalyticsEvent"> | string
     pageType?: StringWithAggregatesFilter<"AnalyticsEvent"> | string
+    targetId?: IntNullableWithAggregatesFilter<"AnalyticsEvent"> | number | null
     country?: StringNullableWithAggregatesFilter<"AnalyticsEvent"> | string | null
     city?: StringNullableWithAggregatesFilter<"AnalyticsEvent"> | string | null
     device?: StringNullableWithAggregatesFilter<"AnalyticsEvent"> | string | null
@@ -20299,6 +21678,93 @@ export namespace Prisma {
     referer?: StringNullableWithAggregatesFilter<"AnalyticsEvent"> | string | null
     visitorHash?: StringNullableWithAggregatesFilter<"AnalyticsEvent"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"AnalyticsEvent"> | Date | string
+  }
+
+  export type PaintingInquiryWhereInput = {
+    AND?: PaintingInquiryWhereInput | PaintingInquiryWhereInput[]
+    OR?: PaintingInquiryWhereInput[]
+    NOT?: PaintingInquiryWhereInput | PaintingInquiryWhereInput[]
+    id?: IntFilter<"PaintingInquiry"> | number
+    inquiryNumber?: StringFilter<"PaintingInquiry"> | string
+    paintingId?: IntFilter<"PaintingInquiry"> | number
+    customerName?: StringFilter<"PaintingInquiry"> | string
+    customerContact?: StringFilter<"PaintingInquiry"> | string
+    preferredContact?: StringFilter<"PaintingInquiry"> | string
+    message?: StringNullableFilter<"PaintingInquiry"> | string | null
+    status?: EnumInquiryStatusFilter<"PaintingInquiry"> | $Enums.InquiryStatus
+    notes?: StringNullableFilter<"PaintingInquiry"> | string | null
+    createdAt?: DateTimeFilter<"PaintingInquiry"> | Date | string
+    updatedAt?: DateTimeFilter<"PaintingInquiry"> | Date | string
+    painting?: XOR<PaintingScalarRelationFilter, PaintingWhereInput>
+  }
+
+  export type PaintingInquiryOrderByWithRelationInput = {
+    id?: SortOrder
+    inquiryNumber?: SortOrder
+    paintingId?: SortOrder
+    customerName?: SortOrder
+    customerContact?: SortOrder
+    preferredContact?: SortOrder
+    message?: SortOrderInput | SortOrder
+    status?: SortOrder
+    notes?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    painting?: PaintingOrderByWithRelationInput
+  }
+
+  export type PaintingInquiryWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    inquiryNumber?: string
+    AND?: PaintingInquiryWhereInput | PaintingInquiryWhereInput[]
+    OR?: PaintingInquiryWhereInput[]
+    NOT?: PaintingInquiryWhereInput | PaintingInquiryWhereInput[]
+    paintingId?: IntFilter<"PaintingInquiry"> | number
+    customerName?: StringFilter<"PaintingInquiry"> | string
+    customerContact?: StringFilter<"PaintingInquiry"> | string
+    preferredContact?: StringFilter<"PaintingInquiry"> | string
+    message?: StringNullableFilter<"PaintingInquiry"> | string | null
+    status?: EnumInquiryStatusFilter<"PaintingInquiry"> | $Enums.InquiryStatus
+    notes?: StringNullableFilter<"PaintingInquiry"> | string | null
+    createdAt?: DateTimeFilter<"PaintingInquiry"> | Date | string
+    updatedAt?: DateTimeFilter<"PaintingInquiry"> | Date | string
+    painting?: XOR<PaintingScalarRelationFilter, PaintingWhereInput>
+  }, "id" | "inquiryNumber">
+
+  export type PaintingInquiryOrderByWithAggregationInput = {
+    id?: SortOrder
+    inquiryNumber?: SortOrder
+    paintingId?: SortOrder
+    customerName?: SortOrder
+    customerContact?: SortOrder
+    preferredContact?: SortOrder
+    message?: SortOrderInput | SortOrder
+    status?: SortOrder
+    notes?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: PaintingInquiryCountOrderByAggregateInput
+    _avg?: PaintingInquiryAvgOrderByAggregateInput
+    _max?: PaintingInquiryMaxOrderByAggregateInput
+    _min?: PaintingInquiryMinOrderByAggregateInput
+    _sum?: PaintingInquirySumOrderByAggregateInput
+  }
+
+  export type PaintingInquiryScalarWhereWithAggregatesInput = {
+    AND?: PaintingInquiryScalarWhereWithAggregatesInput | PaintingInquiryScalarWhereWithAggregatesInput[]
+    OR?: PaintingInquiryScalarWhereWithAggregatesInput[]
+    NOT?: PaintingInquiryScalarWhereWithAggregatesInput | PaintingInquiryScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"PaintingInquiry"> | number
+    inquiryNumber?: StringWithAggregatesFilter<"PaintingInquiry"> | string
+    paintingId?: IntWithAggregatesFilter<"PaintingInquiry"> | number
+    customerName?: StringWithAggregatesFilter<"PaintingInquiry"> | string
+    customerContact?: StringWithAggregatesFilter<"PaintingInquiry"> | string
+    preferredContact?: StringWithAggregatesFilter<"PaintingInquiry"> | string
+    message?: StringNullableWithAggregatesFilter<"PaintingInquiry"> | string | null
+    status?: EnumInquiryStatusWithAggregatesFilter<"PaintingInquiry"> | $Enums.InquiryStatus
+    notes?: StringNullableWithAggregatesFilter<"PaintingInquiry"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"PaintingInquiry"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"PaintingInquiry"> | Date | string
   }
 
   export type AuthorCreateInput = {
@@ -20506,6 +21972,7 @@ export namespace Prisma {
     author: AuthorCreateNestedOneWithoutPaintingsInput
     collection?: CollectionCreateNestedOneWithoutPaintingsInput
     media?: PaintingMediaCreateNestedManyWithoutPaintingInput
+    inquiries?: PaintingInquiryCreateNestedManyWithoutPaintingInput
   }
 
   export type PaintingUncheckedCreateInput = {
@@ -20523,6 +21990,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     media?: PaintingMediaUncheckedCreateNestedManyWithoutPaintingInput
+    inquiries?: PaintingInquiryUncheckedCreateNestedManyWithoutPaintingInput
   }
 
   export type PaintingUpdateInput = {
@@ -20539,6 +22007,7 @@ export namespace Prisma {
     author?: AuthorUpdateOneRequiredWithoutPaintingsNestedInput
     collection?: CollectionUpdateOneWithoutPaintingsNestedInput
     media?: PaintingMediaUpdateManyWithoutPaintingNestedInput
+    inquiries?: PaintingInquiryUpdateManyWithoutPaintingNestedInput
   }
 
   export type PaintingUncheckedUpdateInput = {
@@ -20556,6 +22025,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     media?: PaintingMediaUncheckedUpdateManyWithoutPaintingNestedInput
+    inquiries?: PaintingInquiryUncheckedUpdateManyWithoutPaintingNestedInput
   }
 
   export type PaintingCreateManyInput = {
@@ -21378,6 +22848,7 @@ export namespace Prisma {
   export type AnalyticsEventCreateInput = {
     path: string
     pageType?: string
+    targetId?: number | null
     country?: string | null
     city?: string | null
     device?: string | null
@@ -21392,6 +22863,7 @@ export namespace Prisma {
     id?: number
     path: string
     pageType?: string
+    targetId?: number | null
     country?: string | null
     city?: string | null
     device?: string | null
@@ -21405,6 +22877,7 @@ export namespace Prisma {
   export type AnalyticsEventUpdateInput = {
     path?: StringFieldUpdateOperationsInput | string
     pageType?: StringFieldUpdateOperationsInput | string
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     country?: NullableStringFieldUpdateOperationsInput | string | null
     city?: NullableStringFieldUpdateOperationsInput | string | null
     device?: NullableStringFieldUpdateOperationsInput | string | null
@@ -21419,6 +22892,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     path?: StringFieldUpdateOperationsInput | string
     pageType?: StringFieldUpdateOperationsInput | string
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     country?: NullableStringFieldUpdateOperationsInput | string | null
     city?: NullableStringFieldUpdateOperationsInput | string | null
     device?: NullableStringFieldUpdateOperationsInput | string | null
@@ -21433,6 +22907,7 @@ export namespace Prisma {
     id?: number
     path: string
     pageType?: string
+    targetId?: number | null
     country?: string | null
     city?: string | null
     device?: string | null
@@ -21446,6 +22921,7 @@ export namespace Prisma {
   export type AnalyticsEventUpdateManyMutationInput = {
     path?: StringFieldUpdateOperationsInput | string
     pageType?: StringFieldUpdateOperationsInput | string
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     country?: NullableStringFieldUpdateOperationsInput | string | null
     city?: NullableStringFieldUpdateOperationsInput | string | null
     device?: NullableStringFieldUpdateOperationsInput | string | null
@@ -21460,6 +22936,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     path?: StringFieldUpdateOperationsInput | string
     pageType?: StringFieldUpdateOperationsInput | string
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     country?: NullableStringFieldUpdateOperationsInput | string | null
     city?: NullableStringFieldUpdateOperationsInput | string | null
     device?: NullableStringFieldUpdateOperationsInput | string | null
@@ -21468,6 +22945,100 @@ export namespace Prisma {
     referer?: NullableStringFieldUpdateOperationsInput | string | null
     visitorHash?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaintingInquiryCreateInput = {
+    inquiryNumber: string
+    customerName: string
+    customerContact: string
+    preferredContact?: string
+    message?: string | null
+    status?: $Enums.InquiryStatus
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    painting: PaintingCreateNestedOneWithoutInquiriesInput
+  }
+
+  export type PaintingInquiryUncheckedCreateInput = {
+    id?: number
+    inquiryNumber: string
+    paintingId: number
+    customerName: string
+    customerContact: string
+    preferredContact?: string
+    message?: string | null
+    status?: $Enums.InquiryStatus
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PaintingInquiryUpdateInput = {
+    inquiryNumber?: StringFieldUpdateOperationsInput | string
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerContact?: StringFieldUpdateOperationsInput | string
+    preferredContact?: StringFieldUpdateOperationsInput | string
+    message?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInquiryStatusFieldUpdateOperationsInput | $Enums.InquiryStatus
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    painting?: PaintingUpdateOneRequiredWithoutInquiriesNestedInput
+  }
+
+  export type PaintingInquiryUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    inquiryNumber?: StringFieldUpdateOperationsInput | string
+    paintingId?: IntFieldUpdateOperationsInput | number
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerContact?: StringFieldUpdateOperationsInput | string
+    preferredContact?: StringFieldUpdateOperationsInput | string
+    message?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInquiryStatusFieldUpdateOperationsInput | $Enums.InquiryStatus
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaintingInquiryCreateManyInput = {
+    id?: number
+    inquiryNumber: string
+    paintingId: number
+    customerName: string
+    customerContact: string
+    preferredContact?: string
+    message?: string | null
+    status?: $Enums.InquiryStatus
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PaintingInquiryUpdateManyMutationInput = {
+    inquiryNumber?: StringFieldUpdateOperationsInput | string
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerContact?: StringFieldUpdateOperationsInput | string
+    preferredContact?: StringFieldUpdateOperationsInput | string
+    message?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInquiryStatusFieldUpdateOperationsInput | $Enums.InquiryStatus
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaintingInquiryUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    inquiryNumber?: StringFieldUpdateOperationsInput | string
+    paintingId?: IntFieldUpdateOperationsInput | number
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerContact?: StringFieldUpdateOperationsInput | string
+    preferredContact?: StringFieldUpdateOperationsInput | string
+    message?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInquiryStatusFieldUpdateOperationsInput | $Enums.InquiryStatus
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -21761,7 +23332,17 @@ export namespace Prisma {
     none?: PaintingMediaWhereInput
   }
 
+  export type PaintingInquiryListRelationFilter = {
+    every?: PaintingInquiryWhereInput
+    some?: PaintingInquiryWhereInput
+    none?: PaintingInquiryWhereInput
+  }
+
   export type PaintingMediaOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type PaintingInquiryOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -22503,6 +24084,7 @@ export namespace Prisma {
     id?: SortOrder
     path?: SortOrder
     pageType?: SortOrder
+    targetId?: SortOrder
     country?: SortOrder
     city?: SortOrder
     device?: SortOrder
@@ -22515,12 +24097,14 @@ export namespace Prisma {
 
   export type AnalyticsEventAvgOrderByAggregateInput = {
     id?: SortOrder
+    targetId?: SortOrder
   }
 
   export type AnalyticsEventMaxOrderByAggregateInput = {
     id?: SortOrder
     path?: SortOrder
     pageType?: SortOrder
+    targetId?: SortOrder
     country?: SortOrder
     city?: SortOrder
     device?: SortOrder
@@ -22535,6 +24119,7 @@ export namespace Prisma {
     id?: SortOrder
     path?: SortOrder
     pageType?: SortOrder
+    targetId?: SortOrder
     country?: SortOrder
     city?: SortOrder
     device?: SortOrder
@@ -22547,6 +24132,76 @@ export namespace Prisma {
 
   export type AnalyticsEventSumOrderByAggregateInput = {
     id?: SortOrder
+    targetId?: SortOrder
+  }
+
+  export type EnumInquiryStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.InquiryStatus | EnumInquiryStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.InquiryStatus[] | ListEnumInquiryStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.InquiryStatus[] | ListEnumInquiryStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumInquiryStatusFilter<$PrismaModel> | $Enums.InquiryStatus
+  }
+
+  export type PaintingInquiryCountOrderByAggregateInput = {
+    id?: SortOrder
+    inquiryNumber?: SortOrder
+    paintingId?: SortOrder
+    customerName?: SortOrder
+    customerContact?: SortOrder
+    preferredContact?: SortOrder
+    message?: SortOrder
+    status?: SortOrder
+    notes?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PaintingInquiryAvgOrderByAggregateInput = {
+    id?: SortOrder
+    paintingId?: SortOrder
+  }
+
+  export type PaintingInquiryMaxOrderByAggregateInput = {
+    id?: SortOrder
+    inquiryNumber?: SortOrder
+    paintingId?: SortOrder
+    customerName?: SortOrder
+    customerContact?: SortOrder
+    preferredContact?: SortOrder
+    message?: SortOrder
+    status?: SortOrder
+    notes?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PaintingInquiryMinOrderByAggregateInput = {
+    id?: SortOrder
+    inquiryNumber?: SortOrder
+    paintingId?: SortOrder
+    customerName?: SortOrder
+    customerContact?: SortOrder
+    preferredContact?: SortOrder
+    message?: SortOrder
+    status?: SortOrder
+    notes?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PaintingInquirySumOrderByAggregateInput = {
+    id?: SortOrder
+    paintingId?: SortOrder
+  }
+
+  export type EnumInquiryStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.InquiryStatus | EnumInquiryStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.InquiryStatus[] | ListEnumInquiryStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.InquiryStatus[] | ListEnumInquiryStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumInquiryStatusWithAggregatesFilter<$PrismaModel> | $Enums.InquiryStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumInquiryStatusFilter<$PrismaModel>
+    _max?: NestedEnumInquiryStatusFilter<$PrismaModel>
   }
 
   export type PaintingCreateNestedManyWithoutAuthorInput = {
@@ -22774,11 +24429,25 @@ export namespace Prisma {
     connect?: PaintingMediaWhereUniqueInput | PaintingMediaWhereUniqueInput[]
   }
 
+  export type PaintingInquiryCreateNestedManyWithoutPaintingInput = {
+    create?: XOR<PaintingInquiryCreateWithoutPaintingInput, PaintingInquiryUncheckedCreateWithoutPaintingInput> | PaintingInquiryCreateWithoutPaintingInput[] | PaintingInquiryUncheckedCreateWithoutPaintingInput[]
+    connectOrCreate?: PaintingInquiryCreateOrConnectWithoutPaintingInput | PaintingInquiryCreateOrConnectWithoutPaintingInput[]
+    createMany?: PaintingInquiryCreateManyPaintingInputEnvelope
+    connect?: PaintingInquiryWhereUniqueInput | PaintingInquiryWhereUniqueInput[]
+  }
+
   export type PaintingMediaUncheckedCreateNestedManyWithoutPaintingInput = {
     create?: XOR<PaintingMediaCreateWithoutPaintingInput, PaintingMediaUncheckedCreateWithoutPaintingInput> | PaintingMediaCreateWithoutPaintingInput[] | PaintingMediaUncheckedCreateWithoutPaintingInput[]
     connectOrCreate?: PaintingMediaCreateOrConnectWithoutPaintingInput | PaintingMediaCreateOrConnectWithoutPaintingInput[]
     createMany?: PaintingMediaCreateManyPaintingInputEnvelope
     connect?: PaintingMediaWhereUniqueInput | PaintingMediaWhereUniqueInput[]
+  }
+
+  export type PaintingInquiryUncheckedCreateNestedManyWithoutPaintingInput = {
+    create?: XOR<PaintingInquiryCreateWithoutPaintingInput, PaintingInquiryUncheckedCreateWithoutPaintingInput> | PaintingInquiryCreateWithoutPaintingInput[] | PaintingInquiryUncheckedCreateWithoutPaintingInput[]
+    connectOrCreate?: PaintingInquiryCreateOrConnectWithoutPaintingInput | PaintingInquiryCreateOrConnectWithoutPaintingInput[]
+    createMany?: PaintingInquiryCreateManyPaintingInputEnvelope
+    connect?: PaintingInquiryWhereUniqueInput | PaintingInquiryWhereUniqueInput[]
   }
 
   export type NullableIntFieldUpdateOperationsInput = {
@@ -22821,6 +24490,20 @@ export namespace Prisma {
     deleteMany?: PaintingMediaScalarWhereInput | PaintingMediaScalarWhereInput[]
   }
 
+  export type PaintingInquiryUpdateManyWithoutPaintingNestedInput = {
+    create?: XOR<PaintingInquiryCreateWithoutPaintingInput, PaintingInquiryUncheckedCreateWithoutPaintingInput> | PaintingInquiryCreateWithoutPaintingInput[] | PaintingInquiryUncheckedCreateWithoutPaintingInput[]
+    connectOrCreate?: PaintingInquiryCreateOrConnectWithoutPaintingInput | PaintingInquiryCreateOrConnectWithoutPaintingInput[]
+    upsert?: PaintingInquiryUpsertWithWhereUniqueWithoutPaintingInput | PaintingInquiryUpsertWithWhereUniqueWithoutPaintingInput[]
+    createMany?: PaintingInquiryCreateManyPaintingInputEnvelope
+    set?: PaintingInquiryWhereUniqueInput | PaintingInquiryWhereUniqueInput[]
+    disconnect?: PaintingInquiryWhereUniqueInput | PaintingInquiryWhereUniqueInput[]
+    delete?: PaintingInquiryWhereUniqueInput | PaintingInquiryWhereUniqueInput[]
+    connect?: PaintingInquiryWhereUniqueInput | PaintingInquiryWhereUniqueInput[]
+    update?: PaintingInquiryUpdateWithWhereUniqueWithoutPaintingInput | PaintingInquiryUpdateWithWhereUniqueWithoutPaintingInput[]
+    updateMany?: PaintingInquiryUpdateManyWithWhereWithoutPaintingInput | PaintingInquiryUpdateManyWithWhereWithoutPaintingInput[]
+    deleteMany?: PaintingInquiryScalarWhereInput | PaintingInquiryScalarWhereInput[]
+  }
+
   export type PaintingMediaUncheckedUpdateManyWithoutPaintingNestedInput = {
     create?: XOR<PaintingMediaCreateWithoutPaintingInput, PaintingMediaUncheckedCreateWithoutPaintingInput> | PaintingMediaCreateWithoutPaintingInput[] | PaintingMediaUncheckedCreateWithoutPaintingInput[]
     connectOrCreate?: PaintingMediaCreateOrConnectWithoutPaintingInput | PaintingMediaCreateOrConnectWithoutPaintingInput[]
@@ -22833,6 +24516,20 @@ export namespace Prisma {
     update?: PaintingMediaUpdateWithWhereUniqueWithoutPaintingInput | PaintingMediaUpdateWithWhereUniqueWithoutPaintingInput[]
     updateMany?: PaintingMediaUpdateManyWithWhereWithoutPaintingInput | PaintingMediaUpdateManyWithWhereWithoutPaintingInput[]
     deleteMany?: PaintingMediaScalarWhereInput | PaintingMediaScalarWhereInput[]
+  }
+
+  export type PaintingInquiryUncheckedUpdateManyWithoutPaintingNestedInput = {
+    create?: XOR<PaintingInquiryCreateWithoutPaintingInput, PaintingInquiryUncheckedCreateWithoutPaintingInput> | PaintingInquiryCreateWithoutPaintingInput[] | PaintingInquiryUncheckedCreateWithoutPaintingInput[]
+    connectOrCreate?: PaintingInquiryCreateOrConnectWithoutPaintingInput | PaintingInquiryCreateOrConnectWithoutPaintingInput[]
+    upsert?: PaintingInquiryUpsertWithWhereUniqueWithoutPaintingInput | PaintingInquiryUpsertWithWhereUniqueWithoutPaintingInput[]
+    createMany?: PaintingInquiryCreateManyPaintingInputEnvelope
+    set?: PaintingInquiryWhereUniqueInput | PaintingInquiryWhereUniqueInput[]
+    disconnect?: PaintingInquiryWhereUniqueInput | PaintingInquiryWhereUniqueInput[]
+    delete?: PaintingInquiryWhereUniqueInput | PaintingInquiryWhereUniqueInput[]
+    connect?: PaintingInquiryWhereUniqueInput | PaintingInquiryWhereUniqueInput[]
+    update?: PaintingInquiryUpdateWithWhereUniqueWithoutPaintingInput | PaintingInquiryUpdateWithWhereUniqueWithoutPaintingInput[]
+    updateMany?: PaintingInquiryUpdateManyWithWhereWithoutPaintingInput | PaintingInquiryUpdateManyWithWhereWithoutPaintingInput[]
+    deleteMany?: PaintingInquiryScalarWhereInput | PaintingInquiryScalarWhereInput[]
   }
 
   export type PaintingCreateNestedOneWithoutMediaInput = {
@@ -23349,6 +25046,24 @@ export namespace Prisma {
     update?: XOR<XOR<GalleryPostUpdateToOneWithWhereWithoutMediaInput, GalleryPostUpdateWithoutMediaInput>, GalleryPostUncheckedUpdateWithoutMediaInput>
   }
 
+  export type PaintingCreateNestedOneWithoutInquiriesInput = {
+    create?: XOR<PaintingCreateWithoutInquiriesInput, PaintingUncheckedCreateWithoutInquiriesInput>
+    connectOrCreate?: PaintingCreateOrConnectWithoutInquiriesInput
+    connect?: PaintingWhereUniqueInput
+  }
+
+  export type EnumInquiryStatusFieldUpdateOperationsInput = {
+    set?: $Enums.InquiryStatus
+  }
+
+  export type PaintingUpdateOneRequiredWithoutInquiriesNestedInput = {
+    create?: XOR<PaintingCreateWithoutInquiriesInput, PaintingUncheckedCreateWithoutInquiriesInput>
+    connectOrCreate?: PaintingCreateOrConnectWithoutInquiriesInput
+    upsert?: PaintingUpsertWithoutInquiriesInput
+    connect?: PaintingWhereUniqueInput
+    update?: XOR<XOR<PaintingUpdateToOneWithWhereWithoutInquiriesInput, PaintingUpdateWithoutInquiriesInput>, PaintingUncheckedUpdateWithoutInquiriesInput>
+  }
+
   export type NestedIntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -23633,6 +25348,23 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
+  export type NestedEnumInquiryStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.InquiryStatus | EnumInquiryStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.InquiryStatus[] | ListEnumInquiryStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.InquiryStatus[] | ListEnumInquiryStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumInquiryStatusFilter<$PrismaModel> | $Enums.InquiryStatus
+  }
+
+  export type NestedEnumInquiryStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.InquiryStatus | EnumInquiryStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.InquiryStatus[] | ListEnumInquiryStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.InquiryStatus[] | ListEnumInquiryStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumInquiryStatusWithAggregatesFilter<$PrismaModel> | $Enums.InquiryStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumInquiryStatusFilter<$PrismaModel>
+    _max?: NestedEnumInquiryStatusFilter<$PrismaModel>
+  }
+
   export type PaintingCreateWithoutAuthorInput = {
     title: string
     description?: string | null
@@ -23646,6 +25378,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     collection?: CollectionCreateNestedOneWithoutPaintingsInput
     media?: PaintingMediaCreateNestedManyWithoutPaintingInput
+    inquiries?: PaintingInquiryCreateNestedManyWithoutPaintingInput
   }
 
   export type PaintingUncheckedCreateWithoutAuthorInput = {
@@ -23662,6 +25395,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     media?: PaintingMediaUncheckedCreateNestedManyWithoutPaintingInput
+    inquiries?: PaintingInquiryUncheckedCreateNestedManyWithoutPaintingInput
   }
 
   export type PaintingCreateOrConnectWithoutAuthorInput = {
@@ -23903,6 +25637,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     author: AuthorCreateNestedOneWithoutPaintingsInput
     media?: PaintingMediaCreateNestedManyWithoutPaintingInput
+    inquiries?: PaintingInquiryCreateNestedManyWithoutPaintingInput
   }
 
   export type PaintingUncheckedCreateWithoutCollectionInput = {
@@ -23919,6 +25654,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     media?: PaintingMediaUncheckedCreateNestedManyWithoutPaintingInput
+    inquiries?: PaintingInquiryUncheckedCreateNestedManyWithoutPaintingInput
   }
 
   export type PaintingCreateOrConnectWithoutCollectionInput = {
@@ -24084,6 +25820,41 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type PaintingInquiryCreateWithoutPaintingInput = {
+    inquiryNumber: string
+    customerName: string
+    customerContact: string
+    preferredContact?: string
+    message?: string | null
+    status?: $Enums.InquiryStatus
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PaintingInquiryUncheckedCreateWithoutPaintingInput = {
+    id?: number
+    inquiryNumber: string
+    customerName: string
+    customerContact: string
+    preferredContact?: string
+    message?: string | null
+    status?: $Enums.InquiryStatus
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PaintingInquiryCreateOrConnectWithoutPaintingInput = {
+    where: PaintingInquiryWhereUniqueInput
+    create: XOR<PaintingInquiryCreateWithoutPaintingInput, PaintingInquiryUncheckedCreateWithoutPaintingInput>
+  }
+
+  export type PaintingInquiryCreateManyPaintingInputEnvelope = {
+    data: PaintingInquiryCreateManyPaintingInput | PaintingInquiryCreateManyPaintingInput[]
+    skipDuplicates?: boolean
+  }
+
   export type AuthorUpsertWithoutPaintingsInput = {
     update: XOR<AuthorUpdateWithoutPaintingsInput, AuthorUncheckedUpdateWithoutPaintingsInput>
     create: XOR<AuthorCreateWithoutPaintingsInput, AuthorUncheckedCreateWithoutPaintingsInput>
@@ -24189,6 +25960,39 @@ export namespace Prisma {
     paintingId?: IntFilter<"PaintingMedia"> | number
   }
 
+  export type PaintingInquiryUpsertWithWhereUniqueWithoutPaintingInput = {
+    where: PaintingInquiryWhereUniqueInput
+    update: XOR<PaintingInquiryUpdateWithoutPaintingInput, PaintingInquiryUncheckedUpdateWithoutPaintingInput>
+    create: XOR<PaintingInquiryCreateWithoutPaintingInput, PaintingInquiryUncheckedCreateWithoutPaintingInput>
+  }
+
+  export type PaintingInquiryUpdateWithWhereUniqueWithoutPaintingInput = {
+    where: PaintingInquiryWhereUniqueInput
+    data: XOR<PaintingInquiryUpdateWithoutPaintingInput, PaintingInquiryUncheckedUpdateWithoutPaintingInput>
+  }
+
+  export type PaintingInquiryUpdateManyWithWhereWithoutPaintingInput = {
+    where: PaintingInquiryScalarWhereInput
+    data: XOR<PaintingInquiryUpdateManyMutationInput, PaintingInquiryUncheckedUpdateManyWithoutPaintingInput>
+  }
+
+  export type PaintingInquiryScalarWhereInput = {
+    AND?: PaintingInquiryScalarWhereInput | PaintingInquiryScalarWhereInput[]
+    OR?: PaintingInquiryScalarWhereInput[]
+    NOT?: PaintingInquiryScalarWhereInput | PaintingInquiryScalarWhereInput[]
+    id?: IntFilter<"PaintingInquiry"> | number
+    inquiryNumber?: StringFilter<"PaintingInquiry"> | string
+    paintingId?: IntFilter<"PaintingInquiry"> | number
+    customerName?: StringFilter<"PaintingInquiry"> | string
+    customerContact?: StringFilter<"PaintingInquiry"> | string
+    preferredContact?: StringFilter<"PaintingInquiry"> | string
+    message?: StringNullableFilter<"PaintingInquiry"> | string | null
+    status?: EnumInquiryStatusFilter<"PaintingInquiry"> | $Enums.InquiryStatus
+    notes?: StringNullableFilter<"PaintingInquiry"> | string | null
+    createdAt?: DateTimeFilter<"PaintingInquiry"> | Date | string
+    updatedAt?: DateTimeFilter<"PaintingInquiry"> | Date | string
+  }
+
   export type PaintingCreateWithoutMediaInput = {
     title: string
     description?: string | null
@@ -24202,6 +26006,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     author: AuthorCreateNestedOneWithoutPaintingsInput
     collection?: CollectionCreateNestedOneWithoutPaintingsInput
+    inquiries?: PaintingInquiryCreateNestedManyWithoutPaintingInput
   }
 
   export type PaintingUncheckedCreateWithoutMediaInput = {
@@ -24218,6 +26023,7 @@ export namespace Prisma {
     collectionId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    inquiries?: PaintingInquiryUncheckedCreateNestedManyWithoutPaintingInput
   }
 
   export type PaintingCreateOrConnectWithoutMediaInput = {
@@ -24249,6 +26055,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     author?: AuthorUpdateOneRequiredWithoutPaintingsNestedInput
     collection?: CollectionUpdateOneWithoutPaintingsNestedInput
+    inquiries?: PaintingInquiryUpdateManyWithoutPaintingNestedInput
   }
 
   export type PaintingUncheckedUpdateWithoutMediaInput = {
@@ -24265,6 +26072,7 @@ export namespace Prisma {
     collectionId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    inquiries?: PaintingInquiryUncheckedUpdateManyWithoutPaintingNestedInput
   }
 
   export type ProductCreateWithoutCategoryInput = {
@@ -25362,6 +27170,88 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type PaintingCreateWithoutInquiriesInput = {
+    title: string
+    description?: string | null
+    coverUrl: string
+    coverPublicId?: string
+    hasNeon?: boolean
+    isForSale?: boolean
+    sortOrder?: number
+    year?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    author: AuthorCreateNestedOneWithoutPaintingsInput
+    collection?: CollectionCreateNestedOneWithoutPaintingsInput
+    media?: PaintingMediaCreateNestedManyWithoutPaintingInput
+  }
+
+  export type PaintingUncheckedCreateWithoutInquiriesInput = {
+    id?: number
+    title: string
+    description?: string | null
+    coverUrl: string
+    coverPublicId?: string
+    hasNeon?: boolean
+    isForSale?: boolean
+    sortOrder?: number
+    year?: number | null
+    authorId: number
+    collectionId?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    media?: PaintingMediaUncheckedCreateNestedManyWithoutPaintingInput
+  }
+
+  export type PaintingCreateOrConnectWithoutInquiriesInput = {
+    where: PaintingWhereUniqueInput
+    create: XOR<PaintingCreateWithoutInquiriesInput, PaintingUncheckedCreateWithoutInquiriesInput>
+  }
+
+  export type PaintingUpsertWithoutInquiriesInput = {
+    update: XOR<PaintingUpdateWithoutInquiriesInput, PaintingUncheckedUpdateWithoutInquiriesInput>
+    create: XOR<PaintingCreateWithoutInquiriesInput, PaintingUncheckedCreateWithoutInquiriesInput>
+    where?: PaintingWhereInput
+  }
+
+  export type PaintingUpdateToOneWithWhereWithoutInquiriesInput = {
+    where?: PaintingWhereInput
+    data: XOR<PaintingUpdateWithoutInquiriesInput, PaintingUncheckedUpdateWithoutInquiriesInput>
+  }
+
+  export type PaintingUpdateWithoutInquiriesInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: StringFieldUpdateOperationsInput | string
+    coverPublicId?: StringFieldUpdateOperationsInput | string
+    hasNeon?: BoolFieldUpdateOperationsInput | boolean
+    isForSale?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    year?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    author?: AuthorUpdateOneRequiredWithoutPaintingsNestedInput
+    collection?: CollectionUpdateOneWithoutPaintingsNestedInput
+    media?: PaintingMediaUpdateManyWithoutPaintingNestedInput
+  }
+
+  export type PaintingUncheckedUpdateWithoutInquiriesInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: StringFieldUpdateOperationsInput | string
+    coverPublicId?: StringFieldUpdateOperationsInput | string
+    hasNeon?: BoolFieldUpdateOperationsInput | boolean
+    isForSale?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    year?: NullableIntFieldUpdateOperationsInput | number | null
+    authorId?: IntFieldUpdateOperationsInput | number
+    collectionId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    media?: PaintingMediaUncheckedUpdateManyWithoutPaintingNestedInput
+  }
+
   export type PaintingCreateManyAuthorInput = {
     id?: number
     title: string
@@ -25415,6 +27305,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     collection?: CollectionUpdateOneWithoutPaintingsNestedInput
     media?: PaintingMediaUpdateManyWithoutPaintingNestedInput
+    inquiries?: PaintingInquiryUpdateManyWithoutPaintingNestedInput
   }
 
   export type PaintingUncheckedUpdateWithoutAuthorInput = {
@@ -25431,6 +27322,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     media?: PaintingMediaUncheckedUpdateManyWithoutPaintingNestedInput
+    inquiries?: PaintingInquiryUncheckedUpdateManyWithoutPaintingNestedInput
   }
 
   export type PaintingUncheckedUpdateManyWithoutAuthorInput = {
@@ -25557,6 +27449,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     author?: AuthorUpdateOneRequiredWithoutPaintingsNestedInput
     media?: PaintingMediaUpdateManyWithoutPaintingNestedInput
+    inquiries?: PaintingInquiryUpdateManyWithoutPaintingNestedInput
   }
 
   export type PaintingUncheckedUpdateWithoutCollectionInput = {
@@ -25573,6 +27466,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     media?: PaintingMediaUncheckedUpdateManyWithoutPaintingNestedInput
+    inquiries?: PaintingInquiryUncheckedUpdateManyWithoutPaintingNestedInput
   }
 
   export type PaintingUncheckedUpdateManyWithoutCollectionInput = {
@@ -25599,6 +27493,19 @@ export namespace Prisma {
     type?: $Enums.MediaType
   }
 
+  export type PaintingInquiryCreateManyPaintingInput = {
+    id?: number
+    inquiryNumber: string
+    customerName: string
+    customerContact: string
+    preferredContact?: string
+    message?: string | null
+    status?: $Enums.InquiryStatus
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type PaintingMediaUpdateWithoutPaintingInput = {
     url?: StringFieldUpdateOperationsInput | string
     publicId?: StringFieldUpdateOperationsInput | string
@@ -25623,6 +27530,44 @@ export namespace Prisma {
     isNeon?: BoolFieldUpdateOperationsInput | boolean
     order?: IntFieldUpdateOperationsInput | number
     type?: EnumMediaTypeFieldUpdateOperationsInput | $Enums.MediaType
+  }
+
+  export type PaintingInquiryUpdateWithoutPaintingInput = {
+    inquiryNumber?: StringFieldUpdateOperationsInput | string
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerContact?: StringFieldUpdateOperationsInput | string
+    preferredContact?: StringFieldUpdateOperationsInput | string
+    message?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInquiryStatusFieldUpdateOperationsInput | $Enums.InquiryStatus
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaintingInquiryUncheckedUpdateWithoutPaintingInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    inquiryNumber?: StringFieldUpdateOperationsInput | string
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerContact?: StringFieldUpdateOperationsInput | string
+    preferredContact?: StringFieldUpdateOperationsInput | string
+    message?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInquiryStatusFieldUpdateOperationsInput | $Enums.InquiryStatus
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaintingInquiryUncheckedUpdateManyWithoutPaintingInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    inquiryNumber?: StringFieldUpdateOperationsInput | string
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerContact?: StringFieldUpdateOperationsInput | string
+    preferredContact?: StringFieldUpdateOperationsInput | string
+    message?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInquiryStatusFieldUpdateOperationsInput | $Enums.InquiryStatus
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ProductCreateManyCategoryInput = {

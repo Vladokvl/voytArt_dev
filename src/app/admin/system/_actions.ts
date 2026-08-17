@@ -178,7 +178,7 @@ export async function getDatabaseUsageAction(): Promise<DatabaseUsageData> {
     ]);
 
     const rawBytes = sizeResult[0]?.db_bytes;
-    const sizeBytes = typeof rawBytes === "bigint" ? Number(rawBytes) : Number(rawBytes || 0);
+    const sizeBytes = typeof rawBytes === "bigint" ? Number(rawBytes) : Number(rawBytes ?? 0);
 
     // Supabase Free Tier = 500 MB
     const supabaseLimitBytes = 500 * 1024 * 1024;

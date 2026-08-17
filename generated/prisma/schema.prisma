@@ -24,6 +24,14 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum InquiryStatus {
+  NEW
+  IN_PROGRESS
+  CONTACTED
+  SOLD
+  CANCELLED
+}
+
 enum PaymentMethod {
   COD
   CARD
@@ -95,7 +103,8 @@ model Painting {
   collection   Collection? @relation(fields: [collectionId], references: [id])
   collectionId Int?        @map("collection_id")
 
-  media PaintingMedia[]
+  media     PaintingMedia[]
+  inquiries PaintingInquiry[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -302,6 +311,7 @@ model AnalyticsEvent {
   id          Int      @id @default(autoincrement())
   path        String
   pageType    String   @default("OTHER") @map("page_type")
+  targetId    Int?     @map("target_id")
   country     String?
   city        String?
   device      String? // Desktop, Mobile, Tablet
@@ -315,5 +325,28 @@ model AnalyticsEvent {
   @@index([path])
   @@index([country])
   @@index([pageType])
+  @@index([targetId])
   @@map("analytics_events")
+}
+
+// ── Painting Inquiries (Запити на картини) ───────────────────────────────────
+model PaintingInquiry {
+  id               Int           @id @default(autoincrement())
+  inquiryNumber    String        @unique @map("inquiry_number")
+  paintingId       Int           @map("painting_id")
+  painting         Painting      @relation(fields: [paintingId], references: [id], onDelete: Cascade)
+  customerName     String        @map("customer_name")
+  customerContact  String        @map("customer_contact")
+  preferredContact String        @default("TELEGRAM") @map("preferred_contact")
+  message          String?
+  status           InquiryStatus @default(NEW)
+  notes            String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([createdAt])
+  @@index([paintingId])
+  @@index([status])
+  @@map("painting_inquiries")
 }
