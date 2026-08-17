@@ -6,6 +6,7 @@ import artStyles from "@/app/art/[[...artistId]]/art.module.scss";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
 import { useImageCrop } from "~/hooks/use-image-crop";
 import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
+import { useSetBreadcrumb } from "@/app/admin/_components/BreadcrumbContext";
 
 type Author = {
   id: number;
@@ -28,6 +29,8 @@ export default function AuthorEditForm({ author }: { author: Author }) {
   const [firstName, setFirstName] = useState(author.firstName);
   const [lastName, setLastName] = useState(author.lastName);
   const [shortDesc, setShortDesc] = useState(author.shortDesc ?? "");
+
+  useSetBreadcrumb(`${firstName} ${lastName}`.trim() || `${author.firstName} ${author.lastName}`);
 
   // Режими ховеру прев'ю
   const [previewHover, setPreviewHover] = useState(false);

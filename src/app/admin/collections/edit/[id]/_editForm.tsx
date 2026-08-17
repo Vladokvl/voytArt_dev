@@ -7,6 +7,7 @@ import Image from "next/image";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
 import { useImageCrop } from "~/hooks/use-image-crop";
 import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
+import { useSetBreadcrumb } from "@/app/admin/_components/BreadcrumbContext";
 
 type CollectionForEdit = {
   id: number;
@@ -22,6 +23,7 @@ export default function CollectionEditForm({
   collection: CollectionForEdit;
   authors: Author[];
 }) {
+  useSetBreadcrumb(collection.title);
   const [state, formAction] = useActionState(updateCollectionAction, undefined);
   const [uploading, setUploading] = useState(false);
   const [pending, startTransition] = useTransition();

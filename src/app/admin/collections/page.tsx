@@ -1,6 +1,7 @@
 import { db } from "~/lib/db";
 import Link from "next/link";
 import styles from "../admin-table.module.scss";
+import { Plus, Edit2 } from "lucide-react";
 import DeleteCollectionButton from "./_DeleteButton";
 
 export default async function CollectionsPage() {
@@ -14,64 +15,83 @@ export default async function CollectionsPage() {
 
   return (
     <div>
+      {/* Header */}
       <div className={styles.header}>
-        <h1 className={styles.heading}>Колекції</h1>
+        <div>
+          <h1 className={styles.heading}>Колекції робіт</h1>
+        </div>
         <Link href="/admin/collections/new" className={styles.button}>
-          + Додати колекцію
+          <Plus size={16} />
+          <span>Додати колекцію</span>
         </Link>
       </div>
 
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th className={styles.th}>Обкладинка</th>
-            <th className={styles.th}>Назва</th>
-            <th className={styles.th}>Автор</th>
-            <th className={styles.th}>Картин</th>
-            <th className={styles.th}></th>
-          </tr>
-        </thead>
-        <tbody>
-          {collections.length === 0 ? (
+      {/* Table Card */}
+      <div className={styles.tableCard}>
+        <table className={styles.table}>
+          <thead>
             <tr>
-              <td colSpan={5} className={styles.empty}>
-                Колекцій ще немає
-              </td>
+              <th className={styles.th} style={{ width: 64 }}>Обкладинка</th>
+              <th className={styles.th}>Назва колекції</th>
+              <th className={styles.th}>Автор</th>
+              <th className={styles.th}>Кількість картин</th>
+              <th className={styles.th} style={{ textAlign: "right" }}>Дії</th>
             </tr>
-          ) : (
-            collections.map((col) => (
-              <tr key={col.id}>
-                <td className={styles.td}>
-                  {col.coverPhotoUrl && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={col.coverPhotoUrl}
-                      alt={col.title}
-                      className={styles.thumbnail}
-                    />
-                  )}
-                </td>
-                <td className={styles.td}>{col.title}</td>
-                <td className={styles.td}>
-                  {col.author.firstName} {col.author.lastName}
-                </td>
-                <td className={styles.td}>{col._count.paintings}</td>
-                <td className={styles.td}>
-                  <div className={styles.actions}>
-                    <Link
-                      href={`/admin/collections/edit/${col.id}`}
-                      className={styles.buttonOutline}
-                    >
-                      Ред.
-                    </Link>
-                    <DeleteCollectionButton id={col.id} />
-                  </div>
+          </thead>
+          <tbody>
+            {collections.length === 0 ? (
+              <tr>
+                <td colSpan={5} className={styles.empty}>
+                  Колекцій ще немає
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              collections.map((col) => (
+                <tr key={col.id}>
+                  <td className={styles.td}>
+                    {col.coverPhotoUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={col.coverPhotoUrl}
+                        alt={col.title}
+                        className={styles.thumbnail}
+                      />
+                    ) : (
+                      <div
+                        className={styles.thumbnail}
+                        style={{ display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: "0.75rem" }}
+                      >
+                        —
+                      </div>
+                    )}
+                  </td>
+                  <td className={styles.td} style={{ fontWeight: 600 }}>{col.title}</td>
+                  <td className={styles.td}>
+                    {col.author.firstName} {col.author.lastName}
+                  </td>
+                  <td className={styles.td}>
+                    <span className={`${styles.badge} ${styles.badgeNeutral}`}>
+                      {col._count.paintings} картин
+                    </span>
+                  </td>
+                  <td className={styles.td}>
+                    <div className={styles.actions} style={{ justifyContent: "flex-end" }}>
+                      <Link
+                        href={`/admin/collections/edit/${col.id}`}
+                        className={styles.iconBtn}
+                        title="Редагувати"
+                      >
+                        <Edit2 size={14} />
+                      </Link>
+                      <DeleteCollectionButton id={col.id} />
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

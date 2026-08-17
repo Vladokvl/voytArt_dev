@@ -7,6 +7,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { useImageCrop } from "~/hooks/use-image-crop";
 import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
+import { useSetBreadcrumb } from "@/app/admin/_components/BreadcrumbContext";
 
 type Post = {
   id: number;
@@ -17,6 +18,7 @@ type Post = {
 };
 
 export default function PostEditForm({ post }: { post: Post }) {
+  useSetBreadcrumb(post.title);
   const [state, formAction] = useActionState(updatePostAction, undefined);
   const [uploading, setUploading] = useState(false);
   const [pending, startTransition] = useTransition();
