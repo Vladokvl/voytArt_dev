@@ -7,10 +7,19 @@
 const config = {
   allowedDevOrigins: ["testing.zhovtok.work"],
   output: "standalone",
+  compress: true,
   experimental: {
     serverActions: {
       bodySizeLimit: "10mb",
     },
+    optimizePackageImports: [
+      "lucide-react",
+      "framer-motion",
+      "gsap",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-slot",
+    ],
   },
   images: {
     remotePatterns: [
@@ -23,6 +32,19 @@ const config = {
         hostname: "images.unsplash.com",
       },
     ],
+  },
+  async headers() {
+    return [
+      {
+        source: "/:all*(svg|jpg|jpeg|png|webp|avif|mp4|webm)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
   },
 };
 
