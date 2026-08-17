@@ -126,21 +126,24 @@
 .panelOverlay {
   position: absolute;
   top: 50%;
-  width: 180vh;
-  height: 180vh;
+  width: 210vh;
+  height: 210vh;
   border-radius: 50%;
   transform: translateY(-50%);
   z-index: 6;
   pointer-events: none;
-  filter: blur(22px);
+  filter: blur(32px);
+  will-change: transform, opacity;
   background:
     radial-gradient(
       circle at center,
-      rgba(0, 0, 0, 0.9) 0%,
-      rgba(0, 0, 0, 0.8) 46%,
-      rgba(0, 0, 0, 0.42) 72%,
-      rgba(0, 0, 0, 0.2) 84%,
-      rgba(0, 0, 0, 0.07) 93%,
+      rgba(0, 0, 0, 0.96) 0%,
+      rgba(0, 0, 0, 0.92) 35%,
+      rgba(0, 0, 0, 0.78) 55%,
+      rgba(0, 0, 0, 0.50) 70%,
+      rgba(0, 0, 0, 0.22) 82%,
+      rgba(0, 0, 0, 0.08) 91%,
+      rgba(0, 0, 0, 0.02) 96%,
       rgba(0, 0, 0, 0) 100%
     );
 
@@ -150,11 +153,11 @@
 }
 
 .panelOverlayLeft {
-  left: -125vh;
+  left: -140vh;
 }
 
 .panelOverlayRight {
-  right: -125vh;
+  right: -140vh;
 }
 
 .panelOverlayMobile {
@@ -164,22 +167,25 @@
     display: block;
     position: absolute;
     left: 50%;
-    bottom: -140vw;
-    width: 220vw;
-    height: 250vw;
+    bottom: -150vw;
+    width: 240vw;
+    height: 270vw;
     border-radius: 50%;
     transform: translateX(-50%);
     z-index: 6;
     pointer-events: none;
-    filter: blur(24px);
+    filter: blur(32px);
+    will-change: transform, opacity;
     background:
       radial-gradient(
         circle at center,
-        rgba(0, 0, 0, 0.9) 0%,
-        rgba(0, 0, 0, 0.8) 46%,
-        rgba(0, 0, 0, 0.46) 72%,
-        rgba(0, 0, 0, 0.22) 84%,
-        rgba(0, 0, 0, 0.08) 93%,
+        rgba(0, 0, 0, 0.96) 0%,
+        rgba(0, 0, 0, 0.92) 35%,
+        rgba(0, 0, 0, 0.78) 55%,
+        rgba(0, 0, 0, 0.52) 70%,
+        rgba(0, 0, 0, 0.24) 82%,
+        rgba(0, 0, 0, 0.09) 91%,
+        rgba(0, 0, 0, 0.02) 96%,
         rgba(0, 0, 0, 0) 100%
       );
   }

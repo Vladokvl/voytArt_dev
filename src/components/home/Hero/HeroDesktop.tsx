@@ -42,7 +42,7 @@ const DESKTOP_SNAP_POINTS = [0.0, 0.24, 0.6, 0.9];
 const DESKTOP_NEON_SNAP = 0.9;
 // ★ Швидкість / тривалість перельоту між секціями (у секундах)
 // (Змінюй тут: 0.8 = швидше, 1.2 = плавно за замовчуванням, 1.6 = довше/кінематографічніше)
-const DESKTOP_SNAP_DURATION = 1.2;
+const DESKTOP_SNAP_DURATION = 2;
 
 const getDesktopFrameSrc = (index: number) =>
   `/mainPageVideos/originals/desktop_frames/frame_${String(index).padStart(4, "0")}.webp`;
@@ -639,9 +639,6 @@ export default function HeroDesktop() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const lenis = (window as any).lenis;
       if (lenis) {
-        // Зупиняємо Lenis, щоб він не перебивав наш scrollTo
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        lenis.stop();
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         lenis.scrollTo(targetY, {
           duration: DESKTOP_SNAP_DURATION,
@@ -649,8 +646,6 @@ export default function HeroDesktop() {
           lock: true,
           easing: (t: number) => 1 - Math.pow(1 - t, 3),
           onComplete: () => {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-            lenis.start();
             isGlidingRef.current = false;
           },
         });
