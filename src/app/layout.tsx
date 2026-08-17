@@ -7,6 +7,7 @@ import PageLoader from "~/components/layout/PageLoader/PageLoader";
 import FooterWrapper from "~/components/layout/Footer/FooterWrapper";
 import NavMenu from "~/components/layout/navMenu/navmenu";
 import Header from "~/components/layout/Header/Header";
+import AnalyticsTracker from "~/components/analytics/AnalyticsTracker";
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL
   ? (process.env.NEXT_PUBLIC_APP_URL.startsWith("http")
@@ -89,6 +90,9 @@ export default function RootLayout({
       </head>
       <body>
         <script dangerouslySetInnerHTML={{ __html: "history.scrollRestoration='manual';window.scrollTo(0,0);" }} />
+        <Suspense fallback={null}>
+          <AnalyticsTracker />
+        </Suspense>
         <PageLoader />
         <Suspense fallback={null}>
           <Header />

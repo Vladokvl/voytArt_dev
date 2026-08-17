@@ -14,6 +14,8 @@ import {
   Sparkles,
   ExternalLink,
   LogOut,
+  BarChart3,
+  Activity,
 } from "lucide-react";
 import styles from "../admin.module.scss";
 import { logoutAction } from "../_action";
@@ -35,6 +37,13 @@ const navSections = [
     items: [
       { label: "Колекції", href: "/admin/collections", icon: Sparkles },
       { label: "Категорії", href: "/admin/categories", icon: FolderTree },
+    ],
+  },
+  {
+    title: "Моніторинг",
+    items: [
+      { label: "Аналітика", href: "/admin/analytics", icon: BarChart3 },
+      { label: "Стан & Ліміти", href: "/admin/system", icon: Activity },
     ],
   },
 ];

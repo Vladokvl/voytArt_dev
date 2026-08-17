@@ -273,6 +273,20 @@ exports.Prisma.AdminUserScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.AnalyticsEventScalarFieldEnum = {
+  id: 'id',
+  path: 'path',
+  pageType: 'pageType',
+  country: 'country',
+  city: 'city',
+  device: 'device',
+  browser: 'browser',
+  os: 'os',
+  referer: 'referer',
+  visitorHash: 'visitorHash',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -318,7 +332,8 @@ exports.Prisma.ModelName = {
   OrderItem: 'OrderItem',
   GalleryPost: 'GalleryPost',
   GalleryPostMedia: 'GalleryPostMedia',
-  AdminUser: 'AdminUser'
+  AdminUser: 'AdminUser',
+  AnalyticsEvent: 'AnalyticsEvent'
 };
 
 /**

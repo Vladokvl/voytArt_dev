@@ -296,3 +296,24 @@ model AdminUser {
 
   @@map("admin_users")
 }
+
+// ── Analytics Events (Статистика відвідувань) ─────────────────────────────────
+model AnalyticsEvent {
+  id          Int      @id @default(autoincrement())
+  path        String
+  pageType    String   @default("OTHER") @map("page_type")
+  country     String?
+  city        String?
+  device      String? // Desktop, Mobile, Tablet
+  browser     String? // Chrome, Safari, Telegram In-App, Instagram In-App, etc.
+  os          String? // iOS, Android, Windows, macOS, Linux
+  referer     String? // Telegram, Instagram, Google, Facebook, Direct, etc.
+  visitorHash String?  @map("visitor_hash") // Daily salt hash for unique visitor metrics
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@index([path])
+  @@index([country])
+  @@index([pageType])
+  @@map("analytics_events")
+}

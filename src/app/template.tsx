@@ -22,10 +22,13 @@ export default function Template({ children }: { children: React.ReactNode }) {
   const isAdmin = pathname.startsWith("/admin");
   const isHome = pathname === "/";
   const isArtToArt = pathname.startsWith("/art") && lastPathname.startsWith("/art");
+  const isShopToShop = pathname.startsWith("/shop") && lastPathname.startsWith("/shop");
+  const isGalleryToGallery = pathname.startsWith("/gallery") && lastPathname.startsWith("/gallery");
   const isFirstLoad = !lastPathname;
 
-  // Skip transitions for admin, going to home page, same-page art navigation, or first load
-  const shouldSkipTransition = isAdmin || isHome || isArtToArt || isFirstLoad;
+  // Skip transitions for admin, going to home page, same-section navigation, or first load
+  const shouldSkipTransition =
+    isAdmin || isHome || isArtToArt || isShopToShop || isGalleryToGallery || isFirstLoad;
 
   // Synchronously compute direction on render using the last recorded path
   const prevIdx = getRouteIndex(lastPathname);
@@ -49,13 +52,14 @@ export default function Template({ children }: { children: React.ReactNode }) {
 
   const variants = {
     initial: (dir: "right" | "left" | "fade") => {
-      if (dir === "right") return { x: 80};
-      if (dir === "left") return { x: -80};
-      return { y: 15, opacity: 0 };
+      if (dir === "right") return { x: 40, opacity: 0 };
+      if (dir === "left") return { x: -40, opacity: 0 };
+      return { y: 10, opacity: 0 };
     },
     animate: {
       x: 0,
       y: 0,
+      opacity: 1,
     },
   };
 
@@ -66,12 +70,12 @@ export default function Template({ children }: { children: React.ReactNode }) {
       initial="initial"
       animate="animate"
       variants={variants}
-      transition={{ type: "spring", stiffness: 260, damping: 28 }}
-      style={{ overflowX: "hidden", width: "100%" }}
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      style={{ width: "100%" }}
       onAnimationComplete={() => {
         if (wrapperRef.current) {
           wrapperRef.current.style.transform = "none";
-          wrapperRef.current.style.opacity = "";
+          wrapperRef.current.style.opacity = "1";
         }
         if (typeof window !== "undefined") {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
