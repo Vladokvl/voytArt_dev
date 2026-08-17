@@ -3,17 +3,30 @@ import React, { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./ProductCarousel.module.scss";
-import type { Product } from "~/app/shop/_ShopStorefront";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
-
-interface ProductCarouselProps {
+export type CarouselItem = {
+  id: number;
   title: string;
-  products: Product[];
-  onProductClick?: (product: Product) => void;
-  onAddToCart: (product: Product) => void;
+  price: number;
+  stock: number;
+  coverUrl?: string | null;
+  images?: { id: number; url: string; order: number }[];
+  author?: { firstName: string; lastName: string } | null;
+  category?: { id: number; name: string; slug: string } | null;
+};
+
+interface ProductCarouselProps<T extends CarouselItem = CarouselItem> {
+  title: string;
+  products: T[];
+  onProductClick?: (product: T) => void;
+  onAddToCart: (product: T) => void;
 }
 
-export default function ProductCarousel({ title, products, onAddToCart }: ProductCarouselProps) {
+export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
+  title,
+  products,
+  onAddToCart,
+}: ProductCarouselProps<T>) {
   const trackRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: "left" | "right") => {
@@ -62,7 +75,7 @@ export default function ProductCarousel({ title, products, onAddToCart }: Produc
                     className={styles.productImage}
                     sizes="(max-width: 640px) 100vw, 300px"
                   />
-                  {product.stock <= 0 && <div className={styles.soldOut}>Немає в наявності</div>}
+                  {product.stock <= 0 && <div className={styles.soldOut}>Sold Out</div>}
                 </Link>
 
                 <div className={styles.cardInfo}>
@@ -75,13 +88,14 @@ export default function ProductCarousel({ title, products, onAddToCart }: Produc
                     </h3>
                   </Link>
                   <div className={styles.cardFooter}>
-                    <span className={styles.price}>{product.price.toLocaleString("uk-UA")} €</span>
+                    <span className={styles.price}>{product.price.toLocaleString("en-US")} €</span>
                     <button
+                      type="button"
                       onClick={() => onAddToCart(product)}
                       disabled={product.stock <= 0}
                       className={styles.addToCartBtn}
                     >
-                      Купити
+                      {product.stock <= 0 ? "Sold Out" : "Add to Cart"}
                     </button>
                   </div>
                 </div>

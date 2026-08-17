@@ -11,20 +11,43 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const product = await db.product.findUnique({
     where: { id: Number(id) },
-    include: { author: true },
+    include: { author: true, category: true },
   });
 
   if (!product) {
-    return { title: "Товар не знайдено | VoytArt Shop" };
+    return { title: "Product Not Found | VoytArt Store" };
   }
 
+  const artistName = `${product.author.firstName} ${product.author.lastName}`;
+  const cleanDescription = product.description
+    ? product.description.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 160)
+    : `${product.title} by ${artistName}. Exclusive Ukrainian contemporary art edition.`;
+
+  const ogDescription = `${product.price} € · ${product.category.name} · ${cleanDescription}`;
+
   return {
-    title: `${product.title} | VoytArt Shop`,
-    description: product.description?.slice(0, 150) ?? `${product.title} від ${product.author.firstName} ${product.author.lastName}`,
+    title: `${product.title} by ${artistName}`,
+    description: ogDescription,
     openGraph: {
-      title: `${product.title} | VoytArt Shop`,
-      description: `${product.price} € — ${product.author.firstName} ${product.author.lastName}`,
-      images: product.coverUrl ? [{ url: product.coverUrl }] : [],
+      title: `${product.title} — ${artistName}`,
+      description: ogDescription,
+      type: "article",
+      images: product.coverUrl
+        ? [
+            {
+              url: product.coverUrl,
+              width: 1000,
+              height: 1000,
+              alt: `${product.title} by ${artistName}`,
+            },
+          ]
+        : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.title} — ${artistName}`,
+      description: ogDescription,
+      images: product.coverUrl ? [product.coverUrl] : [],
     },
   };
 }

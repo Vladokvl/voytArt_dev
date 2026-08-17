@@ -17,17 +17,20 @@ export async function generateMetadata({
   if (artist) {
     const author = await db.author.findUnique({
       where: { id: Number(artist) },
-      select: { firstName: true, lastName: true, bio: true },
+      select: { firstName: true, lastName: true, bio: true, photoUrl: true },
     });
     if (author) {
       const name = `${author.firstName} ${author.lastName}`;
-      const desc = author.bio ?? `Paintings by artist ${name}`;
+      const desc = author.bio ?? `Original contemporary paintings and collections by ${name}.`;
       return {
-        title: `${name} - Paintings | VoytArt Gallery`,
+        title: `${name} — Artworks & Paintings`,
         description: desc,
         openGraph: {
-          title: `${name} - Paintings`,
+          title: `${name} — VoytArt Gallery`,
           description: desc,
+          images: author.photoUrl
+            ? [{ url: author.photoUrl, width: 800, height: 800, alt: name }]
+            : [{ url: "/pagesImages/galleryPageHero.jpg", width: 1200, height: 630, alt: name }],
         },
       };
     }
@@ -36,24 +39,43 @@ export async function generateMetadata({
   if (collection) {
     const coll = await db.collection.findUnique({
       where: { id: Number(collection) },
-      select: { title: true, author: { select: { firstName: true, lastName: true } } },
+      select: {
+        title: true,
+        coverPhotoUrl: true,
+        author: { select: { firstName: true, lastName: true } },
+      },
     });
     if (coll) {
-      const desc = `Collection "${coll.title}" by ${coll.author.firstName} ${coll.author.lastName}`;
+      const desc = `Art collection "${coll.title}" by ${coll.author.firstName} ${coll.author.lastName}.`;
       return {
-        title: `Collection: ${coll.title} | VoytArt Gallery`,
+        title: `Collection: ${coll.title} — ${coll.author.firstName} ${coll.author.lastName}`,
         description: desc,
         openGraph: {
           title: `Collection: ${coll.title}`,
           description: desc,
+          images: coll.coverPhotoUrl
+            ? [{ url: coll.coverPhotoUrl, width: 1200, height: 630, alt: coll.title }]
+            : [],
         },
       };
     }
   }
 
   return {
-    title: "Our Paintings | VoytArt Gallery",
-    description: "Original paintings by Ukrainian artists",
+    title: "Art Gallery — Original Paintings & Collections",
+    description: "Explore curated original paintings and contemporary art collections by Ukrainian artists.",
+    openGraph: {
+      title: "VoytArt Gallery — Contemporary Paintings",
+      description: "Explore curated original paintings and contemporary art collections by Ukrainian artists.",
+      images: [
+        {
+          url: "/pagesImages/galleryPageHero.jpg",
+          width: 1200,
+          height: 630,
+          alt: "VoytArt Gallery",
+        },
+      ],
+    },
   };
 }
 

@@ -1,0 +1,83 @@
+.floatingCartBtn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 999;
+  background: var(--color-text);
+  color: var(--color-bg);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+  border-radius: 999px;
+  padding: 0.85rem 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(10px);
+
+  &:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+    opacity: 0.92;
+    border-color: var(--color-accent);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  @media (max-width: 768px) {
+    bottom: 1.5rem;
+    right: 1.25rem;
+    padding: 0.75rem 1.15rem;
+  }
+}
+
+.iconWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--color-bg);
+
+  @media (max-width: 480px) {
+    display: none;
+  }
+}
+
+.badge {
+  background: var(--color-accent);
+  color: #000;
+  font-size: 0.75rem;
+  font-weight: 900;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 0 10px rgba(215, 255, 1, 0.6);
+  animation: pulseBadge 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes pulseBadge {
+  0% {
+    transform: scale(0.7);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

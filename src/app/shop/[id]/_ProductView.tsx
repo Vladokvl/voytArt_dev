@@ -3,33 +3,40 @@
 import { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingBag, Check, ChevronRight, ArrowRight } from "lucide-react";
-import styles from "./product-page.module.scss";
+import { ChevronRight, ShoppingBag, ArrowRight, Check } from "lucide-react";
+import { useCart } from "~/context/CartContext";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
+import ProductCarousel from "~/components/shop/ProductCarousel";
+import styles from "./product-page.module.scss";
 
-type ProductImage = { id: number; url: string; order: number; variantId?: number | null };
+type ProductImage = {
+  id: number;
+  url: string;
+  order: number;
+  variantId?: number | null;
+};
+
 type ProductVariant = {
   id: number;
   title: string;
   price: number | null;
   stock: number;
-  sku: string | null;
+  sku?: string | null;
+  sortOrder: number;
 };
-type Author = { id: number; firstName: string; lastName: string; photoUrl: string | null; shortDesc: string | null };
-type Category = { id: number; name: string; slug: string };
 
-type CartItem = {
-  product: {
-    id: number;
-    title: string;
-    price: number;
-    coverUrl: string;
-    author: Author;
-    category: Category;
-  };
-  variantId: number | null;
-  variantTitle: string | null;
-  quantity: number;
+type Author = {
+  id: number;
+  firstName: string;
+  lastName: string;
+  photoUrl?: string | null;
+  shortDesc?: string | null;
+};
+
+type Category = {
+  id: number;
+  name: string;
+  slug: string;
 };
 
 export type FullProduct = {
@@ -47,16 +54,21 @@ export type FullProduct = {
 
 export default function ProductView({
   product,
-  relatedProducts: _relatedProducts = [],
+  relatedProducts = [],
 }: {
   product: FullProduct;
   relatedProducts?: FullProduct[];
 }) {
-  // All available product images
+  const { addToCart } = useCart();
+
+  // Consolidate images (cover + gallery)
   const allImages = useMemo(() => {
-    const list: ProductImage[] = [{ id: 0, url: product.coverUrl, order: -1, variantId: null }];
-    for (const img of product.images) {
-      if (img.url !== product.coverUrl) {
+    const list: ProductImage[] = [];
+    if (product.coverUrl) {
+      list.push({ id: 0, url: product.coverUrl, order: -1 });
+    }
+    if (product.images && product.images.length > 0) {
+      for (const img of product.images) {
         list.push(img);
       }
     }
@@ -68,20 +80,18 @@ export default function ProductView({
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
     hasVariants
       ? (product.variants.find((v) => v.stock > 0) ?? product.variants[0] ?? null)
-      : null
+      : null,
   );
 
   // Filtered gallery images based on selected variant
   const visibleImages = useMemo(() => {
     if (!selectedVariant) return allImages;
 
-    // Check if there are images specifically assigned to this variant
     const variantSpecific = allImages.filter(
-      (img) => img.variantId === selectedVariant.id
+      (img) => img.variantId === selectedVariant.id,
     );
 
     if (variantSpecific.length > 0) {
-      // Show variant-specific images + general untagged images
       const untagged = allImages.filter((img) => !img.variantId);
       return [...variantSpecific, ...untagged];
     }
@@ -90,10 +100,10 @@ export default function ProductView({
   }, [allImages, selectedVariant]);
 
   const [activeImage, setActiveImage] = useState(
-    visibleImages[0]?.url ?? product.coverUrl
+    visibleImages[0]?.url ?? product.coverUrl,
   );
 
-  // When variant changes, auto-switch active image to the first photo of this variant
+  // When variant changes, auto-switch active image to variant's photo if available
   const handleVariantSelect = (v: ProductVariant) => {
     setSelectedVariant(v);
     setQuantity(1);
@@ -104,7 +114,6 @@ export default function ProductView({
     }
   };
 
-  // When clicking a thumbnail, if it's tied to a variant, also auto-select that variant
   const handleThumbnailClick = (img: ProductImage) => {
     setActiveImage(img.url);
     if (img.variantId && hasVariants) {
@@ -126,48 +135,21 @@ export default function ProductView({
   const handleAddToCart = () => {
     if (isOutOfStock) return;
 
-    // Read cart from localStorage
-    const savedCart = localStorage.getItem("voyt_art_cart");
-    let cart: CartItem[] = [];
-    if (savedCart) {
-      try {
-        cart = JSON.parse(savedCart) as CartItem[];
-      } catch (e) {
-        console.error(e);
-      }
-    }
+    addToCart({
+      product: {
+        id: product.id,
+        title: product.title,
+        price: currentPrice,
+        coverUrl: activeImage || product.coverUrl,
+        author: product.author,
+        category: product.category,
+      },
+      variantId: selectedVariant?.id ?? null,
+      variantTitle: selectedVariant?.title ?? null,
+      quantity,
+      maxStock: currentStock,
+    });
 
-    const existingIndex = cart.findIndex((item) =>
-      selectedVariant
-        ? item.product.id === product.id && item.variantId === selectedVariant.id
-        : item.product.id === product.id && !item.variantId
-    );
-
-    if (existingIndex > -1 && cart[existingIndex]) {
-      cart[existingIndex].quantity = Math.min(
-        currentStock,
-        cart[existingIndex].quantity + quantity
-      );
-    } else {
-      cart.push({
-        product: {
-          id: product.id,
-          title: product.title,
-          price: currentPrice,
-          coverUrl: activeImage || product.coverUrl,
-          author: product.author,
-          category: product.category,
-        },
-        variantId: selectedVariant?.id ?? null,
-        variantTitle: selectedVariant?.title ?? null,
-        quantity,
-      });
-    }
-
-    localStorage.setItem("voyt_art_cart", JSON.stringify(cart));
-    window.dispatchEvent(new Event("cartUpdated"));
-
-    // Feedback
     setAddedAnimation(true);
     setTimeout(() => setAddedAnimation(false), 2000);
   };
@@ -176,9 +158,9 @@ export default function ProductView({
     <div className={styles.pageContainer}>
       {/* Breadcrumbs */}
       <nav className={styles.breadcrumbs} aria-label="Breadcrumb">
-        <Link href="/">Головна</Link>
+        <Link href="/">Home</Link>
         <ChevronRight size={14} />
-        <Link href="/shop">Магазин</Link>
+        <Link href="/shop">Shop</Link>
         <ChevronRight size={14} />
         <span className={styles.current}>{product.title}</span>
       </nav>
@@ -208,8 +190,15 @@ export default function ProductView({
                   className={`${styles.thumbBtn} ${
                     activeImage === img.url ? styles.thumbBtnActive : ""
                   }`}
+                  aria-label={`View image ${i + 1}`}
                 >
-                  <Image src={getOptimizedImageUrl(img.url, { preset: "thumb" })} alt="" fill sizes="72px" style={{ objectFit: "cover" }} />
+                  <Image
+                    src={getOptimizedImageUrl(img.url, { preset: "thumb" })}
+                    alt=""
+                    fill
+                    sizes="72px"
+                    style={{ objectFit: "cover" }}
+                  />
                 </button>
               ))}
             </div>
@@ -223,7 +212,7 @@ export default function ProductView({
             <h1 className={styles.title}>{product.title}</h1>
             <div className={styles.priceRow}>
               <span className={styles.price}>
-                {currentPrice.toLocaleString("uk-UA")} €
+                {currentPrice.toLocaleString("en-US")} €
               </span>
             </div>
           </div>
@@ -231,7 +220,7 @@ export default function ProductView({
           {/* Variant Selector */}
           {hasVariants && (
             <div className={styles.variantSection}>
-              <span className={styles.sectionLabel}>Оберіть розмір / модифікацію:</span>
+              <span className={styles.sectionLabel}>Select Option / Size:</span>
               <div className={styles.variantChips}>
                 {product.variants.map((v) => {
                   const active = selectedVariant?.id === v.id;
@@ -249,7 +238,7 @@ export default function ProductView({
                       <span>{v.title}</span>
                       {v.price && v.price !== product.price && (
                         <span style={{ fontSize: "0.8rem", marginLeft: "0.35rem", opacity: 0.85 }}>
-                          ({v.price.toLocaleString("uk-UA")} €)
+                          ({v.price.toLocaleString("en-US")} €)
                         </span>
                       )}
                     </button>
@@ -262,10 +251,10 @@ export default function ProductView({
           {/* Stock Status */}
           <div className={styles.stockStatus}>
             {isOutOfStock ? (
-              <span className={styles.stockOut}>✕ Немає в наявності</span>
+              <span className={styles.stockOut}>✕ Out of Stock</span>
             ) : (
               <span className={styles.stockIn}>
-                ● В наявності ({currentStock} шт)
+                ● In Stock ({currentStock} available)
               </span>
             )}
           </div>
@@ -278,6 +267,7 @@ export default function ProductView({
                 className={styles.qtyBtn}
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                 disabled={quantity <= 1 || isOutOfStock}
+                aria-label="Decrease quantity"
               >
                 −
               </button>
@@ -287,6 +277,7 @@ export default function ProductView({
                 className={styles.qtyBtn}
                 onClick={() => setQuantity((q) => Math.min(currentStock, q + 1))}
                 disabled={quantity >= currentStock || isOutOfStock}
+                aria-label="Increase quantity"
               >
                 +
               </button>
@@ -301,12 +292,14 @@ export default function ProductView({
               {addedAnimation ? (
                 <>
                   <Check size={18} />
-                  <span>Додано в кошик!</span>
+                  <span>Added to Cart!</span>
                 </>
+              ) : isOutOfStock ? (
+                <span>Sold Out</span>
               ) : (
                 <>
                   <ShoppingBag size={18} />
-                  <span>Додати в кошик</span>
+                  <span>Add to Cart</span>
                 </>
               )}
             </button>
@@ -315,7 +308,7 @@ export default function ProductView({
           {/* Description */}
           {product.description && (
             <div className={styles.descriptionBox}>
-              <h3>Опис товару</h3>
+              <h3>Product Details</h3>
               <div dangerouslySetInnerHTML={{ __html: product.description }} />
             </div>
           )}
@@ -334,7 +327,14 @@ export default function ProductView({
                 ) : (
                   <div
                     className={styles.authorAvatar}
-                    style={{ background: "#0f172a", color: "#d7ff01", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700 }}
+                    style={{
+                      background: "#0f172a",
+                      color: "#d7ff01",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontWeight: 700,
+                    }}
                   >
                     {product.author.firstName[0]}
                   </div>
@@ -344,7 +344,7 @@ export default function ProductView({
                     {product.author.firstName} {product.author.lastName}
                   </h4>
                   <p className={styles.authorSubtitle}>
-                    {product.author.shortDesc ?? "Художник галереї VoytArt"}
+                    {product.author.shortDesc ?? "VoytArt Gallery Artist"}
                   </p>
                 </div>
               </div>
@@ -353,6 +353,38 @@ export default function ProductView({
           )}
         </div>
       </div>
+
+      {/* Related Products Section */}
+      {relatedProducts.length > 0 && (
+        <section style={{ marginTop: "5rem", paddingTop: "3rem", borderTop: "1px solid #f1f5f9" }}>
+          <ProductCarousel
+            title="You May Also Like"
+            products={relatedProducts}
+            onAddToCart={(relProduct) => {
+              addToCart({
+                product: {
+                  id: relProduct.id,
+                  title: relProduct.title,
+                  price: relProduct.price,
+                  coverUrl: relProduct.coverUrl ?? "",
+                  author: relProduct.author
+                    ? {
+                        id: relProduct.author.id,
+                        firstName: relProduct.author.firstName,
+                        lastName: relProduct.author.lastName,
+                      }
+                    : { id: 0, firstName: "VoytArt", lastName: "Artist" },
+                  category: relProduct.category ?? undefined,
+                },
+                variantId: null,
+                variantTitle: null,
+                quantity: 1,
+                maxStock: relProduct.stock,
+              });
+            }}
+          />
+        </section>
+      )}
     </div>
   );
 }

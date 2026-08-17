@@ -202,14 +202,15 @@
 }
 
 .chipActive {
-  background: #111;
-  color: #fff;
-  border-color: #111;
+  background: var(--color-text);
+  color: var(--color-bg);
+  border-color: var(--color-text);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 
   &:hover {
-    background: #222;
-    color: #fff;
+    background: var(--color-text);
+    color: var(--color-bg);
+    opacity: 0.92;
   }
 }
 
@@ -218,7 +219,7 @@
   border-style: dashed;
   cursor: not-allowed;
   text-decoration: line-through;
-  background: #f5f5f5;
+  background: rgba(26, 26, 26, 0.05);
 }
 
 // ── Stock & Quantity & Purchase ───────────────────────────────────────────────
@@ -253,7 +254,7 @@
 .qtyPicker {
   display: flex;
   align-items: center;
-  border: 1.5px solid #e0e0e0;
+  border: 1.5px solid rgba(26, 26, 26, 0.15);
   border-radius: 8px;
   overflow: hidden;
   background: #fff;
@@ -271,11 +272,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #333;
+  color: var(--color-text);
   transition: background 0.15s;
 
   &:hover:not(:disabled) {
-    background: #f0f0f0;
+    background: rgba(26, 26, 26, 0.05);
   }
 
   &:disabled {
@@ -289,6 +290,7 @@
   text-align: center;
   font-weight: 700;
   font-size: 1rem;
+  color: var(--color-text);
 }
 
 .addToCartBtn {
@@ -298,8 +300,8 @@
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
-  background: #111;
-  color: #fff;
+  background: var(--color-text);
+  color: var(--color-bg);
   border: none;
   border-radius: 8px;
   font-size: 1rem;
@@ -309,13 +311,14 @@
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover:not(:disabled) {
-    background: #2b2b2b;
+    opacity: 0.92;
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
   }
 
   &:disabled {
-    background: #ccc;
+    background: rgba(26, 26, 26, 0.1);
+    color: var(--color-text-muted);
     cursor: not-allowed;
     box-shadow: none;
   }
