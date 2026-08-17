@@ -3,6 +3,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import gsap from "gsap";
 import styles from "@/app/art/[[...artistId]]/art.module.scss";
+import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 
 type DBAuthor = {
   id: number;
@@ -300,7 +301,7 @@ export default function ArtHero({
                 <div
                   className={styles.colBg}
                   style={{
-                    backgroundImage: `url(${bgPhotoUrl})`,
+                    backgroundImage: `url(${getOptimizedImageUrl(bgPhotoUrl, { preset: "large" })})`,
                   }}
                 />
 

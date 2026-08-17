@@ -5,6 +5,7 @@ import Link from "next/link";
 import styles from "./GalleryPosts.module.scss";
 import { fetchPaginatedPosts } from "~/app/gallery/_actions";
 import { motion } from "framer-motion";
+import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 
 type Post = {
   id: number;
@@ -86,7 +87,7 @@ export default function GalleryPosts({
                   <div className={styles.coverWrapper}>
                     {post.coverUrl ? (
                       <Image
-                        src={post.coverUrl}
+                        src={getOptimizedImageUrl(post.coverUrl, { preset: "card" })}
                         alt={post.title}
                         fill
                         className={styles.coverImage}

@@ -4,11 +4,38 @@ import Link from "next/link";
 import { Plus, Edit2, ArrowUp, ArrowDown, ArrowRight } from "lucide-react";
 import DeleteAuthorButton from "./_DeleteButton";
 import { swapAuthorOrderAction, moveAuthorToPositionAction } from "./_actions";
+import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
+import SortableHeader from "../_components/SortableHeader";
 
-export default async function AuthorsPage() {
+type AuthorSortField = "name" | "paintingsCount" | "status" | "order";
+
+type SearchParams = Promise<{
+  sortBy?: AuthorSortField;
+  sortDir?: "asc" | "desc";
+}>;
+
+export default async function AuthorsPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const { sortBy = "order", sortDir = "asc" } = await searchParams;
+  const validSortDir: "asc" | "desc" = sortDir === "desc" ? "desc" : "asc";
+
+  let orderByQuery: Record<string, any> = { order: validSortDir };
+  if (sortBy === "name") {
+    orderByQuery = { firstName: validSortDir };
+  } else if (sortBy === "paintingsCount") {
+    orderByQuery = { paintings: { _count: validSortDir } };
+  } else if (sortBy === "status") {
+    orderByQuery = { active: validSortDir };
+  } else if (sortBy === "order") {
+    orderByQuery = { order: validSortDir };
+  }
+
   const authors = await db.author.findMany({
     include: { _count: { select: { paintings: true, products: true } } },
-    orderBy: { order: "asc" },
+    orderBy: orderByQuery,
   });
 
   return (
@@ -29,11 +56,11 @@ export default async function AuthorsPage() {
         <table className={styles.table}>
           <thead>
             <tr>
-              <th className={styles.th} style={{ width: 64 }}>Фото</th>
-              <th className={styles.th}>Імʼя та прізвище</th>
-              <th className={styles.th}>Картин</th>
-              <th className={styles.th}>Статус</th>
-              <th className={styles.th}>Порядок</th>
+              <th className={`${styles.th} ${styles.thThumb}`}>Фото</th>
+              <SortableHeader field="name" label="Імʼя та прізвище" defaultField="order" />
+              <SortableHeader field="paintingsCount" label="Картин" defaultField="order" />
+              <SortableHeader field="status" label="Статус" defaultField="order" />
+              <SortableHeader field="order" label="Порядок" defaultField="order" />
               <th className={styles.th} style={{ textAlign: "right" }}>Дії</th>
             </tr>
           </thead>
@@ -47,10 +74,10 @@ export default async function AuthorsPage() {
             ) : (
               authors.map((a, index) => (
                 <tr key={a.id}>
-                  <td className={styles.td}>
+                  <td className={styles.tdThumb}>
                     {a.photoUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={a.photoUrl} alt={a.firstName} className={styles.thumbnail} />
+                      <img src={getOptimizedImageUrl(a.photoUrl, { preset: "thumb" })} alt={a.firstName} className={styles.thumbnail} />
                     ) : (
                       <div className={styles.thumbnail} style={{ display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: "0.75rem" }}>
                         —

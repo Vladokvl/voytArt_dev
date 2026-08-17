@@ -3,6 +3,7 @@ import { useRef, useState, useTransition } from "react";
 import { addPaintingMediaAction, deletePaintingMediaAction } from "./_media-actions";
 import styles from "../paintings.module.scss";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
+import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import { useImageCrop } from "~/hooks/use-image-crop";
 import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
 
@@ -95,7 +96,7 @@ export default function MediaSection({
                 </div>
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={item.url} alt="" className={styles.mediaThumbnail} />
+                <img src={getOptimizedImageUrl(item.url, { preset: "thumb" })} alt="" className={styles.mediaThumbnail} />
               )}
               <button
                 type="button"

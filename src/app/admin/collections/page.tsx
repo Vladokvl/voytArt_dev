@@ -3,14 +3,41 @@ import Link from "next/link";
 import styles from "../admin-table.module.scss";
 import { Plus, Edit2 } from "lucide-react";
 import DeleteCollectionButton from "./_DeleteButton";
+import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
+import SortableHeader from "../_components/SortableHeader";
 
-export default async function CollectionsPage() {
+type CollectionSortField = "title" | "author" | "paintingsCount" | "createdAt";
+
+type SearchParams = Promise<{
+  sortBy?: CollectionSortField;
+  sortDir?: "asc" | "desc";
+}>;
+
+export default async function CollectionsPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const { sortBy = "createdAt", sortDir = "desc" } = await searchParams;
+  const validSortDir: "asc" | "desc" = sortDir === "asc" ? "asc" : "desc";
+
+  let orderByQuery: Record<string, any> = { createdAt: validSortDir };
+  if (sortBy === "title") {
+    orderByQuery = { title: validSortDir };
+  } else if (sortBy === "author") {
+    orderByQuery = { author: { firstName: validSortDir } };
+  } else if (sortBy === "paintingsCount") {
+    orderByQuery = { paintings: { _count: validSortDir } };
+  } else if (sortBy === "createdAt") {
+    orderByQuery = { createdAt: validSortDir };
+  }
+
   const collections = await db.collection.findMany({
     include: {
       author: true,
       _count: { select: { paintings: true } },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: orderByQuery,
   });
 
   return (
@@ -31,10 +58,10 @@ export default async function CollectionsPage() {
         <table className={styles.table}>
           <thead>
             <tr>
-              <th className={styles.th} style={{ width: 64 }}>Обкладинка</th>
-              <th className={styles.th}>Назва колекції</th>
-              <th className={styles.th}>Автор</th>
-              <th className={styles.th}>Кількість картин</th>
+              <th className={`${styles.th} ${styles.thThumb}`}>Обкладинка</th>
+              <SortableHeader field="title" label="Назва колекції" defaultField="createdAt" />
+              <SortableHeader field="author" label="Автор" defaultField="createdAt" />
+              <SortableHeader field="paintingsCount" label="Кількість картин" defaultField="createdAt" />
               <th className={styles.th} style={{ textAlign: "right" }}>Дії</th>
             </tr>
           </thead>
@@ -48,11 +75,11 @@ export default async function CollectionsPage() {
             ) : (
               collections.map((col) => (
                 <tr key={col.id}>
-                  <td className={styles.td}>
+                  <td className={styles.tdThumb}>
                     {col.coverPhotoUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={col.coverPhotoUrl}
+                        src={getOptimizedImageUrl(col.coverPhotoUrl, { preset: "thumb" })}
                         alt={col.title}
                         className={styles.thumbnail}
                       />

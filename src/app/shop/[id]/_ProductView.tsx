@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ShoppingBag, Check, ChevronRight, ArrowRight } from "lucide-react";
 import styles from "./product-page.module.scss";
+import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 
 type ProductImage = { id: number; url: string; order: number; variantId?: number | null };
 type ProductVariant = {
@@ -188,7 +189,7 @@ export default function ProductView({
         <div className={styles.galleryCol}>
           <div className={styles.mainImageWrap}>
             <Image
-              src={activeImage}
+              src={getOptimizedImageUrl(activeImage, { preset: "large" })}
               alt={product.title}
               fill
               priority
@@ -208,7 +209,7 @@ export default function ProductView({
                     activeImage === img.url ? styles.thumbBtnActive : ""
                   }`}
                 >
-                  <Image src={img.url} alt="" fill sizes="72px" style={{ objectFit: "cover" }} />
+                  <Image src={getOptimizedImageUrl(img.url, { preset: "thumb" })} alt="" fill sizes="72px" style={{ objectFit: "cover" }} />
                 </button>
               ))}
             </div>
@@ -326,7 +327,7 @@ export default function ProductView({
                 {product.author.photoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={product.author.photoUrl}
+                    src={getOptimizedImageUrl(product.author.photoUrl, { preset: "thumb" })}
                     alt={product.author.firstName}
                     className={styles.authorAvatar}
                   />

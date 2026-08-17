@@ -240,3 +240,30 @@ export async function deleteProductAction(id: number): Promise<void> {
   revalidatePath("/admin/products");
   revalidatePath("/shop");
 }
+
+export async function swapProductOrderAction(idA: number, idB: number) {
+  const [a, b] = await Promise.all([
+    db.product.findUnique({ where: { id: idA }, select: { sortOrder: true } }),
+    db.product.findUnique({ where: { id: idB }, select: { sortOrder: true } }),
+  ]);
+  if (!a || !b) return;
+  await Promise.all([
+    db.product.update({ where: { id: idA }, data: { sortOrder: b.sortOrder } }),
+    db.product.update({ where: { id: idB }, data: { sortOrder: a.sortOrder } }),
+  ]);
+  revalidatePath("/admin/products");
+  revalidatePath("/shop");
+}
+
+export async function moveProductToPositionAction(id: number, targetIndex: number) {
+  const all = await db.product.findMany({ orderBy: { sortOrder: "asc" }, select: { id: true } });
+  const without = all.filter((p) => p.id !== id);
+  const clamped = Math.max(0, Math.min(targetIndex, without.length));
+  without.splice(clamped, 0, { id });
+  await Promise.all(
+    without.map((p, i) => db.product.update({ where: { id: p.id }, data: { sortOrder: i } })),
+  );
+  revalidatePath("/admin/products");
+  revalidatePath("/shop");
+}
+

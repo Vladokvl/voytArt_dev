@@ -1,17 +1,51 @@
 import { db } from "~/lib/db";
 import styles from "../admin-table.module.scss";
 import Link from "next/link";
-import { Plus, Edit2 } from "lucide-react";
+import { Plus, Edit2, ArrowUp, ArrowDown, ArrowRight } from "lucide-react";
 import DeleteProductButton from "./_DeleteButton";
+import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
+import SortableHeader from "../_components/SortableHeader";
+import { swapProductOrderAction, moveProductToPositionAction } from "./_actions";
 
-export default async function ProductsPage() {
+type ProductSortField = "title" | "author" | "category" | "price" | "stock" | "status" | "sortOrder";
+
+type SearchParams = Promise<{
+  sortBy?: ProductSortField;
+  sortDir?: "asc" | "desc";
+}>;
+
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const { sortBy = "sortOrder", sortDir = "asc" } = await searchParams;
+  const validSortDir: "asc" | "desc" = sortDir === "desc" ? "desc" : "asc";
+
+  let orderByQuery: Record<string, any> = { sortOrder: validSortDir };
+  if (sortBy === "title") {
+    orderByQuery = { title: validSortDir };
+  } else if (sortBy === "author") {
+    orderByQuery = { author: { firstName: validSortDir } };
+  } else if (sortBy === "category") {
+    orderByQuery = { category: { name: validSortDir } };
+  } else if (sortBy === "price") {
+    orderByQuery = { price: validSortDir };
+  } else if (sortBy === "stock") {
+    orderByQuery = { stock: validSortDir };
+  } else if (sortBy === "status") {
+    orderByQuery = { isActive: validSortDir };
+  } else if (sortBy === "sortOrder") {
+    orderByQuery = { sortOrder: validSortDir };
+  }
+
   const products = await db.product.findMany({
     include: {
       category: true,
       author: true,
       images: { orderBy: { order: "asc" }, take: 1 },
     },
-    orderBy: { sortOrder: "asc" },
+    orderBy: orderByQuery,
   });
 
   return (
@@ -32,31 +66,32 @@ export default async function ProductsPage() {
         <table className={styles.table}>
           <thead>
             <tr>
-              <th className={styles.th} style={{ width: 64 }}>Фото</th>
-              <th className={styles.th}>Назва товару</th>
-              <th className={styles.th}>Автор</th>
-              <th className={styles.th}>Категорія</th>
-              <th className={styles.th}>Ціна</th>
-              <th className={styles.th}>Залишок</th>
-              <th className={styles.th}>Статус</th>
+              <th className={`${styles.th} ${styles.thThumb}`}>Фото</th>
+              <SortableHeader field="title" label="Назва товару" defaultField="sortOrder" />
+              <SortableHeader field="author" label="Автор" defaultField="sortOrder" />
+              <SortableHeader field="category" label="Категорія" defaultField="sortOrder" />
+              <SortableHeader field="price" label="Ціна" defaultField="sortOrder" />
+              <SortableHeader field="stock" label="Залишок" defaultField="sortOrder" />
+              <SortableHeader field="status" label="Статус" defaultField="sortOrder" />
+              <SortableHeader field="sortOrder" label="Порядок" defaultField="sortOrder" />
               <th className={styles.th} style={{ textAlign: "right" }}>Дії</th>
             </tr>
           </thead>
           <tbody>
             {products.length === 0 ? (
               <tr>
-                <td colSpan={8} className={styles.empty}>
+                <td colSpan={9} className={styles.empty}>
                   Товарів у магазині ще немає
                 </td>
               </tr>
             ) : (
-              products.map((p) => (
+              products.map((p, i) => (
                 <tr key={p.id}>
-                  <td className={styles.td}>
+                  <td className={styles.tdThumb}>
                     {p.coverUrl ?? p.images[0]?.url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={p.coverUrl ?? p.images[0]?.url}
+                        src={getOptimizedImageUrl(p.coverUrl ?? p.images[0]?.url, { preset: "thumb" })}
                         alt={p.title}
                         className={styles.thumbnail}
                       />
@@ -104,7 +139,61 @@ export default async function ProductsPage() {
                     )}
                   </td>
                   <td className={styles.td}>
+                    <form
+                      action={async (fd) => {
+                        "use server";
+                        const pos = Number(fd.get("pos")) - 1;
+                        await moveProductToPositionAction(p.id, pos);
+                      }}
+                      className={styles.orderForm}
+                    >
+                      <input
+                        name="pos"
+                        type="number"
+                        min={1}
+                        max={products.length}
+                        defaultValue={i + 1}
+                        className={styles.orderInput}
+                      />
+                      <button type="submit" className={styles.iconBtn} title="Перемістити">
+                        <ArrowRight size={14} />
+                      </button>
+                    </form>
+                  </td>
+                  <td className={styles.td}>
                     <div className={styles.actions} style={{ justifyContent: "flex-end" }}>
+                      <form
+                        action={swapProductOrderAction.bind(
+                          null,
+                          p.id,
+                          products[i - 1]?.id ?? p.id,
+                        )}
+                      >
+                        <button
+                          type="submit"
+                          className={styles.iconBtn}
+                          disabled={i === 0}
+                          title="Підняти вище"
+                        >
+                          <ArrowUp size={14} />
+                        </button>
+                      </form>
+                      <form
+                        action={swapProductOrderAction.bind(
+                          null,
+                          p.id,
+                          products[i + 1]?.id ?? p.id,
+                        )}
+                      >
+                        <button
+                          type="submit"
+                          className={styles.iconBtn}
+                          disabled={i === products.length - 1}
+                          title="Опустити нижче"
+                        >
+                          <ArrowDown size={14} />
+                        </button>
+                      </form>
                       <Link
                         href={`/admin/products/edit/${p.id}`}
                         className={styles.iconBtn}
@@ -124,3 +213,4 @@ export default async function ProductsPage() {
     </div>
   );
 }
+

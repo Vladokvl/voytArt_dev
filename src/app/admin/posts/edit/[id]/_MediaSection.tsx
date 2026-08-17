@@ -5,6 +5,7 @@ import styles from "@/app/admin/_formStyles.module.scss";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
 import { useImageCrop } from "~/hooks/use-image-crop";
 import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
+import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 
 type MediaItem = { id: number; url: string; type: "IMAGE" | "VIDEO"; order: number };
 
@@ -139,7 +140,7 @@ export default function PostMediaSection({
                 </div>
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={item.url} alt="" style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 6, display: "block" }} />
+                <img src={getOptimizedImageUrl(item.url, { preset: "thumb" })} alt="" style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 6, display: "block" }} />
               )}
               <button
                 type="button"

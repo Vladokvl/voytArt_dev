@@ -3,8 +3,37 @@ import styles from "../admin-table.module.scss";
 import { MapPin, Clock } from "lucide-react";
 import OrderStatusSelect from "./_OrderStatusSelect";
 import DeleteOrderButton from "./_DeleteButton";
+import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
+import SortableHeader from "../_components/SortableHeader";
 
-export default async function OrdersPage() {
+type OrderSortField = "createdAt" | "customerName" | "deliveryCity" | "total" | "status";
+
+type SearchParams = Promise<{
+  sortBy?: OrderSortField;
+  sortDir?: "asc" | "desc";
+}>;
+
+export default async function OrdersPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const { sortBy = "createdAt", sortDir = "desc" } = await searchParams;
+  const validSortDir: "asc" | "desc" = sortDir === "asc" ? "asc" : "desc";
+
+  let orderByQuery: Record<string, any> = { createdAt: validSortDir };
+  if (sortBy === "customerName") {
+    orderByQuery = { customerName: validSortDir };
+  } else if (sortBy === "deliveryCity") {
+    orderByQuery = { deliveryCity: validSortDir };
+  } else if (sortBy === "total") {
+    orderByQuery = { total: validSortDir };
+  } else if (sortBy === "status") {
+    orderByQuery = { status: validSortDir };
+  } else if (sortBy === "createdAt") {
+    orderByQuery = { createdAt: validSortDir };
+  }
+
   const orders = await db.order.findMany({
     include: {
       items: {
@@ -13,7 +42,7 @@ export default async function OrdersPage() {
         },
       },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: orderByQuery,
   });
 
   return (
@@ -30,12 +59,12 @@ export default async function OrdersPage() {
         <table className={styles.table}>
           <thead>
             <tr>
-              <th className={styles.th}>№ Замовлення</th>
-              <th className={styles.th}>Клієнт та Контакти</th>
-              <th className={styles.th}>Доставка (Нова Пошта)</th>
+              <SortableHeader field="createdAt" label="№ Замовлення" defaultField="createdAt" />
+              <SortableHeader field="customerName" label="Клієнт та Контакти" defaultField="createdAt" />
+              <SortableHeader field="deliveryCity" label="Доставка (Нова Пошта)" defaultField="createdAt" />
               <th className={styles.th}>Товари та розміри</th>
-              <th className={styles.th}>Сума</th>
-              <th className={styles.th}>Статус</th>
+              <SortableHeader field="total" label="Сума" defaultField="createdAt" />
+              <SortableHeader field="status" label="Статус" defaultField="createdAt" />
               <th className={styles.th} style={{ textAlign: "right" }}>Дії</th>
             </tr>
           </thead>
@@ -90,7 +119,7 @@ export default async function OrdersPage() {
                           {item.product?.coverUrl && (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
-                              src={item.product.coverUrl}
+                              src={getOptimizedImageUrl(item.product.coverUrl, { preset: "thumb" })}
                               alt=""
                               style={{ width: 24, height: 24, borderRadius: 4, objectFit: "cover" }}
                             />

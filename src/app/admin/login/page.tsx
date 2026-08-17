@@ -1,5 +1,6 @@
 "use client";
 import { useActionState } from "react";
+import Image from "next/image";
 import { loginAction } from "./_actions";
 import styles from "./login.module.scss";
 
@@ -8,6 +9,15 @@ export default function AdminLoginPage() {
   return (
     <div className={styles.page}>
       <div className={styles.box}>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "1rem" }}>
+          <Image
+            src="/voytCirclelogo.svg"
+            alt="VoytArt Logo"
+            width={52}
+            height={52}
+            priority
+          />
+        </div>
         <h1 className={styles.title}>Admin Panel</h1>
         <form action={formAction}>
           {state?.error && <p className={styles.error}>{state.error}</p>}

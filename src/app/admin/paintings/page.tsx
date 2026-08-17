@@ -1,6 +1,7 @@
 import { db } from "~/lib/db";
 import tableStyles from "../admin-table.module.scss";
 import Link from "next/link";
+import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import {
   Plus,
   Edit2,
@@ -10,16 +11,61 @@ import {
   Zap,
 } from "lucide-react";
 import DeletePaintingButton from "./_DeleteButton";
+import PaintingFilters from "./_PaintingFilters";
+import SortableHeader from "../_components/SortableHeader";
 import {
   movePaintingToPositionAction,
   swapPaintingOrderAction,
 } from "./_actions";
 
-export default async function PaintingsPage() {
-  const paintings = await db.painting.findMany({
-    include: { author: true, collection: true },
-    orderBy: { sortOrder: "asc" },
-  });
+type PaintingSortField = "title" | "author" | "year" | "sortOrder";
+
+type SearchParams = Promise<{
+  authorId?: string;
+  collectionId?: string;
+  sortBy?: PaintingSortField;
+  sortDir?: "asc" | "desc";
+}>;
+
+export default async function PaintingsPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const { authorId, collectionId, sortBy = "sortOrder", sortDir = "asc" } = await searchParams;
+  const authorFilter = authorId ? Number(authorId) : undefined;
+  const collectionFilter = collectionId ? Number(collectionId) : undefined;
+  const validSortDir: "asc" | "desc" = sortDir === "desc" ? "desc" : "asc";
+
+  let orderByQuery: Record<string, any> = { sortOrder: validSortDir };
+  if (sortBy === "title") {
+    orderByQuery = { title: validSortDir };
+  } else if (sortBy === "author") {
+    orderByQuery = { author: { firstName: validSortDir } };
+  } else if (sortBy === "year") {
+    orderByQuery = { year: validSortDir };
+  } else if (sortBy === "sortOrder") {
+    orderByQuery = { sortOrder: validSortDir };
+  }
+
+  const [paintings, authors, collections] = await Promise.all([
+    db.painting.findMany({
+      where: {
+        ...(authorFilter ? { authorId: authorFilter } : {}),
+        ...(collectionFilter ? { collectionId: collectionFilter } : {}),
+      },
+      include: { author: true, collection: true },
+      orderBy: orderByQuery,
+    }),
+    db.author.findMany({
+      orderBy: { order: "asc" },
+      select: { id: true, firstName: true, lastName: true },
+    }),
+    db.collection.findMany({
+      orderBy: { title: "asc" },
+      select: { id: true, title: true, authorId: true },
+    }),
+  ]);
 
   return (
     <div>
@@ -34,18 +80,21 @@ export default async function PaintingsPage() {
         </Link>
       </div>
 
+      {/* Filters Bar */}
+      <PaintingFilters authors={authors} collections={collections} />
+
       {/* Table Card */}
       <div className={tableStyles.tableCard}>
         <table className={tableStyles.table}>
           <thead>
             <tr>
-              <th className={tableStyles.th} style={{ width: 64 }}>Фото</th>
-              <th className={tableStyles.th}>Назва</th>
-              <th className={tableStyles.th}>Автор</th>
+              <th className={`${tableStyles.th} ${tableStyles.thThumb}`}>Фото</th>
+              <SortableHeader field="title" label="Назва" />
+              <SortableHeader field="author" label="Автор" />
               <th className={tableStyles.th}>Колекція</th>
-              <th className={tableStyles.th}>Рік</th>
+              <SortableHeader field="year" label="Рік" />
               <th className={tableStyles.th}>Статус продажу</th>
-              <th className={tableStyles.th}>Порядок</th>
+              <SortableHeader field="sortOrder" label="Порядок" />
               <th className={tableStyles.th} style={{ textAlign: "right" }}>Дії</th>
             </tr>
           </thead>
@@ -53,17 +102,19 @@ export default async function PaintingsPage() {
             {paintings.length === 0 ? (
               <tr>
                 <td colSpan={8} className={tableStyles.empty}>
-                  Картин ще не додано
+                  {authorFilter || collectionFilter
+                    ? "Картин за вибраними фільтрами не знайдено"
+                    : "Картин ще не додано"}
                 </td>
               </tr>
             ) : (
               paintings.map((p, i) => (
                 <tr key={p.id}>
-                  <td className={tableStyles.td}>
+                  <td className={tableStyles.tdThumb}>
                     {p.coverUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={p.coverUrl}
+                        src={getOptimizedImageUrl(p.coverUrl, { preset: "thumb" })}
                         alt={p.title}
                         className={tableStyles.thumbnail}
                       />

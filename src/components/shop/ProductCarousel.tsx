@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import styles from "./ProductCarousel.module.scss";
 import type { Product } from "~/app/shop/_ShopStorefront";
+import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 
 interface ProductCarouselProps {
   title: string;
@@ -47,8 +48,8 @@ export default function ProductCarousel({ title, products, onAddToCart }: Produc
 
       <div className={styles.track} ref={trackRef}>
         {products.map((product, index) => {
-          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-          const coverImg = product.coverUrl || product.images?.[0]?.url || "/voyt.svg";
+          const rawUrl = product.coverUrl ?? product.images?.[0]?.url;
+          const coverImg = rawUrl ? getOptimizedImageUrl(rawUrl, { preset: "card" }) : "/voyt.svg";
           return (
             <div key={product.id} className={styles.slide}>
               <div className={styles.productCard}>

@@ -86,6 +86,42 @@
   border-bottom: 1px solid #e2e8f0;
 }
 
+.thSortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background-color: #f1f5f9;
+    color: #0f172a;
+  }
+}
+
+.thSortActive {
+  color: #0f172a;
+  background-color: #f1f5f9;
+  font-weight: 700;
+}
+
+.sortHeaderWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.sortIcon {
+  color: #0f172a;
+  stroke-width: 2.5;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.thThumb {
+  padding: 0.85rem 0.5rem;
+  width: 76px;
+  text-align: center;
+}
+
 .td {
   padding: 1rem 1.25rem;
   font-size: 0.875rem;
@@ -102,13 +138,31 @@
   }
 }
 
+.tdThumb {
+  padding: 0.35rem 0.5rem;
+  width: 76px;
+  text-align: center;
+  vertical-align: middle;
+  border-bottom: 1px solid #f1f5f9;
+
+  tr:last-child & {
+    border-bottom: none;
+  }
+
+  tr:hover & {
+    background-color: #fafbfc;
+  }
+}
+
 .thumbnail {
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   object-fit: cover;
   border-radius: 8px;
   border: 1px solid #e2e8f0;
   background: #f1f5f9;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .actions {
@@ -214,8 +268,8 @@
 }
 
 .orderInput {
-  width: 44px;
-  padding: 0.25rem 0.35rem;
+  width: 52px;
+  padding: 0.3rem 0.4rem;
   text-align: center;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
@@ -224,6 +278,15 @@
   background: #f8fafc;
   outline: none;
   transition: all 0.15s ease;
+
+  // Приховуємо нативні стрілочки браузера, щоб вони не закривали 2+ значні числа
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  -moz-appearance: textfield;
+  appearance: textfield;
 
   &:focus {
     border-color: #0f172a;
@@ -237,4 +300,77 @@
   padding: 4rem 2rem;
   color: #94a3b8;
   font-size: 0.95rem;
+}
+
+// ── Filter Bar Controls ───────────────────────────────────────────────────────
+.filterBar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  background: #ffffff;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filterLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.filterSelect {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.825rem;
+  font-weight: 500;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background-color: #f8fafc;
+  color: #0f172a;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: #94a3b8;
+  }
+
+  &:focus {
+    border-color: #0f172a;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.06);
+  }
+}
+
+.filterResetBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #ef4444;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-left: auto;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: #fee2e2;
+  }
 }

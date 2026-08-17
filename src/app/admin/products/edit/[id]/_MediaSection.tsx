@@ -10,6 +10,7 @@ import styles from "../../../_formStyles.module.scss";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
 import { useImageCrop } from "~/hooks/use-image-crop";
 import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
+import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import { Trash2, Tag, UploadCloud } from "lucide-react";
 
 type MediaItem = { id: number; url: string; order: number; variantId?: number | null };
@@ -137,7 +138,7 @@ export default function MediaSection({
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={item.url}
+                  src={getOptimizedImageUrl(item.url, { preset: "thumb" })}
                   alt=""
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />

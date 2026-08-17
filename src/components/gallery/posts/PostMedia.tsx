@@ -3,6 +3,7 @@ import { useState } from "react";
 import Image from "next/image";
 import styles from "./PostMedia.module.scss";
 import ModalMedia from "./ModalMedia";
+import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 
 type MediaItem = {
   id: number;
@@ -40,7 +41,7 @@ export default function PostMedia({ items }: { items: MediaItem[] }) {
                 aria-label={item.type === "VIDEO" ? "Open video" : "Open photo"}
               >
                 <Image
-                  src={item.type === "VIDEO" ? videoPoster(item.url) : item.url}
+                  src={item.type === "VIDEO" ? videoPoster(item.url) : getOptimizedImageUrl(item.url, { preset: "card" })}
                   alt=""
                   fill
                   className={styles.thumb}

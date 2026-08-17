@@ -2,6 +2,7 @@
 import { useEffect, useCallback } from "react";
 import Image from "next/image";
 import styles from "./ModalMedia.module.scss";
+import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 
 type MediaItem = {
   id: number;
@@ -81,7 +82,7 @@ export default function ModalMedia({
         ) : (
           <Image
             key={current.url}
-            src={current.url}
+            src={getOptimizedImageUrl(current.url, { preset: "large" })}
             alt=""
             width={1400}
             height={900}

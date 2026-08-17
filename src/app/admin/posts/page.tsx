@@ -3,10 +3,35 @@ import styles from "../admin-table.module.scss";
 import Link from "next/link";
 import { Plus, Edit2, Calendar } from "lucide-react";
 import DeletePostButton from "./_DeleteButton";
+import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
+import SortableHeader from "../_components/SortableHeader";
 
-export default async function PostsPage() {
+type PostSortField = "title" | "date" | "createdAt";
+
+type SearchParams = Promise<{
+  sortBy?: PostSortField;
+  sortDir?: "asc" | "desc";
+}>;
+
+export default async function PostsPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const { sortBy = "createdAt", sortDir = "desc" } = await searchParams;
+  const validSortDir: "asc" | "desc" = sortDir === "asc" ? "asc" : "desc";
+
+  let orderByQuery: Record<string, any> = { createdAt: validSortDir };
+  if (sortBy === "title") {
+    orderByQuery = { title: validSortDir };
+  } else if (sortBy === "date") {
+    orderByQuery = { date: validSortDir };
+  } else if (sortBy === "createdAt") {
+    orderByQuery = { createdAt: validSortDir };
+  }
+
   const posts = await db.galleryPost.findMany({
-    orderBy: { createdAt: "desc" },
+    orderBy: orderByQuery,
   });
 
   return (
@@ -27,9 +52,9 @@ export default async function PostsPage() {
         <table className={styles.table}>
           <thead>
             <tr>
-              <th className={styles.th} style={{ width: 64 }}>Обкладинка</th>
-              <th className={styles.th}>Заголовок посту</th>
-              <th className={styles.th}>Дата публікації</th>
+              <th className={`${styles.th} ${styles.thThumb}`}>Обкладинка</th>
+              <SortableHeader field="title" label="Заголовок посту" defaultField="createdAt" />
+              <SortableHeader field="date" label="Дата публікації" defaultField="createdAt" />
               <th className={styles.th} style={{ textAlign: "right" }}>Дії</th>
             </tr>
           </thead>
@@ -43,10 +68,10 @@ export default async function PostsPage() {
             ) : (
               posts.map((p) => (
                 <tr key={p.id}>
-                  <td className={styles.td}>
+                  <td className={styles.tdThumb}>
                     {p.coverUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={p.coverUrl} alt={p.title} className={styles.thumbnail} />
+                      <img src={getOptimizedImageUrl(p.coverUrl, { preset: "thumb" })} alt={p.title} className={styles.thumbnail} />
                     ) : (
                       <div
                         className={styles.thumbnail}

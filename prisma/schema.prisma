@@ -136,7 +136,7 @@ model Product {
     description String?
     price       Float
     stock       Int     @default(0)
-    sortOrder   Int     @default(0) @map("sort_order")
+    sortOrder   Int     @default(autoincrement()) @map("sort_order")
     isFeatured  Boolean @default(false) @map("is_featured")
     isActive    Boolean @default(true) @map("is_active")
 

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 
 import styles from "./shop.module.scss";
 import ProductCarousel from "~/components/shop/ProductCarousel";
@@ -267,8 +268,8 @@ export default function ShopStorefront({
         ) : (
           <div className={styles.productGrid}>
             {filteredProducts.map((product, idx) => {
-              // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-              const coverImg = product.coverUrl || product.images[0]?.url || "/voyt.svg";
+              const rawUrl = product.coverUrl ?? product.images[0]?.url;
+              const coverImg = rawUrl ? getOptimizedImageUrl(rawUrl, { preset: "card" }) : "/voyt.svg";
               const hasMultiplePrices =
                 product.variants?.some((v) => v.price && v.price !== product.price);
 
@@ -348,7 +349,7 @@ export default function ShopStorefront({
                       <div key={`${item.product.id}_${item.variantId}_${idx}`} className={styles.cartItem}>
                         <div className={styles.itemThumb}>
                           <Image
-                            src={item.product.coverUrl ? item.product.coverUrl : "/voyt.svg"}
+                            src={item.product.coverUrl ? getOptimizedImageUrl(item.product.coverUrl, { preset: "thumb" }) : "/voyt.svg"}
                             alt={item.product.title}
                             fill
                           />

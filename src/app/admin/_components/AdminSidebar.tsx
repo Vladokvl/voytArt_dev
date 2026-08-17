@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -52,7 +53,15 @@ export default function AdminSidebar() {
     <aside className={styles.sidebar}>
       {/* Brand Header */}
       <Link href="/admin" className={styles.brandHeader}>
-        <div className={styles.brandLogo}>V</div>
+        <div className={styles.brandLogo}>
+          <Image
+            src="/voytCirclelogo.svg"
+            alt="VoytArt"
+            width={36}
+            height={36}
+            className={styles.brandLogoImg}
+          />
+        </div>
         <div className={styles.brandMeta}>
           <span className={styles.brandTitle}>VoytArt</span>
           <span className={styles.brandSubtitle}>Admin Console</span>

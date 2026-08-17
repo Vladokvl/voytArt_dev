@@ -3,11 +3,35 @@ import styles from "../admin-table.module.scss";
 import Link from "next/link";
 import { Plus, Edit2 } from "lucide-react";
 import DeleteCategoryButton from "./_DeleteButton";
+import SortableHeader from "../_components/SortableHeader";
 
-export default async function CategoriesPage() {
+type CategorySortField = "name" | "slug" | "productsCount";
+
+type SearchParams = Promise<{
+  sortBy?: CategorySortField;
+  sortDir?: "asc" | "desc";
+}>;
+
+export default async function CategoriesPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const { sortBy = "name", sortDir = "asc" } = await searchParams;
+  const validSortDir: "asc" | "desc" = sortDir === "desc" ? "desc" : "asc";
+
+  let orderByQuery: Record<string, any> = { name: validSortDir };
+  if (sortBy === "name") {
+    orderByQuery = { name: validSortDir };
+  } else if (sortBy === "slug") {
+    orderByQuery = { slug: validSortDir };
+  } else if (sortBy === "productsCount") {
+    orderByQuery = { products: { _count: validSortDir } };
+  }
+
   const categories = await db.category.findMany({
     include: { _count: { select: { products: true } } },
-    orderBy: { name: "asc" },
+    orderBy: orderByQuery,
   });
 
   return (
@@ -28,9 +52,9 @@ export default async function CategoriesPage() {
         <table className={styles.table}>
           <thead>
             <tr>
-              <th className={styles.th}>Назва категорії</th>
-              <th className={styles.th}>Slug (URL)</th>
-              <th className={styles.th}>Кількість товарів</th>
+              <SortableHeader field="name" label="Назва категорії" defaultField="name" />
+              <SortableHeader field="slug" label="Slug (URL)" defaultField="name" />
+              <SortableHeader field="productsCount" label="Кількість товарів" defaultField="name" />
               <th className={styles.th} style={{ textAlign: "right" }}>Дії</th>
             </tr>
           </thead>

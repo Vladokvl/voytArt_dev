@@ -6,6 +6,7 @@ import styles from "./paintingCard.module.scss";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
+import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 
 
 type MediaItem = {
@@ -129,7 +130,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <Image
-            src={gridCoverUrl}
+            src={getOptimizedImageUrl(gridCoverUrl, { preset: "card" })}
             alt={painting.title}
             width={1200}
             height={1200}
@@ -182,7 +183,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                     </video>
                   ) : (
                     <Image
-                      src={item.url}
+                      src={getOptimizedImageUrl(item.url, { preset: "large" })}
                       alt={painting.title}
                       fill
                       className={styles.mediaEl}
