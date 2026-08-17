@@ -4,6 +4,7 @@
 .wrapper {
   position: relative;
   min-height: 100vh;
+  z-index: 50;
 }
 
 .lockedScroll {
@@ -16,7 +17,7 @@
 .hero {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  z-index: 240;
   display: flex;
   width: 100vw;
   height: 100vh;
@@ -56,7 +57,7 @@
   background: #111;
   border: none;
   cursor: pointer;
-  z-index: 100;
+  z-index: 250;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -126,8 +127,6 @@
 .infoWrap {
   position: absolute;
   top: 15%;
-  // Розрахунок нижньої межі: висота статичного портрета (без рамки і зсуву) + відступ 20px
-  bottom: calc((4 / 3 * clamp(220px, 20vw, 320px)) + 20px);
   left: 50%;
   transform: translateX(-50%);
   width: 90%;
@@ -140,8 +139,6 @@
 
   @include mobile {
     top: 8%;
-    // На мобільному: висота статичного портрета + відступ 15px
-    bottom: calc((4 / 3 * clamp(180px, 55vw, 240px)) + 15px);
     gap: 15px;
   }
 }
@@ -159,7 +156,6 @@
 
 .colText {
   width: 90%;
-  flex: 1; // Займає всю доступну висоту до портрета
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -169,7 +165,6 @@
   pointer-events: none;
   transform: translateY(15px);
   transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-  overflow: hidden; // Гарантує, що текст не вийде за межі контейнера і не налізе на портрет
 }
 
 .colTextVisible {
@@ -179,7 +174,6 @@
 
 .colDesc {
   width: 100%;
-  height: 100%;
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -187,7 +181,6 @@
   line-height: 1.6;
   opacity: 0.85;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
-  overflow: hidden; // Запобігає виходу тексту за рамки
 
   @include mobile {
     font-size: 1.2rem;
@@ -197,25 +190,11 @@
 
 // ── Portraits (Портрети / Силуети у рамках) ────────────────────────────────────
 .portraitWrap {
-  position: absolute;
-  bottom: 0; // Притиснутий до самого низу
-  left: 50%;
-  transform: translateX(-50%);
-  width: clamp(220px, 20vw, 320px); // Збільшений розмір
-  aspect-ratio: 3 / 4;
-  z-index: 2;
-  pointer-events: none;
-  filter: drop-shadow(0 15px 20px rgba(0, 0, 0, 0.65)); // Тінь за контуром силуету
-
-  @include mobile {
-    bottom: 0;
-    width: clamp(180px, 55vw, 240px); // Збільшений мобільний розмір
-  }
+  display: none;
 }
 
-// Залишаємо пустим для запобігання помилок імпорту, але без зміщення на ховері
 .portraitWrapDown {
-  transform: translateX(-50%);
+  display: none;
 }
 
 .portraitImg {

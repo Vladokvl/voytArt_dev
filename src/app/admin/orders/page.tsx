@@ -111,7 +111,7 @@ export default async function OrdersPage() {
                     </div>
                   </td>
                   <td className={styles.td} style={{ fontWeight: 800, color: "#0f172a", fontSize: "0.95rem" }}>
-                    {o.totalAmount.toLocaleString("uk-UA")} ₴
+                    {o.totalAmount.toLocaleString("uk-UA")} €
                   </td>
                   <td className={styles.td}>
                     <OrderStatusSelect orderId={o.id} currentStatus={o.status} />

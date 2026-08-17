@@ -46,7 +46,7 @@ export default function ProductCarousel({ title, products, onAddToCart }: Produc
       </div>
 
       <div className={styles.track} ref={trackRef}>
-        {products.map((product) => {
+        {products.map((product, index) => {
           // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
           const coverImg = product.coverUrl || product.images?.[0]?.url || "/voyt.svg";
           return (
@@ -57,6 +57,7 @@ export default function ProductCarousel({ title, products, onAddToCart }: Produc
                     src={coverImg}
                     alt={product.title}
                     fill
+                    priority={index < 2}
                     className={styles.productImage}
                     sizes="(max-width: 640px) 100vw, 300px"
                   />
@@ -65,7 +66,7 @@ export default function ProductCarousel({ title, products, onAddToCart }: Produc
 
                 <div className={styles.cardInfo}>
                   <p className={styles.authorName}>
-                    {product.author.firstName} {product.author.lastName}
+                    {product.author ? `${product.author.firstName} ${product.author.lastName}` : ""}
                   </p>
                   <Link href={`/shop/${product.id}`} style={{ textDecoration: "none", color: "inherit" }}>
                     <h3 className={styles.productTitle}>
@@ -73,7 +74,7 @@ export default function ProductCarousel({ title, products, onAddToCart }: Produc
                     </h3>
                   </Link>
                   <div className={styles.cardFooter}>
-                    <span className={styles.price}>{product.price.toLocaleString("uk-UA")} ₴</span>
+                    <span className={styles.price}>{product.price.toLocaleString("uk-UA")} €</span>
                     <button
                       onClick={() => onAddToCart(product)}
                       disabled={product.stock <= 0}

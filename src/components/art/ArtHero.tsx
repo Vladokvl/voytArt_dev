@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import gsap from "gsap";
@@ -19,17 +18,12 @@ type DBAuthor = {
 
 const DEFAULT_BG_PHOTOS = [
   "/artPageAssets/IvankaBackground.jpg",
-  "/artPageAssets/SashaBackground.jpg"
-];
-
-const DEFAULT_PORTRAIT_PHOTOS = [
-  "/artPageAssets/Ivanka.png",
-  "/artPageAssets/Sasha.png"
+  "/artPageAssets/SashaBackground.jpg",
 ];
 
 export default function ArtHero({
   artistParam,
-  authors = []
+  authors = [],
 }: {
   artistParam: string | null;
   authors: DBAuthor[];
@@ -41,7 +35,7 @@ export default function ArtHero({
   const isMobileRef = useRef(false);
   const animatingRef = useRef(false);
   const prevArtistRef = useRef<string | null>(artistParam);
-  
+
   // Позиція скролу десктопного слайдера (у vw)
   const currentXVw = useRef(0);
 
@@ -70,7 +64,7 @@ export default function ArtHero({
 
     // Визначаємо початковий індекс автора (якщо відкритий через URL)
     const initialArtistId = Number(artistParam);
-    const initialIndex = initialArtistId ? authors.findIndex(a => a.id === initialArtistId) : 0;
+    const initialIndex = initialArtistId ? authors.findIndex((a) => a.id === initialArtistId) : 0;
     const startIndex = initialIndex >= 0 ? initialIndex : 0;
 
     if (isMobile) {
@@ -89,9 +83,15 @@ export default function ArtHero({
     if (isArtistSelected) {
       gsap.set(heroRef.current, { y: "-100vh" });
       document.body.style.overflow = "";
+      document.documentElement.removeAttribute("data-art-hero");
     } else {
       document.body.style.overflow = "hidden";
+      document.documentElement.setAttribute("data-art-hero", "open");
     }
+
+    return () => {
+      document.documentElement.removeAttribute("data-art-hero");
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -102,14 +102,11 @@ export default function ArtHero({
       if (isMobileRef.current) return; // вимикаємо на мобілках
       if (authors.length === 0) return;
 
-      // Скасовуємо стандартний вертикальний скрол сторінки
       e.preventDefault();
 
       const delta = e.deltaY || e.deltaX;
-      // Чутливість скролу
       let nextX = currentXVw.current + delta * 0.04;
 
-      // Максимальний зсув слайдера (кількість авторів * 33.33vw - 100vw)
       const maxTranslateVw = Math.max(0, authors.length * 33.333 - 100);
 
       if (nextX < 0) nextX = 0;
@@ -117,7 +114,6 @@ export default function ArtHero({
 
       currentXVw.current = nextX;
 
-      // Оновлюємо відсоток прогресу для лінії індикатора
       const progress = maxTranslateVw > 0 ? (nextX / maxTranslateVw) * 100 : 0;
       setScrollProgress(progress);
 
@@ -141,7 +137,7 @@ export default function ArtHero({
     };
   }, [isArtistSelected, authors]);
 
-  // ── Реакція на зміну artistParam (в т.ч. навігація кнопками браузера) ─────────
+  // ── Реакція на зміну artistParam ───────────────────────────────────────────
   useEffect(() => {
     const prev = prevArtistRef.current;
     const curr = artistParam;
@@ -159,10 +155,20 @@ export default function ArtHero({
 
     if (curr) {
       document.body.style.overflow = "";
-      gsap.to(heroRef.current, { y: "-100vh", duration: 1, delay: 0.15, ease: "power2.inOut" });
+      // Жорстко фіксуємо стан hero open, поки шторка не сховається на 100%
+      document.documentElement.setAttribute("data-art-hero", "open");
+      gsap.to(heroRef.current, {
+        y: "-100vh",
+        duration: 1,
+        delay: 0.15,
+        ease: "power2.inOut",
+        onComplete: () => {
+          document.documentElement.removeAttribute("data-art-hero");
+        },
+      });
     } else {
       document.body.style.overflow = "hidden";
-      // При поверненні назад відновлюємо ту позицію слайдера, яка збережена в стані/рефі
+      document.documentElement.setAttribute("data-art-hero", "open");
       if (isMobile) {
         gsap.set(sliderWrapperRef.current, { x: `-${activeMobileIndex * 100}vw` });
       } else {
@@ -178,6 +184,7 @@ export default function ArtHero({
     if (isArtistSelected) return;
     setLoadingArtistId(authorId);
     animatingRef.current = false;
+    document.documentElement.setAttribute("data-art-hero", "open");
     const params = new URLSearchParams();
     params.set("artist", String(authorId));
     if (isNeon) params.set("neon", "true");
@@ -189,18 +196,33 @@ export default function ArtHero({
     animatingRef.current = true;
     document.body.style.overflow = "hidden";
 
-    // НЕ скидаємо координати в 0 при натисканні назад — залишаємо слайдер у поточному стані
+    // Жорстко блокуємо хедер миттєво при кліку на язичок
+    document.documentElement.setAttribute("data-art-hero", "open");
+
+    // Плавно ховаємо футер вниз разом із рухом шторки
+    const footerEl = document.querySelector("footer");
+    if (footerEl) {
+      gsap.to(footerEl, {
+        y: 120,
+        opacity: 0,
+        duration: 0.6,
+        ease: "power2.inOut",
+      });
+    }
 
     gsap.to(heroRef.current, {
       y: 0,
       duration: 1,
       ease: "power2.inOut",
       onComplete: () => {
+        if (footerEl) {
+          gsap.set(footerEl, { clearProps: "all" });
+        }
         const params = new URLSearchParams();
         if (isNeon) params.set("neon", "true");
         const queryStr = params.toString();
         router.push("/art" + (queryStr ? "?" + queryStr : ""));
-      }
+      },
     });
   };
 
@@ -219,10 +241,8 @@ export default function ArtHero({
 
     let newIndex = activeMobileIndex;
     if (delta > 0) {
-      // свайп вправо -> гортаємо назад
       if (newIndex > 0) newIndex--;
     } else {
-      // свайп вліво -> гортаємо вперед
       if (newIndex < authors.length - 1) newIndex++;
     }
 
@@ -254,17 +274,17 @@ export default function ArtHero({
       onTouchEnd={handleTouchEnd}
     >
       <div className={styles.sliderClip}>
-        <div 
-          ref={sliderWrapperRef} 
+        <div
+          ref={sliderWrapperRef}
           className={styles.sliderWrapper}
           style={{ width: `${authors.length * 33.333}vw` }}
         >
           {authors.map((author, index) => {
             const isHovered = isMobileState ? activeMobileIndex === index : hoveredIndex === index;
-
-            // Визначаємо фото та фон з урахуванням дефолтних значень
-            const photoUrl = author.photoUrl ?? DEFAULT_PORTRAIT_PHOTOS[index % DEFAULT_PORTRAIT_PHOTOS.length] ?? "/artPageAssets/Ivanka.png";
-            const bgPhotoUrl = author.bgPhotoUrl ?? DEFAULT_BG_PHOTOS[index % DEFAULT_BG_PHOTOS.length] ?? "/artPageAssets/IvankaBackground.jpg";
+            const bgPhotoUrl =
+              author.bgPhotoUrl ??
+              DEFAULT_BG_PHOTOS[index % DEFAULT_BG_PHOTOS.length] ??
+              "/artPageAssets/IvankaBackground.jpg";
 
             return (
               <div
@@ -293,10 +313,8 @@ export default function ArtHero({
 
                 {/* Контейнер імені та короткого опису */}
                 <div className={styles.infoWrap}>
-                  {/* Ім'я автора зверху по центру */}
                   <h2 className={styles.colName}>{author.firstName}</h2>
 
-                  {/* Біографія автора по центру */}
                   <div
                     className={`${styles.colText} ${
                       isHovered ? styles.colTextVisible : ""
@@ -307,18 +325,6 @@ export default function ArtHero({
                     </p>
                   </div>
                 </div>
-
-                {/* Контейнер рамки портрета автора (зсувається вниз при ховері) */}
-                <div className={styles.portraitWrap}>
-                  <Image
-                    src={photoUrl}
-                    alt={`${author.firstName} ${author.lastName}`}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 30vw"
-                    className={styles.portraitImg}
-                    priority={index < 3}
-                  />
-                </div>
               </div>
             );
           })}
@@ -328,8 +334,8 @@ export default function ArtHero({
       {/* ── Лінія прогресу скролу (тільки для десктопу) ── */}
       {!isMobileRef.current && authors.length * 33.333 > 100 && (
         <div className={styles.progressBarContainer}>
-          <div 
-            className={styles.progressBarActive} 
+          <div
+            className={styles.progressBarActive}
             style={{ width: `${scrollProgress}%` }}
           />
         </div>
@@ -340,9 +346,12 @@ export default function ArtHero({
         {authors.map((_, index) => (
           <button
             key={index}
-            className={`${styles.dot} ${activeMobileIndex === index ? styles.dotActive : ""}`}
+            type="button"
+            className={`${styles.dot} ${
+              activeMobileIndex === index ? styles.dotActive : ""
+            }`}
             onClick={() => handleDotClick(index)}
-            aria-label={`Go to slide ${index + 1}`}
+            aria-label={`Go to artist ${index + 1}`}
           />
         ))}
       </div>

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 import styles from "./shop.module.scss";
@@ -45,12 +46,16 @@ type CartItem = {
 };
 
 export default function ShopStorefront({
-  initialProducts,
-  categories,
+  initialProducts = [],
+  categories = [],
 }: {
-  initialProducts: Product[];
-  categories: Category[];
+  initialProducts?: Product[];
+  categories?: Category[];
 }) {
+  const router = useRouter();
+  const productsList = Array.isArray(initialProducts) ? initialProducts : [];
+  const categoriesList = Array.isArray(categories) ? categories : [];
+
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -105,7 +110,7 @@ export default function ShopStorefront({
 
     // If product has variants, direct to product page
     if (product.variants && product.variants.length > 0) {
-      window.location.href = `/shop/${product.id}`;
+      router.push(`/shop/${product.id}`);
       return;
     }
 
@@ -201,8 +206,8 @@ export default function ShopStorefront({
   };
 
   const filteredProducts = selectedCategory
-    ? initialProducts.filter((p) => p.categoryId === selectedCategory)
-    : initialProducts;
+    ? productsList.filter((p) => p.categoryId === selectedCategory)
+    : productsList;
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
@@ -220,7 +225,7 @@ export default function ShopStorefront({
       {/* ── Featured Products Carousel ──────────────────────── */}
       <ProductCarousel 
         title="Рекомендовані товари" 
-        products={initialProducts.filter((p) => p.isFeatured)} 
+        products={productsList.filter((p) => p.isFeatured)} 
         onAddToCart={addToCart} 
       />
 
@@ -233,7 +238,7 @@ export default function ShopStorefront({
           >
             Усі товари
           </button>
-          {categories.map((cat) => (
+          {categoriesList.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
@@ -262,7 +267,7 @@ export default function ShopStorefront({
           <p className={styles.empty}>У цій категорії поки що немає товарів.</p>
         ) : (
           <div className={styles.productGrid}>
-            {filteredProducts.map((product) => {
+            {filteredProducts.map((product, idx) => {
               // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
               const coverImg = product.coverUrl || product.images[0]?.url || "/voyt.svg";
               const hasMultiplePrices =
@@ -270,18 +275,16 @@ export default function ShopStorefront({
                 product.variants.some((v) => v.price && v.price !== product.price);
 
               return (
-                <motion.div
+                <div
                   key={product.id}
                   className={styles.productCard}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
                 >
                   <Link href={`/shop/${product.id}`} className={styles.imageWrapper}>
                     <Image
                       src={coverImg}
                       alt={product.title}
                       fill
+                      priority={idx < 2}
                       className={styles.productImage}
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
@@ -292,7 +295,7 @@ export default function ShopStorefront({
 
                   <div className={styles.cardInfo}>
                     <p className={styles.authorName}>
-                      {product.author.firstName} {product.author.lastName}
+                      {product.author ? `${product.author.firstName} ${product.author.lastName}` : ""}
                     </p>
                     <Link href={`/shop/${product.id}`} style={{ textDecoration: "none", color: "inherit" }}>
                       <h3 className={styles.productTitle}>
@@ -302,7 +305,7 @@ export default function ShopStorefront({
                     <div className={styles.cardFooter}>
                       <span className={styles.price}>
                         {hasMultiplePrices ? `від ` : ""}
-                        {product.price.toLocaleString("uk-UA")} ₴
+                        {product.price.toLocaleString("uk-UA")} €
                       </span>
                       <button
                         onClick={() => addToCart(product)}
@@ -313,7 +316,7 @@ export default function ShopStorefront({
                       </button>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               );
             })}
           </div>
@@ -361,7 +364,7 @@ export default function ShopStorefront({
                             </span>
                           )}
                           <span className={styles.itemPrice}>
-                            {item.product.price.toLocaleString("uk-UA")} ₴
+                            {item.product.price.toLocaleString("uk-UA")} €
                           </span>
                           <div className={styles.qtyControl}>
                             <button onClick={() => updateQuantity(idx, -1)}>-</button>
@@ -383,7 +386,7 @@ export default function ShopStorefront({
                   <div className={styles.drawerFooter}>
                     <div className={styles.totals}>
                       <span>Разом до сплати</span>
-                      <span>{totalPrice.toLocaleString("uk-UA")} ₴</span>
+                      <span>{totalPrice.toLocaleString("uk-UA")} €</span>
                     </div>
                     <button
                       onClick={() => setCheckoutStep("form")}
@@ -473,7 +476,7 @@ export default function ShopStorefront({
 
                 <div className={styles.formTotals}>
                   <span>Сума замовлення</span>
-                  <span>{totalPrice.toLocaleString("uk-UA")} ₴</span>
+                  <span>{totalPrice.toLocaleString("uk-UA")} €</span>
                 </div>
 
                 <div className={styles.formButtons}>

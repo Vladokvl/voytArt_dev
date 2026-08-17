@@ -23,46 +23,43 @@ export default function VariantEditor({
 }) {
   const [variants, setVariants] = useState<VariantItem[]>(initialVariants);
 
-  const updateState = (updater: (prev: VariantItem[]) => VariantItem[]) => {
-    setVariants((prev) => {
-      const next = updater(prev);
-      onChange?.(next);
-      return next;
-    });
+  const updateVariants = (next: VariantItem[]) => {
+    setVariants(next);
+    onChange?.(next);
   };
 
-  const addVariant = (title = "", price = "", stock = 5) => {
-    updateState((prev) => [
-      ...prev,
+  const addVariant = (title = "", price: number | string = "", stock: number | string = 5) => {
+    const next = [
+      ...variants,
       {
         title,
         price,
         stock,
         sku: "",
       },
-    ]);
+    ];
+    updateVariants(next);
   };
 
   const removeVariant = (index: number) => {
-    updateState((prev) => prev.filter((_, i) => i !== index));
+    const next = variants.filter((_, i) => i !== index);
+    updateVariants(next);
   };
 
   const updateVariant = (index: number, field: keyof VariantItem, val: string | number) => {
-    updateState((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, [field]: val } : item))
-    );
+    const next = variants.map((item, i) => (i === index ? { ...item, [field]: val } : item));
+    updateVariants(next);
   };
 
   const applyClothingSizes = () => {
     const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
-    updateState(() =>
-      sizes.map((s) => ({
-        title: s,
-        price: "",
-        stock: 5,
-        sku: "",
-      }))
-    );
+    const next = sizes.map((s) => ({
+      title: s,
+      price: "",
+      stock: 5,
+      sku: "",
+    }));
+    updateVariants(next);
   };
 
   const applyPrintSizes = () => {
@@ -72,14 +69,13 @@ export default function VariantEditor({
       { title: "A2 (42×60 см)", price: Math.round(basePrice * 1.5) || "" },
       { title: "A1 (60×84 см)", price: Math.round(basePrice * 2.2) || "" },
     ];
-    updateState(() =>
-      prints.map((p) => ({
-        title: p.title,
-        price: p.price,
-        stock: 10,
-        sku: "",
-      }))
-    );
+    const next = prints.map((p) => ({
+      title: p.title,
+      price: p.price,
+      stock: 10,
+      sku: "",
+    }));
+    updateVariants(next);
   };
 
   return (
@@ -157,7 +153,7 @@ export default function VariantEditor({
             }}
           >
             <span>Назва варіанту / Розмір *</span>
-            <span>Ціна (₴, опц.)</span>
+            <span>Ціна (€, опц.)</span>
             <span>Залишок (шт) *</span>
             <span>Артикул / SKU</span>
             <span></span>

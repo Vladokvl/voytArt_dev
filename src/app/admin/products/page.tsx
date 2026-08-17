@@ -80,7 +80,7 @@ export default async function ProductsPage() {
                     </span>
                   </td>
                   <td className={styles.td} style={{ fontWeight: 700, color: "#0f172a" }}>
-                    {p.price.toLocaleString("uk-UA")} ₴
+                    {p.price.toLocaleString("uk-UA")} €
                   </td>
                   <td className={styles.td}>
                     {p.stock > 0 ? (

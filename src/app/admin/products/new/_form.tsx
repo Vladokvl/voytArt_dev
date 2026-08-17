@@ -127,7 +127,7 @@ export default function ProductForm({
 
             <div className={styles.row}>
               <div className={styles.field}>
-                <label className={styles.label}>Базова ціна (грн) *</label>
+                <label className={styles.label}>Базова ціна (€) *</label>
                 <input
                   className={styles.input}
                   name="price"

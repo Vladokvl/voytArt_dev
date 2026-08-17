@@ -6,6 +6,7 @@ import SmoothScroll from "~/components/SmoothScroll/SmoothScroll";
 import PageLoader from "~/components/layout/PageLoader/PageLoader";
 import FooterWrapper from "~/components/layout/Footer/FooterWrapper";
 import NavMenu from "~/components/layout/navMenu/navmenu";
+import Header from "~/components/layout/Header/Header";
 
 export const metadata: Metadata = {
   title: "VoytArt Gallery",
@@ -26,6 +27,9 @@ export default function RootLayout({
       <body>
         <script dangerouslySetInnerHTML={{ __html: "history.scrollRestoration='manual';window.scrollTo(0,0);" }} />
         <PageLoader />
+        <Suspense fallback={null}>
+          <Header />
+        </Suspense>
         <NavMenu />
         <SmoothScroll>
           {children}

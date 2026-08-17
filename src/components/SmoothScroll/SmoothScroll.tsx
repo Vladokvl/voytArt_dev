@@ -29,22 +29,64 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
 
     lenis.on("scroll", () => ScrollTrigger.update());
 
+    // Обробник стрілочки браузера "Назад/Вперед"
+    const handlePopState = () => {
+      window.scrollTo(0, 0);
+      lenis.scrollTo(0, { immediate: true, force: true });
+      lenis.resize();
+      ScrollTrigger.refresh();
+
+      requestAnimationFrame(() => {
+        window.scrollTo(0, 0);
+        lenis.scrollTo(0, { immediate: true, force: true });
+        lenis.resize();
+        ScrollTrigger.refresh();
+      });
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
     return () => {
+      window.removeEventListener("popstate", handlePopState);
       gsap.ticker.remove(driverFn);
       lenis.destroy();
     };
   }, []);
 
-  // При кожній зміні маршруту скидаємо скрол на 0 та оновлюємо розміри Lenis/GSAP
+  // При кожній зміні маршруту гарантовано скидаємо скрол у 0 та перераховуємо розміри
   useEffect(() => {
+    window.scrollTo(0, 0);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     const lenis = (window as any).lenis as Lenis | undefined;
     if (lenis) {
-      lenis.scrollTo(0, { immediate: true });
+      lenis.scrollTo(0, { immediate: true, force: true });
       lenis.resize();
       ScrollTrigger.refresh();
-    } else if (typeof window !== "undefined") {
-      window.scrollTo(0, 0);
+
+      // Додаткові таймери для сторінок, які довантажують зображення та DOM
+      const rafId = requestAnimationFrame(() => {
+        window.scrollTo(0, 0);
+        lenis.scrollTo(0, { immediate: true, force: true });
+        lenis.resize();
+        ScrollTrigger.refresh();
+      });
+
+      const t1 = setTimeout(() => {
+        lenis.scrollTo(0, { immediate: true, force: true });
+        lenis.resize();
+        ScrollTrigger.refresh();
+      }, 50);
+
+      const t2 = setTimeout(() => {
+        lenis.resize();
+        ScrollTrigger.refresh();
+      }, 200);
+
+      return () => {
+        cancelAnimationFrame(rafId);
+        clearTimeout(t1);
+        clearTimeout(t2);
+      };
     }
   }, [pathname]);
 

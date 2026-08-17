@@ -2,6 +2,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Observer } from "gsap/Observer";
 import LogoSection from "../Sections/LogoSection";
 import AboutGallerySection from "../Sections/AboutGallerySection";
 import ArtSection from "../Sections/ArtSection";
@@ -9,7 +10,7 @@ import ArtShopSection from "../Sections/ArtShopSection";
 import NeonSection from "../Sections/NeonSection";
 import styles from "./Hero.module.scss";
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, Observer);
 
 // HeroDesktop — десктопна версія з frame-scrub hero.
 const DESKTOP_TOTAL_FRAMES = 421;
@@ -18,6 +19,30 @@ const PRELOAD_READY_THRESHOLD = 8;
 const BUFFER_FORWARD = 36;
 const BUFFER_BACKWARD = 8;
 const HERO_READY_EVENT = "voyt:hero-ready";
+
+// ╔══════════════════════════════════════════════════════════════════════╗
+// ║  DESKTOP SNAP POINTS (Таймкоди / точки фіксації скролу)             ║
+// ║                                                                      ║
+// ║  Основне відео (від 0.0 до 1.0 висоти .container):                  ║
+// ║    0.00 = Стартовий екран (LogoSection)                              ║
+// ║    0.24 = Панель 0 — "About our Gallery" по центру                   ║
+// ║    0.56 = Панель 1 — "Discover our Art" по центру                    ║
+// ║    0.82 = Панель 2 — "Art shop" по центру                            ║
+// ║    1.00 = Кінець основного відео (перехід на Neon)                   ║
+// ║                                                                      ║
+// ║  Неон-секція (окремий контейнер .neonContainer):                     ║
+// ║    Neon = 0.50 — середина neon-контейнера (50% його висоти)          ║
+// ║    Змінюй DESKTOP_NEON_SNAP нижче (0.0 = початок, 1.0 = кінець)     ║
+// ║                                                                      ║
+// ║  Змінюйте числа (від 0.0 до 1.0) для тонкого налаштування!          ║
+// ╚══════════════════════════════════════════════════════════════════════╝
+// 0.0 = Logo, 0.24 = About, 0.6 = Art, 0.9 = Art Shop, потім одразу Neon
+const DESKTOP_SNAP_POINTS = [0.0, 0.24, 0.6, 0.9];
+// ★ Де зупинитися всередині Neon-секції (0.0 = самий верх, 1.0 = самий низ)
+const DESKTOP_NEON_SNAP = 0.9;
+// ★ Швидкість / тривалість перельоту між секціями (у секундах)
+// (Змінюй тут: 0.8 = швидше, 1.2 = плавно за замовчуванням, 1.6 = довше/кінематографічніше)
+const DESKTOP_SNAP_DURATION = 1.2;
 
 const getDesktopFrameSrc = (index: number) =>
   `/mainPageVideos/originals/desktop_frames/frame_${String(index).padStart(4, "0")}.webp`;
@@ -49,6 +74,8 @@ export default function HeroDesktop() {
   const neonVideoRef = useRef<HTMLVideoElement>(null);
   const neonPanelRef = useRef<HTMLDivElement>(null);
   const neonOverlayRef = useRef<HTMLDivElement>(null);
+  const targetIndexRef = useRef(0);
+  const isGlidingRef = useRef(false);
 
   useEffect(() => {
     if (!isMainReady) return;
@@ -546,8 +573,195 @@ export default function HeroDesktop() {
       }
     }, containerRef);
 
+    // ══════════════════════════════════════════════════════════════════════
+    // INTENT-DRIVEN SECTION GLIDER (Direct Wheel & Touch Interceptors)
+    // ══════════════════════════════════════════════════════════════════════
+    const updateTargetFromScroll = () => {
+      if (isGlidingRef.current) return;
+      const neonEl = neonContainerRef.current;
+      const mainMaxScroll = container.offsetHeight - window.innerHeight;
+
+      // Якщо користувач уже в зоні Neon секції — ставимо індекс Neon
+      if (neonEl) {
+        const neonRect = neonEl.getBoundingClientRect();
+        const neonAbsTop = neonRect.top + window.scrollY;
+        if (window.scrollY >= neonAbsTop - 50) {
+          targetIndexRef.current = DESKTOP_SNAP_POINTS.length;
+          return;
+        }
+      }
+
+      if (mainMaxScroll <= 0) return;
+      const rawProgress = window.scrollY / mainMaxScroll;
+      const clamped = Math.max(0, Math.min(1, rawProgress));
+
+      let closest = 0;
+      let minDiff = Infinity;
+      for (let i = 0; i < DESKTOP_SNAP_POINTS.length; i++) {
+        const diff = Math.abs(DESKTOP_SNAP_POINTS[i] - clamped);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closest = i;
+        }
+      }
+      targetIndexRef.current = closest;
+    };
+
+    window.addEventListener("scroll", updateTargetFromScroll, { passive: true });
+
+    const goToSection = (index: number) => {
+      // index === DESKTOP_SNAP_POINTS.length означає Neon-секцію
+      const isNeon = index >= DESKTOP_SNAP_POINTS.length;
+      const clamped = isNeon
+        ? DESKTOP_SNAP_POINTS.length
+        : Math.max(0, Math.min(DESKTOP_SNAP_POINTS.length - 1, index));
+      targetIndexRef.current = clamped;
+      isGlidingRef.current = true;
+
+      let targetY: number;
+      const neonEl = neonContainerRef.current;
+
+      if (isNeon && neonEl) {
+        // ──── Neon: скролимо до позиції всередині neonContainer ────
+        const neonRect = neonEl.getBoundingClientRect();
+        const neonAbsTop = neonRect.top + window.scrollY;
+        const neonMaxScroll = neonEl.offsetHeight - window.innerHeight;
+        const neonOffset = neonAbsTop + Math.max(0, neonMaxScroll) * DESKTOP_NEON_SNAP;
+        targetY = neonOffset;
+      } else {
+        // ──── Основне відео ────
+        const progress = DESKTOP_SNAP_POINTS[clamped];
+        const maxScroll = container.offsetHeight - window.innerHeight;
+        targetY = progress * maxScroll;
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      const lenis = (window as any).lenis;
+      if (lenis) {
+        // Зупиняємо Lenis, щоб він не перебивав наш scrollTo
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        lenis.stop();
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        lenis.scrollTo(targetY, {
+          duration: DESKTOP_SNAP_DURATION,
+          force: true,
+          lock: true,
+          easing: (t: number) => 1 - Math.pow(1 - t, 3),
+          onComplete: () => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+            lenis.start();
+            isGlidingRef.current = false;
+          },
+        });
+      } else {
+        window.scrollTo({ top: targetY, behavior: "smooth" });
+        setTimeout(() => {
+          isGlidingRef.current = false;
+        }, DESKTOP_SNAP_DURATION * 1000);
+      }
+    };
+
+    const TOTAL_SECTIONS = DESKTOP_SNAP_POINTS.length + 1; // +1 для Neon
+
+    const handleHeroWheel = (e: WheelEvent) => {
+      const neonEl = neonContainerRef.current;
+      const mainMaxScroll = container.offsetHeight - window.innerHeight;
+      const neonRect = neonEl?.getBoundingClientRect();
+      const neonAbsTop = neonRect ? neonRect.top + window.scrollY : mainMaxScroll;
+      const neonMaxScroll = neonEl ? Math.max(0, neonEl.offsetHeight - window.innerHeight) : 0;
+      const neonTargetY = neonAbsTop + neonMaxScroll * DESKTOP_NEON_SNAP;
+      const neonBottom = neonAbsTop + (neonEl ? neonEl.offsetHeight : 0);
+
+      // Якщо користувач вже на/після Neon і крутить ВНИЗ -> відпускаємо до футера!
+      if (window.scrollY >= neonTargetY - 15 && e.deltaY > 0) {
+        return;
+      }
+
+      // Якщо користувач перебуває у футері та скролить вгору, поки не дійде до Neon -> не перехоплюємо
+      if (window.scrollY > neonBottom - window.innerHeight + 20 && e.deltaY < 0) {
+        return;
+      }
+
+      // Якщо поза межами hero + neon
+      if (window.scrollY > neonBottom) return;
+
+      // Блокуємо паразитні мікро-рухи під час перельоту
+      if (isGlidingRef.current) {
+        e.preventDefault();
+        return;
+      }
+
+      if (Math.abs(e.deltaY) < 8) return;
+
+      // Скрол ВНИЗ -> до наступної секції (включно з Neon)
+      if (e.deltaY > 0 && targetIndexRef.current < TOTAL_SECTIONS - 1) {
+        e.preventDefault();
+        goToSection(targetIndexRef.current + 1);
+        return;
+      }
+      // Скрол ВГОРУ -> до попередньої секції
+      if (e.deltaY < 0 && targetIndexRef.current > 0) {
+        e.preventDefault();
+        goToSection(targetIndexRef.current - 1);
+        return;
+      }
+    };
+
+    let touchStartY = 0;
+    const handleHeroTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0]?.clientY ?? 0;
+    };
+    const handleHeroTouchMove = (e: TouchEvent) => {
+      const neonEl = neonContainerRef.current;
+      const mainMaxScroll = container.offsetHeight - window.innerHeight;
+      const neonRect = neonEl?.getBoundingClientRect();
+      const neonAbsTop = neonRect ? neonRect.top + window.scrollY : mainMaxScroll;
+      const neonMaxScroll = neonEl ? Math.max(0, neonEl.offsetHeight - window.innerHeight) : 0;
+      const neonTargetY = neonAbsTop + neonMaxScroll * DESKTOP_NEON_SNAP;
+      const neonBottom = neonAbsTop + (neonEl ? neonEl.offsetHeight : 0);
+
+      const touchY = e.touches[0]?.clientY ?? 0;
+      const deltaY = touchStartY - touchY;
+
+      // Свайп вгору (рух вниз до футера після Neon) -> відпускаємо
+      if (window.scrollY >= neonTargetY - 15 && deltaY > 0) {
+        return;
+      }
+
+      if (window.scrollY > neonBottom - window.innerHeight + 20 && deltaY < 0) {
+        return;
+      }
+
+      if (window.scrollY > neonBottom) return;
+
+      if (isGlidingRef.current) {
+        e.preventDefault();
+        return;
+      }
+
+      if (Math.abs(deltaY) > 25) {
+        if (deltaY > 0 && targetIndexRef.current < TOTAL_SECTIONS - 1) {
+          e.preventDefault();
+          touchStartY = touchY;
+          goToSection(targetIndexRef.current + 1);
+        } else if (deltaY < 0 && targetIndexRef.current > 0) {
+          e.preventDefault();
+          touchStartY = touchY;
+          goToSection(targetIndexRef.current - 1);
+        }
+      }
+    };
+
+    window.addEventListener("wheel", handleHeroWheel, { passive: false });
+    window.addEventListener("touchstart", handleHeroTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleHeroTouchMove, { passive: false });
+
     return () => {
       window.removeEventListener("resize", resizeCanvas);
+      window.removeEventListener("scroll", updateTargetFromScroll);
+      window.removeEventListener("wheel", handleHeroWheel);
+      window.removeEventListener("touchstart", handleHeroTouchStart);
+      window.removeEventListener("touchmove", handleHeroTouchMove);
 
       for (const img of imageCache.values()) {
         img.src = "";

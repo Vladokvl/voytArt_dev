@@ -382,20 +382,6 @@ export default function AuthorEditForm({ author }: { author: Author }) {
               </p>
             </div>
           </div>
-
-          <div className={artStyles.portraitWrap}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={preview ?? "/artPageAssets/Ivanka.png"}
-              alt="portrait preview"
-              className={artStyles.portraitImg}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover"
-              }}
-            />
-          </div>
         </div>
       </div>
 

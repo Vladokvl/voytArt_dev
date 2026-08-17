@@ -163,7 +163,7 @@ export default function ProductModal({ product, onClose, onAddToCart }: ProductM
               </p>
               <Dialog.Title className={styles.title}>{product.title}</Dialog.Title>
               <span className={styles.modalPrice}>
-                ${product.price.toLocaleString()}
+                {product.price.toLocaleString("uk-UA")} €
               </span>
 
               {product.description && (

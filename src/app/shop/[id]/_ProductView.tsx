@@ -208,7 +208,7 @@ export default function ProductView({
             <h1 className={styles.title}>{product.title}</h1>
             <div className={styles.priceRow}>
               <span className={styles.price}>
-                {currentPrice.toLocaleString("uk-UA")} ₴
+                {currentPrice.toLocaleString("uk-UA")} €
               </span>
             </div>
           </div>
@@ -234,7 +234,7 @@ export default function ProductView({
                       <span>{v.title}</span>
                       {v.price && v.price !== product.price && (
                         <span style={{ fontSize: "0.8rem", marginLeft: "0.35rem", opacity: 0.85 }}>
-                          ({v.price.toLocaleString("uk-UA")} ₴)
+                          ({v.price.toLocaleString("uk-UA")} €)
                         </span>
                       )}
                     </button>
