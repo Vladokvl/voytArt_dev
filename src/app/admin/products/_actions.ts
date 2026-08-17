@@ -65,7 +65,7 @@ export async function createProductAction(
                 title: v.title,
                 price: v.price ? Number(v.price) : null,
                 stock: Number(v.stock) || 0,
-                sku: v.sku || null,
+                sku: v.sku ?? null,
                 sortOrder: i,
               })),
             },
@@ -155,7 +155,7 @@ export async function updateProductAction(
     const v = variants[i]!;
     const vPrice = v.price !== "" && v.price !== null && v.price !== undefined ? Number(v.price) : null;
     const vStock = Number(v.stock) || 0;
-    const vSku = v.sku || null;
+    const vSku = v.sku ?? null;
 
     if (v.id && existingMap.has(v.id)) {
       submittedIds.add(v.id);

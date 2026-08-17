@@ -9,7 +9,7 @@ type BreadcrumbContextType = {
 
 const BreadcrumbContext = createContext<BreadcrumbContextType>({
   dynamicTitle: null,
-  setDynamicTitle: () => {},
+  setDynamicTitle: () => undefined,
 });
 
 export function BreadcrumbProvider({ children }: { children: React.ReactNode }) {

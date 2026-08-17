@@ -563,7 +563,8 @@ export default function HeroMobile() {
       let closest = 0;
       let minDiff = Infinity;
       for (let i = 0; i < MOBILE_SNAP_POINTS.length; i++) {
-        const diff = Math.abs(MOBILE_SNAP_POINTS[i] - clamped);
+        const point = MOBILE_SNAP_POINTS[i] ?? 0;
+        const diff = Math.abs(point - clamped);
         if (diff < minDiff) {
           minDiff = diff;
           closest = i;
@@ -593,12 +594,12 @@ export default function HeroMobile() {
         const neonOffset = neonAbsTop + Math.max(0, neonMaxScroll) * MOBILE_NEON_SNAP;
         targetY = neonOffset;
       } else {
-        const progress = MOBILE_SNAP_POINTS[clamped];
+        const progress = MOBILE_SNAP_POINTS[clamped] ?? 0;
         const maxScroll = container.offsetHeight - window.innerHeight;
         targetY = progress * maxScroll;
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const lenis = (window as any).lenis;
       if (lenis) {
         // Зупиняємо Lenis, щоб він не перебивав наш scrollTo

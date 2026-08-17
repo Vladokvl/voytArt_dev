@@ -185,7 +185,7 @@ export default function AuthorEditForm({ author }: { author: Author }) {
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <h3 className={styles.cardTitle}>Основні дані художника</h3>
-            <span className={styles.cardDesc}>Ім'я, прізвище та статус</span>
+            <span className={styles.cardDesc}>Імʼя, прізвище та статус</span>
           </div>
 
           <div className={styles.row}>

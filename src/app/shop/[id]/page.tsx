@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `${product.title} | VoytArt Shop`,
-    description: product.description?.slice(0, 150) || `${product.title} від ${product.author.firstName} ${product.author.lastName}`,
+    description: product.description?.slice(0, 150) ?? `${product.title} від ${product.author.firstName} ${product.author.lastName}`,
     openGraph: {
       title: `${product.title} | VoytArt Shop`,
       description: `${product.price} € — ${product.author.firstName} ${product.author.lastName}`,

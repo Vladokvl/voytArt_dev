@@ -53,11 +53,10 @@ export default async function ProductsPage() {
               products.map((p) => (
                 <tr key={p.id}>
                   <td className={styles.td}>
-                    {/* eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing */}
-                    {p.coverUrl || p.images[0] ? (
+                    {p.coverUrl ?? p.images[0]?.url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={p.coverUrl || p.images[0]?.url}
+                        src={p.coverUrl ?? p.images[0]?.url}
                         alt={p.title}
                         className={styles.thumbnail}
                       />

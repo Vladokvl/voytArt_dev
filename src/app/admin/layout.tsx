@@ -28,7 +28,7 @@ function BreadcrumbsView() {
   ];
 
   if (segments.length > 1 && segments[1]) {
-    const sectionKey = segments[1] as keyof typeof sectionLabels;
+    const sectionKey = segments[1];
     const sectionInfo = sectionLabels[sectionKey];
     const sectionTitle = sectionInfo?.title ?? segments[1];
     const sectionUrl = `/admin/${segments[1]}`;

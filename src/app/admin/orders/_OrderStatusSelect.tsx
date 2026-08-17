@@ -3,7 +3,6 @@
 import { useTransition } from "react";
 import { updateOrderStatusAction } from "./_actions";
 import { type OrderStatus } from "~/../generated/prisma";
-import styles from "../admin-table.module.scss";
 
 export default function OrderStatusSelect({
   orderId,
@@ -18,23 +17,6 @@ export default function OrderStatusSelect({
     startTransition(async () => {
       await updateOrderStatusAction(orderId, newStatus);
     });
-  };
-
-  const getStatusBadgeClass = (status: OrderStatus) => {
-    switch (status) {
-      case "NEW":
-        return styles.badgeWarning;
-      case "PAID":
-        return styles.badgeSuccess;
-      case "SHIPPED":
-        return styles.badgeNeon;
-      case "COMPLETED":
-        return styles.badgeSuccess;
-      case "CANCELLED":
-        return styles.badgeDanger;
-      default:
-        return styles.badgeNeutral;
-    }
   };
 
   return (

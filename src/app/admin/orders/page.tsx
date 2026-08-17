@@ -1,6 +1,6 @@
 import { db } from "~/lib/db";
 import styles from "../admin-table.module.scss";
-import { Package, User, Phone, MapPin, Calendar, Clock } from "lucide-react";
+import { MapPin, Clock } from "lucide-react";
 import OrderStatusSelect from "./_OrderStatusSelect";
 import DeleteOrderButton from "./_DeleteButton";
 

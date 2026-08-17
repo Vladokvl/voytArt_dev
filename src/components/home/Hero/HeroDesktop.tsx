@@ -598,7 +598,8 @@ export default function HeroDesktop() {
       let closest = 0;
       let minDiff = Infinity;
       for (let i = 0; i < DESKTOP_SNAP_POINTS.length; i++) {
-        const diff = Math.abs(DESKTOP_SNAP_POINTS[i] - clamped);
+        const point = DESKTOP_SNAP_POINTS[i] ?? 0;
+        const diff = Math.abs(point - clamped);
         if (diff < minDiff) {
           minDiff = diff;
           closest = i;
@@ -630,12 +631,12 @@ export default function HeroDesktop() {
         targetY = neonOffset;
       } else {
         // ──── Основне відео ────
-        const progress = DESKTOP_SNAP_POINTS[clamped];
+        const progress = DESKTOP_SNAP_POINTS[clamped] ?? 0;
         const maxScroll = container.offsetHeight - window.innerHeight;
         targetY = progress * maxScroll;
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const lenis = (window as any).lenis;
       if (lenis) {
         // Зупиняємо Lenis, щоб він не перебивав наш scrollTo

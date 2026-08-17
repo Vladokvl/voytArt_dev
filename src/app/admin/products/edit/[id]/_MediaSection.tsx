@@ -94,7 +94,7 @@ export default function MediaSection({
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
         <div>
           <h3 className={styles.cardTitle} style={{ border: "none", padding: 0 }}>
-            Галерея фото товару та прив'язка до варіантів
+            Галерея фото товару та привʼязка до варіантів
           </h3>
           <p style={{ fontSize: "0.825rem", color: "#64748b", margin: "0.25rem 0 0" }}>
             Ви можете привʼязати кожне фото до конкретного кольору/розміру, щоб галерея перемикалася автоматично при виборі покупцем.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingBag, Check, ChevronRight, ArrowRight } from "lucide-react";
@@ -17,6 +17,20 @@ type ProductVariant = {
 type Author = { id: number; firstName: string; lastName: string; photoUrl: string | null; shortDesc: string | null };
 type Category = { id: number; name: string; slug: string };
 
+type CartItem = {
+  product: {
+    id: number;
+    title: string;
+    price: number;
+    coverUrl: string;
+    author: Author;
+    category: Category;
+  };
+  variantId: number | null;
+  variantTitle: string | null;
+  quantity: number;
+};
+
 export type FullProduct = {
   id: number;
   title: string;
@@ -32,7 +46,7 @@ export type FullProduct = {
 
 export default function ProductView({
   product,
-  relatedProducts = [],
+  relatedProducts: _relatedProducts = [],
 }: {
   product: FullProduct;
   relatedProducts?: FullProduct[];
@@ -52,7 +66,7 @@ export default function ProductView({
   const hasVariants = product.variants && product.variants.length > 0;
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
     hasVariants
-      ? product.variants.find((v) => v.stock > 0) || product.variants[0] || null
+      ? (product.variants.find((v) => v.stock > 0) ?? product.variants[0] ?? null)
       : null
   );
 
@@ -75,7 +89,7 @@ export default function ProductView({
   }, [allImages, selectedVariant]);
 
   const [activeImage, setActiveImage] = useState(
-    visibleImages[0]?.url || product.coverUrl
+    visibleImages[0]?.url ?? product.coverUrl
   );
 
   // When variant changes, auto-switch active image to the first photo of this variant
@@ -113,22 +127,22 @@ export default function ProductView({
 
     // Read cart from localStorage
     const savedCart = localStorage.getItem("voyt_art_cart");
-    let cart = [];
+    let cart: CartItem[] = [];
     if (savedCart) {
       try {
-        cart = JSON.parse(savedCart);
+        cart = JSON.parse(savedCart) as CartItem[];
       } catch (e) {
         console.error(e);
       }
     }
 
-    const existingIndex = cart.findIndex((item: any) =>
+    const existingIndex = cart.findIndex((item) =>
       selectedVariant
         ? item.product.id === product.id && item.variantId === selectedVariant.id
         : item.product.id === product.id && !item.variantId
     );
 
-    if (existingIndex > -1) {
+    if (existingIndex > -1 && cart[existingIndex]) {
       cart[existingIndex].quantity = Math.min(
         currentStock,
         cart[existingIndex].quantity + quantity
@@ -143,8 +157,8 @@ export default function ProductView({
           author: product.author,
           category: product.category,
         },
-        variantId: selectedVariant?.id || null,
-        variantTitle: selectedVariant?.title || null,
+        variantId: selectedVariant?.id ?? null,
+        variantTitle: selectedVariant?.title ?? null,
         quantity,
       });
     }
@@ -329,7 +343,7 @@ export default function ProductView({
                     {product.author.firstName} {product.author.lastName}
                   </h4>
                   <p className={styles.authorSubtitle}>
-                    {product.author.shortDesc || "Художник галереї VoytArt"}
+                    {product.author.shortDesc ?? "Художник галереї VoytArt"}
                   </p>
                 </div>
               </div>

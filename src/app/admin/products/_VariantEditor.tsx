@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Plus, Trash2, Sparkles, Layers } from "lucide-react";
 import styles from "../_formStyles.module.scss";
 

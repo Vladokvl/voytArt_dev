@@ -12,7 +12,7 @@ import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
 import { useSetBreadcrumb } from "@/app/admin/_components/BreadcrumbContext";
 import VariantEditor, { type VariantItem } from "./_VariantEditor";
 import MediaSection from "./edit/[id]/_MediaSection";
-import { ArrowLeft, ExternalLink, Save, Eye, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ExternalLink, Save, Eye } from "lucide-react";
 
 type Author = { id: number; firstName: string; lastName: string };
 type Category = { id: number; name: string };
@@ -140,7 +140,7 @@ export default function ProductEditForm({
           <div>
             <h1 className={styles.headerTitle}>Редагування: {product.title}</h1>
             <p style={{ margin: 0, fontSize: "0.8rem", color: "#64748b" }}>
-              ID товару: #{product.id} • {product.category?.name || "Товар"}
+              ID товару: #{product.id} • {product.category?.name ?? "Товар"}
             </p>
           </div>
         </div>

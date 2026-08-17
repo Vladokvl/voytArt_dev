@@ -7,8 +7,6 @@ import { useEffect, useRef } from "react";
 // Persistent variable across page transitions (SPA page swaps)
 let lastPathname = "";
 
-const ROUTES_ORDER = ["/", "/art", "/gallery", "/shop"];
-
 function getRouteIndex(path: string): number {
   if (path === "/") return 0;
   if (path.startsWith("/art")) return 1;

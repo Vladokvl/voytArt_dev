@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 
 import styles from "./shop.module.scss";
 import ProductCarousel from "~/components/shop/ProductCarousel";
@@ -186,9 +185,9 @@ export default function ShopStorefront({
       comment: formData.comment,
       items: cart.map((item) => ({
         productId: item.product.id,
-        variantId: item.variantId || null,
+        variantId: item.variantId ?? null,
         title: item.product.title,
-        variantTitle: item.variantTitle || null,
+        variantTitle: item.variantTitle ?? null,
         price: item.product.price,
         quantity: item.quantity,
       })),
@@ -200,7 +199,7 @@ export default function ShopStorefront({
       localStorage.removeItem("voyt_art_cart");
       setCart([]);
     } else {
-      setErrorMessage(res.error || "Не вдалося оформити замовлення");
+      setErrorMessage(res.error ?? "Не вдалося оформити замовлення");
       setCheckoutStep("error");
     }
   };
@@ -271,8 +270,7 @@ export default function ShopStorefront({
               // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
               const coverImg = product.coverUrl || product.images[0]?.url || "/voyt.svg";
               const hasMultiplePrices =
-                product.variants &&
-                product.variants.some((v) => v.price && v.price !== product.price);
+                product.variants?.some((v) => v.price && v.price !== product.price);
 
               return (
                 <div
@@ -350,8 +348,7 @@ export default function ShopStorefront({
                       <div key={`${item.product.id}_${item.variantId}_${idx}`} className={styles.cartItem}>
                         <div className={styles.itemThumb}>
                           <Image
-                            // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-                            src={item.product.coverUrl || "/voyt.svg"}
+                            src={item.product.coverUrl ? item.product.coverUrl : "/voyt.svg"}
                             alt={item.product.title}
                             fill
                           />
