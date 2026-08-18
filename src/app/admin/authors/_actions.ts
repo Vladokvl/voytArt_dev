@@ -73,6 +73,22 @@ export async function updateAuthorAction(
     return { error: "Заповніть обовʼязкові поля" };
   }
 
+  // Перевірка: якщо автора роблять неактивним, чи залишається мінімум 2 активних автори на сайті
+  if (!active) {
+    const otherActiveCount = await db.author.count({
+      where: {
+        active: true,
+        id: { not: id },
+      },
+    });
+
+    if (otherActiveCount < 2) {
+      return {
+        error: "Неможливо приховати автора: на сайті має бути мінімум 2 видимих автори для коректного відображення галереї.",
+      };
+    }
+  }
+
   await db.author.update({
     where: { id },
     data: {
@@ -101,6 +117,7 @@ export async function deleteAuthorAction(id: number): Promise<void> {
   const author = await db.author.findUnique({
     where: { id },
     select: {
+      active: true,
       photoUrl: true,
       photoPublicId: true,
       bgPhotoUrl: true,
@@ -127,6 +144,19 @@ export async function deleteAuthorAction(id: number): Promise<void> {
   });
 
   if (!author) return;
+
+  // Перевірка: якщо видаляють активного автора
+  if (author.active) {
+    const remainingActiveCount = await db.author.count({
+      where: {
+        active: true,
+        id: { not: id },
+      },
+    });
+    if (remainingActiveCount < 2) {
+      throw new Error("Неможливо видалити автора: на сайті має бути мінімум 2 видимих автори.");
+    }
+  }
 
   await db.author.delete({ where: { id } });
 

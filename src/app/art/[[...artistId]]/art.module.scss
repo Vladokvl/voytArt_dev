@@ -91,6 +91,14 @@
   }
 }
 
+.columnHalf {
+  flex: 0 0 50vw;
+
+  @include mobile {
+    flex: 0 0 100vw;
+  }
+}
+
 .loadingColumn {
   cursor: wait !important;
   pointer-events: none;

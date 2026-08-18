@@ -70,7 +70,7 @@ export default function PageLoader() {
 
       // Якщо вже закешовано — робимо швидкий і плавний fade-out оверлею
       const isAlreadyReady =
-        (window as Window & { __voytHeroReady?: boolean }).__voytHeroReady ||
+        (window as Window & { __voytHeroReady?: boolean }).__voytHeroReady ??
         sessionStorage.getItem("voyt_hero_cached") === "true";
 
       if (isAlreadyReady && overlay) {

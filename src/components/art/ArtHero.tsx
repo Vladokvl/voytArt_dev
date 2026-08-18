@@ -29,6 +29,9 @@ export default function ArtHero({
   artistParam: string | null;
   authors: DBAuthor[];
 }) {
+  const isTwoAuthors = authors.length === 2;
+  const colWidthVw = isTwoAuthors ? 50 : 33.333;
+
   const heroRef = useRef<HTMLDivElement>(null);
   const sliderWrapperRef = useRef<HTMLDivElement>(null);
   const pullTabRef = useRef<HTMLButtonElement>(null);
@@ -72,8 +75,8 @@ export default function ArtHero({
       gsap.set(sliderWrapperRef.current, { x: `-${startIndex * 100}vw` });
       setActiveMobileIndex(startIndex);
     } else {
-      const maxTranslateVw = Math.max(0, authors.length * 33.333 - 100);
-      let targetXVw = startIndex * 33.333;
+      const maxTranslateVw = Math.max(0, authors.length * colWidthVw - 100);
+      let targetXVw = startIndex * colWidthVw;
       if (targetXVw > maxTranslateVw) targetXVw = maxTranslateVw;
 
       gsap.set(sliderWrapperRef.current, { x: `-${targetXVw}vw` });
@@ -103,12 +106,13 @@ export default function ArtHero({
       if (isMobileRef.current) return; // вимикаємо на мобілках
       if (authors.length === 0) return;
 
+      const maxTranslateVw = Math.max(0, authors.length * colWidthVw - 100);
+      if (maxTranslateVw <= 0) return; // Якщо 2 автори — вони вже займають по 50vw, скрол не потрібен
+
       e.preventDefault();
 
       const delta = e.deltaY || e.deltaX;
       let nextX = currentXVw.current + delta * 0.04;
-
-      const maxTranslateVw = Math.max(0, authors.length * 33.333 - 100);
 
       if (nextX < 0) nextX = 0;
       if (nextX > maxTranslateVw) nextX = maxTranslateVw;
@@ -136,7 +140,7 @@ export default function ArtHero({
         heroElement.removeEventListener("wheel", handleWheel);
       }
     };
-  }, [isArtistSelected, authors]);
+  }, [isArtistSelected, authors, colWidthVw]);
 
   // ── Реакція на зміну artistParam ───────────────────────────────────────────
   useEffect(() => {
@@ -244,7 +248,7 @@ export default function ArtHero({
     if (delta > 0) {
       if (newIndex > 0) newIndex--;
     } else {
-      if (newIndex < authors.length - 1) newIndex++;
+      if (newIndex < displayAuthors.length - 1) newIndex++;
     }
 
     setActiveMobileIndex(newIndex);
@@ -263,8 +267,6 @@ export default function ArtHero({
       duration: 0.45,
       ease: "power2.inOut",
     });
-  };
-
   if (authors.length === 0) return null;
 
   return (
@@ -278,7 +280,7 @@ export default function ArtHero({
         <div
           ref={sliderWrapperRef}
           className={styles.sliderWrapper}
-          style={{ width: `${authors.length * 33.333}vw` }}
+          style={{ width: isMobileState ? `${authors.length * 100}vw` : `${authors.length * colWidthVw}vw` }}
         >
           {authors.map((author, index) => {
             const isHovered = isMobileState ? activeMobileIndex === index : hoveredIndex === index;
@@ -290,9 +292,10 @@ export default function ArtHero({
             return (
               <div
                 key={author.id}
-                className={`${styles.column} ${
+                className={`${styles.column} ${isTwoAuthors ? styles.columnHalf : ""} ${
                   loadingArtistId === author.id ? styles.loadingColumn : ""
                 }`}
+                style={{ flex: isMobileState ? "0 0 100vw" : `0 0 ${colWidthVw}vw` }}
                 onClick={() => handleSelectArtist(author.id)}
                 onMouseEnter={() => !isMobileState && setHoveredIndex(index)}
                 onMouseLeave={() => !isMobileState && setHoveredIndex(null)}
@@ -332,8 +335,8 @@ export default function ArtHero({
         </div>
       </div>
 
-      {/* ── Лінія прогресу скролу (тільки для десктопу) ── */}
-      {!isMobileRef.current && authors.length * 33.333 > 100 && (
+      {/* ── Лінія прогресу скролу (тільки для десктопу, коли більше 2 авторів) ── */}
+      {!isMobileRef.current && authors.length * colWidthVw > 100 && (
         <div className={styles.progressBarContainer}>
           <div
             className={styles.progressBarActive}

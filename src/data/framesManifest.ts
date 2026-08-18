@@ -915,7 +915,7 @@ export const getMobileFrameUrl = (frame: number): string => {
 };
 
 export const DESKTOP_NEON_VIDEO_URL =
-  "https://res.cloudinary.com/dkm5vtfyg/video/upload/v1787042384/final_neon_desktop_p3ii4x.mp4";
+  "https://res.cloudinary.com/dkm5vtfyg/video/upload/v1787042384/final_neon_desktop_p3ii4x.mp4" as const;
 
 export const MOBILE_NEON_VIDEO_URL =
-  "https://res.cloudinary.com/dkm5vtfyg/video/upload/v1787042382/final_neon_mobile_lmk0r1.mp4";
+  "https://res.cloudinary.com/dkm5vtfyg/video/upload/v1787042382/final_neon_mobile_lmk0r1.mp4" as const;
