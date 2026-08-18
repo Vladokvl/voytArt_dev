@@ -44,3 +44,10 @@ yarn-error.log*
 
 # idea files
 .idea
+
+# heavy media / frame sequences (served via Cloudinary CDN)
+/public/mainPageVideos/
+/public/New folder/
+
+# temp & test scripts
+test-groupby.*
