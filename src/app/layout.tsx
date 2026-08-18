@@ -1,4 +1,4 @@
-import { type Metadata } from "next";
+import { type Metadata, type Viewport } from "next";
 import { Montserrat } from "next/font/google";
 import { Suspense } from "react";
 import "~/styles/globals.scss";
@@ -8,12 +8,21 @@ import FooterWrapper from "~/components/layout/Footer/FooterWrapper";
 import NavMenu from "~/components/layout/navMenu/navmenu";
 import Header from "~/components/layout/Header/Header";
 import AnalyticsTracker from "~/components/analytics/AnalyticsTracker";
+import InAppBrowserBanner from "~/components/layout/InAppBrowserBanner/InAppBrowserBanner";
+import VhFix from "~/components/layout/VhFix/VhFix";
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL
   ? (process.env.NEXT_PUBLIC_APP_URL.startsWith("http")
       ? process.env.NEXT_PUBLIC_APP_URL
       : `https://${process.env.NEXT_PUBLIC_APP_URL}`)
   : "https://testing.zhovtok.work";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#050505",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -90,6 +99,8 @@ export default function RootLayout({
       </head>
       <body>
         <script dangerouslySetInnerHTML={{ __html: "history.scrollRestoration='manual';window.scrollTo(0,0);" }} />
+        <VhFix />
+        <InAppBrowserBanner />
         <Suspense fallback={null}>
           <AnalyticsTracker />
         </Suspense>

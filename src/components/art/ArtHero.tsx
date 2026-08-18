@@ -82,7 +82,7 @@ export default function ArtHero({
     }
 
     if (isArtistSelected) {
-      gsap.set(heroRef.current, { y: "-100vh" });
+      gsap.set(heroRef.current, { y: "-100%" });
       document.body.style.overflow = "";
       document.documentElement.removeAttribute("data-art-hero");
     } else {
@@ -159,7 +159,7 @@ export default function ArtHero({
       // Жорстко фіксуємо стан hero open, поки шторка не сховається на 100%
       document.documentElement.setAttribute("data-art-hero", "open");
       gsap.to(heroRef.current, {
-        y: "-100vh",
+        y: "-100%",
         duration: 1,
         delay: 0.15,
         ease: "power2.inOut",
@@ -356,6 +356,14 @@ export default function ArtHero({
           />
         ))}
       </div>
+
+      {/* ── Swipe Indicator (тільки для мобілок на першому екрані) ── */}
+      {!isArtistSelected && authors.length > 1 && (
+        <div className={styles.swipeIndicator}>
+          <span className={styles.swipeText}>Swipe</span>
+          <span className={styles.swipeArrow}>→</span>
+        </div>
+      )}
 
       {/* ── Pull-tab шторка ── */}
       <button

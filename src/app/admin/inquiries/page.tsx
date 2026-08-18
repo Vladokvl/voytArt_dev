@@ -6,6 +6,7 @@ import InquiryStatusSelect from "./_InquiryStatusSelect";
 import DeleteInquiryButton from "./_DeleteButton";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import SortableHeader from "../_components/SortableHeader";
+import Pagination from "../_components/Pagination";
 
 type InquirySortField = "createdAt" | "customerName" | "status";
 
@@ -13,6 +14,7 @@ type SearchParams = Promise<{
   sortBy?: InquirySortField;
   sortDir?: "asc" | "desc";
   status?: "NEW" | "IN_PROGRESS" | "CONTACTED" | "SOLD" | "CANCELLED" | "ALL";
+  page?: string;
 }>;
 
 export const dynamic = "force-dynamic";
@@ -22,7 +24,7 @@ export default async function InquiriesPage({
 }: {
   searchParams: SearchParams;
 }) {
-  const { sortBy = "createdAt", sortDir = "desc", status = "ALL" } = await searchParams;
+  const { sortBy = "createdAt", sortDir = "desc", status = "ALL", page: pageParam } = await searchParams;
   const validSortDir = sortDir === "asc" ? "asc" : "desc";
 
   let orderByQuery: Prisma.PaintingInquiryOrderByWithRelationInput = { createdAt: validSortDir };
@@ -37,6 +39,9 @@ export default async function InquiriesPage({
   const whereClause: Prisma.PaintingInquiryWhereInput =
     status !== "ALL" ? { status } : {};
 
+  const page = Number(pageParam) || 1;
+  const pageSize = 20;
+
   const [inquiries, counts] = await Promise.all([
     db.paintingInquiry.findMany({
       where: whereClause,
@@ -48,6 +53,8 @@ export default async function InquiriesPage({
         },
       },
       orderBy: orderByQuery,
+      take: pageSize,
+      skip: (page - 1) * pageSize,
     }),
     Promise.all([
       db.paintingInquiry.count(),
@@ -327,6 +334,8 @@ export default async function InquiriesPage({
             )}
           </tbody>
         </table>
+
+        <Pagination totalItems={totalCount} pageSize={pageSize} />
       </div>
     </div>
   );

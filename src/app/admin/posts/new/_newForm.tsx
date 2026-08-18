@@ -3,8 +3,17 @@ import { useActionState, useRef, useState, useTransition } from "react";
 import { createPostAction } from "../_actions";
 import styles from "../../_formStyles.module.scss";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
+import dynamic from "next/dynamic";
+
+const TipTapEditor = dynamic(() => import("~/components/admin/TipTapEditor"), {
+  ssr: false,
+  loading: () => (
+    <div
+      className="skeleton-editor"
+      style={{ minHeight: "200px", background: "#f1f5f9", borderRadius: "8px" }}
+    />
+  ),
+});
 import { useImageCrop } from "~/hooks/use-image-crop";
 import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
 
@@ -17,12 +26,7 @@ export default function PostForm() {
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const editor = useEditor({
-    extensions: [StarterKit],
-    content: "",
-    immediatelyRender: false,
-    onUpdate: ({ editor }) => setContent(editor.getHTML()),
-  });
+
 
   const {
     cropFile,
@@ -78,23 +82,10 @@ export default function PostForm() {
 
       <div className={styles.field}>
         <label className={styles.label}>Контент *</label>
-        <div className={styles.editorWrapper}>
-          <div className={styles.toolbar}>
-            <button type="button" onClick={() => editor?.chain().focus().toggleBold().run()}
-              className={editor?.isActive("bold") ? styles.toolbarBtnActive : styles.toolbarBtn}>
-              <b>B</b>
-            </button>
-            <button type="button" onClick={() => editor?.chain().focus().toggleItalic().run()}
-              className={editor?.isActive("italic") ? styles.toolbarBtnActive : styles.toolbarBtn}>
-              <i>I</i>
-            </button>
-            <button type="button" onClick={() => editor?.chain().focus().toggleBulletList().run()}
-              className={editor?.isActive("bulletList") ? styles.toolbarBtnActive : styles.toolbarBtn}>
-              ≡
-            </button>
-          </div>
-          <EditorContent editor={editor} className={styles.editorContent} />
-        </div>
+        <TipTapEditor
+          content={content}
+          onChange={(html) => setContent(html)}
+        />
         <input type="hidden" name="content" value={content} />
       </div>
 

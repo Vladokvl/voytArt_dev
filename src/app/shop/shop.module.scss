@@ -2,6 +2,7 @@
   background: var(--color-bg);
   color: var(--color-text);
   min-height: 100vh;
+  min-height: 100dvh;
   padding: 6rem 2rem 8rem;
 
   @media (max-width: 768px) {

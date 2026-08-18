@@ -19,9 +19,13 @@ const config = {
       "@radix-ui/react-dialog",
       "@radix-ui/react-dropdown-menu",
       "@radix-ui/react-slot",
+      "@tiptap/react",
+      "@tiptap/starter-kit",
+      "@tiptap/pm",
     ],
   },
   images: {
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
         protocol: "https",

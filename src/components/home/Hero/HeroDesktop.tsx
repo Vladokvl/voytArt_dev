@@ -8,6 +8,8 @@ import AboutGallerySection from "../Sections/AboutGallerySection";
 import ArtSection from "../Sections/ArtSection";
 import ArtShopSection from "../Sections/ArtShopSection";
 import NeonSection from "../Sections/NeonSection";
+import { DESKTOP_NEON_VIDEO_URL, getDesktopFrameUrl } from "~/data/framesManifest";
+import { getDesktopQualityTier } from "~/utils/adaptiveQuality";
 import styles from "./Hero.module.scss";
 
 gsap.registerPlugin(ScrollTrigger, Observer);
@@ -16,8 +18,6 @@ gsap.registerPlugin(ScrollTrigger, Observer);
 const DESKTOP_TOTAL_FRAMES = 421;
 const PRELOAD_CRITICAL_FRAMES = 14;
 const PRELOAD_READY_THRESHOLD = 8;
-const BUFFER_FORWARD = 36;
-const BUFFER_BACKWARD = 8;
 const HERO_READY_EVENT = "voyt:hero-ready";
 
 // ╔══════════════════════════════════════════════════════════════════════╗
@@ -44,9 +44,6 @@ const DESKTOP_NEON_SNAP = 0.9;
 // (Змінюй тут: 0.8 = швидше, 1.2 = плавно за замовчуванням, 1.6 = довше/кінематографічніше)
 const DESKTOP_SNAP_DURATION = 2;
 
-const getDesktopFrameSrc = (index: number) =>
-  `/mainPageVideos/originals/desktop_frames/frame_${String(index).padStart(4, "0")}.webp`;
-
 export default function HeroDesktop() {
   const [isMainReady, setIsMainReady] = useState(false);
   const [loaderProgress, setLoaderProgress] = useState(0);
@@ -54,7 +51,7 @@ export default function HeroDesktop() {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imageCacheRef = useRef<Map<number, HTMLImageElement>>(new Map());
+  const imageCacheRef = useRef<Map<number, ImageBitmap | HTMLImageElement>>(new Map());
   const pendingLoadsRef = useRef<Set<number>>(new Set());
   const currentFrameRef = useRef(1);
   const frameTweenRef = useRef<gsap.core.Tween | null>(null);
@@ -69,6 +66,7 @@ export default function HeroDesktop() {
   const panel1OverlayRef = useRef<HTMLDivElement>(null);
   const panel2OverlayRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
+  const bufferBarRef = useRef<HTMLDivElement>(null);
   const curtainRef = useRef<HTMLDivElement>(null);
   const neonContainerRef = useRef<HTMLDivElement>(null);
   const neonVideoRef = useRef<HTMLVideoElement>(null);
@@ -150,26 +148,86 @@ export default function HeroDesktop() {
     const imageCache = imageCacheRef.current;
     const pendingLoads = pendingLoadsRef.current;
     const prefetchedFrames = prefetchedFramesRef.current;
+    const bufferBar = bufferBarRef.current;
+    const neonVideo = neonVideoRef.current;
+    const qualityTier = getDesktopQualityTier();
+
+    // Прогрес-бар охоплює основний (800vh) + neon (200vh) = 1000vh разом
+    const MAIN_PROGRESS_FRAC = 800 / 1000;
+    const NEON_PROGRESS_FRAC = 200 / 1000;
+    let neonBufferedFraction = 0;
+
+    const updateBufferProgress = () => {
+      if (bufferBar) {
+        const framesFrac =
+          (Math.min(DESKTOP_TOTAL_FRAMES, prefetchedFrames.size) / DESKTOP_TOTAL_FRAMES) *
+          MAIN_PROGRESS_FRAC;
+        const neonFrac = neonBufferedFraction * NEON_PROGRESS_FRAC;
+        const total = Math.min(1, framesFrac + neonFrac);
+        bufferBar.style.width = `${total * 100}%`;
+      }
+    };
+
+    // Відстежуємо буферизацію neon-відео для 100% заповнення сірого бару
+    const checkNeonBuffer = () => {
+      if (!neonVideo) return;
+      if (neonVideo.readyState >= 3) {
+        neonBufferedFraction = 1;
+        updateBufferProgress();
+      } else if (neonVideo.buffered && neonVideo.buffered.length > 0 && neonVideo.duration > 0) {
+        const end = neonVideo.buffered.end(neonVideo.buffered.length - 1);
+        neonBufferedFraction = Math.min(1, end / neonVideo.duration);
+        updateBufferProgress();
+      }
+    };
+
+    neonVideo?.addEventListener("progress", checkNeonBuffer);
+    neonVideo?.addEventListener("canplaythrough", () => {
+      neonBufferedFraction = 1;
+      updateBufferProgress();
+    });
+    neonVideo?.addEventListener("loadeddata", checkNeonBuffer);
+    checkNeonBuffer();
 
     const drawFrame = (frame: number) => {
-      const img = imageCache.get(frame);
-      if (!img || !img.complete || img.naturalWidth === 0 || img.naturalHeight === 0)
-        return;
+      const item = imageCache.get(frame);
+      if (!item) return;
 
       const canvasW = canvas.width;
       const canvasH = canvas.height;
-      const scale = Math.max(canvasW / img.naturalWidth, canvasH / img.naturalHeight);
-      const drawW = img.naturalWidth * scale;
-      const drawH = img.naturalHeight * scale;
+      const imgW = "naturalWidth" in item ? item.naturalWidth : (item as ImageBitmap).width;
+      const imgH = "naturalHeight" in item ? item.naturalHeight : (item as ImageBitmap).height;
+      if (!imgW || !imgH) return;
+
+      const scale = Math.max(canvasW / imgW, canvasH / imgH);
+      const drawW = imgW * scale;
+      const drawH = imgH * scale;
       const offsetX = (canvasW - drawW) / 2;
       const offsetY = (canvasH - drawH) / 2;
 
       ctx2d.clearRect(0, 0, canvasW, canvasH);
-      ctx2d.drawImage(img, offsetX, offsetY, drawW, drawH);
+      ctx2d.drawImage(item, offsetX, offsetY, drawW, drawH);
+    };
+
+    // ── RAF-gated рендеринг: плавна синхронізація без черг ──
+    let rafPending = false;
+    let targetFrameToDraw = 1;
+
+    const scheduleDraw = (frame: number) => {
+      targetFrameToDraw = frame;
+      if (!rafPending) {
+        rafPending = true;
+        requestAnimationFrame(() => {
+          rafPending = false;
+          drawFrame(targetFrameToDraw);
+        });
+      }
     };
 
     const resizeCanvas = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const rawDpr = window.devicePixelRatio || 1;
+      const maxDpr = qualityTier === "standard" ? 1.0 : 1.5;
+      const dpr = Math.min(rawDpr, maxDpr);
       const width = Math.max(1, Math.floor(window.innerWidth));
       const height = Math.max(1, Math.floor(window.innerHeight));
 
@@ -181,6 +239,7 @@ export default function HeroDesktop() {
       drawFrame(currentFrameRef.current);
     };
 
+    // Нативне надшвидке завантаження зображення через браузерний кеш
     const loadFrame = (frame: number, onSettled?: () => void) => {
       if (frame < 1 || frame > DESKTOP_TOTAL_FRAMES) return;
 
@@ -195,21 +254,39 @@ export default function HeroDesktop() {
 
       const img = new Image();
       img.decoding = "async";
+      img.src = getDesktopFrameUrl(frame, qualityTier);
+
+      if (img.complete && img.naturalWidth > 0) {
+        pendingLoads.delete(frame);
+        imageCache.set(frame, img);
+        prefetchedFrames.add(frame);
+        updateBufferProgress();
+        onSettled?.();
+        if (frame === currentFrameRef.current) {
+          scheduleDraw(frame);
+        }
+        return;
+      }
+
       img.onload = () => {
         pendingLoads.delete(frame);
         imageCache.set(frame, img);
+        prefetchedFrames.add(frame);
+        updateBufferProgress();
         onSettled?.();
-
         if (frame === currentFrameRef.current) {
-          drawFrame(frame);
+          scheduleDraw(frame);
         }
       };
+
       img.onerror = () => {
         pendingLoads.delete(frame);
         onSettled?.();
       };
-      img.src = getDesktopFrameSrc(frame);
     };
+
+    const BUFFER_FORWARD = 50;
+    const BUFFER_BACKWARD = 20;
 
     const manageCache = (currentFrame: number) => {
       const startWindow = Math.max(1, currentFrame - BUFFER_BACKWARD);
@@ -219,18 +296,26 @@ export default function HeroDesktop() {
         loadFrame(frame);
       }
 
-      for (const frame of imageCache.keys()) {
-        if (frame < startWindow || frame > endWindow) {
-          const img = imageCache.get(frame);
-          if (img) {
-            img.src = "";
+      // Очищуємо тільки якщо в пам'яті більше 120 кадрів, щоб не смикати GC при скролі вперед-назад
+      if (imageCache.size > 120) {
+        for (const frame of imageCache.keys()) {
+          if (frame < startWindow - 20 || frame > endWindow + 20) {
+            imageCache.delete(frame);
           }
-          imageCache.delete(frame);
         }
       }
     };
 
-    const prefetchFramesInBackground = async (startFromFrame: number) => {
+    let lastCacheTriggerFrame = 1;
+    const triggerCacheIfNeeded = (frame: number) => {
+      if (Math.abs(frame - lastCacheTriggerFrame) >= 2) {
+        lastCacheTriggerFrame = frame;
+        manageCache(frame);
+      }
+    };
+
+    // ── Плавний фоновий префетч (без перевантаження мережевого потоку) ─────────
+    const prefetchFramesInBackground = async () => {
       if (prefetchStartedRef.current) return;
 
       const connection = (navigator as Navigator & {
@@ -242,23 +327,60 @@ export default function HeroDesktop() {
       const controller = new AbortController();
       prefetchAbortRef.current = controller;
 
-      for (let frame = startFromFrame; frame <= DESKTOP_TOTAL_FRAMES; frame += 1) {
-        if (controller.signal.aborted) break;
-        if (prefetchedFrames.has(frame)) continue;
+      // Пріоритетні кластери навколо snap-точок
+      const priorityClusters = [
+        { center: 1, radius: 30 },
+        { center: Math.round(DESKTOP_TOTAL_FRAMES * 0.24), radius: 25 },
+        { center: Math.round(DESKTOP_TOTAL_FRAMES * 0.60), radius: 25 },
+        { center: Math.round(DESKTOP_TOTAL_FRAMES * 0.90), radius: 25 },
+        { center: DESKTOP_TOTAL_FRAMES, radius: 20 },
+      ];
 
-        try {
-          const response = await fetch(getDesktopFrameSrc(frame), {
-            cache: "force-cache",
-            signal: controller.signal,
-          });
-          if (response.ok) {
-            await response.blob();
-            prefetchedFrames.add(frame);
+      const queuedFrames: number[] = [];
+      const added = new Set<number>();
+
+      for (const cluster of priorityClusters) {
+        const minF = Math.max(1, cluster.center - cluster.radius);
+        const maxF = Math.min(DESKTOP_TOTAL_FRAMES, cluster.center + cluster.radius);
+        for (let f = minF; f <= maxF; f++) {
+          if (!added.has(f)) {
+            added.add(f);
+            queuedFrames.push(f);
           }
-        } catch {
-          break;
         }
       }
+
+      for (let f = 1; f <= DESKTOP_TOTAL_FRAMES; f++) {
+        if (!added.has(f)) {
+          added.add(f);
+          queuedFrames.push(f);
+        }
+      }
+
+      const CONCURRENCY = 4;
+      let queueIndex = 0;
+
+      const worker = async () => {
+        while (queueIndex < queuedFrames.length) {
+          if (controller.signal.aborted) break;
+          const frame = queuedFrames[queueIndex++];
+          if (!frame || prefetchedFrames.has(frame)) continue;
+
+          await new Promise<void>((resolve) => {
+            const img = new Image();
+            img.decoding = "async";
+            img.onload = img.onerror = () => {
+              prefetchedFrames.add(frame);
+              updateBufferProgress();
+              resolve();
+            };
+            img.src = getDesktopFrameUrl(frame, qualityTier);
+          });
+        }
+      };
+
+      const workers = Array.from({ length: CONCURRENCY }, () => worker());
+      await Promise.allSettled(workers);
     };
 
     resizeCanvas();
@@ -266,15 +388,9 @@ export default function HeroDesktop() {
 
     // Neon refs (перевіряються окремо всередині контексту — основні анімації працюють навіть без них)
     const neonContainer = neonContainerRef.current;
-    const neonVideo = neonVideoRef.current;
     const neonPanel = neonPanelRef.current;
     const neonOverlay = neonOverlayRef.current;
     const curtain = curtainRef.current;
-
-    // Прогрес-бар охоплює основний (800vh) + neon (400vh) = 1200vh разом
-    // ↓↓ Онови якщо змінюєш висоту .container або .neonContainer в CSS
-    const MAIN_PROGRESS_FRAC = 800 / 1000;
-    const NEON_PROGRESS_FRAC = 200 / 1000;
 
     const initDesktopFrameScroll = () => {
       frameTweenRef.current?.kill();
@@ -301,8 +417,8 @@ export default function HeroDesktop() {
             const currentFrame = Math.round(frameState.frame);
             if (currentFrame !== lastRenderedFrame) {
               currentFrameRef.current = currentFrame;
-              manageCache(currentFrame);
-              drawFrame(currentFrame);
+              triggerCacheIfNeeded(currentFrame);
+              scheduleDraw(currentFrame);
               lastRenderedFrame = currentFrame;
             }
           },
@@ -338,8 +454,8 @@ export default function HeroDesktop() {
           setIsMainReady(true);
           initDesktopFrameScroll();
           window.setTimeout(() => {
-            void prefetchFramesInBackground(PRELOAD_CRITICAL_FRAMES + 1);
-          }, 1000);
+            void prefetchFramesInBackground();
+          }, 800);
         }
       });
     }
@@ -759,8 +875,12 @@ export default function HeroDesktop() {
       window.removeEventListener("touchstart", handleHeroTouchStart);
       window.removeEventListener("touchmove", handleHeroTouchMove);
 
-      for (const img of imageCache.values()) {
-        img.src = "";
+      for (const item of imageCache.values()) {
+        if ("close" in item && typeof item.close === "function") {
+          item.close();
+        } else if ("src" in item) {
+          (item as HTMLImageElement).src = "";
+        }
       }
       imageCache.clear();
       pendingLoads.clear();
@@ -784,8 +904,9 @@ export default function HeroDesktop() {
           <span>scroll</span>
           <div className={styles.scrollLine} />
         </div>
-        {/* Прогрес-бар */}
+        {/* Прогрес-бар: чорний трек + сірий буфер завантаження + жовтий маркер */}
         <div className={styles.progressTrack}>
+          <div ref={bufferBarRef} className={styles.bufferBar} />
           <div ref={progressBarRef} className={styles.progressBar} />
         </div>
       </div>
@@ -862,7 +983,7 @@ export default function HeroDesktop() {
           <video
             ref={neonVideoRef}
             className={styles.video}
-            src="/mainPageVideos/final_neon_desktop.mp4"
+            src={DESKTOP_NEON_VIDEO_URL}
             muted
             loop
             autoPlay

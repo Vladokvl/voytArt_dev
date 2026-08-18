@@ -6,12 +6,14 @@ import DeleteAuthorButton from "./_DeleteButton";
 import { swapAuthorOrderAction, moveAuthorToPositionAction } from "./_actions";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import SortableHeader from "../_components/SortableHeader";
+import Pagination from "../_components/Pagination";
 
 type AuthorSortField = "name" | "paintingsCount" | "status" | "order";
 
 type SearchParams = Promise<{
   sortBy?: AuthorSortField;
   sortDir?: "asc" | "desc";
+  page?: string;
 }>;
 
 export default async function AuthorsPage({
@@ -19,7 +21,7 @@ export default async function AuthorsPage({
 }: {
   searchParams: SearchParams;
 }) {
-  const { sortBy = "order", sortDir = "asc" } = await searchParams;
+  const { sortBy = "order", sortDir = "asc", page: pageParam } = await searchParams;
   const validSortDir: "asc" | "desc" = sortDir === "desc" ? "desc" : "asc";
 
   let orderByQuery: Prisma.AuthorOrderByWithRelationInput = { order: validSortDir };
@@ -33,10 +35,18 @@ export default async function AuthorsPage({
     orderByQuery = { order: validSortDir };
   }
 
-  const authors = await db.author.findMany({
-    include: { _count: { select: { paintings: true, products: true } } },
-    orderBy: orderByQuery,
-  });
+  const page = Number(pageParam) || 1;
+  const pageSize = 20;
+
+  const [authors, totalCount] = await Promise.all([
+    db.author.findMany({
+      include: { _count: { select: { paintings: true, products: true } } },
+      orderBy: orderByQuery,
+      take: pageSize,
+      skip: (page - 1) * pageSize,
+    }),
+    db.author.count(),
+  ]);
 
   return (
     <div>
@@ -77,7 +87,7 @@ export default async function AuthorsPage({
                   <td className={styles.tdThumb}>
                     {a.photoUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={getOptimizedImageUrl(a.photoUrl, { preset: "thumb" })} alt={a.firstName} className={styles.thumbnail} />
+                      <img src={getOptimizedImageUrl(a.photoUrl, { preset: "thumb" })} alt={a.firstName} loading="lazy" className={styles.thumbnail} />
                     ) : (
                       <div className={styles.thumbnail} style={{ display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: "0.75rem" }}>
                         —
@@ -174,6 +184,8 @@ export default async function AuthorsPage({
             )}
           </tbody>
         </table>
+
+        <Pagination totalItems={totalCount} pageSize={pageSize} />
       </div>
     </div>
   );

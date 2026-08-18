@@ -5,6 +5,7 @@ import { Plus, Edit2, ArrowUp, ArrowDown, ArrowRight } from "lucide-react";
 import DeleteProductButton from "./_DeleteButton";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import SortableHeader from "../_components/SortableHeader";
+import Pagination from "../_components/Pagination";
 import { swapProductOrderAction, moveProductToPositionAction } from "./_actions";
 
 type ProductSortField = "title" | "author" | "category" | "price" | "stock" | "status" | "sortOrder";
@@ -12,6 +13,7 @@ type ProductSortField = "title" | "author" | "category" | "price" | "stock" | "s
 type SearchParams = Promise<{
   sortBy?: ProductSortField;
   sortDir?: "asc" | "desc";
+  page?: string;
 }>;
 
 export default async function ProductsPage({
@@ -39,14 +41,22 @@ export default async function ProductsPage({
     orderByQuery = { sortOrder: validSortDir };
   }
 
-  const products = await db.product.findMany({
-    include: {
-      category: true,
-      author: true,
-      images: { orderBy: { order: "asc" }, take: 1 },
-    },
-    orderBy: orderByQuery,
-  });
+  const page = Number(await searchParams.then(s => s.page)) || 1;
+  const pageSize = 20;
+
+  const [products, totalCount] = await Promise.all([
+    db.product.findMany({
+      include: {
+        category: true,
+        author: true,
+        images: { orderBy: { order: "asc" }, take: 1 },
+      },
+      orderBy: orderByQuery,
+      take: pageSize,
+      skip: (page - 1) * pageSize,
+    }),
+    db.product.count(),
+  ]);
 
   return (
     <div>
@@ -93,6 +103,7 @@ export default async function ProductsPage({
                       <img
                         src={getOptimizedImageUrl(p.coverUrl ?? p.images[0]?.url, { preset: "thumb" })}
                         alt={p.title}
+                        loading="lazy"
                         className={styles.thumbnail}
                       />
                     ) : (
@@ -209,8 +220,9 @@ export default async function ProductsPage({
             )}
           </tbody>
         </table>
+
+        <Pagination totalItems={totalCount} pageSize={pageSize} />
       </div>
     </div>
   );
 }
-

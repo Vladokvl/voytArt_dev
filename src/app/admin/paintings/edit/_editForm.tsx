@@ -5,8 +5,17 @@ import Link from "next/link";
 import { updatePaintingAction } from "./_actions";
 import { type Author } from "@/types/Author";
 import formStyles from "@/app/admin/_formStyles.module.scss";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
+import dynamic from "next/dynamic";
+
+const TipTapEditor = dynamic(() => import("~/components/admin/TipTapEditor"), {
+  ssr: false,
+  loading: () => (
+    <div
+      className="skeleton-editor"
+      style={{ minHeight: "200px", background: "#f1f5f9", borderRadius: "8px" }}
+    />
+  ),
+});
 import Image from "next/image";
 import MediaSection from "./_MediaSection";
 import { useSetBreadcrumb } from "@/app/admin/_components/BreadcrumbContext";
@@ -69,12 +78,7 @@ export default function PaintingEditForm({
     }
   }
 
-  const editor = useEditor({
-    extensions: [StarterKit],
-    content: painting.description ?? "",
-    immediatelyRender: false,
-    onUpdate: ({ editor }) => setDescription(editor.getHTML()),
-  });
+
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -190,32 +194,10 @@ export default function PaintingEditForm({
             </div>
 
             <div className={formStyles.field}>
-              <div className={formStyles.editorWrapper}>
-                <div className={formStyles.toolbar}>
-                  <button
-                    type="button"
-                    onClick={() => editor?.chain().focus().toggleBold().run()}
-                    className={editor?.isActive("bold") ? formStyles.toolbarBtnActive : formStyles.toolbarBtn}
-                  >
-                    <b>B</b>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => editor?.chain().focus().toggleItalic().run()}
-                    className={editor?.isActive("italic") ? formStyles.toolbarBtnActive : formStyles.toolbarBtn}
-                  >
-                    <i>I</i>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => editor?.chain().focus().toggleBulletList().run()}
-                    className={editor?.isActive("bulletList") ? formStyles.toolbarBtnActive : formStyles.toolbarBtn}
-                  >
-                    ≡ Список
-                  </button>
-                </div>
-                <EditorContent editor={editor} className={formStyles.editorContent} />
-              </div>
+              <TipTapEditor
+                content={description}
+                onChange={(html) => setDescription(html)}
+              />
               <input type="hidden" name="description" value={description} />
             </div>
           </div>

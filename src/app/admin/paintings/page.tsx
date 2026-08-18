@@ -13,6 +13,7 @@ import {
 import DeletePaintingButton from "./_DeleteButton";
 import PaintingFilters from "./_PaintingFilters";
 import SortableHeader from "../_components/SortableHeader";
+import Pagination from "../_components/Pagination";
 import {
   movePaintingToPositionAction,
   swapPaintingOrderAction,
@@ -25,6 +26,7 @@ type SearchParams = Promise<{
   collectionId?: string;
   sortBy?: PaintingSortField;
   sortDir?: "asc" | "desc";
+  page?: string;
 }>;
 
 export default async function PaintingsPage({
@@ -48,7 +50,10 @@ export default async function PaintingsPage({
     orderByQuery = { sortOrder: validSortDir };
   }
 
-  const [paintings, authors, collections] = await Promise.all([
+  const page = Number(await searchParams.then(s => s.page)) || 1;
+  const pageSize = 20;
+
+  const [paintings, totalCount, authors, collections] = await Promise.all([
     db.painting.findMany({
       where: {
         ...(authorFilter ? { authorId: authorFilter } : {}),
@@ -56,6 +61,14 @@ export default async function PaintingsPage({
       },
       include: { author: true, collection: true },
       orderBy: orderByQuery,
+      take: pageSize,
+      skip: (page - 1) * pageSize,
+    }),
+    db.painting.count({
+      where: {
+        ...(authorFilter ? { authorId: authorFilter } : {}),
+        ...(collectionFilter ? { collectionId: collectionFilter } : {}),
+      },
     }),
     db.author.findMany({
       orderBy: { order: "asc" },
@@ -116,6 +129,7 @@ export default async function PaintingsPage({
                       <img
                         src={getOptimizedImageUrl(p.coverUrl, { preset: "thumb" })}
                         alt={p.title}
+                        loading="lazy"
                         className={tableStyles.thumbnail}
                       />
                     ) : (
@@ -233,6 +247,8 @@ export default async function PaintingsPage({
             )}
           </tbody>
         </table>
+
+        <Pagination totalItems={totalCount} pageSize={pageSize} />
       </div>
     </div>
   );

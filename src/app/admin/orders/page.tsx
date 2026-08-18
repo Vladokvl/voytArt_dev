@@ -5,12 +5,14 @@ import OrderStatusSelect from "./_OrderStatusSelect";
 import DeleteOrderButton from "./_DeleteButton";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import SortableHeader from "../_components/SortableHeader";
+import Pagination from "../_components/Pagination";
 
 type OrderSortField = "createdAt" | "customerName" | "deliveryCity" | "total" | "status";
 
 type SearchParams = Promise<{
   sortBy?: OrderSortField;
   sortDir?: "asc" | "desc";
+  page?: string;
 }>;
 
 export default async function OrdersPage({
@@ -18,7 +20,7 @@ export default async function OrdersPage({
 }: {
   searchParams: SearchParams;
 }) {
-  const { sortBy = "createdAt", sortDir = "desc" } = await searchParams;
+  const { sortBy = "createdAt", sortDir = "desc", page: pageParam } = await searchParams;
   const validSortDir: "asc" | "desc" = sortDir === "asc" ? "asc" : "desc";
 
   let orderByQuery: Prisma.OrderOrderByWithRelationInput = { createdAt: validSortDir };
@@ -34,16 +36,24 @@ export default async function OrdersPage({
     orderByQuery = { createdAt: validSortDir };
   }
 
-  const orders = await db.order.findMany({
-    include: {
-      items: {
-        include: {
-          product: { select: { coverUrl: true } },
+  const page = Number(pageParam) || 1;
+  const pageSize = 20;
+
+  const [orders, totalCount] = await Promise.all([
+    db.order.findMany({
+      include: {
+        items: {
+          include: {
+            product: { select: { coverUrl: true } },
+          },
         },
       },
-    },
-    orderBy: orderByQuery,
-  });
+      orderBy: orderByQuery,
+      take: pageSize,
+      skip: (page - 1) * pageSize,
+    }),
+    db.order.count(),
+  ]);
 
   return (
     <div>
@@ -155,6 +165,8 @@ export default async function OrdersPage({
             )}
           </tbody>
         </table>
+
+        <Pagination totalItems={totalCount} pageSize={pageSize} />
       </div>
     </div>
   );

@@ -5,12 +5,14 @@ import { Plus, Edit2, Calendar } from "lucide-react";
 import DeletePostButton from "./_DeleteButton";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import SortableHeader from "../_components/SortableHeader";
+import Pagination from "../_components/Pagination";
 
 type PostSortField = "title" | "date" | "createdAt";
 
 type SearchParams = Promise<{
   sortBy?: PostSortField;
   sortDir?: "asc" | "desc";
+  page?: string;
 }>;
 
 export default async function PostsPage({
@@ -18,7 +20,7 @@ export default async function PostsPage({
 }: {
   searchParams: SearchParams;
 }) {
-  const { sortBy = "createdAt", sortDir = "desc" } = await searchParams;
+  const { sortBy = "createdAt", sortDir = "desc", page: pageParam } = await searchParams;
   const validSortDir: "asc" | "desc" = sortDir === "asc" ? "asc" : "desc";
 
   let orderByQuery: Prisma.GalleryPostOrderByWithRelationInput = { createdAt: validSortDir };
@@ -30,9 +32,17 @@ export default async function PostsPage({
     orderByQuery = { createdAt: validSortDir };
   }
 
-  const posts = await db.galleryPost.findMany({
-    orderBy: orderByQuery,
-  });
+  const page = Number(pageParam) || 1;
+  const pageSize = 20;
+
+  const [posts, totalCount] = await Promise.all([
+    db.galleryPost.findMany({
+      orderBy: orderByQuery,
+      take: pageSize,
+      skip: (page - 1) * pageSize,
+    }),
+    db.galleryPost.count(),
+  ]);
 
   return (
     <div>
@@ -71,7 +81,7 @@ export default async function PostsPage({
                   <td className={styles.tdThumb}>
                     {p.coverUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={getOptimizedImageUrl(p.coverUrl, { preset: "thumb" })} alt={p.title} className={styles.thumbnail} />
+                      <img src={getOptimizedImageUrl(p.coverUrl, { preset: "thumb" })} alt={p.title} loading="lazy" className={styles.thumbnail} />
                     ) : (
                       <div
                         className={styles.thumbnail}
@@ -109,6 +119,8 @@ export default async function PostsPage({
             )}
           </tbody>
         </table>
+
+        <Pagination totalItems={totalCount} pageSize={pageSize} />
       </div>
     </div>
   );

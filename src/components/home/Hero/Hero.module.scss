@@ -17,6 +17,7 @@
   position: sticky;
   top: 0;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   background: #111; // запобігає білому флешу коли відео ще не відрендерилось
 }
@@ -232,16 +233,33 @@
 
 // ── Прогрес-бар — у межах fixedHud (батько вже fixed) ────────────────────
 .progressTrack {
+  position: relative;
   width: 100%;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.2);
+  height: 2.5px;
+  background: rgba(0, 0, 0, 0.7); // Чорний базовий трек
+  overflow: hidden;
+}
+
+.bufferBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  background: rgba(255, 255, 255, 0.38); // Сірий індикатор завантаженого контенту
+  transition: width 0.2s ease-out;
+  pointer-events: none;
 }
 
 .progressBar {
+  position: absolute;
+  top: 0;
+  left: 0;
   height: 100%;
   width: 0%;
-  background: var(--color-accent);
+  background: var(--color-accent); // Жовтий маркер поточної позиції
   transition: width 0.05s linear;
+  box-shadow: 0 0 6px rgba(215, 255, 1, 0.4);
 }
 
 // ── Підказка "scroll" — у межах fixedHud (позиціонується flexbox'ом) ──────

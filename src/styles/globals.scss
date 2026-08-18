@@ -9,6 +9,17 @@
   padding: 0;
 }
 
+:root {
+  --vh: 1vh;
+  --app-height: 100vh;
+}
+
+@supports (height: 100dvh) {
+  :root {
+    --app-height: 100dvh;
+  }
+}
+
 html,
 body {
   min-height: 100%;

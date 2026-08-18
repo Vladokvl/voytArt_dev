@@ -5,12 +5,14 @@ import { Plus, Edit2 } from "lucide-react";
 import DeleteCollectionButton from "./_DeleteButton";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import SortableHeader from "../_components/SortableHeader";
+import Pagination from "../_components/Pagination";
 
 type CollectionSortField = "title" | "author" | "paintingsCount" | "createdAt";
 
 type SearchParams = Promise<{
   sortBy?: CollectionSortField;
   sortDir?: "asc" | "desc";
+  page?: string;
 }>;
 
 export default async function CollectionsPage({
@@ -18,7 +20,7 @@ export default async function CollectionsPage({
 }: {
   searchParams: SearchParams;
 }) {
-  const { sortBy = "createdAt", sortDir = "desc" } = await searchParams;
+  const { sortBy = "createdAt", sortDir = "desc", page: pageParam } = await searchParams;
   const validSortDir: "asc" | "desc" = sortDir === "asc" ? "asc" : "desc";
 
   let orderByQuery: Prisma.CollectionOrderByWithRelationInput = { createdAt: validSortDir };
@@ -32,13 +34,21 @@ export default async function CollectionsPage({
     orderByQuery = { createdAt: validSortDir };
   }
 
-  const collections = await db.collection.findMany({
-    include: {
-      author: true,
-      _count: { select: { paintings: true } },
-    },
-    orderBy: orderByQuery,
-  });
+  const page = Number(pageParam) || 1;
+  const pageSize = 20;
+
+  const [collections, totalCount] = await Promise.all([
+    db.collection.findMany({
+      include: {
+        author: true,
+        _count: { select: { paintings: true } },
+      },
+      orderBy: orderByQuery,
+      take: pageSize,
+      skip: (page - 1) * pageSize,
+    }),
+    db.collection.count(),
+  ]);
 
   return (
     <div>
@@ -81,6 +91,7 @@ export default async function CollectionsPage({
                       <img
                         src={getOptimizedImageUrl(col.coverPhotoUrl, { preset: "thumb" })}
                         alt={col.title}
+                        loading="lazy"
                         className={styles.thumbnail}
                       />
                     ) : (
@@ -118,6 +129,8 @@ export default async function CollectionsPage({
             )}
           </tbody>
         </table>
+
+        <Pagination totalItems={totalCount} pageSize={pageSize} />
       </div>
     </div>
   );

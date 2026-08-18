@@ -5,8 +5,17 @@ import Link from "next/link";
 import { createProductAction } from "../_actions";
 import styles from "../../_formStyles.module.scss";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
+import dynamic from "next/dynamic";
+
+const TipTapEditor = dynamic(() => import("~/components/admin/TipTapEditor"), {
+  ssr: false,
+  loading: () => (
+    <div
+      className="skeleton-editor"
+      style={{ minHeight: "200px", background: "#f1f5f9", borderRadius: "8px" }}
+    />
+  ),
+});
 import { useImageCrop } from "~/hooks/use-image-crop";
 import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
 import VariantEditor from "../_VariantEditor";
@@ -31,12 +40,7 @@ export default function ProductForm({
   const [price, setPrice] = useState<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const editor = useEditor({
-    extensions: [StarterKit],
-    content: "",
-    immediatelyRender: false,
-    onUpdate: ({ editor }) => setDescription(editor.getHTML()),
-  });
+
 
   const {
     cropFile,
@@ -192,32 +196,10 @@ export default function ProductForm({
               <span className={styles.cardDesc}>Матеріали, догляд та опис</span>
             </div>
             <div className={styles.field}>
-              <div className={styles.editorWrapper}>
-                <div className={styles.toolbar}>
-                  <button
-                    type="button"
-                    onClick={() => editor?.chain().focus().toggleBold().run()}
-                    className={editor?.isActive("bold") ? styles.toolbarBtnActive : styles.toolbarBtn}
-                  >
-                    <b>B</b>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => editor?.chain().focus().toggleItalic().run()}
-                    className={editor?.isActive("italic") ? styles.toolbarBtnActive : styles.toolbarBtn}
-                  >
-                    <i>I</i>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => editor?.chain().focus().toggleBulletList().run()}
-                    className={editor?.isActive("bulletList") ? styles.toolbarBtnActive : styles.toolbarBtn}
-                  >
-                    ≡ Список
-                  </button>
-                </div>
-                <EditorContent editor={editor} className={styles.editorContent} />
-              </div>
+              <TipTapEditor
+                content={description}
+                onChange={(html) => setDescription(html)}
+              />
               <input type="hidden" name="description" value={description} />
             </div>
           </div>

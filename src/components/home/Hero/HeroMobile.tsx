@@ -8,6 +8,7 @@ import AboutGallerySection from "../Sections/AboutGallerySection";
 import ArtSection from "../Sections/ArtSection";
 import ArtShopSection from "../Sections/ArtShopSection";
 import NeonSection from "../Sections/NeonSection";
+import { getMobileFrameUrl, MOBILE_NEON_VIDEO_URL } from "~/data/framesManifest";
 import styles from "./Hero.module.scss";
 
 gsap.registerPlugin(ScrollTrigger, Observer);
@@ -16,8 +17,6 @@ gsap.registerPlugin(ScrollTrigger, Observer);
 const MOBILE_TOTAL_FRAMES = 466;
 const MOBILE_PRELOAD_CRITICAL_FRAMES = 14;
 const MOBILE_PRELOAD_READY_THRESHOLD = 8;
-const MOBILE_BUFFER_FORWARD = 70;
-const MOBILE_BUFFER_BACKWARD = 15;
 const HERO_READY_EVENT = "voyt:hero-ready";
 
 // ╔══════════════════════════════════════════════════════════════════════╗
@@ -44,9 +43,6 @@ const MOBILE_NEON_SNAP = 0.9;
 // (Змінюй тут: 0.8 = швидше, 1.2 = плавно за замовчуванням, 1.6 = довше/кінематографічніше)
 const MOBILE_SNAP_DURATION = 2;
 
-const getMobileFrameSrc = (index: number) =>
-  `/mainPageVideos/originals/mobile_frames/frame_${String(index).padStart(4, "0")}.webp`;
-
 export default function HeroMobile() {
   const [isMainReady, setIsMainReady] = useState(false);
   const [loaderProgress, setLoaderProgress] = useState(0);
@@ -55,7 +51,7 @@ export default function HeroMobile() {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imageCacheRef = useRef<Map<number, HTMLImageElement>>(new Map());
+  const imageCacheRef = useRef<Map<number, ImageBitmap | HTMLImageElement>>(new Map());
   const pendingLoadsRef = useRef<Set<number>>(new Set());
   const currentFrameRef = useRef(1);
   const frameTweenRef = useRef<gsap.core.Tween | null>(null);
@@ -70,6 +66,7 @@ export default function HeroMobile() {
   const panel1OverlayRef = useRef<HTMLDivElement>(null);
   const panel2OverlayRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
+  const bufferBarRef = useRef<HTMLDivElement>(null);
   const curtainRef = useRef<HTMLDivElement>(null);
   const neonContainerRef = useRef<HTMLDivElement>(null);
   const neonVideoRef = useRef<HTMLVideoElement>(null);
@@ -130,28 +127,97 @@ export default function HeroMobile() {
     const imageCache = imageCacheRef.current;
     const pendingLoads = pendingLoadsRef.current;
     const prefetchedFrames = prefetchedFramesRef.current;
+    const bufferBar = bufferBarRef.current;
+    const neonVideo = neonVideoRef.current;
+
+    // Прогрес-бар охоплює основний (800vh) + neon (400vh) = 1200vh разом
+    const MAIN_PROGRESS_FRAC = 800 / 1200;
+    const NEON_PROGRESS_FRAC = 400 / 1200;
+    let neonBufferedFraction = 0;
+
+    const updateBufferProgress = () => {
+      if (bufferBar) {
+        const framesFrac =
+          (Math.min(MOBILE_TOTAL_FRAMES, prefetchedFrames.size) / MOBILE_TOTAL_FRAMES) *
+          MAIN_PROGRESS_FRAC;
+        const neonFrac = neonBufferedFraction * NEON_PROGRESS_FRAC;
+        const total = Math.min(1, framesFrac + neonFrac);
+        bufferBar.style.width = `${total * 100}%`;
+      }
+    };
+
+    // Відстежуємо буферизацію neon-відео для 100% заповнення сірого бару
+    const checkNeonBuffer = () => {
+      if (!neonVideo) return;
+      if (neonVideo.readyState >= 3) {
+        neonBufferedFraction = 1;
+        updateBufferProgress();
+      } else if (neonVideo.buffered && neonVideo.buffered.length > 0 && neonVideo.duration > 0) {
+        const end = neonVideo.buffered.end(neonVideo.buffered.length - 1);
+        neonBufferedFraction = Math.min(1, end / neonVideo.duration);
+        updateBufferProgress();
+      }
+    };
+
+    neonVideo?.addEventListener("progress", checkNeonBuffer);
+    neonVideo?.addEventListener("canplaythrough", () => {
+      neonBufferedFraction = 1;
+      updateBufferProgress();
+    });
+    neonVideo?.addEventListener("loadeddata", checkNeonBuffer);
+    checkNeonBuffer();
 
     const drawFrame = (frame: number) => {
-      const img = imageCache.get(frame);
-      if (!img || !img.complete || img.naturalWidth === 0 || img.naturalHeight === 0)
-        return;
+      const item = imageCache.get(frame);
+      if (!item) return;
 
       const canvasW = canvas.width;
       const canvasH = canvas.height;
-      const scale = Math.max(canvasW / img.naturalWidth, canvasH / img.naturalHeight);
-      const drawW = img.naturalWidth * scale;
-      const drawH = img.naturalHeight * scale;
+      const imgW = "naturalWidth" in item ? item.naturalWidth : (item as ImageBitmap).width;
+      const imgH = "naturalHeight" in item ? item.naturalHeight : (item as ImageBitmap).height;
+      if (!imgW || !imgH) return;
+
+      const scale = Math.max(canvasW / imgW, canvasH / imgH);
+      const drawW = imgW * scale;
+      const drawH = imgH * scale;
       const offsetX = (canvasW - drawW) / 2;
       const offsetY = (canvasH - drawH) / 2;
 
       ctx2d.clearRect(0, 0, canvasW, canvasH);
-      ctx2d.drawImage(img, offsetX, offsetY, drawW, drawH);
+      ctx2d.drawImage(item, offsetX, offsetY, drawW, drawH);
     };
 
+    // ── RAF-gated рендеринг для мобільних екранів ──
+    let rafPending = false;
+    let targetFrameToDraw = 1;
+
+    const scheduleDraw = (frame: number) => {
+      targetFrameToDraw = frame;
+      if (!rafPending) {
+        rafPending = true;
+        requestAnimationFrame(() => {
+          rafPending = false;
+          drawFrame(targetFrameToDraw);
+        });
+      }
+    };
+
+    let lastWidth = 0;
+    let lastHeight = 0;
+
     const resizeCanvas = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const rawDpr = window.devicePixelRatio || 1;
+      const dpr = Math.min(rawDpr, 1.25);
       const width = Math.max(1, Math.floor(window.innerWidth));
-      const height = Math.max(1, Math.floor(window.innerHeight));
+      const height = Math.max(1, Math.floor(window.visualViewport?.height ?? window.innerHeight));
+
+      // На iOS Safari уникаємо очищення канвасу при згортанні/розгортанні адресного рядка (зміна висоти < 90px)
+      if (Math.abs(width - lastWidth) < 2 && Math.abs(height - lastHeight) < 90 && lastWidth > 0) {
+        return;
+      }
+
+      lastWidth = width;
+      lastHeight = height;
 
       canvas.width = Math.floor(width * dpr);
       canvas.height = Math.floor(height * dpr);
@@ -175,21 +241,39 @@ export default function HeroMobile() {
 
       const img = new Image();
       img.decoding = "async";
+      img.src = getMobileFrameUrl(frame);
+
+      if (img.complete && img.naturalWidth > 0) {
+        pendingLoads.delete(frame);
+        imageCache.set(frame, img);
+        prefetchedFrames.add(frame);
+        updateBufferProgress();
+        onSettled?.(true);
+        if (frame === currentFrameRef.current) {
+          scheduleDraw(frame);
+        }
+        return;
+      }
+
       img.onload = () => {
         pendingLoads.delete(frame);
         imageCache.set(frame, img);
+        prefetchedFrames.add(frame);
+        updateBufferProgress();
         onSettled?.(true);
-
         if (frame === currentFrameRef.current) {
-          drawFrame(frame);
+          scheduleDraw(frame);
         }
       };
+
       img.onerror = () => {
         pendingLoads.delete(frame);
         onSettled?.(false);
       };
-      img.src = getMobileFrameSrc(frame);
     };
+
+    const MOBILE_BUFFER_FORWARD = 50;
+    const MOBILE_BUFFER_BACKWARD = 20;
 
     const manageCache = (currentFrame: number) => {
       const startWindow = Math.max(1, currentFrame - MOBILE_BUFFER_BACKWARD);
@@ -199,16 +283,25 @@ export default function HeroMobile() {
         loadFrame(frame);
       }
 
-      for (const frame of imageCache.keys()) {
-        if (frame < startWindow || frame > endWindow) {
-          const img = imageCache.get(frame);
-          if (img) img.src = "";
-          imageCache.delete(frame);
+      if (imageCache.size > 120) {
+        for (const frame of imageCache.keys()) {
+          if (frame < startWindow - 20 || frame > endWindow + 20) {
+            imageCache.delete(frame);
+          }
         }
       }
     };
 
-    const prefetchFramesInBackground = async (startFromFrame: number) => {
+    let lastCacheTriggerFrame = 1;
+    const triggerCacheIfNeeded = (frame: number) => {
+      if (Math.abs(frame - lastCacheTriggerFrame) >= 2) {
+        lastCacheTriggerFrame = frame;
+        manageCache(frame);
+      }
+    };
+
+    // ── Плавний фоновий префетч для мобайлу ─
+    const prefetchFramesInBackground = async () => {
       if (prefetchStartedRef.current) return;
 
       const connection = (navigator as Navigator & {
@@ -220,23 +313,59 @@ export default function HeroMobile() {
       const controller = new AbortController();
       prefetchAbortRef.current = controller;
 
-      for (let frame = startFromFrame; frame <= MOBILE_TOTAL_FRAMES; frame += 1) {
-        if (controller.signal.aborted) break;
-        if (prefetchedFrames.has(frame)) continue;
+      const priorityClusters = [
+        { center: 1, radius: 25 },
+        { center: Math.round(MOBILE_TOTAL_FRAMES * 0.25), radius: 20 },
+        { center: Math.round(MOBILE_TOTAL_FRAMES * 0.72), radius: 20 },
+        { center: Math.round(MOBILE_TOTAL_FRAMES * 0.98), radius: 20 },
+        { center: MOBILE_TOTAL_FRAMES, radius: 15 },
+      ];
 
-        try {
-          const response = await fetch(getMobileFrameSrc(frame), {
-            cache: "force-cache",
-            signal: controller.signal,
-          });
-          if (response.ok) {
-            await response.blob();
-            prefetchedFrames.add(frame);
+      const queuedFrames: number[] = [];
+      const added = new Set<number>();
+
+      for (const cluster of priorityClusters) {
+        const minF = Math.max(1, cluster.center - cluster.radius);
+        const maxF = Math.min(MOBILE_TOTAL_FRAMES, cluster.center + cluster.radius);
+        for (let f = minF; f <= maxF; f++) {
+          if (!added.has(f)) {
+            added.add(f);
+            queuedFrames.push(f);
           }
-        } catch {
-          break;
         }
       }
+
+      for (let f = 1; f <= MOBILE_TOTAL_FRAMES; f++) {
+        if (!added.has(f)) {
+          added.add(f);
+          queuedFrames.push(f);
+        }
+      }
+
+      const CONCURRENCY = 4;
+      let queueIndex = 0;
+
+      const worker = async () => {
+        while (queueIndex < queuedFrames.length) {
+          if (controller.signal.aborted) break;
+          const frame = queuedFrames[queueIndex++];
+          if (!frame || prefetchedFrames.has(frame)) continue;
+
+          await new Promise<void>((resolve) => {
+            const img = new Image();
+            img.decoding = "async";
+            img.onload = img.onerror = () => {
+              prefetchedFrames.add(frame);
+              updateBufferProgress();
+              resolve();
+            };
+            img.src = getMobileFrameUrl(frame);
+          });
+        }
+      };
+
+      const workers = Array.from({ length: CONCURRENCY }, () => worker());
+      await Promise.allSettled(workers);
     };
 
     resizeCanvas();
@@ -244,15 +373,9 @@ export default function HeroMobile() {
 
     // Neon refs (перевіряються окремо всередині контексту — основні анімації працюють навіть без них)
     const neonContainer = neonContainerRef.current;
-    const neonVideo = neonVideoRef.current;
     const neonPanel = neonPanelRef.current;
     const neonOverlay = neonOverlayRef.current;
     const curtain = curtainRef.current;
-
-    // Прогрес-бар охоплює основний (800vh) + neon (400vh) = 1200vh разом
-    // ↓↓ Онови якщо змінюєш висоту .container або .neonContainer в CSS
-    const MAIN_PROGRESS_FRAC = 800 / 1200;
-    const NEON_PROGRESS_FRAC = 400 / 1200;
 
     const initMobileFrameScroll = () => {
       frameTweenRef.current?.kill();
@@ -265,8 +388,8 @@ export default function HeroMobile() {
         if (boundedFrame === lastRenderedFrame) return;
 
         currentFrameRef.current = boundedFrame;
-        manageCache(boundedFrame);
-        drawFrame(boundedFrame);
+        triggerCacheIfNeeded(boundedFrame);
+        scheduleDraw(boundedFrame);
         lastRenderedFrame = boundedFrame;
       };
 
@@ -335,8 +458,8 @@ export default function HeroMobile() {
         setIsMainReady(true);
         initMobileFrameScroll();
         window.setTimeout(() => {
-          void prefetchFramesInBackground(MOBILE_PRELOAD_CRITICAL_FRAMES + 1);
-        }, 1000);
+          void prefetchFramesInBackground();
+        }, 800);
       }
     };
 
@@ -719,8 +842,12 @@ export default function HeroMobile() {
       window.removeEventListener("touchstart", handleHeroTouchStart);
       window.removeEventListener("touchmove", handleHeroTouchMove);
 
-      for (const img of imageCache.values()) {
-        img.src = "";
+      for (const item of imageCache.values()) {
+        if ("close" in item && typeof item.close === "function") {
+          item.close();
+        } else if ("src" in item) {
+          (item as HTMLImageElement).src = "";
+        }
       }
       imageCache.clear();
       pendingLoads.clear();
@@ -745,8 +872,9 @@ export default function HeroMobile() {
         <span>scroll</span>
         <div className={styles.scrollLine} />
       </div>
-      {/* Прогрес-бар */}
+      {/* Прогрес-бар: чорний трек + сірий буфер завантаження + жовтий маркер */}
       <div className={styles.progressTrack}>
+        <div ref={bufferBarRef} className={styles.bufferBar} />
         <div ref={progressBarRef} className={styles.progressBar} />
       </div>
     </div>
@@ -811,7 +939,7 @@ export default function HeroMobile() {
         <video
           ref={neonVideoRef}
           className={styles.video}
-          src="/mainPageVideos/final_neon_mobile.mp4"
+          src={MOBILE_NEON_VIDEO_URL}
           muted
           loop
           autoPlay
