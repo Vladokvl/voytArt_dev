@@ -273,7 +273,8 @@
   font-size: 0.65rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  animation: fadeInUp 1s ease 1.5s both;
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
 .scrollLine {

@@ -74,12 +74,18 @@ export default function HeroMobile() {
   const neonOverlayRef = useRef<HTMLDivElement>(null);
   const targetIndexRef = useRef(0);
   const isGlidingRef = useRef(false);
+  const scrollHintRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isMainReady) return;
 
     const heroWindow = window as Window & { __voytHeroReady?: boolean };
     heroWindow.__voytHeroReady = true;
+    try {
+      sessionStorage.setItem("voyt_hero_cached", "true");
+    } catch {
+      // ignore
+    }
     window.dispatchEvent(
       new CustomEvent(HERO_READY_EVENT, {
         detail: { source: "mobile-frames" },
@@ -486,6 +492,27 @@ export default function HeroMobile() {
         },
       });
 
+      // ── Scroll Hint: зникає як тільки починаємо скрол, з'являється у верхній точці ──
+      if (scrollHintRef.current) {
+        const hintEl = scrollHintRef.current;
+        gsap.set(hintEl, { opacity: 1, y: 0 });
+        ScrollTrigger.create({
+          trigger: container,
+          start: "top top",
+          end: "bottom bottom",
+          onUpdate: (self) => {
+            const atTop = self.scroll() < 30;
+            gsap.to(hintEl, {
+              opacity: atTop ? 1 : 0,
+              y: atTop ? 0 : 15,
+              duration: 0.3,
+              ease: "power2.out",
+              overwrite: "auto",
+            });
+          },
+        });
+      }
+
       // ── 2. Panel 0: "About our Gallery" ─────────────────────────────
       // ╔══════════════════════════════════════════════════════════════════╗
       // ║  MOBILE PANEL 0 TIMINGS                                         ║
@@ -525,7 +552,7 @@ export default function HeroMobile() {
       const tl1 = gsap.timeline({
         scrollTrigger: {
           trigger: container,
-          start: "50% top", // ← коли з'являється
+          start: "60% top", // ← коли з'являється
           end: "70% top",   // ← коли зникає
           scrub: 1.0,
           onEnter: () => { panel1.style.pointerEvents = "auto"; },
@@ -868,7 +895,7 @@ export default function HeroMobile() {
     {/* ══ Fixed HUD — поза всіма scroll-контейнерами, жодна GSAP-анімація не зачіпає ══ */}
     <div className={styles.fixedHud}>
       {/* Scroll-підказка */}
-      <div className={styles.scrollHint}>
+      <div ref={scrollHintRef} className={styles.scrollHint}>
         <span>scroll</span>
         <div className={styles.scrollLine} />
       </div>

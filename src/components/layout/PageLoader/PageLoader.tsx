@@ -1,17 +1,14 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import gsap from "gsap";
 import styles from "./PageLoader.module.scss";
 
 // ══════════════════════════════════════════════════════════════════════════════
 // PageLoader — екран завантаження сторінки
-// • Чорний fullscreen оверлей з круглим відео по центру
-// • Коло обтинає кути відео (border-radius: 50% + overflow: hidden)
-// • Після закінчення відео → reveal анімація (коло розширюється → оверлей зникає)
-//
-// ★ LOADER_PAGES — список сторінок де лоадер показується.
-//   Щоб додати сторінку — просто додай рядок до масиву, наприклад "/gallery"
+// • Якщо кадри ще вантажаться: показує кругле відео-лого та чекає hero-ready
+// • Якщо кадри вже в кеші: показує статичне лого і миттєво плавно розчиняється
 // ══════════════════════════════════════════════════════════════════════════════
 const LOADER_PAGES = ["/"];
 const HERO_READY_EVENT = "voyt:hero-ready";
@@ -25,23 +22,33 @@ export default function PageLoader() {
   const circleWrapperRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [hidden, setHidden] = useState(false);
+  const [isCached, setIsCached] = useState(false);
+
+  // Перевірка стану кешу при першому клієнтському маунті
+  useEffect(() => {
+    try {
+      if (
+        sessionStorage.getItem("voyt_hero_cached") === "true" ||
+        (window as Window & { __voytHeroReady?: boolean }).__voytHeroReady
+      ) {
+        setIsCached(true);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   // ── Синхронізація позиції circleWrapper з heroContent ──────────────────────
-  // Hero компонент — lazy import, може з'явитися пізніше ніж PageLoader.
-  // MutationObserver — чекає появи #hero-content в DOM.
-  // ResizeObserver — оновлює позицію при resize вікна.
   useEffect(() => {
     if (!isLoaderPage) return;
 
     const wrapper = circleWrapperRef.current;
+    const overlay = overlayRef.current;
     if (!wrapper) return;
 
     let ro: ResizeObserver | null = null;
     let mo: MutationObserver | null = null;
 
-    // getBoundingClientRect повертає позицію відносно візуального viewport.
-    // position:fixed теж прив'язаний до візуального viewport.
-    // Тому цей підхід точний навіть коли адресний рядок мобільного браузера видимий.
     const syncPosition = (el: Element) => {
       const rect = el.getBoundingClientRect();
       wrapper.style.top = `${rect.top}px`;
@@ -54,16 +61,32 @@ export default function PageLoader() {
       const heroContent = document.getElementById("hero-content");
       if (!heroContent) return false;
       syncPosition(heroContent);
-      // Показуємо коло тільки після того як позиція встановлена — без флешу
+
       const circle = circleRef.current;
       if (circle) gsap.to(circle, { opacity: 1, duration: 0.2, ease: "none" });
+
       ro = new ResizeObserver(() => syncPosition(heroContent));
       ro.observe(heroContent);
+
+      // Якщо вже закешовано — робимо швидкий і плавний fade-out оверлею
+      const isAlreadyReady =
+        (window as Window & { __voytHeroReady?: boolean }).__voytHeroReady ||
+        sessionStorage.getItem("voyt_hero_cached") === "true";
+
+      if (isAlreadyReady && overlay) {
+        gsap.to(overlay, {
+          opacity: 0,
+          duration: 0.4,
+          delay: 0.1,
+          ease: "power2.inOut",
+          onComplete: () => setHidden(true),
+        });
+      }
+
       return true;
     };
 
     if (!tryConnect()) {
-      // Hero ще не змонтовано — чекаємо появи #hero-content
       mo = new MutationObserver(() => {
         if (tryConnect()) mo?.disconnect();
       });
@@ -76,8 +99,9 @@ export default function PageLoader() {
     };
   }, [isLoaderPage]);
 
+  // Відео лоадер (тільки для першого / незакешованого візиту)
   useEffect(() => {
-    if (!isLoaderPage) return;
+    if (!isLoaderPage || isCached) return;
 
     const video = videoRef.current;
     const overlay = overlayRef.current;
@@ -87,7 +111,6 @@ export default function PageLoader() {
     let heroReady = false;
     let isWaitingAtHalf = false;
 
-    // ── 1. Fade-out — викликається ТІЛЬКИ через подію "ended" ─────────────────
     const doFadeOut = () => {
       window.removeEventListener(HERO_READY_EVENT, onHeroReady);
       gsap.to(overlay, {
@@ -115,7 +138,6 @@ export default function PageLoader() {
     const heroWindow = window as Window & { __voytHeroReady?: boolean };
     if (heroWindow.__voytHeroReady) markHeroReady();
 
-    // Ставимо loader-ролик на паузу на 50%, поки hero не стане ready.
     const checkPauseAtHalf = () => {
       if (!video.duration || isNaN(video.duration)) return;
       const targetTime = video.duration * 0.5;
@@ -129,14 +151,11 @@ export default function PageLoader() {
     video.addEventListener("durationchange", checkPauseAtHalf);
     video.addEventListener("ended", doFadeOut, { once: true });
 
-    // Fallback: через 15с примусово знімаємо паузу і відпускаємо на сайт.
-    // Якщо подія hero-ready не прийшла (помилка кадрів/скрипта), не тримаємо користувача.
     const fallbackTimer = setTimeout(markHeroReady, 15000);
 
     const playPromise = video.play();
     if (playPromise !== undefined) {
       playPromise.catch(() => {
-        // Автовідтворення заблоковано (напр. iOS Low Power Mode) → ревіл одразу
         heroReady = true;
         doFadeOut();
       });
@@ -149,7 +168,7 @@ export default function PageLoader() {
       clearTimeout(fallbackTimer);
       window.removeEventListener(HERO_READY_EVENT, onHeroReady);
     };
-  }, [isLoaderPage]);
+  }, [isLoaderPage, isCached]);
 
   if (!isLoaderPage || hidden) return null;
 
@@ -157,17 +176,25 @@ export default function PageLoader() {
     <div ref={overlayRef} className={styles.overlay}>
       <div className={styles.circleWrapper} ref={circleWrapperRef}>
         <div ref={circleRef} className={styles.circle}>
-          <video
-            ref={videoRef}
-            className={styles.video}
-            src="/siteLoader.mp4"
-            muted
-            playsInline
-            // autoPlay НЕ використовуємо — запускаємо через .play() в useEffect
-            // для кращої сумісності з мобільними браузерами
-          />
+          {isCached ? (
+            <Image
+              src="/voytCirclelogo.svg"
+              alt="Voyt"
+              fill
+              className={styles.staticLogo}
+              priority
+            />
+          ) : (
+            <video
+              ref={videoRef}
+              className={styles.video}
+              src="/siteLoader.mp4"
+              muted
+              playsInline
+            />
+          )}
         </div>
-        <p className={styles.loadingLabel}>Loading asets</p>
+        {!isCached && <p className={styles.loadingLabel}>Loading assets</p>}
       </div>
     </div>
   );

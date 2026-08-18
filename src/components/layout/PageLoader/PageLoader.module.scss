@@ -73,6 +73,14 @@
   object-fit: cover; // ← заповнює коло не деформуючи пропорції
 }
 
+.staticLogo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 @keyframes loaderPulse {
   0%,
   100% {

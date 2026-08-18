@@ -74,12 +74,18 @@ export default function HeroDesktop() {
   const neonOverlayRef = useRef<HTMLDivElement>(null);
   const targetIndexRef = useRef(0);
   const isGlidingRef = useRef(false);
+  const scrollHintRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isMainReady) return;
 
     const heroWindow = window as Window & { __voytHeroReady?: boolean };
     heroWindow.__voytHeroReady = true;
+    try {
+      sessionStorage.setItem("voyt_hero_cached", "true");
+    } catch {
+      // ignore
+    }
     window.dispatchEvent(
       new CustomEvent(HERO_READY_EVENT, {
         detail: { source: "desktop-frames" },
@@ -477,6 +483,27 @@ export default function HeroDesktop() {
           scrub: 0.6, // ← інерція: 0.1 = жорстко, 2 = дуже плавно
         },
       });
+
+      // ── Scroll Hint: зникає як тільки починаємо скрол, з'являється у верхній точці ──
+      if (scrollHintRef.current) {
+        const hintEl = scrollHintRef.current;
+        gsap.set(hintEl, { opacity: 1, y: 0 });
+        ScrollTrigger.create({
+          trigger: container,
+          start: "top top",
+          end: "bottom bottom",
+          onUpdate: (self) => {
+            const atTop = self.scroll() < 40;
+            gsap.to(hintEl, {
+              opacity: atTop ? 1 : 0,
+              y: atTop ? 0 : 15,
+              duration: 0.3,
+              ease: "power2.out",
+              overwrite: "auto",
+            });
+          },
+        });
+      }
 
       // ── 2. Panel 0: "About our Gallery" ─────────────────────────────
       // ╔══════════════════════════════════════════════════════════════════╗
@@ -900,7 +927,7 @@ export default function HeroDesktop() {
       {/* ══ Fixed HUD — поза всіма scroll-контейнерами, жодна GSAP-анімація не зачіпає ══ */}
       <div className={styles.fixedHud}>
         {/* Scroll-підказка */}
-        <div className={styles.scrollHint}>
+        <div ref={scrollHintRef} className={styles.scrollHint}>
           <span>scroll</span>
           <div className={styles.scrollLine} />
         </div>
