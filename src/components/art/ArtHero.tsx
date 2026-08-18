@@ -248,7 +248,7 @@ export default function ArtHero({
     if (delta > 0) {
       if (newIndex > 0) newIndex--;
     } else {
-      if (newIndex < displayAuthors.length - 1) newIndex++;
+      if (newIndex < authors.length - 1) newIndex++;
     }
 
     setActiveMobileIndex(newIndex);
@@ -267,6 +267,8 @@ export default function ArtHero({
       duration: 0.45,
       ease: "power2.inOut",
     });
+  };
+
   if (authors.length === 0) return null;
 
   return (
