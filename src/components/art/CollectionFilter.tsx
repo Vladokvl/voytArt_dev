@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import styles from "@/app/art/[[...artistId]]/art.module.scss";
 
 type Collection = {
@@ -52,7 +53,7 @@ export default function CollectionFilter({
           <span className={styles.chipIconWrap}>
             {col.coverPhotoUrl ? (
               <Image
-                src={col.coverPhotoUrl}
+                src={getOptimizedImageUrl(col.coverPhotoUrl, { preset: "thumb" })}
                 alt={col.title}
                 width={32}
                 height={32}
