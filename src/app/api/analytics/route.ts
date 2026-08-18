@@ -66,6 +66,71 @@ function categorizePage(path: string): string {
   return "OTHER";
 }
 
+function isPrivateIp(ip: string): boolean {
+  if (!ip || ip === "127.0.0.1" || ip === "::1" || ip === "localhost") return true;
+  if (ip.startsWith("10.") || ip.startsWith("192.168.")) return true;
+  if (/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(ip)) return true;
+  return false;
+}
+
+const geoCache = new Map<string, { country: string; city: string | null }>();
+
+async function resolveGeo(ip: string, req: NextRequest): Promise<{ country: string; city: string | null }> {
+  // 1. Check direct Cloudflare / Vercel / AWS / Nginx headers
+  const headerCountry =
+    req.headers.get("cf-ipcountry") ??
+    req.headers.get("x-vercel-ip-country") ??
+    req.headers.get("cloudfront-viewer-country") ??
+    req.headers.get("x-country-code") ??
+    req.headers.get("x-geo-country");
+
+  const headerCity =
+    req.headers.get("x-vercel-ip-city") ??
+    req.headers.get("cf-ipcity") ??
+    req.headers.get("cloudfront-viewer-city") ??
+    null;
+
+  if (headerCountry && headerCountry !== "XX" && headerCountry !== "T1" && headerCountry.length === 2) {
+    return { country: headerCountry.toUpperCase(), city: headerCity };
+  }
+
+  // 2. Private/Localhost IPs
+  if (isPrivateIp(ip)) {
+    return { country: "UA", city: "Localhost" };
+  }
+
+  // 3. In-memory cache
+  const cached = geoCache.get(ip);
+  if (cached) {
+    return cached;
+  }
+
+  // 4. Fast IP Lookup fallback (for VPS, Docker, custom domains)
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 1200);
+
+    const res = await fetch(`http://ip-api.com/json/${ip}?fields=status,countryCode,city`, {
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      const data = (await res.json()) as { status: string; countryCode?: string; city?: string };
+      if (data.status === "success" && data.countryCode) {
+        const result = { country: data.countryCode.toUpperCase(), city: data.city ?? null };
+        if (geoCache.size > 2000) geoCache.clear();
+        geoCache.set(ip, result);
+        return result;
+      }
+    }
+  } catch {
+    // Non-blocking fallback
+  }
+
+  return { country: "UNKNOWN", city: null };
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json().catch(() => ({}))) as {
@@ -89,13 +154,8 @@ export async function POST(req: NextRequest) {
     const rawReferrer = req.headers.get("referer") ?? "";
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? req.headers.get("x-real-ip") ?? "127.0.0.1";
 
-    // Country from Cloudflare / Vercel headers
-    let country = req.headers.get("cf-ipcountry") ?? req.headers.get("x-vercel-ip-country");
-    if (!country || country === "XX" || country === "T1") {
-      country = "UA"; // Default fallback for local testing
-    }
-
-    const city = req.headers.get("x-vercel-ip-city") ?? req.headers.get("cf-ipcity") ?? null;
+    // Accurate Multi-Tier Country & City resolution
+    const { country, city } = await resolveGeo(ip, req);
 
     const { device, os, browser } = parseDeviceAndBrowser(userAgent);
     const referer = parseReferrer(rawReferrer, userAgent);

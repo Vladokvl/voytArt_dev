@@ -32,6 +32,16 @@ function getCountryFlag(code: string | null): string {
   return String.fromCodePoint(...codePoints);
 }
 
+function getCountryName(code: string | null): string {
+  if (!code || code === "UNKNOWN") return "Не визначено";
+  try {
+    const dn = new Intl.DisplayNames(["uk"], { type: "region" });
+    return dn.of(code.toUpperCase()) ?? code;
+  } catch {
+    return code;
+  }
+}
+
 export default async function AnalyticsPage({
   searchParams,
 }: {
@@ -327,7 +337,7 @@ export default async function AnalyticsPage({
             </div>
           </div>
           <span className={styles.kpiValue}>
-            {sortedCountries[0] ? `${getCountryFlag(sortedCountries[0].code)} ${sortedCountries[0].code}` : "—"}
+            {sortedCountries[0] ? `${getCountryFlag(sortedCountries[0].code)} ${getCountryName(sortedCountries[0].code)}` : "—"}
           </span>
           <span className={styles.kpiSub}>
             {sortedCountries[0] ? `${sortedCountries[0].count} переходів (${sortedCountries[0].percent}%)` : "Немає даних"}
@@ -485,13 +495,7 @@ export default async function AnalyticsPage({
                   <div className={styles.itemLeft}>
                     <span className={styles.countryFlag}>{getCountryFlag(c.code)}</span>
                     <span className={styles.itemName}>
-                      {c.code === "UA" && "Україна"}
-                      {c.code === "PL" && "Польща"}
-                      {c.code === "US" && "США"}
-                      {c.code === "DE" && "Німеччина"}
-                      {c.code === "GB" && "Велика Британія"}
-                      {c.code === "UNKNOWN" && "Не визначено"}
-                      {c.code !== "UA" && c.code !== "PL" && c.code !== "US" && c.code !== "DE" && c.code !== "GB" && c.code !== "UNKNOWN" && c.code}
+                      {getCountryName(c.code)}
                     </span>
                   </div>
                   <div className={styles.itemRight}>
