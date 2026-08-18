@@ -189,23 +189,12 @@ export default function HeroMobile() {
       const offsetX = (canvasW - drawW) / 2;
       const offsetY = (canvasH - drawH) / 2;
 
-      ctx2d.clearRect(0, 0, canvasW, canvasH);
       ctx2d.drawImage(item, offsetX, offsetY, drawW, drawH);
     };
 
-    // ── RAF-gated рендеринг для мобільних екранів ──
-    let rafPending = false;
-    let targetFrameToDraw = 1;
-
+    // Рендеринг напряму у поточному тіку анімації (без зайвої затримки double-RAF)
     const scheduleDraw = (frame: number) => {
-      targetFrameToDraw = frame;
-      if (!rafPending) {
-        rafPending = true;
-        requestAnimationFrame(() => {
-          rafPending = false;
-          drawFrame(targetFrameToDraw);
-        });
-      }
+      drawFrame(frame);
     };
 
     let lastWidth = 0;
@@ -300,7 +289,7 @@ export default function HeroMobile() {
 
     let lastCacheTriggerFrame = 1;
     const triggerCacheIfNeeded = (frame: number) => {
-      if (Math.abs(frame - lastCacheTriggerFrame) >= 2) {
+      if (Math.abs(frame - lastCacheTriggerFrame) >= 5) {
         lastCacheTriggerFrame = frame;
         manageCache(frame);
       }
@@ -348,7 +337,7 @@ export default function HeroMobile() {
         }
       }
 
-      const CONCURRENCY = 4;
+      const CONCURRENCY = 2;
       let queueIndex = 0;
 
       const worker = async () => {
@@ -404,13 +393,12 @@ export default function HeroMobile() {
 
       frameTweenRef.current = gsap.to(frameState, {
         frame: MOBILE_TOTAL_FRAMES,
-        snap: "frame",
         ease: "none",
         scrollTrigger: {
           trigger: container,
           start: "top top",
           end: "bottom bottom",
-          scrub: 1.2,
+          scrub: 0.35,
           onUpdate: (self) => {
             if (bar) {
               bar.style.width = `${self.progress * MAIN_PROGRESS_FRAC * 100}%`;
@@ -525,7 +513,7 @@ export default function HeroMobile() {
           trigger: container,
           start: "15% top",  // ← коли з'являється
           end: "35% top",   // ← коли зникає
-          scrub: 1.0,
+          scrub: 0.4,
           onEnter: () => { panel0.style.pointerEvents = "auto"; },
           onLeave: () => { panel0.style.pointerEvents = "none"; },
           onEnterBack: () => { panel0.style.pointerEvents = "auto"; },
@@ -554,7 +542,7 @@ export default function HeroMobile() {
           trigger: container,
           start: "60% top", // ← коли з'являється
           end: "70% top",   // ← коли зникає
-          scrub: 1.0,
+          scrub: 0.4,
           onEnter: () => { panel1.style.pointerEvents = "auto"; },
           onLeave: () => { panel1.style.pointerEvents = "none"; },
           onEnterBack: () => { panel1.style.pointerEvents = "auto"; },
@@ -584,7 +572,7 @@ export default function HeroMobile() {
           trigger: container,
           start: "80% top", // ← коли з'являється
           end: "100% top",   // ← коли зникає
-          scrub: 1.0,
+          scrub: 0.4,
           onEnter: () => { panel2.style.pointerEvents = "auto"; },
           onLeave: () => { panel2.style.pointerEvents = "none"; },
           onEnterBack: () => { panel2.style.pointerEvents = "auto"; },
