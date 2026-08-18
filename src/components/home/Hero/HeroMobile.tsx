@@ -702,23 +702,45 @@ export default function HeroMobile() {
     // ══════════════════════════════════════════════════════════════════════
     // INTENT-DRIVEN SECTION GLIDER (Direct Touch & Wheel Interceptors)
     // ══════════════════════════════════════════════════════════════════════
+    let lastScrollY = typeof window !== "undefined" ? window.scrollY : 0;
+
     const updateTargetFromScroll = () => {
+      const currentScrollY = window.scrollY;
+      const scrollingUp = currentScrollY < lastScrollY;
+      const scrollDiff = lastScrollY - currentScrollY;
+      lastScrollY = currentScrollY;
+
       if (isGlidingRef.current) return;
       const neonEl = neonContainerRef.current;
       const mainMaxScroll = container.offsetHeight - window.innerHeight;
 
-      // Якщо користувач уже в зоні Neon секції — ставимо індекс Neon
+      // Якщо користувач летів знизу (з футера) різко вгору і влітає в зону Neon / Hero:
+      // Перехоплюємо некерований інерційний політ і плавно стопимо на секції!
       if (neonEl) {
         const neonRect = neonEl.getBoundingClientRect();
-        const neonAbsTop = neonRect.top + window.scrollY;
-        if (window.scrollY >= neonAbsTop - 50) {
+        const neonAbsTop = neonRect.top + currentScrollY;
+        const neonMaxScroll = Math.max(0, neonEl.offsetHeight - window.innerHeight);
+        const neonTargetY = neonAbsTop + neonMaxScroll * MOBILE_NEON_SNAP;
+
+        if (
+          scrollingUp &&
+          currentScrollY <= neonTargetY + 50 &&
+          currentScrollY >= neonAbsTop - 100
+        ) {
+          if (scrollDiff > 12) {
+            goToSection(MOBILE_SNAP_POINTS.length);
+            return;
+          }
+        }
+
+        if (currentScrollY >= neonAbsTop - 50) {
           targetIndexRef.current = MOBILE_SNAP_POINTS.length;
           return;
         }
       }
 
       if (mainMaxScroll <= 0) return;
-      const rawProgress = window.scrollY / mainMaxScroll;
+      const rawProgress = currentScrollY / mainMaxScroll;
       const clamped = Math.max(0, Math.min(1, rawProgress));
 
       let closest = 0;
@@ -797,8 +819,8 @@ export default function HeroMobile() {
         return;
       }
 
-      // Якщо користувач перебуває у футері та скролить вгору, поки не дійде до Neon -> не перехоплюємо
-      if (window.scrollY > neonBottom - window.innerHeight + 20 && e.deltaY < 0) {
+      // Якщо користувач перебуває у футері та скролить вгору, поки не дійшов до Neon -> не перехоплюємо
+      if (window.scrollY > neonTargetY + 60 && e.deltaY < 0) {
         return;
       }
 
@@ -840,15 +862,17 @@ export default function HeroMobile() {
       const touchY = e.touches[0]?.clientY ?? 0;
       const deltaY = touchStartY - touchY;
 
-      // Свайп вгору (рух вниз до футера після Neon) -> відпускаємо
+      // Свайп вгору (палець вгору -> рух вниз до футера після Neon) -> відпускаємо
       if (window.scrollY >= neonTargetY - 15 && deltaY > 0) {
         return;
       }
 
-      if (window.scrollY > neonBottom - window.innerHeight + 20 && deltaY < 0) {
+      // Якщо користувач глибоко у футері та скролить вгору, але ще НЕ дійшов до межі Neon -> не чіпаємо
+      if (window.scrollY > neonTargetY + 60 && deltaY < 0) {
         return;
       }
 
+      // Якщо поза межами hero + neon
       if (window.scrollY > neonBottom) return;
 
       if (isGlidingRef.current) {
@@ -856,7 +880,7 @@ export default function HeroMobile() {
         return;
       }
 
-      if (Math.abs(deltaY) > 25) {
+      if (Math.abs(deltaY) > 20) {
         if (deltaY > 0 && targetIndexRef.current < TOTAL_SECTIONS - 1) {
           e.preventDefault();
           touchStartY = touchY;
@@ -865,6 +889,10 @@ export default function HeroMobile() {
           e.preventDefault();
           touchStartY = touchY;
           goToSection(targetIndexRef.current - 1);
+        } else if (deltaY < 0 && targetIndexRef.current === 0) {
+          e.preventDefault();
+          touchStartY = touchY;
+          goToSection(0);
         }
       }
     };
