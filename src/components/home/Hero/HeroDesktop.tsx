@@ -751,45 +751,23 @@ export default function HeroDesktop() {
     // ══════════════════════════════════════════════════════════════════════
     // INTENT-DRIVEN SECTION GLIDER (Direct Wheel & Touch Interceptors)
     // ══════════════════════════════════════════════════════════════════════
-    let lastScrollY = typeof window !== "undefined" ? window.scrollY : 0;
-
     const updateTargetFromScroll = () => {
-      const currentScrollY = window.scrollY;
-      const scrollingUp = currentScrollY < lastScrollY;
-      const scrollDiff = lastScrollY - currentScrollY;
-      lastScrollY = currentScrollY;
-
       if (isGlidingRef.current) return;
       const neonEl = neonContainerRef.current;
       const mainMaxScroll = container.offsetHeight - window.innerHeight;
 
-      // Якщо користувач летів знизу (з футера) різко вгору і влітає в зону Neon / Hero:
-      // Перехоплюємо некерований інерційний політ і плавно стопимо на секції!
+      // Якщо користувач уже в зоні Neon секції — ставимо індекс Neon
       if (neonEl) {
         const neonRect = neonEl.getBoundingClientRect();
-        const neonAbsTop = neonRect.top + currentScrollY;
-        const neonMaxScroll = Math.max(0, neonEl.offsetHeight - window.innerHeight);
-        const neonTargetY = neonAbsTop + neonMaxScroll * DESKTOP_NEON_SNAP;
-
-        if (
-          scrollingUp &&
-          currentScrollY <= neonTargetY + 50 &&
-          currentScrollY >= neonAbsTop - 100
-        ) {
-          if (scrollDiff > 12) {
-            goToSection(DESKTOP_SNAP_POINTS.length);
-            return;
-          }
-        }
-
-        if (currentScrollY >= neonAbsTop - 50) {
+        const neonAbsTop = neonRect.top + window.scrollY;
+        if (window.scrollY >= neonAbsTop - 50) {
           targetIndexRef.current = DESKTOP_SNAP_POINTS.length;
           return;
         }
       }
 
       if (mainMaxScroll <= 0) return;
-      const rawProgress = currentScrollY / mainMaxScroll;
+      const rawProgress = window.scrollY / mainMaxScroll;
       const clamped = Math.max(0, Math.min(1, rawProgress));
 
       let closest = 0;
@@ -870,8 +848,8 @@ export default function HeroDesktop() {
         return;
       }
 
-      // Якщо користувач перебуває у футері та скролить вгору, поки не дійшов до Neon -> не перехоплюємо
-      if (window.scrollY > neonTargetY + 60 && e.deltaY < 0) {
+      // Якщо користувач перебуває у футері та скролить вгору, поки не дійде до Neon -> не перехоплюємо
+      if (window.scrollY > neonBottom - window.innerHeight + 20 && e.deltaY < 0) {
         return;
       }
 
