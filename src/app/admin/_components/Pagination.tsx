@@ -33,7 +33,7 @@ export default function Pagination({
       <div className={styles.controls}>
         <Link
           href={createPageURL(currentPage - 1)}
-          className={currentPage <= 1 ? styles.disabled : styles.button}
+          className={`${styles.button} ${currentPage <= 1 ? styles.disabled : ""}`}
           aria-disabled={currentPage <= 1}
         >
           <ChevronLeft size={16} />
@@ -43,7 +43,7 @@ export default function Pagination({
         </span>
         <Link
           href={createPageURL(currentPage + 1)}
-          className={currentPage >= totalPages ? styles.disabled : styles.button}
+          className={`${styles.button} ${currentPage >= totalPages ? styles.disabled : ""}`}
           aria-disabled={currentPage >= totalPages}
         >
           <ChevronRight size={16} />

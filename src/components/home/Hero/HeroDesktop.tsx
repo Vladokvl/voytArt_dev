@@ -195,8 +195,8 @@ export default function HeroDesktop() {
 
       const canvasW = canvas.width;
       const canvasH = canvas.height;
-      const imgW = "naturalWidth" in item ? item.naturalWidth : (item as ImageBitmap).width;
-      const imgH = "naturalHeight" in item ? item.naturalHeight : (item as ImageBitmap).height;
+      const imgW = "naturalWidth" in item ? item.naturalWidth : item.width;
+      const imgH = "naturalHeight" in item ? item.naturalHeight : item.height;
       if (!imgW || !imgH) return;
 
       const scale = Math.max(canvasW / imgW, canvasH / imgH);
@@ -879,7 +879,7 @@ export default function HeroDesktop() {
         if ("close" in item && typeof item.close === "function") {
           item.close();
         } else if ("src" in item) {
-          (item as HTMLImageElement).src = "";
+          item.src = "";
         }
       }
       imageCache.clear();

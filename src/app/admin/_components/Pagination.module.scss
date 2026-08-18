@@ -38,8 +38,7 @@
   }
 
   .disabled {
-    composes: button;
-    opacity: 0.5;
+    opacity: 0.4;
     pointer-events: none;
     cursor: not-allowed;
   }

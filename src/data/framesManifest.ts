@@ -897,7 +897,7 @@ export const getDesktopFrameUrl = (
   tier: "hd" | "standard" = "hd",
 ): string => {
   const rawUrl =
-    DESKTOP_FRAMES_CDN[frame] ||
+    DESKTOP_FRAMES_CDN[frame] ??
     `/mainPageVideos/originals/desktop_frames/frame_${String(frame).padStart(4, "0")}.webp`;
 
   if (tier === "standard" && rawUrl.includes("/image/upload/")) {
@@ -909,7 +909,7 @@ export const getDesktopFrameUrl = (
 
 export const getMobileFrameUrl = (frame: number): string => {
   return (
-    MOBILE_FRAMES_CDN[frame] ||
+    MOBILE_FRAMES_CDN[frame] ??
     `/mainPageVideos/originals/mobile_frames/frame_${String(frame).padStart(4, "0")}.webp`
   );
 };

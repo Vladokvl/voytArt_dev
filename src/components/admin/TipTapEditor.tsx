@@ -3,7 +3,7 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { useEffect } from "react";
-import formStyles from "~/styles/adminForm.module.scss"; // or whatever styles TipTap uses in those forms
+import formStyles from "~/app/admin/_formStyles.module.scss";
 
 export default function TipTapEditor({
   content,
