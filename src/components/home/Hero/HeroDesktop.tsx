@@ -9,7 +9,11 @@ import ArtSection from "../Sections/ArtSection";
 import ArtShopSection from "../Sections/ArtShopSection";
 import NeonSection from "../Sections/NeonSection";
 import { DESKTOP_NEON_VIDEO_URL, getDesktopFrameUrl } from "~/data/framesManifest";
-import { getDesktopQualityTier } from "~/utils/adaptiveQuality";
+import {
+  getDesktopQualityTier,
+  getFrameStride,
+  snapFrameToStride,
+} from "~/utils/adaptiveQuality";
 import styles from "./Hero.module.scss";
 
 gsap.registerPlugin(ScrollTrigger, Observer);
@@ -158,6 +162,9 @@ export default function HeroDesktop() {
     const neonVideo = neonVideoRef.current;
     const qualityTier = getDesktopQualityTier();
 
+    const frameStride = getFrameStride();
+    const TOTAL_STRIDED_FRAMES = Math.ceil(DESKTOP_TOTAL_FRAMES / frameStride);
+
     // Прогрес-бар охоплює основний (800vh) + neon (200vh) = 1000vh разом
     const MAIN_PROGRESS_FRAC = 800 / 1000;
     const NEON_PROGRESS_FRAC = 200 / 1000;
@@ -166,7 +173,7 @@ export default function HeroDesktop() {
     const updateBufferProgress = () => {
       if (bufferBar) {
         const framesFrac =
-          (Math.min(DESKTOP_TOTAL_FRAMES, prefetchedFrames.size) / DESKTOP_TOTAL_FRAMES) *
+          (Math.min(TOTAL_STRIDED_FRAMES, prefetchedFrames.size) / TOTAL_STRIDED_FRAMES) *
           MAIN_PROGRESS_FRAC;
         const neonFrac = neonBufferedFraction * NEON_PROGRESS_FRAC;
         const total = Math.min(1, framesFrac + neonFrac);
@@ -196,7 +203,8 @@ export default function HeroDesktop() {
     checkNeonBuffer();
 
     const drawFrame = (frame: number) => {
-      const item = imageCache.get(frame);
+      const targetFrame = snapFrameToStride(frame, frameStride, DESKTOP_TOTAL_FRAMES);
+      const item = imageCache.get(targetFrame);
       if (!item) return;
 
       const canvasW = canvas.width;
@@ -246,7 +254,8 @@ export default function HeroDesktop() {
     };
 
     // Нативне надшвидке завантаження зображення через браузерний кеш
-    const loadFrame = (frame: number, onSettled?: () => void) => {
+    const loadFrame = (rawFrame: number, onSettled?: () => void) => {
+      const frame = snapFrameToStride(rawFrame, frameStride, DESKTOP_TOTAL_FRAMES);
       if (frame < 1 || frame > DESKTOP_TOTAL_FRAMES) return;
 
       const cached = imageCache.get(frame);
@@ -298,7 +307,11 @@ export default function HeroDesktop() {
       const startWindow = Math.max(1, currentFrame - BUFFER_BACKWARD);
       const endWindow = Math.min(DESKTOP_TOTAL_FRAMES, currentFrame + BUFFER_FORWARD);
 
-      for (let frame = startWindow; frame <= endWindow; frame += 1) {
+      for (
+        let frame = snapFrameToStride(startWindow, frameStride, DESKTOP_TOTAL_FRAMES);
+        frame <= endWindow;
+        frame += frameStride
+      ) {
         loadFrame(frame);
       }
 
@@ -348,7 +361,11 @@ export default function HeroDesktop() {
       for (const cluster of priorityClusters) {
         const minF = Math.max(1, cluster.center - cluster.radius);
         const maxF = Math.min(DESKTOP_TOTAL_FRAMES, cluster.center + cluster.radius);
-        for (let f = minF; f <= maxF; f++) {
+        for (
+          let f = snapFrameToStride(minF, frameStride, DESKTOP_TOTAL_FRAMES);
+          f <= maxF;
+          f += frameStride
+        ) {
           if (!added.has(f)) {
             added.add(f);
             queuedFrames.push(f);
@@ -356,7 +373,7 @@ export default function HeroDesktop() {
         }
       }
 
-      for (let f = 1; f <= DESKTOP_TOTAL_FRAMES; f++) {
+      for (let f = 1; f <= DESKTOP_TOTAL_FRAMES; f += frameStride) {
         if (!added.has(f)) {
           added.add(f);
           queuedFrames.push(f);
@@ -420,7 +437,12 @@ export default function HeroDesktop() {
             if (bar)
               bar.style.width = `${self.progress * MAIN_PROGRESS_FRAC * 100}%`;
 
-            const currentFrame = Math.round(frameState.frame);
+            const rawCurrentFrame = Math.round(frameState.frame);
+            const currentFrame = snapFrameToStride(
+              rawCurrentFrame,
+              frameStride,
+              DESKTOP_TOTAL_FRAMES,
+            );
             if (currentFrame !== lastRenderedFrame) {
               currentFrameRef.current = currentFrame;
               triggerCacheIfNeeded(currentFrame);
@@ -432,11 +454,21 @@ export default function HeroDesktop() {
       });
     };
 
+    const criticalFramesList: number[] = [];
+    for (let f = 1; f <= PRELOAD_CRITICAL_FRAMES; f += frameStride) {
+      criticalFramesList.push(f);
+    }
+    const criticalTotal = criticalFramesList.length;
+    const criticalReady = Math.min(
+      criticalTotal,
+      Math.ceil(PRELOAD_READY_THRESHOLD / frameStride),
+    );
+
     let settledCritical = 0;
     let loadedCritical = 0;
     let frameScrollInitialized = false;
 
-    for (let frame = 1; frame <= PRELOAD_CRITICAL_FRAMES; frame += 1) {
+    for (const frame of criticalFramesList) {
       loadFrame(frame, () => {
         settledCritical += 1;
         if (frame === 1) {
@@ -446,15 +478,15 @@ export default function HeroDesktop() {
 
         loadedCritical += 1;
         setLoaderProgress(
-          Math.min(100, Math.round((settledCritical / PRELOAD_CRITICAL_FRAMES) * 100)),
+          Math.min(100, Math.round((settledCritical / criticalTotal) * 100)),
         );
         setLoaderHint(
-          `Loaded ${Math.min(loadedCritical, PRELOAD_CRITICAL_FRAMES)} of ${PRELOAD_CRITICAL_FRAMES}`,
+          `Loaded ${Math.min(loadedCritical, criticalTotal)} of ${criticalTotal}`,
         );
 
         if (
           !frameScrollInitialized &&
-          loadedCritical >= PRELOAD_READY_THRESHOLD
+          (loadedCritical >= criticalReady || settledCritical >= criticalTotal)
         ) {
           frameScrollInitialized = true;
           setIsMainReady(true);

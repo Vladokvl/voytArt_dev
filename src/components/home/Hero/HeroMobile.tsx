@@ -9,6 +9,7 @@ import ArtSection from "../Sections/ArtSection";
 import ArtShopSection from "../Sections/ArtShopSection";
 import NeonSection from "../Sections/NeonSection";
 import { getMobileFrameUrl, MOBILE_NEON_VIDEO_URL } from "~/data/framesManifest";
+import { getFrameStride, snapFrameToStride } from "~/utils/adaptiveQuality";
 import styles from "./Hero.module.scss";
 
 gsap.registerPlugin(ScrollTrigger, Observer);
@@ -136,6 +137,9 @@ export default function HeroMobile() {
     const bufferBar = bufferBarRef.current;
     const neonVideo = neonVideoRef.current;
 
+    const frameStride = getFrameStride();
+    const TOTAL_STRIDED_FRAMES = Math.ceil(MOBILE_TOTAL_FRAMES / frameStride);
+
     // Прогрес-бар охоплює основний (800vh) + neon (400vh) = 1200vh разом
     const MAIN_PROGRESS_FRAC = 800 / 1200;
     const NEON_PROGRESS_FRAC = 400 / 1200;
@@ -144,7 +148,7 @@ export default function HeroMobile() {
     const updateBufferProgress = () => {
       if (bufferBar) {
         const framesFrac =
-          (Math.min(MOBILE_TOTAL_FRAMES, prefetchedFrames.size) / MOBILE_TOTAL_FRAMES) *
+          (Math.min(TOTAL_STRIDED_FRAMES, prefetchedFrames.size) / TOTAL_STRIDED_FRAMES) *
           MAIN_PROGRESS_FRAC;
         const neonFrac = neonBufferedFraction * NEON_PROGRESS_FRAC;
         const total = Math.min(1, framesFrac + neonFrac);
@@ -174,7 +178,8 @@ export default function HeroMobile() {
     checkNeonBuffer();
 
     const drawFrame = (frame: number) => {
-      const item = imageCache.get(frame);
+      const targetFrame = snapFrameToStride(frame, frameStride, MOBILE_TOTAL_FRAMES);
+      const item = imageCache.get(targetFrame);
       if (!item) return;
 
       const canvasW = canvas.width;
@@ -222,7 +227,8 @@ export default function HeroMobile() {
       drawFrame(currentFrameRef.current);
     };
 
-    const loadFrame = (frame: number, onSettled?: (ok: boolean) => void) => {
+    const loadFrame = (rawFrame: number, onSettled?: (ok: boolean) => void) => {
+      const frame = snapFrameToStride(rawFrame, frameStride, MOBILE_TOTAL_FRAMES);
       if (frame < 1 || frame > MOBILE_TOTAL_FRAMES) return;
 
       const cached = imageCache.get(frame);
@@ -274,7 +280,11 @@ export default function HeroMobile() {
       const startWindow = Math.max(1, currentFrame - MOBILE_BUFFER_BACKWARD);
       const endWindow = Math.min(MOBILE_TOTAL_FRAMES, currentFrame + MOBILE_BUFFER_FORWARD);
 
-      for (let frame = startWindow; frame <= endWindow; frame += 1) {
+      for (
+        let frame = snapFrameToStride(startWindow, frameStride, MOBILE_TOTAL_FRAMES);
+        frame <= endWindow;
+        frame += frameStride
+      ) {
         loadFrame(frame);
       }
 
@@ -322,7 +332,11 @@ export default function HeroMobile() {
       for (const cluster of priorityClusters) {
         const minF = Math.max(1, cluster.center - cluster.radius);
         const maxF = Math.min(MOBILE_TOTAL_FRAMES, cluster.center + cluster.radius);
-        for (let f = minF; f <= maxF; f++) {
+        for (
+          let f = snapFrameToStride(minF, frameStride, MOBILE_TOTAL_FRAMES);
+          f <= maxF;
+          f += frameStride
+        ) {
           if (!added.has(f)) {
             added.add(f);
             queuedFrames.push(f);
@@ -330,7 +344,7 @@ export default function HeroMobile() {
         }
       }
 
-      for (let f = 1; f <= MOBILE_TOTAL_FRAMES; f++) {
+      for (let f = 1; f <= MOBILE_TOTAL_FRAMES; f += frameStride) {
         if (!added.has(f)) {
           added.add(f);
           queuedFrames.push(f);
@@ -379,7 +393,7 @@ export default function HeroMobile() {
       let lastRenderedFrame = 1;
 
       const renderFrameIfChanged = (nextFrame: number) => {
-        const boundedFrame = Math.min(MOBILE_TOTAL_FRAMES, Math.max(1, nextFrame));
+        const boundedFrame = snapFrameToStride(nextFrame, frameStride, MOBILE_TOTAL_FRAMES);
         if (boundedFrame === lastRenderedFrame) return;
 
         currentFrameRef.current = boundedFrame;
@@ -421,6 +435,16 @@ export default function HeroMobile() {
       });
     };
 
+    const criticalFramesList: number[] = [];
+    for (let f = 1; f <= MOBILE_PRELOAD_CRITICAL_FRAMES; f += frameStride) {
+      criticalFramesList.push(f);
+    }
+    const criticalTotal = criticalFramesList.length;
+    const criticalReady = Math.min(
+      criticalTotal,
+      Math.ceil(MOBILE_PRELOAD_READY_THRESHOLD / frameStride),
+    );
+
     let settledCritical = 0;
     let loadedCritical = 0;
     let mainScrollInitialized = false;
@@ -430,10 +454,10 @@ export default function HeroMobile() {
       if (ok) loadedCritical += 1;
 
       setLoaderProgress(
-        Math.min(100, Math.round((settledCritical / MOBILE_PRELOAD_CRITICAL_FRAMES) * 100)),
+        Math.min(100, Math.round((settledCritical / criticalTotal) * 100)),
       );
       setLoaderHint(
-        `Loaded ${Math.min(loadedCritical, MOBILE_PRELOAD_CRITICAL_FRAMES)} of ${MOBILE_PRELOAD_CRITICAL_FRAMES}`,
+        `Loaded ${Math.min(loadedCritical, criticalTotal)} of ${criticalTotal}`,
       );
 
       if (frame === 1 && ok) {
@@ -443,8 +467,7 @@ export default function HeroMobile() {
 
       if (
         !mainScrollInitialized &&
-        (loadedCritical >= MOBILE_PRELOAD_READY_THRESHOLD ||
-          settledCritical >= MOBILE_PRELOAD_CRITICAL_FRAMES)
+        (loadedCritical >= criticalReady || settledCritical >= criticalTotal)
       ) {
         mainScrollInitialized = true;
         setLoaderTitle("Loading Mobile Frames");
@@ -457,7 +480,7 @@ export default function HeroMobile() {
       }
     };
 
-    for (let frame = 1; frame <= MOBILE_PRELOAD_CRITICAL_FRAMES; frame += 1) {
+    for (const frame of criticalFramesList) {
       loadFrame(frame, (ok) => finalizeCriticalPreload(ok, frame));
     }
 
