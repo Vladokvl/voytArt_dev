@@ -73,9 +73,9 @@ function formatBytes(bytes: number, decimals = 2): string {
 }
 
 export async function getCloudinaryUsageAction(): Promise<CloudinaryUsageData> {
-  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-  const apiKey = process.env.CLOUDINARY_API_KEY;
-  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim().replace(/^["']|["']$/g, "");
+  const apiKey = process.env.CLOUDINARY_API_KEY?.trim().replace(/^["']|["']$/g, "");
+  const apiSecret = process.env.CLOUDINARY_API_SECRET?.trim().replace(/^["']|["']$/g, "");
 
   if (!cloudName || !apiKey || !apiSecret) {
     return {

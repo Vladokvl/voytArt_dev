@@ -8,14 +8,17 @@ export async function getCloudinarySignature(params: Record<string, string | num
     timestamp,
   };
 
+  const apiSecret = process.env.CLOUDINARY_API_SECRET?.trim().replace(/^["']|["']$/g, "") ?? "";
+  const apiKey = process.env.CLOUDINARY_API_KEY?.trim().replace(/^["']|["']$/g, "") ?? "";
+
   const signature = cloudinary.utils.api_sign_request(
     paramsToSign,
-    process.env.CLOUDINARY_API_SECRET!
+    apiSecret
   );
 
   return {
     signature,
     timestamp,
-    apiKey: process.env.CLOUDINARY_API_KEY!,
+    apiKey,
   };
 }
