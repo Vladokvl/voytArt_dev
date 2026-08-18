@@ -70,13 +70,20 @@ function isPrivateIp(ip: string): boolean {
   if (!ip || ip === "127.0.0.1" || ip === "::1" || ip === "localhost") return true;
   if (ip.startsWith("10.") || ip.startsWith("192.168.")) return true;
   if (/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(ip)) return true;
+  if (ip.startsWith("fe80:") || ip.startsWith("fc00:") || ip.startsWith("fd")) return true;
   return false;
 }
 
 const geoCache = new Map<string, { country: string; city: string | null }>();
 
-async function resolveGeo(ip: string, req: NextRequest): Promise<{ country: string; city: string | null }> {
-  // 1. Check direct Cloudflare / Vercel / AWS / Nginx headers
+async function resolveGeo(rawIp: string, req: NextRequest): Promise<{ country: string; city: string | null }> {
+  // Normalize IP
+  let ip = rawIp.trim();
+  if (ip.startsWith("::ffff:")) {
+    ip = ip.replace("::ffff:", "");
+  }
+
+  // 1. Direct Edge / Reverse Proxy Headers (Cloudflare, Vercel, AWS CloudFront, Nginx custom)
   const headerCountry =
     req.headers.get("cf-ipcountry") ??
     req.headers.get("x-vercel-ip-country") ??
@@ -105,27 +112,50 @@ async function resolveGeo(ip: string, req: NextRequest): Promise<{ country: stri
     return cached;
   }
 
-  // 4. Fast IP Lookup fallback (for VPS, Docker, custom domains)
+  // 4. Primary Provider: ip-api.com (1.2s timeout)
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 1200);
 
-    const res = await fetch(`http://ip-api.com/json/${ip}?fields=status,countryCode,city`, {
+    const res = await fetch(`http://ip-api.com/json/${encodeURIComponent(ip)}?fields=status,countryCode,city`, {
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
 
     if (res.ok) {
       const data = (await res.json()) as { status: string; countryCode?: string; city?: string };
-      if (data.status === "success" && data.countryCode) {
+      if (data.status === "success" && data.countryCode?.length === 2) {
         const result = { country: data.countryCode.toUpperCase(), city: data.city ?? null };
-        if (geoCache.size > 2000) geoCache.clear();
+        if (geoCache.size > 3000) geoCache.clear();
         geoCache.set(ip, result);
         return result;
       }
     }
   } catch {
-    // Non-blocking fallback
+    // Continue to fallback
+  }
+
+  // 5. Secondary Fallback Provider: ipwho.is
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 1200);
+
+    const res = await fetch(`https://ipwho.is/${encodeURIComponent(ip)}`, {
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      const data = (await res.json()) as { success?: boolean; country_code?: string; city?: string };
+      if (data.success && data.country_code?.length === 2) {
+        const result = { country: data.country_code.toUpperCase(), city: data.city ?? null };
+        if (geoCache.size > 3000) geoCache.clear();
+        geoCache.set(ip, result);
+        return result;
+      }
+    }
+  } catch {
+    // Continue to fallback
   }
 
   return { country: "UNKNOWN", city: null };

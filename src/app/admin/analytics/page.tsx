@@ -16,11 +16,15 @@ import {
 } from "lucide-react";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import styles from "./analytics.module.scss";
+import DateRangePicker from "./_DateRangePicker";
 
 type PeriodOption = "today" | "7d" | "30d" | "all";
 
 type SearchParams = Promise<{
   period?: PeriodOption;
+  date?: string;
+  from?: string;
+  to?: string;
 }>;
 
 function getCountryFlag(code: string | null): string {
@@ -47,20 +51,44 @@ export default async function AnalyticsPage({
 }: {
   searchParams: SearchParams;
 }) {
-  const { period = "7d" } = await searchParams;
+  const { period = "7d", date, from, to } = await searchParams;
 
   let startDate: Date | undefined;
+  let endDate: Date | undefined;
+  let periodLabel = "Останні 7 днів";
   const now = new Date();
 
-  if (period === "today") {
-    startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const isSingleDay = Boolean(date ?? period === "today");
+
+  if (date) {
+    startDate = new Date(`${date}T00:00:00`);
+    endDate = new Date(`${date}T23:59:59.999`);
+    periodLabel = `День: ${new Date(date).toLocaleDateString("uk-UA")}`;
+  } else if (from ?? to) {
+    if (from) startDate = new Date(`${from}T00:00:00`);
+    if (to) endDate = new Date(`${to}T23:59:59.999`);
+    periodLabel = `Період: ${from ? new Date(from).toLocaleDateString("uk-UA") : "початку"} — ${to ? new Date(to).toLocaleDateString("uk-UA") : "сьогодні"}`;
+  } else if (period === "today") {
+    startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+    periodLabel = "Сьогодні";
   } else if (period === "7d") {
     startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    periodLabel = "Останні 7 днів";
   } else if (period === "30d") {
     startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    periodLabel = "Останні 30 днів";
+  } else if (period === "all") {
+    startDate = undefined;
+    endDate = undefined;
+    periodLabel = "Весь час";
   }
 
-  const whereClause = startDate ? { createdAt: { gte: startDate } } : {};
+  const whereClause: { createdAt?: { gte?: Date; lte?: Date } } = {};
+  if (startDate || endDate) {
+    whereClause.createdAt = {};
+    if (startDate) whereClause.createdAt.gte = startDate;
+    if (endDate) whereClause.createdAt.lte = endDate;
+  }
 
   // Fetch metrics and database entities in parallel
   const [
@@ -169,8 +197,10 @@ export default async function AnalyticsPage({
       }
     }
 
-    // Daily timeline grouping
-    const dateKey = ev.createdAt.toISOString().slice(5, 10); // MM-DD
+    // Timeline grouping: hourly if single day, daily (MM-DD) otherwise
+    const dateKey = isSingleDay
+      ? `${ev.createdAt.getHours().toString().padStart(2, "0")}:00`
+      : ev.createdAt.toISOString().slice(5, 10); // MM-DD
     const currentDay = dailyTimelineMap[dateKey] ?? { views: 0, uniqueSet: new Set<string>() };
     currentDay.views++;
     if (ev.visitorHash) {
@@ -260,36 +290,16 @@ export default async function AnalyticsPage({
         <div>
           <h1 className={styles.title}>Статистика відвідувачів</h1>
           <p className={styles.subtitle}>
-            Реальний трафік, інтерес до картин та товарів без блокувань AdBlock
+            {periodLabel} • Реальний трафік без блокувань AdBlock
           </p>
         </div>
 
-        <div className={styles.periodFilter}>
-          <Link
-            href="/admin/analytics?period=today"
-            className={`${styles.periodBtn} ${period === "today" ? styles.periodBtnActive : ""}`}
-          >
-            Сьогодні
-          </Link>
-          <Link
-            href="/admin/analytics?period=7d"
-            className={`${styles.periodBtn} ${period === "7d" ? styles.periodBtnActive : ""}`}
-          >
-            7 днів
-          </Link>
-          <Link
-            href="/admin/analytics?period=30d"
-            className={`${styles.periodBtn} ${period === "30d" ? styles.periodBtnActive : ""}`}
-          >
-            30 днів
-          </Link>
-          <Link
-            href="/admin/analytics?period=all"
-            className={`${styles.periodBtn} ${period === "all" ? styles.periodBtnActive : ""}`}
-          >
-            Весь час
-          </Link>
-        </div>
+        <DateRangePicker
+          currentPeriod={period}
+          currentDate={date}
+          currentFrom={from}
+          currentTo={to}
+        />
       </div>
 
       {/* ── Top Metric Cards (KPIs) ── */}
