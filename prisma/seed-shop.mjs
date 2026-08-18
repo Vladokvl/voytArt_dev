@@ -7,7 +7,7 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log("🌱 Починаємо наповнення тестовими товарами для магазину...");
+  console.log("🌱 Оновлюємо тестові товари реальними фотографіями високої якості...");
 
   // 1. Отримуємо або створюємо авторів
   let authors = await prisma.author.findMany({ where: { active: true } });
@@ -58,7 +58,7 @@ async function main() {
 
   console.log("✅ Категорії підготовлено.");
 
-  // 3. Тестові товари з варіаціями та фото
+  // 3. Список товарів з реальними естетичними фото з Unsplash
   const sampleProducts = [
     {
       title: "Fine Art Print «Ethereal Geometry»",
@@ -68,8 +68,7 @@ async function main() {
       stock: 35,
       isFeatured: true,
       isActive: true,
-      coverUrl: "https://res.cloudinary.com/dkm5vtfyg/image/upload/v1787041226/frame_0001_oy1u9x.webp",
-      coverPublicId: "voytart/shop/sample_print_1",
+      coverUrl: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1200&q=80",
       categoryId: categories["prints-posters"].id,
       authorId: ivanka.id,
       variants: [
@@ -78,50 +77,49 @@ async function main() {
         { title: "A2 в чорній дубовій рамі", price: 2350, stock: 5, sku: "PR-EG-A2-FRAME" },
       ],
       images: [
-        { url: "https://res.cloudinary.com/dkm5vtfyg/image/upload/v1787041226/frame_0001_oy1u9x.webp", order: 0 },
-        { url: "https://res.cloudinary.com/dkm5vtfyg/image/upload/v1787041226/frame_0010_p0jrqe.webp", order: 1 },
+        { url: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1200&q=80", order: 0 },
+        { url: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1200&q=80", order: 1 },
       ],
     },
     {
-      title: "Оверсайз худі «Neon Horizon»",
+      title: "Оверсайз худі «Dark Harmony»",
       description:
-        "<p>Преміальний оверсайз худі зі щільної 3-ниткової бавовни (420 gsm). Шовкотрафаретний друк з неоновими пігментами, що світяться під ультрафіолетом.</p>",
+        "<p>Преміальний оверсайз худі зі щільної 3-ниткової бавовни (420 gsm). Шовкотрафаретний авторський друк, довговічні стійкі пігменти.</p>",
       price: 2400,
       stock: 24,
       isFeatured: true,
       isActive: true,
-      coverUrl: "https://res.cloudinary.com/dkm5vtfyg/image/upload/v1787041226/frame_0050_qwmqre.webp",
-      coverPublicId: "voytart/shop/sample_hoodie_1",
+      coverUrl: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1200&q=80",
       categoryId: categories["merch-apparel"].id,
       authorId: oleksandr.id,
       variants: [
-        { title: "Розмір S (Oversize)", price: 2400, stock: 6, sku: "HD-NH-S" },
-        { title: "Розмір M (Oversize)", price: 2400, stock: 10, sku: "HD-NH-M" },
-        { title: "Розмір L (Oversize)", price: 2400, stock: 8, sku: "HD-NH-L" },
+        { title: "Розмір S (Oversize)", price: 2400, stock: 6, sku: "HD-DH-S" },
+        { title: "Розмір M (Oversize)", price: 2400, stock: 10, sku: "HD-DH-M" },
+        { title: "Розмір L (Oversize)", price: 2400, stock: 8, sku: "HD-DH-L" },
       ],
       images: [
-        { url: "https://res.cloudinary.com/dkm5vtfyg/image/upload/v1787041226/frame_0050_qwmqre.webp", order: 0 },
-        { url: "https://res.cloudinary.com/dkm5vtfyg/image/upload/v1787041226/frame_0060_abcdef.webp", order: 1 },
+        { url: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1200&q=80", order: 0 },
+        { url: "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=1200&q=80", order: 1 },
       ],
     },
     {
-      title: "Керамічна скульптурна ваза «Vortex»",
+      title: "Керамічна скульптурна ваза «Eclipse»",
       description:
-        "<p>Авторська кераміка ручної ліпки. Матова чорна глазур з фактурним теракотовим градієнтом. Створено в єдиному тиражі.</p>",
+        "<p>Авторська кераміка ручної ліпки. Матова чорна глазур з фактурним теракотовим градієнтом. Створено в єдиному екземплярі.</p>",
       price: 3800,
       stock: 4,
       isFeatured: true,
       isActive: true,
-      coverUrl: "https://res.cloudinary.com/dkm5vtfyg/image/upload/v1787041226/frame_0100_zxcvbn.webp",
-      coverPublicId: "voytart/shop/sample_vase_1",
+      coverUrl: "https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?auto=format&fit=crop&w=1200&q=80",
       categoryId: categories["ceramics-art-objects"].id,
       authorId: ivanka.id,
       variants: [
-        { title: "Matte Black (28 см)", price: 3800, stock: 2, sku: "VA-VT-BLK" },
-        { title: "Raw Terracotta (28 см)", price: 3800, stock: 2, sku: "VA-VT-TER" },
+        { title: "Matte Black (28 см)", price: 3800, stock: 2, sku: "VA-EC-BLK" },
+        { title: "Raw Terracotta (28 см)", price: 3800, stock: 2, sku: "VA-EC-TER" },
       ],
       images: [
-        { url: "https://res.cloudinary.com/dkm5vtfyg/image/upload/v1787041226/frame_0100_zxcvbn.webp", order: 0 },
+        { url: "https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?auto=format&fit=crop&w=1200&q=80", order: 0 },
+        { url: "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=1200&q=80", order: 1 },
       ],
     },
     {
@@ -132,8 +130,7 @@ async function main() {
       stock: 18,
       isFeatured: false,
       isActive: true,
-      coverUrl: "https://res.cloudinary.com/dkm5vtfyg/image/upload/v1787041226/frame_0150_lkjhgf.webp",
-      coverPublicId: "voytart/shop/sample_scarf_1",
+      coverUrl: "https://images.unsplash.com/photo-1601924994987-69e26d50dc26?auto=format&fit=crop&w=1200&q=80",
       categoryId: categories["merch-apparel"].id,
       authorId: oleksandr.id,
       variants: [
@@ -141,41 +138,67 @@ async function main() {
         { title: "Формат 90 × 90 см", price: 2350, stock: 6, sku: "SC-VS-90" },
       ],
       images: [
-        { url: "https://res.cloudinary.com/dkm5vtfyg/image/upload/v1787041226/frame_0150_lkjhgf.webp", order: 0 },
+        { url: "https://images.unsplash.com/photo-1601924994987-69e26d50dc26?auto=format&fit=crop&w=1200&q=80", order: 0 },
+        { url: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1200&q=80", order: 1 },
       ],
     },
     {
-      title: "Арт-постер «Metamorphosis IV»",
+      title: "Арт-постер «Abstract Fluidity»",
       description:
         "<p>Шовкодрук у 5 кольорів на дизайнерському картоні Fedrigoni. Ексклюзивний реліз до персональної виставки.</p>",
       price: 1200,
       stock: 50,
       isFeatured: false,
       isActive: true,
-      coverUrl: "https://res.cloudinary.com/dkm5vtfyg/image/upload/v1787041226/frame_0200_asdfgh.webp",
-      coverPublicId: "voytart/shop/sample_print_2",
+      coverUrl: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1200&q=80",
       categoryId: categories["prints-posters"].id,
       authorId: ivanka.id,
       variants: [
-        { title: "50 × 70 см (Без рами)", price: 1200, stock: 35, sku: "PR-MM-50" },
-        { title: "50 × 70 см (Мінімалістична алюмінієва рама)", price: 2100, stock: 15, sku: "PR-MM-50-ALU" },
+        { title: "50 × 70 см (Без рами)", price: 1200, stock: 35, sku: "PR-AF-50" },
+        { title: "50 × 70 см (Алюмінієва рама)", price: 2100, stock: 15, sku: "PR-AF-50-ALU" },
       ],
       images: [
-        { url: "https://res.cloudinary.com/dkm5vtfyg/image/upload/v1787041226/frame_0200_asdfgh.webp", order: 0 },
+        { url: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1200&q=80", order: 0 },
+        { url: "https://images.unsplash.com/photo-1582561424760-0321d75e81fa?auto=format&fit=crop&w=1200&q=80", order: 1 },
+      ],
+    },
+    {
+      title: "Оригінальне полотно «Midnight Mirage»",
+      description:
+        "<p>Оригінальна авторська робота. Полотно, олія, акрил, змішана техніка (100 × 120 см). Готова до експонування, галерейна натяжка.</p>",
+      price: 28000,
+      stock: 1,
+      isFeatured: true,
+      isActive: true,
+      coverUrl: "https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&w=1200&q=80",
+      categoryId: categories["original-art"].id,
+      authorId: oleksandr.id,
+      variants: [
+        { title: "Оригінал (100 × 120 см)", price: 28000, stock: 1, sku: "ART-MM-ORIG" },
+      ],
+      images: [
+        { url: "https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&w=1200&q=80", order: 0 },
       ],
     },
   ];
 
+  // 4. Очищення старих тестових товарів і запис нових
+  const productTitles = sampleProducts.map((p) => p.title);
+  // Також видаляємо попередні старі назви якщо були
+  const oldTitles = [
+    "Оверсайз худі «Neon Horizon»",
+    "Арт-постер «Metamorphosis IV»",
+    "Керамічна скульптурна ваза «Vortex»",
+  ];
+  
+  await prisma.product.deleteMany({
+    where: {
+      title: { in: [...productTitles, ...oldTitles] },
+    },
+  });
+  console.log("🧹 Старі тестові товари очищено.");
+
   for (const prod of sampleProducts) {
-    const existing = await prisma.product.findFirst({
-      where: { title: prod.title },
-    });
-
-    if (existing) {
-      console.log(`- Товар «${prod.title}» вже існує, пропускаємо.`);
-      continue;
-    }
-
     const created = await prisma.product.create({
       data: {
         title: prod.title,
@@ -185,7 +208,6 @@ async function main() {
         isFeatured: prod.isFeatured,
         isActive: prod.isActive,
         coverUrl: prod.coverUrl,
-        coverPublicId: prod.coverPublicId,
         categoryId: prod.categoryId,
         authorId: prod.authorId,
         variants: {
@@ -206,10 +228,10 @@ async function main() {
       },
     });
 
-    console.log(`+ Створено товар «${created.title}» з ${prod.variants.length} варіаціями.`);
+    console.log(`+ Створено товар «${created.title}» (${prod.variants.length} варіацій, ${prod.images.length} фото).`);
   }
 
-  console.log("🎉 Готово! Магазин успішно наповнено тестовими даними.");
+  console.log("🎉 Готово! Магазин оновлено красивими реальними фотографіями.");
 }
 
 main()

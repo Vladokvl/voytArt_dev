@@ -73,11 +73,18 @@
 .track {
   display: flex;
   overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
   scrollbar-width: none;
   gap: 16px;
-  padding: 4px; /* prevents shadows from clipping */
+  padding: 8px 4px; /* prevents shadows from clipping */
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+
+  &.isGrabbing {
+    cursor: grabbing;
+  }
 
   &::-webkit-scrollbar {
     display: none;
@@ -88,6 +95,8 @@
   flex: 0 0 auto;
   scroll-snap-align: start;
   width: 280px;
+  user-select: none;
+  -webkit-user-select: none;
 
   @media (max-width: 640px) {
     width: 220px;
