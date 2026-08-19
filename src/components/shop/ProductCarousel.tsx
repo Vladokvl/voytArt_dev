@@ -37,7 +37,11 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
   const isDraggingRef = useRef(false);
   const animFrameRef = useRef<number | null>(null);
   const isUserInteractingRef = useRef(false);
+
   const touchStartXRef = useRef(0);
+  const touchStartYRef = useRef(0);
+  const touchScrollLeftRef = useRef(0);
+  const autoplayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Отримуємо ширину одного слайду разом із відступом (gap)
   const getSlideStep = useCallback(() => {
@@ -84,6 +88,26 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
     animFrameRef.current = requestAnimationFrame(step);
   }, []);
 
+  // ── Скидання та перезапуск автотаймера (8 секунд) ──
+  const resetAutoplayTimer = useCallback(() => {
+    if (autoplayTimerRef.current) {
+      clearInterval(autoplayTimerRef.current);
+      autoplayTimerRef.current = null;
+    }
+
+    if (!products || products.length <= 1) return;
+
+    autoplayTimerRef.current = setInterval(() => {
+      if (isUserInteractingRef.current || isDownRef.current) return;
+      setActiveIndex((prev) => {
+        const next = (prev + 1) % products.length;
+        const step = getSlideStep();
+        smoothScrollTo(next * step, 500);
+        return next;
+      });
+    }, 8000);
+  }, [products, getSlideStep, smoothScrollTo]);
+
   // Перехід до конкретного слайду
   const scrollToIndex = useCallback(
     (index: number) => {
@@ -91,8 +115,9 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
       const target = index * step;
       smoothScrollTo(target, 450);
       setActiveIndex(index);
+      resetAutoplayTimer();
     },
-    [getSlideStep, smoothScrollTo]
+    [getSlideStep, smoothScrollTo, resetAutoplayTimer]
   );
 
   // ── Стрілочки вліво / вправо ──
@@ -118,49 +143,73 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
     setActiveIndex(clamped);
   }, [getSlideStep, products.length]);
 
-  // ── Автоперегортання кожні 6 секунд ──
+  // Запуск автотаймера при монтуванні
   useEffect(() => {
-    if (!products || products.length <= 1) return;
+    resetAutoplayTimer();
+    return () => {
+      if (autoplayTimerRef.current) {
+        clearInterval(autoplayTimerRef.current);
+      }
+    };
+  }, [resetAutoplayTimer]);
 
-    const timer = setInterval(() => {
-      if (isUserInteractingRef.current || isDownRef.current) return;
-      setActiveIndex((prev) => {
-        const next = (prev + 1) % products.length;
-        const step = getSlideStep();
-        smoothScrollTo(next * step, 500);
-        return next;
-      });
-    }, 6000);
-
-    return () => clearInterval(timer);
-  }, [products, getSlideStep, smoothScrollTo]);
-
-  // ── Touch Events (Мобільний тач/свайп) ──
+  // ── Touch Events (Повноцінний мобільний тач-свайп) ──
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     isUserInteractingRef.current = true;
     if (animFrameRef.current) {
       cancelAnimationFrame(animFrameRef.current);
       animFrameRef.current = null;
     }
-    touchStartXRef.current = e.touches[0]?.pageX ?? 0;
+    const touch = e.touches[0];
+    if (!touch) return;
+    touchStartXRef.current = touch.clientX;
+    touchStartYRef.current = touch.clientY;
+    touchScrollLeftRef.current = trackRef.current ? trackRef.current.scrollLeft : 0;
+    resetAutoplayTimer();
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    const touchX = e.touches[0]?.pageX ?? 0;
-    const diff = touchX - touchStartXRef.current;
-    if (Math.abs(diff) > 8) {
+    if (!trackRef.current) return;
+    const touch = e.touches[0];
+    if (!touch) return;
+    const deltaX = touch.clientX - touchStartXRef.current;
+    const deltaY = touch.clientY - touchStartYRef.current;
+
+    // Якщо рух пальцем переважно горизонтальний — скролимо карусель
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 6) {
       isDraggingRef.current = true;
+      trackRef.current.scrollLeft = touchScrollLeftRef.current - deltaX;
     }
   };
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!trackRef.current) return;
+    const touch = e.changedTouches[0];
+    const deltaX = touch ? touch.clientX - touchStartXRef.current : 0;
+
+    if (Math.abs(deltaX) > 35) {
+      if (deltaX > 0) {
+        // Свайп вправо ➔ попередній товар
+        scroll("left");
+      } else {
+        // Свайп вліво ➔ наступний товар
+        scroll("right");
+      }
+    } else {
+      // Доводка до найближчого слайду
+      const step = getSlideStep();
+      const currentIdx = Math.round(trackRef.current.scrollLeft / step);
+      scrollToIndex(Math.max(0, Math.min(products.length - 1, currentIdx)));
+    }
+
     isUserInteractingRef.current = false;
     setTimeout(() => {
       isDraggingRef.current = false;
-    }, 60);
+    }, 80);
+    resetAutoplayTimer();
   };
 
-  // ── Mouse Events (Десктоп драг) ──
+  // ── Mouse Events (Десктоп драг мишкою) ──
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!trackRef.current) return;
     isUserInteractingRef.current = true;
@@ -173,6 +222,7 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
     startXRef.current = e.pageX - trackRef.current.offsetLeft;
     scrollLeftRef.current = trackRef.current.scrollLeft;
     setIsGrabbing(true);
+    resetAutoplayTimer();
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -192,9 +242,17 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
       isDownRef.current = false;
       setIsGrabbing(false);
       isUserInteractingRef.current = false;
+
+      if (trackRef.current) {
+        const step = getSlideStep();
+        const currentIdx = Math.round(trackRef.current.scrollLeft / step);
+        scrollToIndex(Math.max(0, Math.min(products.length - 1, currentIdx)));
+      }
+
       setTimeout(() => {
         isDraggingRef.current = false;
-      }, 60);
+      }, 80);
+      resetAutoplayTimer();
     }
   };
 
@@ -211,7 +269,7 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
     <div
       className={styles.carousel}
       onMouseEnter={() => { isUserInteractingRef.current = true; }}
-      onMouseLeave={() => { isUserInteractingRef.current = false; }}
+      onMouseLeave={() => { isUserInteractingRef.current = false; resetAutoplayTimer(); }}
     >
       <div className={styles.header}>
         <div className={styles.titleWrap}>

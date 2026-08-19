@@ -366,8 +366,12 @@ export default function ArtHero({
       </div>
 
       {/* ── Swipe Indicator (тільки для мобілок на першому екрані до першого свайпу) ── */}
-      {!isArtistSelected && authors.length > 1 && !hasSwiped && activeMobileIndex === 0 && (
-        <div className={styles.swipeIndicator}>
+      {!isArtistSelected && authors.length > 1 && (
+        <div
+          className={`${styles.swipeIndicator} ${
+            hasSwiped || activeMobileIndex > 0 ? styles.swipeIndicatorHidden : ""
+          }`}
+        >
           <span className={styles.swipeText}>Swipe</span>
           <span className={styles.swipeArrow}>→</span>
         </div>
