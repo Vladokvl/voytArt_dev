@@ -5,26 +5,70 @@
   padding: 6rem 2rem;
   display: flex;
   justify-content: center;
+  max-width: 100vw;
+  box-sizing: border-box;
+  overflow-x: hidden;
+
+  @media (max-width: 768px) {
+    padding: 3.5rem 1.25rem;
+  }
 }
 
 .inner {
   max-width: 760px;
   width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .content {
   font-size: clamp(1rem, 1.5vw, 1.125rem);
   line-height: 1.85;
   color: var(--color-text);
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
 
-  p { margin: 0 0 1.5rem; }
+  a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+    word-wrap: break-word;
+  }
+
+  p {
+    margin: 0 0 1.5rem;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
   p:last-child { margin-bottom: 0; }
   strong { font-weight: 600; }
   em { font-style: italic; }
-  ul {
+  ul, ol {
     padding-left: 1.5rem;
     margin: 0 0 1.5rem;
-    li { margin-bottom: 0.4rem; }
+    li {
+      margin-bottom: 0.4rem;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+  }
+
+  blockquote {
+    margin: 1.5rem 0;
+    padding-left: 1.25rem;
+    border-left: 3px solid var(--color-text-muted, #888);
+    font-style: italic;
+    overflow-wrap: break-word;
+  }
+
+  pre, code {
+    overflow-x: auto;
+    max-width: 100%;
+    word-break: break-all;
   }
 }
 

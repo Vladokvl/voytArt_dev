@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState, useCallback } from "react";
+import React, { useRef, useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./ProductCarousel.module.scss";
@@ -29,15 +29,27 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
   onAddToCart,
 }: ProductCarouselProps<T>) {
   const trackRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [isGrabbing, setIsGrabbing] = useState(false);
   const isDownRef = useRef(false);
   const startXRef = useRef(0);
   const scrollLeftRef = useRef(0);
   const isDraggingRef = useRef(false);
   const animFrameRef = useRef<number | null>(null);
+  const isUserInteractingRef = useRef(false);
+  const touchStartXRef = useRef(0);
+
+  // Отримуємо ширину одного слайду разом із відступом (gap)
+  const getSlideStep = useCallback(() => {
+    if (!trackRef.current) return 300;
+    const slide = trackRef.current.querySelector<HTMLElement>(`.${styles.slide}`);
+    if (!slide) return 300;
+    const gap = 16;
+    return slide.offsetWidth + gap;
+  }, []);
 
   // ── Плавна анімація скролу через RAF (cubic easeOut) ──
-  const smoothScrollTo = useCallback((targetLeft: number, duration = 450) => {
+  const smoothScrollTo = useCallback((targetLeft: number, duration = 400) => {
     const track = trackRef.current;
     if (!track) return;
 
@@ -72,25 +84,86 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
     animFrameRef.current = requestAnimationFrame(step);
   }, []);
 
-  // ── Плавний скрол кнопками вліво / вправо ──
-  const scroll = useCallback((direction: "left" | "right") => {
+  // Перехід до конкретного слайду
+  const scrollToIndex = useCallback(
+    (index: number) => {
+      const step = getSlideStep();
+      const target = index * step;
+      smoothScrollTo(target, 450);
+      setActiveIndex(index);
+    },
+    [getSlideStep, smoothScrollTo]
+  );
+
+  // ── Стрілочки вліво / вправо ──
+  const scroll = useCallback(
+    (direction: "left" | "right") => {
+      if (!products.length) return;
+      let nextIndex = direction === "left" ? activeIndex - 1 : activeIndex + 1;
+      if (nextIndex < 0) nextIndex = products.length - 1;
+      if (nextIndex >= products.length) nextIndex = 0;
+      scrollToIndex(nextIndex);
+    },
+    [activeIndex, products.length, scrollToIndex]
+  );
+
+  // Оновлення activeIndex при скролі
+  const handleScroll = useCallback(() => {
     if (!trackRef.current) return;
-    const track = trackRef.current;
-    const slide = track.querySelector<HTMLElement>(`.${styles.slide}`);
-    const cardStep = slide ? slide.offsetWidth + 16 : 300;
-    const scrollDistance = cardStep * 1.2;
+    const step = getSlideStep();
+    if (step <= 0) return;
+    const currentScroll = trackRef.current.scrollLeft;
+    const index = Math.round(currentScroll / step);
+    const clamped = Math.max(0, Math.min(products.length - 1, index));
+    setActiveIndex(clamped);
+  }, [getSlideStep, products.length]);
 
-    const targetLeft =
-      direction === "left"
-        ? track.scrollLeft - scrollDistance
-        : track.scrollLeft + scrollDistance;
+  // ── Автоперегортання кожні 6 секунд ──
+  useEffect(() => {
+    if (!products || products.length <= 1) return;
 
-    smoothScrollTo(targetLeft, 500);
-  }, [smoothScrollTo]);
+    const timer = setInterval(() => {
+      if (isUserInteractingRef.current || isDownRef.current) return;
+      setActiveIndex((prev) => {
+        const next = (prev + 1) % products.length;
+        const step = getSlideStep();
+        smoothScrollTo(next * step, 500);
+        return next;
+      });
+    }, 6000);
 
-  // ── Drag-to-scroll мишкою (Swiper style) ──
+    return () => clearInterval(timer);
+  }, [products, getSlideStep, smoothScrollTo]);
+
+  // ── Touch Events (Мобільний тач/свайп) ──
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    isUserInteractingRef.current = true;
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+    touchStartXRef.current = e.touches[0]?.pageX ?? 0;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    const touchX = e.touches[0]?.pageX ?? 0;
+    const diff = touchX - touchStartXRef.current;
+    if (Math.abs(diff) > 8) {
+      isDraggingRef.current = true;
+    }
+  };
+
+  const handleTouchEnd = () => {
+    isUserInteractingRef.current = false;
+    setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 60);
+  };
+
+  // ── Mouse Events (Десктоп драг) ──
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!trackRef.current) return;
+    isUserInteractingRef.current = true;
     if (animFrameRef.current) {
       cancelAnimationFrame(animFrameRef.current);
       animFrameRef.current = null;
@@ -105,7 +178,7 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isDownRef.current || !trackRef.current) return;
     const x = e.pageX - trackRef.current.offsetLeft;
-    const walk = (x - startXRef.current) * 1.2;
+    const walk = (x - startXRef.current) * 1.3;
 
     if (Math.abs(walk) > 6) {
       isDraggingRef.current = true;
@@ -115,11 +188,16 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
   };
 
   const handleMouseUpOrLeave = () => {
-    isDownRef.current = false;
-    setIsGrabbing(false);
+    if (isDownRef.current) {
+      isDownRef.current = false;
+      setIsGrabbing(false);
+      isUserInteractingRef.current = false;
+      setTimeout(() => {
+        isDraggingRef.current = false;
+      }, 60);
+    }
   };
 
-  // Запобігаємо випадковому відкриттю картки/посилання під час драгу
   const handleClickCapture = (e: React.MouseEvent) => {
     if (isDraggingRef.current) {
       e.preventDefault();
@@ -130,9 +208,18 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
   if (!products || products.length === 0) return null;
 
   return (
-    <div className={styles.carousel}>
+    <div
+      className={styles.carousel}
+      onMouseEnter={() => { isUserInteractingRef.current = true; }}
+      onMouseLeave={() => { isUserInteractingRef.current = false; }}
+    >
       <div className={styles.header}>
-        <h2 className={styles.title}>{title}</h2>
+        <div className={styles.titleWrap}>
+          <h2 className={styles.title}>{title}</h2>
+          <span className={styles.counterBadge}>
+            {activeIndex + 1} / {products.length}
+          </span>
+        </div>
         <div className={styles.buttons}>
           <button
             type="button"
@@ -160,6 +247,10 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
       <div
         className={`${styles.track} ${isGrabbing ? styles.isGrabbing : ""}`}
         ref={trackRef}
+        onScroll={handleScroll}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUpOrLeave}
@@ -211,6 +302,21 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
           );
         })}
       </div>
+
+      {/* ── Крапочки індикатора слайдів (Dots Pagination) ── */}
+      {products.length > 1 && (
+        <div className={styles.dotsWrapper} aria-label="Carousel pagination">
+          {products.map((p, idx) => (
+            <button
+              key={p.id}
+              type="button"
+              className={`${styles.dot} ${idx === activeIndex ? styles.dotActive : ""}`}
+              onClick={() => scrollToIndex(idx)}
+              aria-label={`Go to slide ${idx + 1}`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

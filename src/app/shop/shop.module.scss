@@ -175,8 +175,8 @@
   gap: 2rem 1.5rem;
 
   @media (max-width: 640px) {
-    gap: 1.5rem 1rem;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr));
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem 0.5rem;
   }
 }
 
@@ -195,6 +195,11 @@
     transform: translateY(-6px);
     box-shadow: 0 16px 36px rgba(0, 0, 0, 0.09);
     border-color: rgba(26, 26, 26, 0.18);
+  }
+
+  @media (max-width: 640px) {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
   }
 }
 
@@ -235,6 +240,13 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   z-index: 2;
+
+  @media (max-width: 640px) {
+    top: 0.4rem;
+    left: 0.4rem;
+    padding: 0.2rem 0.45rem;
+    font-size: 0.62rem;
+  }
 }
 
 .featuredBadge {
@@ -251,6 +263,13 @@
   letter-spacing: 0.06em;
   z-index: 2;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+  @media (max-width: 640px) {
+    top: 0.4rem;
+    left: 0.4rem;
+    padding: 0.2rem 0.45rem;
+    font-size: 0.62rem;
+  }
 }
 
 .cardInfo {
@@ -260,7 +279,7 @@
   flex-grow: 1;
 
   @media (max-width: 640px) {
-    padding: 1rem;
+    padding: 0.65rem 0.5rem;
   }
 }
 
@@ -271,6 +290,11 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin-bottom: 0.35rem;
+
+  @media (max-width: 640px) {
+    font-size: 0.65rem;
+    margin-bottom: 0.2rem;
+  }
 }
 
 .titleLink {
@@ -281,6 +305,10 @@
   &:hover h2 {
     color: var(--color-text);
     opacity: 0.8;
+  }
+
+  @media (max-width: 640px) {
+    margin-bottom: 0.4rem;
   }
 }
 
@@ -296,7 +324,8 @@
   overflow: hidden;
 
   @media (max-width: 640px) {
-    font-size: 0.95rem;
+    font-size: 0.825rem;
+    line-height: 1.25;
   }
 }
 
@@ -306,6 +335,12 @@
   justify-content: space-between;
   align-items: center;
   gap: 0.5rem;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.45rem;
+  }
 }
 
 .priceWrap {
@@ -320,7 +355,7 @@
   letter-spacing: -0.02em;
 
   @media (max-width: 640px) {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
 }
 
@@ -361,8 +396,11 @@
   }
 
   @media (max-width: 640px) {
-    padding: 0.45rem 0.75rem;
+    width: 100%;
+    justify-content: center;
+    padding: 0.45rem 0.5rem;
     font-size: 0.75rem;
+    border-radius: 6px;
   }
 }
 

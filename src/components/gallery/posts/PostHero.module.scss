@@ -39,9 +39,14 @@
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
-  max-width: 860px;
-  padding: 0 2rem;
+  max-width: min(860px, 100vw);
+  box-sizing: border-box;
+  padding: 0 1.5rem;
   text-align: center;
+
+  @media (max-width: 640px) {
+    padding: 0 1rem;
+  }
 }
 
 .date {
@@ -55,10 +60,12 @@
 }
 
 .title {
-  font-size: clamp(2rem, 5vw, 3.75rem);
+  font-size: clamp(1.75rem, 5vw, 3.75rem);
   font-weight: 700;
   color: #fff;
-  line-height: 1.1;
+  line-height: 1.15;
   letter-spacing: -0.02em;
   font-family: var(--font-heading);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
