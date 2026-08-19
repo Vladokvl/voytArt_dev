@@ -177,7 +177,7 @@ export default function HeroDesktop() {
           MAIN_PROGRESS_FRAC;
         const neonFrac = neonBufferedFraction * NEON_PROGRESS_FRAC;
         const total = Math.min(1, framesFrac + neonFrac);
-        bufferBar.style.width = `${total * 100}%`;
+        bufferBar.style.transform = `scaleX(${total})`;
       }
     };
 
@@ -435,7 +435,7 @@ export default function HeroDesktop() {
           scrub: 0.8,
           onUpdate: (self) => {
             if (bar)
-              bar.style.width = `${self.progress * MAIN_PROGRESS_FRAC * 100}%`;
+              bar.style.transform = `scaleX(${self.progress * MAIN_PROGRESS_FRAC})`;
 
             const rawCurrentFrame = Math.round(frameState.frame);
             const currentFrame = snapFrameToStride(
@@ -664,7 +664,7 @@ export default function HeroDesktop() {
           scrub: 0.8,
           onUpdate: (self) => {
             if (bar)
-              bar.style.width = `${(MAIN_PROGRESS_FRAC + self.progress * NEON_PROGRESS_FRAC) * 100}%`;
+              bar.style.transform = `scaleX(${MAIN_PROGRESS_FRAC + self.progress * NEON_PROGRESS_FRAC})`;
           },
         });
 

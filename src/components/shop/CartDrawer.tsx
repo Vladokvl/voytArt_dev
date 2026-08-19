@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import Image from "next/image";
 import { X, ShoppingBag, Trash2, ArrowRight, ArrowLeft, Check, Truck, Loader2 } from "lucide-react";
 import { useCart } from "~/context/CartContext";
@@ -19,6 +19,24 @@ export default function CartDrawer() {
     totalItems,
     totalPrice,
   } = useCart();
+
+  // ── Блокування фонового скролу сторінки (iOS Safari + Android + Desktop) ──
+  useEffect(() => {
+    if (!isCartOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    const originalTouchAction = document.body.style.touchAction;
+
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+
+    return () => {
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = originalOverflow;
+      document.body.style.touchAction = originalTouchAction;
+    };
+  }, [isCartOpen]);
 
   const [step, setStep] = useState<"cart" | "form" | "success">("cart");
   const [orderNumber, setOrderNumber] = useState<string>("");
@@ -97,7 +115,11 @@ export default function CartDrawer() {
 
   return (
     <div className={styles.drawerShell} data-open={isCartOpen}>
-      <div className={styles.overlay} onClick={handleCloseAndReset} />
+      <div
+        className={styles.overlay}
+        onClick={handleCloseAndReset}
+        onTouchMove={(e) => e.preventDefault()}
+      />
 
       <aside className={styles.drawer} aria-modal="true" role="dialog" aria-label="Shopping Cart">
         {/* Header */}

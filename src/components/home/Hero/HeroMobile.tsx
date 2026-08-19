@@ -41,7 +41,7 @@ const MOBILE_SNAP_POINTS = [0.0, 0.25, 0.72, 0.98];
 // ★ Де зупинитися всередині Neon-секції (0.0 = самий верх, 1.0 = самий низ)
 const MOBILE_NEON_SNAP = 0.9;
 // ★ Швидкість / тривалість перельоту між секціями (у секундах)
-// (Змінюй тут: 0.8 = швидше, 1.2 = плавно за замовчуванням, 1.6 = довше/кінематографічніше)
+// (Змінюй тут: 1.5 = швидше, 2.0 = стандарт, 2.8 = довше/плавніше, 3.5 = кінематографічніше)
 const MOBILE_SNAP_DURATION = 2;
 
 export default function HeroMobile() {
@@ -152,7 +152,7 @@ export default function HeroMobile() {
           MAIN_PROGRESS_FRAC;
         const neonFrac = neonBufferedFraction * NEON_PROGRESS_FRAC;
         const total = Math.min(1, framesFrac + neonFrac);
-        bufferBar.style.width = `${total * 100}%`;
+        bufferBar.style.transform = `scaleX(${total})`;
       }
     };
 
@@ -209,10 +209,9 @@ export default function HeroMobile() {
       const rawDpr = window.devicePixelRatio || 1;
       const dpr = Math.min(rawDpr, 1.25);
       const width = Math.max(1, Math.floor(window.innerWidth));
-      const height = Math.max(1, Math.floor(window.visualViewport?.height ?? window.innerHeight));
+      const height = Math.max(1, Math.floor(window.innerHeight));
 
-      // На iOS Safari уникаємо очищення канвасу при згортанні/розгортанні адресного рядка (зміна висоти < 90px)
-      if (Math.abs(width - lastWidth) < 2 && Math.abs(height - lastHeight) < 90 && lastWidth > 0) {
+      if (width === lastWidth && Math.abs(height - lastHeight) < 4 && lastWidth > 0) {
         return;
       }
 
@@ -221,8 +220,10 @@ export default function HeroMobile() {
 
       canvas.width = Math.floor(width * dpr);
       canvas.height = Math.floor(height * dpr);
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
+      canvas.style.position = "absolute";
+      canvas.style.inset = "0";
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
 
       drawFrame(currentFrameRef.current);
     };
@@ -415,7 +416,7 @@ export default function HeroMobile() {
           scrub: 0.35,
           onUpdate: (self) => {
             if (bar) {
-              bar.style.width = `${self.progress * MAIN_PROGRESS_FRAC * 100}%`;
+              bar.style.transform = `scaleX(${self.progress * MAIN_PROGRESS_FRAC})`;
             }
 
             // При scrub інерції tween інколи не доходить до точного кадру 1/last на краях.
@@ -625,7 +626,7 @@ export default function HeroMobile() {
           end: "bottom bottom",
           scrub: 1.0,
           onUpdate: (self) => {
-            if (bar) bar.style.width = `${(MAIN_PROGRESS_FRAC + self.progress * NEON_PROGRESS_FRAC) * 100}%`;
+            if (bar) bar.style.transform = `scaleX(${MAIN_PROGRESS_FRAC + self.progress * NEON_PROGRESS_FRAC})`;
           },
         });
 

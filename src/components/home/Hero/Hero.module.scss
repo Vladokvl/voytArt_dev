@@ -245,10 +245,13 @@
   top: 0;
   left: 0;
   height: 100%;
-  width: 0%;
+  width: 100%;
   background: rgba(255, 255, 255, 0.38); // Сірий індикатор завантаженого контенту
-  transition: width 0.2s ease-out;
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 0.25s ease-out;
   pointer-events: none;
+  will-change: transform;
 }
 
 .progressBar {
@@ -256,10 +259,13 @@
   top: 0;
   left: 0;
   height: 100%;
-  width: 0%;
+  width: 100%;
   background: var(--color-accent); // Жовтий маркер поточної позиції
-  transition: width 0.05s linear;
+  transform-origin: left center;
+  transform: scaleX(0);
   box-shadow: 0 0 6px rgba(215, 255, 1, 0.4);
+  pointer-events: none;
+  will-change: transform;
 }
 
 // ── Підказка "scroll" — у межах fixedHud (позиціонується flexbox'ом) ──────

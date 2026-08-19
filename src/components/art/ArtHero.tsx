@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import gsap from "gsap";
 import styles from "@/app/art/[[...artistId]]/art.module.scss";
@@ -233,19 +233,24 @@ export default function ArtHero({
   };
 
   // ── Swipe обробники для мобільних ──────────────────────────────────────────
+  const dismissSwipeHint = useCallback(() => {
+    setHasSwiped(true);
+  }, []);
+
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isArtistSelected) return;
+    dismissSwipeHint();
     touchStartXRef.current = e.touches[0]?.clientX ?? 0;
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     if (isArtistSelected) return;
+    dismissSwipeHint();
     const touch = e.changedTouches[0];
     if (!touch) return;
     const delta = touch.clientX - touchStartXRef.current;
     if (Math.abs(delta) < 35) return;
 
-    setHasSwiped(true);
     let newIndex = activeMobileIndex;
     if (delta > 0) {
       if (newIndex > 0) newIndex--;
@@ -263,7 +268,7 @@ export default function ArtHero({
 
   const handleDotClick = (index: number) => {
     if (isArtistSelected) return;
-    setHasSwiped(true);
+    dismissSwipeHint();
     setActiveMobileIndex(index);
     gsap.to(sliderWrapperRef.current, {
       x: `-${index * 100}vw`,
@@ -274,12 +279,16 @@ export default function ArtHero({
 
   if (authors.length === 0) return null;
 
+  const isSwipeHintHidden = isArtistSelected || hasSwiped || activeMobileIndex > 0;
+
   return (
     <div
       ref={heroRef}
       className={styles.hero}
       onTouchStart={handleTouchStart}
+      onTouchMove={dismissSwipeHint}
       onTouchEnd={handleTouchEnd}
+      onPointerDown={dismissSwipeHint}
     >
       <div className={styles.sliderClip}>
         <div
@@ -369,8 +378,16 @@ export default function ArtHero({
       {!isArtistSelected && authors.length > 1 && (
         <div
           className={`${styles.swipeIndicator} ${
-            hasSwiped || activeMobileIndex > 0 ? styles.swipeIndicatorHidden : ""
+            isSwipeHintHidden ? styles.swipeIndicatorHidden : ""
           }`}
+          style={{
+            opacity: isSwipeHintHidden ? 0 : 1,
+            transform: isSwipeHintHidden
+              ? "translateX(-50%) translateY(14px)"
+              : "translateX(-50%) translateY(0)",
+            pointerEvents: "none",
+            transition: "opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
         >
           <span className={styles.swipeText}>Swipe</span>
           <span className={styles.swipeArrow}>→</span>

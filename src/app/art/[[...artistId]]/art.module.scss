@@ -413,9 +413,9 @@
     position: absolute;
     bottom: 4.75rem;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(0);
     z-index: 100;
-    background: rgba(216, 255, 0, 0.92);
+    background: rgba(216, 255, 0, 0.95);
     backdrop-filter: blur(8px);
     border-radius: 50px;
     padding: 0.35rem 0.9rem;
@@ -423,15 +423,13 @@
     font-weight: 700;
     pointer-events: none;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-    animation: swipePulse 2s ease-in-out infinite;
     opacity: 1;
-    transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 
     &.swipeIndicatorHidden {
-      opacity: 0;
-      transform: translateX(-50%) translateY(12px);
-      pointer-events: none;
-      animation: none;
+      opacity: 0 !important;
+      transform: translateX(-50%) translateY(14px) !important;
+      pointer-events: none !important;
     }
   }
 }

@@ -28,65 +28,67 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
   products,
   onAddToCart,
 }: ProductCarouselProps<T>) {
+  const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isGrabbing, setIsGrabbing] = useState(false);
-  const isDownRef = useRef(false);
-  const startXRef = useRef(0);
-  const scrollLeftRef = useRef(0);
-  const isDraggingRef = useRef(false);
-  const animFrameRef = useRef<number | null>(null);
-  const isUserInteractingRef = useRef(false);
 
-  const touchStartXRef = useRef(0);
-  const touchStartYRef = useRef(0);
-  const touchScrollLeftRef = useRef(0);
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const startYRef = useRef(0);
+  const startTimeRef = useRef(0);
+  const currentTranslateRef = useRef(0);
+  const prevTranslateRef = useRef(0);
+  const isPointerDownRef = useRef(false);
   const autoplayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Отримуємо ширину одного слайду разом із відступом (gap)
-  const getSlideStep = useCallback(() => {
-    if (!trackRef.current) return 300;
+  // Отримуємо ширину одного кроку (слайд + gap)
+  const getSlideMetrics = useCallback(() => {
+    if (!trackRef.current || !viewportRef.current) return { step: 300, maxTranslate: 0 };
     const slide = trackRef.current.querySelector<HTMLElement>(`.${styles.slide}`);
-    if (!slide) return 300;
-    const gap = 16;
-    return slide.offsetWidth + gap;
-  }, []);
+    if (!slide) return { step: 300, maxTranslate: 0 };
 
-  // ── Плавна анімація скролу через RAF (cubic easeOut) ──
-  const smoothScrollTo = useCallback((targetLeft: number, duration = 400) => {
-    const track = trackRef.current;
-    if (!track) return;
+    const isMobile = window.innerWidth <= 640;
+    const gap = isMobile ? 12 : 16;
+    const slideWidth = slide.offsetWidth;
+    const step = slideWidth + gap;
 
-    if (animFrameRef.current) {
-      cancelAnimationFrame(animFrameRef.current);
+    const totalWidth = products.length * step - gap;
+    const viewportWidth = viewportRef.current.offsetWidth;
+    const maxTranslate = Math.max(0, totalWidth - viewportWidth);
+
+    return { step, maxTranslate };
+  }, [products.length]);
+
+  // Встановлення позиції треку через GPU-transform
+  const setTrackPosition = useCallback((translatePx: number, animated = true) => {
+    if (!trackRef.current) return;
+    if (animated) {
+      trackRef.current.style.transition = "transform 420ms cubic-bezier(0.25, 1, 0.5, 1)";
+    } else {
+      trackRef.current.style.transition = "none";
     }
-
-    const startLeft = track.scrollLeft;
-    const maxScroll = track.scrollWidth - track.clientWidth;
-    const clampedTarget = Math.max(0, Math.min(maxScroll, targetLeft));
-    const distance = clampedTarget - startLeft;
-
-    if (Math.abs(distance) < 1) return;
-
-    const startTime = performance.now();
-    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
-
-    const step = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(1, elapsed / duration);
-      const eased = easeOutCubic(progress);
-
-      track.scrollLeft = startLeft + distance * eased;
-
-      if (progress < 1) {
-        animFrameRef.current = requestAnimationFrame(step);
-      } else {
-        animFrameRef.current = null;
-      }
-    };
-
-    animFrameRef.current = requestAnimationFrame(step);
+    trackRef.current.style.transform = `translate3d(${translatePx}px, 0, 0)`;
   }, []);
+
+  // Перехід до конкретного слайду
+  const goToSlide = useCallback(
+    (index: number) => {
+      const clampedIndex = Math.max(0, Math.min(products.length - 1, index));
+      const { step, maxTranslate } = getSlideMetrics();
+      let targetTranslate = -(clampedIndex * step);
+
+      if (maxTranslate > 0 && Math.abs(targetTranslate) > maxTranslate) {
+        targetTranslate = -maxTranslate;
+      }
+
+      currentTranslateRef.current = targetTranslate;
+      prevTranslateRef.current = targetTranslate;
+      setTrackPosition(targetTranslate, true);
+      setActiveIndex(clampedIndex);
+    },
+    [products.length, getSlideMetrics, setTrackPosition]
+  );
 
   // ── Скидання та перезапуск автотаймера (8 секунд) ──
   const resetAutoplayTimer = useCallback(() => {
@@ -98,52 +100,29 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
     if (!products || products.length <= 1) return;
 
     autoplayTimerRef.current = setInterval(() => {
-      if (isUserInteractingRef.current || isDownRef.current) return;
+      if (isPointerDownRef.current) return;
       setActiveIndex((prev) => {
         const next = (prev + 1) % products.length;
-        const step = getSlideStep();
-        smoothScrollTo(next * step, 500);
+        goToSlide(next);
         return next;
       });
     }, 8000);
-  }, [products, getSlideStep, smoothScrollTo]);
+  }, [products, goToSlide]);
 
-  // Перехід до конкретного слайду
-  const scrollToIndex = useCallback(
-    (index: number) => {
-      const step = getSlideStep();
-      const target = index * step;
-      smoothScrollTo(target, 450);
-      setActiveIndex(index);
-      resetAutoplayTimer();
-    },
-    [getSlideStep, smoothScrollTo, resetAutoplayTimer]
-  );
-
-  // ── Стрілочки вліво / вправо ──
+  // Навігація стрілочками
   const scroll = useCallback(
     (direction: "left" | "right") => {
       if (!products.length) return;
       let nextIndex = direction === "left" ? activeIndex - 1 : activeIndex + 1;
       if (nextIndex < 0) nextIndex = products.length - 1;
       if (nextIndex >= products.length) nextIndex = 0;
-      scrollToIndex(nextIndex);
+      goToSlide(nextIndex);
+      resetAutoplayTimer();
     },
-    [activeIndex, products.length, scrollToIndex]
+    [activeIndex, products.length, goToSlide, resetAutoplayTimer]
   );
 
-  // Оновлення activeIndex при скролі
-  const handleScroll = useCallback(() => {
-    if (!trackRef.current) return;
-    const step = getSlideStep();
-    if (step <= 0) return;
-    const currentScroll = trackRef.current.scrollLeft;
-    const index = Math.round(currentScroll / step);
-    const clamped = Math.max(0, Math.min(products.length - 1, index));
-    setActiveIndex(clamped);
-  }, [getSlideStep, products.length]);
-
-  // Запуск автотаймера при монтуванні
+  // Ініціалізація автотаймера
   useEffect(() => {
     resetAutoplayTimer();
     return () => {
@@ -153,107 +132,113 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
     };
   }, [resetAutoplayTimer]);
 
-  // ── Touch Events (Повноцінний мобільний тач-свайп) ──
-  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    isUserInteractingRef.current = true;
-    if (animFrameRef.current) {
-      cancelAnimationFrame(animFrameRef.current);
-      animFrameRef.current = null;
-    }
-    const touch = e.touches[0];
-    if (!touch) return;
-    touchStartXRef.current = touch.clientX;
-    touchStartYRef.current = touch.clientY;
-    touchScrollLeftRef.current = trackRef.current ? trackRef.current.scrollLeft : 0;
-    resetAutoplayTimer();
-  };
+  // Синхронізація при зміні розміру вікна
+  useEffect(() => {
+    const handleResize = () => {
+      goToSlide(activeIndex);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [activeIndex, goToSlide]);
 
-  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (!trackRef.current) return;
-    const touch = e.touches[0];
-    if (!touch) return;
-    const deltaX = touch.clientX - touchStartXRef.current;
-    const deltaY = touch.clientY - touchStartYRef.current;
-
-    // Якщо рух пальцем переважно горизонтальний — скролимо карусель
-    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 6) {
-      isDraggingRef.current = true;
-      trackRef.current.scrollLeft = touchScrollLeftRef.current - deltaX;
-    }
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (!trackRef.current) return;
-    const touch = e.changedTouches[0];
-    const deltaX = touch ? touch.clientX - touchStartXRef.current : 0;
-
-    if (Math.abs(deltaX) > 35) {
-      if (deltaX > 0) {
-        // Свайп вправо ➔ попередній товар
-        scroll("left");
-      } else {
-        // Свайп вліво ➔ наступний товар
-        scroll("right");
-      }
-    } else {
-      // Доводка до найближчого слайду
-      const step = getSlideStep();
-      const currentIdx = Math.round(trackRef.current.scrollLeft / step);
-      scrollToIndex(Math.max(0, Math.min(products.length - 1, currentIdx)));
-    }
-
-    isUserInteractingRef.current = false;
-    setTimeout(() => {
-      isDraggingRef.current = false;
-    }, 80);
-    resetAutoplayTimer();
-  };
-
-  // ── Mouse Events (Десктоп драг мишкою) ──
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!trackRef.current) return;
-    isUserInteractingRef.current = true;
-    if (animFrameRef.current) {
-      cancelAnimationFrame(animFrameRef.current);
-      animFrameRef.current = null;
-    }
-    isDownRef.current = true;
+  // ── Unified Swiper Gestures (Touch & Mouse Drag) ──
+  const onDragStart = (clientX: number, clientY: number) => {
+    isPointerDownRef.current = true;
     isDraggingRef.current = false;
-    startXRef.current = e.pageX - trackRef.current.offsetLeft;
-    scrollLeftRef.current = trackRef.current.scrollLeft;
+    startXRef.current = clientX;
+    startYRef.current = clientY;
+    startTimeRef.current = performance.now();
+    setTrackPosition(prevTranslateRef.current, false);
     setIsGrabbing(true);
     resetAutoplayTimer();
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDownRef.current || !trackRef.current) return;
-    const x = e.pageX - trackRef.current.offsetLeft;
-    const walk = (x - startXRef.current) * 1.3;
+  const onDragMove = (clientX: number, clientY: number) => {
+    if (!isPointerDownRef.current) return;
+    const deltaX = clientX - startXRef.current;
+    const deltaY = clientY - startYRef.current;
 
-    if (Math.abs(walk) > 6) {
+    // Відсікаємо випадковий вертикальний скрол
+    if (Math.abs(deltaY) > Math.abs(deltaX) && !isDraggingRef.current) {
+      return;
+    }
+
+    if (Math.abs(deltaX) > 6) {
       isDraggingRef.current = true;
     }
 
-    trackRef.current.scrollLeft = scrollLeftRef.current - walk;
-  };
+    if (isDraggingRef.current) {
+      const { maxTranslate } = getSlideMetrics();
+      let current = prevTranslateRef.current + deltaX;
 
-  const handleMouseUpOrLeave = () => {
-    if (isDownRef.current) {
-      isDownRef.current = false;
-      setIsGrabbing(false);
-      isUserInteractingRef.current = false;
-
-      if (trackRef.current) {
-        const step = getSlideStep();
-        const currentIdx = Math.round(trackRef.current.scrollLeft / step);
-        scrollToIndex(Math.max(0, Math.min(products.length - 1, currentIdx)));
+      // Пружний опір на краях (Rubber-band physics)
+      if (current > 0) {
+        current = deltaX * 0.3;
+      } else if (Math.abs(current) > maxTranslate) {
+        const excess = Math.abs(current) - maxTranslate;
+        current = -maxTranslate - excess * 0.3;
       }
 
+      currentTranslateRef.current = current;
+      setTrackPosition(current, false);
+    }
+  };
+
+  const onDragEnd = () => {
+    if (!isPointerDownRef.current) return;
+    isPointerDownRef.current = false;
+    setIsGrabbing(false);
+
+    if (isDraggingRef.current) {
+      const deltaX = currentTranslateRef.current - prevTranslateRef.current;
+      const elapsedTime = performance.now() - startTimeRef.current;
+      const velocity = deltaX / (elapsedTime || 1);
+      const { step } = getSlideMetrics();
+
+      let targetIndex = activeIndex;
+
+      // Швидкий флік або свайп більше 20% ширини
+      if (Math.abs(velocity) > 0.25 || Math.abs(deltaX) > step * 0.2) {
+        if (deltaX < 0) {
+          targetIndex = activeIndex + 1;
+        } else {
+          targetIndex = activeIndex - 1;
+        }
+      }
+
+      goToSlide(targetIndex);
       setTimeout(() => {
         isDraggingRef.current = false;
-      }, 80);
-      resetAutoplayTimer();
+      }, 60);
+    } else {
+      goToSlide(activeIndex);
     }
+
+    resetAutoplayTimer();
+  };
+
+  // Touch Handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    if (t) onDragStart(t.clientX, t.clientY);
+  };
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    if (t) onDragMove(t.clientX, t.clientY);
+  };
+  const handleTouchEnd = () => {
+    onDragEnd();
+  };
+
+  // Mouse Handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    onDragStart(e.clientX, e.clientY);
+  };
+  const handleMouseMove = (e: React.MouseEvent) => {
+    onDragMove(e.clientX, e.clientY);
+  };
+  const handleMouseUpOrLeave = () => {
+    if (isPointerDownRef.current) onDragEnd();
   };
 
   const handleClickCapture = (e: React.MouseEvent) => {
@@ -268,8 +253,8 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
   return (
     <div
       className={styles.carousel}
-      onMouseEnter={() => { isUserInteractingRef.current = true; }}
-      onMouseLeave={() => { isUserInteractingRef.current = false; resetAutoplayTimer(); }}
+      onMouseEnter={() => { resetAutoplayTimer(); }}
+      onMouseLeave={() => { resetAutoplayTimer(); }}
     >
       <div className={styles.header}>
         <div className={styles.titleWrap}>
@@ -302,10 +287,10 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
         </div>
       </div>
 
+      {/* ── Viewport з перетягуванням як у Swiper ── */}
       <div
-        className={`${styles.track} ${isGrabbing ? styles.isGrabbing : ""}`}
-        ref={trackRef}
-        onScroll={handleScroll}
+        className={`${styles.viewport} ${isGrabbing ? styles.isGrabbing : ""}`}
+        ref={viewportRef}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -315,50 +300,52 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
         onMouseLeave={handleMouseUpOrLeave}
         onClickCapture={handleClickCapture}
       >
-        {products.map((product, index) => {
-          const rawUrl = product.coverUrl ?? product.images?.[0]?.url;
-          const coverImg = rawUrl ? getOptimizedImageUrl(rawUrl, { preset: "card" }) : "/voyt.svg";
-          return (
-            <div key={product.id} className={styles.slide}>
-              <div className={styles.productCard}>
-                <Link href={`/shop/${product.id}`} className={styles.imageWrapper} draggable={false}>
-                  <Image
-                    src={coverImg}
-                    alt={product.title}
-                    fill
-                    priority={index < 2}
-                    className={styles.productImage}
-                    sizes="(max-width: 640px) 100vw, 300px"
-                    draggable={false}
-                  />
-                  {product.stock <= 0 && <div className={styles.soldOut}>Sold Out</div>}
-                </Link>
-
-                <div className={styles.cardInfo}>
-                  <p className={styles.authorName}>
-                    {product.author ? `${product.author.firstName} ${product.author.lastName}` : ""}
-                  </p>
-                  <Link href={`/shop/${product.id}`} style={{ textDecoration: "none", color: "inherit" }} draggable={false}>
-                    <h3 className={styles.productTitle}>
-                      {product.title}
-                    </h3>
+        <div className={styles.track} ref={trackRef}>
+          {products.map((product, index) => {
+            const rawUrl = product.coverUrl ?? product.images?.[0]?.url;
+            const coverImg = rawUrl ? getOptimizedImageUrl(rawUrl, { preset: "card" }) : "/voyt.svg";
+            return (
+              <div key={product.id} className={styles.slide}>
+                <div className={styles.productCard}>
+                  <Link href={`/shop/${product.id}`} className={styles.imageWrapper} draggable={false}>
+                    <Image
+                      src={coverImg}
+                      alt={product.title}
+                      fill
+                      priority={index < 2}
+                      className={styles.productImage}
+                      sizes="(max-width: 640px) 100vw, 300px"
+                      draggable={false}
+                    />
+                    {product.stock <= 0 && <div className={styles.soldOut}>Sold Out</div>}
                   </Link>
-                  <div className={styles.cardFooter}>
-                    <span className={styles.price}>{product.price.toLocaleString("en-US")} €</span>
-                    <button
-                      type="button"
-                      onClick={() => onAddToCart(product)}
-                      disabled={product.stock <= 0}
-                      className={styles.addToCartBtn}
-                    >
-                      {product.stock <= 0 ? "Sold Out" : "Add to Cart"}
-                    </button>
+
+                  <div className={styles.cardInfo}>
+                    <p className={styles.authorName}>
+                      {product.author ? `${product.author.firstName} ${product.author.lastName}` : ""}
+                    </p>
+                    <Link href={`/shop/${product.id}`} style={{ textDecoration: "none", color: "inherit" }} draggable={false}>
+                      <h3 className={styles.productTitle}>
+                        {product.title}
+                      </h3>
+                    </Link>
+                    <div className={styles.cardFooter}>
+                      <span className={styles.price}>{product.price.toLocaleString("en-US")} €</span>
+                      <button
+                        type="button"
+                        onClick={() => onAddToCart(product)}
+                        disabled={product.stock <= 0}
+                        className={styles.addToCartBtn}
+                      >
+                        {product.stock <= 0 ? "Sold Out" : "Add to Cart"}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* ── Крапочки індикатора слайдів (Dots Pagination) ── */}
@@ -369,7 +356,10 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
               key={p.id}
               type="button"
               className={`${styles.dot} ${idx === activeIndex ? styles.dotActive : ""}`}
-              onClick={() => scrollToIndex(idx)}
+              onClick={() => {
+                goToSlide(idx);
+                resetAutoplayTimer();
+              }}
               aria-label={`Go to slide ${idx + 1}`}
             />
           ))}
