@@ -9,3 +9,12 @@
 @mixin desktop {
   @media (min-width: 1024px) { @content; }
 }
+
+// Застосовує ховер-стилі виключно на пристроях з реальною мишкою/курсором
+@mixin hover {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      @content;
+    }
+  }
+}

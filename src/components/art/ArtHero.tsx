@@ -47,6 +47,7 @@ export default function ArtHero({
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   // Активний слайд на мобільних пристроях
   const [activeMobileIndex, setActiveMobileIndex] = useState(0);
+  const [hasSwiped, setHasSwiped] = useState(false);
   const [loadingArtistId, setLoadingArtistId] = useState<number | null>(null);
 
   // Прогрес скролу на десктопі (від 0 до 100)
@@ -242,8 +243,9 @@ export default function ArtHero({
     const touch = e.changedTouches[0];
     if (!touch) return;
     const delta = touch.clientX - touchStartXRef.current;
-    if (Math.abs(delta) < 40) return;
+    if (Math.abs(delta) < 35) return;
 
+    setHasSwiped(true);
     let newIndex = activeMobileIndex;
     if (delta > 0) {
       if (newIndex > 0) newIndex--;
@@ -261,6 +263,7 @@ export default function ArtHero({
 
   const handleDotClick = (index: number) => {
     if (isArtistSelected) return;
+    setHasSwiped(true);
     setActiveMobileIndex(index);
     gsap.to(sliderWrapperRef.current, {
       x: `-${index * 100}vw`,
@@ -362,8 +365,8 @@ export default function ArtHero({
         ))}
       </div>
 
-      {/* ── Swipe Indicator (тільки для мобілок на першому екрані) ── */}
-      {!isArtistSelected && authors.length > 1 && (
+      {/* ── Swipe Indicator (тільки для мобілок на першому екрані до першого свайпу) ── */}
+      {!isArtistSelected && authors.length > 1 && !hasSwiped && activeMobileIndex === 0 && (
         <div className={styles.swipeIndicator}>
           <span className={styles.swipeText}>Swipe</span>
           <span className={styles.swipeArrow}>→</span>

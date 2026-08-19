@@ -35,11 +35,11 @@
   overflow: hidden;
   border-radius: 12px;
   cursor: pointer;
-  background: #f3f3f3;
-
-  &:hover img {
-    opacity: 0.88;
-    transform: scale(1.02);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover img {
+      opacity: 0.88;
+      transform: scale(1.02);
+    }
   }
 
   &[data-no-neon="true"] {
@@ -47,9 +47,11 @@
     opacity: 0.75;
     transition: filter 0.4s ease, opacity 0.4s ease;
 
-    &:hover {
-      filter: none;
-      opacity: 1;
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        filter: none;
+        opacity: 1;
+      }
     }
   }
 }

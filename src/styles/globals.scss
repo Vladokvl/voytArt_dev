@@ -29,9 +29,40 @@ body {
   font-family: var(--font-montserrat), 'Montserrat', sans-serif;
   background-color: var(--color-bg);
   color: var(--color-text);
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 
 a {
   color: inherit;
   text-decoration: none;
+}
+
+// ── Вимкнення «липких» hover-ефектів на тачскрінах та мобільних пристроях ──
+@media (hover: none) or (max-width: 899px) {
+  *,
+  *::before,
+  *::after {
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  // Забороняємо підстрибування/зсуви карток і кнопок при свайпах пальцем
+  a:hover,
+  button:hover,
+  [class*="card"]:hover,
+  [class*="Card"]:hover,
+  [class*="item"]:hover,
+  [class*="Item"]:hover,
+  [class*="column"]:hover,
+  [class*="chip"]:hover {
+    transform: none !important;
+  }
+
+  [class*="card"]:hover img,
+  [class*="Card"]:hover img,
+  [class*="image"]:hover img,
+  [class*="Image"]:hover img,
+  [class*="Wrapper"]:hover img {
+    transform: none !important;
+  }
 }
