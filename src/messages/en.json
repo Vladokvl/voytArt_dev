@@ -1,0 +1,148 @@
+{
+  "nav": {
+    "home": "Home",
+    "art": "Art",
+    "gallery": "Gallery",
+    "shop": "Shop",
+    "menu": "Menu"
+  },
+  "footer": {
+    "contact": "Contact",
+    "getInTouch": "Get in touch",
+    "navigate": "Navigate",
+    "copyright": "© {year}. All rights reserved. VoytArtGallery"
+  },
+  "hero": {
+    "title": "VOYT ART GALLERY",
+    "subtitle": "Discover original paintings by Ukrainian artists",
+    "scroll": "scroll"
+  },
+  "section": {
+    "about": {
+      "num": "01 / 04",
+      "tag": "Latest stories",
+      "label": "About",
+      "title": "About our\ngallery",
+      "desc": "Step inside our exhibitions, behind-the-scenes process, and moments from the space.",
+      "btn": "View gallery stories →"
+    },
+    "art": {
+      "num": "02 / 04",
+      "tag": "Original works",
+      "label": "Art",
+      "title": "Discover\nour art",
+      "desc": "Explore paintings, collections, and visual narratives created by our artists.",
+      "btn": "Browse paintings →"
+    },
+    "shop": {
+      "num": "03 / 04",
+      "tag": "Limited pieces",
+      "label": "Shop",
+      "title": "Art shop",
+      "desc": "Collect prints, objects, and curated pieces inspired by our current exhibitions.",
+      "btn": "Explore the shop →"
+    },
+    "neon": {
+      "num": "04 / 04",
+      "tag": "Bonus scene",
+      "label": "Neon",
+      "title": "Neon\npaintings",
+      "desc": "A UV-lit concept room where special pigments reveal hidden layers of selected works.",
+      "btn": "Explore neon →"
+    }
+  },
+  "art": {
+    "ourPaintings": "Our Paintings",
+    "authorWorks": "{name} — Works",
+    "allPaintings": "All paintings",
+    "neonMode": "UV Neon Mode",
+    "swipeHint": "Swipe",
+    "empty": "No paintings found.",
+    "showMore": "Show more",
+    "loading": "Loading...",
+    "share": "Share",
+    "copied": "Copied!",
+    "originalArtwork": "Original Artwork",
+    "uvNeonGlow": "UV Neon Glow",
+    "daylight": "Daylight",
+    "neonGlow": "Neon Glow",
+    "interested": "Interested ?",
+    "close": "Close",
+    "inquiryBack": "Back",
+    "inquiryTitle": "Interested in this artwork",
+    "inquirySuccessTitle": "Inquiry Sent!",
+    "inquiryReference": "Reference",
+    "inquirySuccessDesc": "We will reach out to you shortly to share details, private viewing opportunities, and acquisition info.",
+    "yourName": "Your Name",
+    "phoneTelegram": "Phone or @Telegram",
+    "preferredContact": "Preferred Contact Method",
+    "messageOptional": "Message / Question (Optional)",
+    "submitInquiry": "Submit Inquiry",
+    "sending": "Sending...",
+    "orContactDirectly": "or contact us directly",
+    "chatTelegram": "Chat directly on Telegram"
+  },
+  "gallery": {
+    "heroTitle": "Discover Our Gallery",
+    "heroSubtitle": "A sanctuary where contemporary Ukrainian creativity meets immersive artistic vision.",
+    "ourStory": "Our Story",
+    "whereArtMeetsCommunity": "Where Art Meets Community",
+    "storyP1": "VoytArt Gallery is more than a space for paintings — it is a living chronicle of events, exhibitions and human connections that happen around art every day.",
+    "storyP2": "Browse our gallery posts to see exhibitions, artist talks, opening nights and behind-the-scenes moments that make our community unique.",
+    "postsTitle": "Gallery Posts",
+    "empty": "No posts yet.",
+    "readMore": "Learn more →",
+    "showMore": "Show More",
+    "loading": "Loading...",
+    "back": "← Back"
+  },
+  "shop": {
+    "curatedBadge": "Curated Editions & Apparel",
+    "storeTitle": "Gallery Store",
+    "storeSubtitle": "Original prints, limited apparel, and collectible design objects crafted by Ukrainian contemporary artists.",
+    "featuredReleases": "Featured Releases",
+    "allCollections": "All Collections ({count})",
+    "cart": "Cart",
+    "noProducts": "No products available in this category at the moment.",
+    "soldOut": "Sold Out",
+    "featured": "Featured",
+    "optionsCount": "{count} options",
+    "added": "Added",
+    "options": "Options",
+    "add": "Add",
+    "selectVariant": "Select Option / Size:",
+    "inStock": "In Stock ({count} available)",
+    "outOfStock": "Out of Stock",
+    "addToCart": "Add to Cart",
+    "addedToCart": "Added to Cart!",
+    "productDetails": "Product Details",
+    "youMayAlsoLike": "You May Also Like"
+  },
+  "cart": {
+    "shoppingCart": "Shopping Bag",
+    "emptyCart": "Your bag is currently empty",
+    "exploreShop": "Explore the Gallery Store",
+    "subtotal": "Subtotal",
+    "shippingCalculated": "Shipping calculated during checkout",
+    "checkout": "Proceed to Checkout",
+    "backToBag": "Back to Bag",
+    "deliveryDetails": "Delivery Details",
+    "yourName": "Your Name",
+    "email": "Email Address",
+    "phone": "Phone Number",
+    "city": "City / Town",
+    "address": "Delivery Address (Nova Poshta branch)",
+    "comment": "Comment / Delivery notes (Optional)",
+    "placeOrder": "Place Order",
+    "processing": "Processing...",
+    "orderConfirmed": "Order Confirmed!",
+    "orderNumber": "Order Reference",
+    "thankYou": "Thank you for supporting Ukrainian art. We have received your order and will contact you promptly with shipping updates.",
+    "continueShopping": "Continue Shopping"
+  },
+  "banner": {
+    "title": "In-app Browser {name}",
+    "desc": "For smooth 60fps animation and audio, open in Safari or Chrome",
+    "open": "Open ↗"
+  }
+}

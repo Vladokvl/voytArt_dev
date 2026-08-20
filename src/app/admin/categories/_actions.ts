@@ -8,6 +8,7 @@ export async function createCategoryAction(
   formData: FormData,
 ): Promise<{ error: string } | undefined> {
   const name = formData.get("name") as string;
+  const nameUk = (formData.get("nameUk") as string)?.trim() || null;
   const slug = formData.get("slug") as string;
 
   if (!name || !slug) {
@@ -17,9 +18,10 @@ export async function createCategoryAction(
   const exists = await db.category.findUnique({ where: { slug } });
   if (exists) return { error: "Категорія з таким slug вже існує" };
 
-  await db.category.create({ data: { name, slug } });
+  await db.category.create({ data: { name, nameUk, slug } });
 
   revalidatePath("/admin/categories");
+  revalidatePath("/shop");
   redirect("/admin/categories");
 }
 
@@ -29,6 +31,7 @@ export async function updateCategoryAction(
 ): Promise<{ error: string } | undefined> {
   const id = Number(formData.get("id"));
   const name = formData.get("name") as string;
+  const nameUk = (formData.get("nameUk") as string)?.trim() || null;
   const slug = formData.get("slug") as string;
 
   if (!id || !name || !slug) {
@@ -38,9 +41,10 @@ export async function updateCategoryAction(
   const exists = await db.category.findFirst({ where: { slug, NOT: { id } } });
   if (exists) return { error: "Категорія з таким slug вже існує" };
 
-  await db.category.update({ where: { id }, data: { name, slug } });
+  await db.category.update({ where: { id }, data: { name, nameUk, slug } });
 
   revalidatePath("/admin/categories");
+  revalidatePath("/shop");
   redirect("/admin/categories");
 }
 

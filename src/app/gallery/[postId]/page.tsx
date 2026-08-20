@@ -58,8 +58,8 @@ export default async function GalleryPostPage({
 
   return (
     <div>
-      <PostHero title={post.title} coverUrl={post.coverUrl} date={post.date} />
-      <PostContent content={post.content} />
+      <PostHero post={post} />
+      <PostContent post={post} />
       <PostMedia items={post.media} />
     </div>
   );

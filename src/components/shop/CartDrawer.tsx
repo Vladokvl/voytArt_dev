@@ -7,6 +7,7 @@ import { useCart } from "~/context/CartContext";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import { createOrderAction } from "~/app/shop/_actions/checkout";
 import styles from "./CartDrawer.module.scss";
+import { useTranslation } from "~/context/LanguageContext";
 
 export default function CartDrawer() {
   const {
@@ -19,24 +20,42 @@ export default function CartDrawer() {
     totalItems,
     totalPrice,
   } = useCart();
+  const { t } = useTranslation();
 
-  // ── Блокування фонового скролу сторінки (iOS Safari + Android + Desktop) ──
+  // ── Блокування фонового скролу (iOS Safari + Android + Desktop) ──────────
+  // iOS Safari ігнорує overflow:hidden на body, тому використовуємо position:fixed
   useEffect(() => {
     if (!isCartOpen) return;
 
-    const originalOverflow = document.body.style.overflow;
-    const originalTouchAction = document.body.style.touchAction;
+    const scrollY = window.scrollY;
 
-    document.documentElement.style.overflow = "hidden";
+    // Зберігаємо поточний стан
+    const prevPosition = document.body.style.position;
+    const prevTop = document.body.style.top;
+    const prevWidth = document.body.style.width;
+    const prevOverflow = document.body.style.overflow;
+    const prevTouchAction = document.body.style.touchAction;
+
+    // Блокуємо скрол — трюк для iOS Safari
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
     document.body.style.overflow = "hidden";
     document.body.style.touchAction = "none";
+    document.documentElement.style.overflow = "hidden";
 
     return () => {
+      // Відновлюємо стан і повертаємо позицію скролу
+      document.body.style.position = prevPosition;
+      document.body.style.top = prevTop;
+      document.body.style.width = prevWidth;
+      document.body.style.overflow = prevOverflow;
+      document.body.style.touchAction = prevTouchAction;
       document.documentElement.style.overflow = "";
-      document.body.style.overflow = originalOverflow;
-      document.body.style.touchAction = originalTouchAction;
+      window.scrollTo(0, scrollY);
     };
   }, [isCartOpen]);
+
 
   const [step, setStep] = useState<"cart" | "form" | "success">("cart");
   const [orderNumber, setOrderNumber] = useState<string>("");
@@ -98,330 +117,326 @@ export default function CartDrawer() {
           setErrorMessage(result.error ?? "Failed to place order. Please try again.");
         }
       } catch (err) {
-        console.error("Order error:", err);
+        console.error("Order submission failed:", err);
         setErrorMessage("An unexpected error occurred. Please try again.");
       }
     });
   };
 
-  const handleCloseAndReset = () => {
+  const handleModalClose = () => {
     closeCart();
     if (step === "success") {
-      setStep("cart");
-      setOrderNumber("");
-      setFormData({ name: "", email: "", phone: "", city: "", address: "", comment: "" });
+      setTimeout(() => {
+        setStep("cart");
+        setOrderNumber("");
+        setFormData({ name: "", email: "", phone: "", city: "", address: "", comment: "" });
+      }, 300);
     }
   };
 
-  return (
-    <div className={styles.drawerShell} data-open={isCartOpen}>
-      <div
-        className={styles.overlay}
-        onClick={handleCloseAndReset}
-        onTouchMove={(e) => e.preventDefault()}
-      />
+  if (!isCartOpen) return null;
 
-      <aside className={styles.drawer} aria-modal="true" role="dialog" aria-label="Shopping Cart">
-        {/* Header */}
-        <div className={styles.header}>
-          <div className={styles.headerTitleWrap}>
-            <ShoppingBag size={20} color="#0f172a" />
-            <h2 className={styles.title}>
-              {step === "cart" && "Shopping Cart"}
-              {step === "form" && "Checkout & Shipping"}
-              {step === "success" && "Order Received"}
-            </h2>
-            {step === "cart" && totalItems > 0 && (
-              <span className={styles.itemCountBadge}>{totalItems}</span>
+  return (
+    <div className={styles.drawerOverlay} onClick={handleModalClose}>
+      <div
+        className={styles.drawerPanel}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Shopping Cart"
+      >
+        {/* ── Header ── */}
+        <header className={styles.header}>
+          <div className={styles.headerLeft}>
+            {step === "form" && (
+              <button
+                type="button"
+                onClick={() => setStep("cart")}
+                className={styles.backBtn}
+                aria-label="Back to Cart"
+              >
+                <ArrowLeft size={18} />
+              </button>
             )}
+            <h2 className={styles.title}>
+              {step === "cart" && `${t("cart.shoppingCart")} (${totalItems})`}
+              {step === "form" && t("cart.deliveryDetails")}
+              {step === "success" && t("cart.orderConfirmed")}
+            </h2>
           </div>
+
           <button
             type="button"
+            onClick={handleModalClose}
             className={styles.closeBtn}
-            onClick={handleCloseAndReset}
             aria-label="Close cart"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
-        </div>
+        </header>
 
-        {/* ── STEP 1: CART ITEMS ── */}
-        {step === "cart" && (
-          <>
-            {cart.length === 0 ? (
-              <div className={styles.emptyCart}>
-                <div className={styles.emptyIconWrap}>
-                  <ShoppingBag size={32} />
+        {/* ── Body Views ── */}
+        <div className={styles.body}>
+          {/* 1. CART ITEMS VIEW */}
+          {step === "cart" && (
+            <>
+              {cart.length === 0 ? (
+                <div className={styles.emptyState}>
+                  <div className={styles.emptyIconWrap}>
+                    <ShoppingBag size={48} strokeWidth={1.2} />
+                  </div>
+                  <h3>{t("cart.emptyCart")}</h3>
+                  <p>{t("cart.exploreShop")}</p>
+                  <button
+                    type="button"
+                    onClick={handleModalClose}
+                    className={styles.continueBtn}
+                  >
+                    {t("cart.exploreShop")}
+                  </button>
                 </div>
-                <h3 className={styles.emptyTitle}>Your cart is empty</h3>
-                <p className={styles.emptyText}>
-                  Explore authentic prints, apparel, and merchandise created by Ukrainian artists.
-                </p>
-                <button
-                  type="button"
-                  onClick={closeCart}
-                  className={styles.exploreBtn}
-                >
-                  Explore Collection
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className={styles.content}>
-                  <div className={styles.itemsList}>
-                    {cart.map((item, idx) => (
-                      <div key={`${item.product.id}_${item.variantId}_${idx}`} className={styles.itemCard}>
+              ) : (
+                <div className={styles.itemsList}>
+                  {cart.map((item, index) => {
+                    const itemKey = `${item.product.id}-${item.variantId ?? "base"}`;
+                    const itemPrice = item.product.price;
+
+                    return (
+                      <div key={itemKey} className={styles.itemCard}>
                         <div className={styles.itemThumb}>
-                          <Image
-                            src={
-                              item.product.coverUrl
-                                ? getOptimizedImageUrl(item.product.coverUrl, { preset: "thumb" })
-                                : "/voyt.svg"
-                            }
-                            alt={item.product.title}
-                            fill
-                            className={styles.thumbImg}
-                          />
+                          {item.product.coverUrl ? (
+                            <Image
+                              src={getOptimizedImageUrl(item.product.coverUrl, { preset: "thumb" })}
+                              alt={item.product.title}
+                              fill
+                              className={styles.thumbImg}
+                            />
+                          ) : (
+                            <div className={styles.itemPlaceholder}>🖼</div>
+                          )}
                         </div>
 
                         <div className={styles.itemDetails}>
-                          <span className={styles.itemAuthor}>
-                            {item.product.author
-                              ? `${item.product.author.firstName} ${item.product.author.lastName}`
-                              : "VoytArt Gallery"}
-                          </span>
-                          <h4 className={styles.itemTitle}>{item.product.title}</h4>
+                          <div>
+                            <h4 className={styles.itemTitle}>{item.product.title}</h4>
+                            <button
+                              type="button"
+                              onClick={() => removeFromCart(index)}
+                              className={styles.itemRemoveBtn}
+                              aria-label="Remove item"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
 
                           {item.variantTitle && (
                             <span className={styles.variantTag}>
-                              Option: {item.variantTitle}
+                              {item.variantTitle}
                             </span>
                           )}
-
-                          <span className={styles.itemPrice}>
-                            {(item.product.price * item.quantity).toLocaleString("en-US")} €
-                          </span>
 
                           <div className={styles.qtyActions}>
                             <div className={styles.qtyControl}>
                               <button
                                 type="button"
+                                onClick={() => updateQuantity(index, -1)}
+                                disabled={item.quantity <= 1}
                                 className={styles.qtyBtn}
-                                onClick={() => updateQuantity(idx, -1)}
                                 aria-label="Decrease quantity"
                               >
-                                -
+                                −
                               </button>
                               <span className={styles.qtyVal}>{item.quantity}</span>
                               <button
                                 type="button"
+                                onClick={() => updateQuantity(index, 1)}
                                 className={styles.qtyBtn}
-                                onClick={() => updateQuantity(idx, 1)}
                                 aria-label="Increase quantity"
                               >
                                 +
                               </button>
                             </div>
+
+                            <div className={styles.itemPrice}>
+                              {(itemPrice * item.quantity).toLocaleString("en-US")} €
+                            </div>
                           </div>
                         </div>
-
-                        <button
-                          type="button"
-                          className={styles.itemRemoveBtn}
-                          onClick={() => removeFromCart(idx)}
-                          title="Remove item"
-                        >
-                          <Trash2 size={16} />
-                        </button>
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })}
                 </div>
+              )}
+            </>
+          )}
 
-                <div className={styles.footer}>
-                  <div className={styles.totalsRow}>
-                    <span className={styles.totalLabel}>Subtotal</span>
-                    <span className={styles.totalPrice}>{totalPrice.toLocaleString("en-US")} €</span>
-                  </div>
-                  <div className={styles.shippingNote}>
-                    <Truck size={14} />
-                    <span>Shipping via Nova Poshta across Ukraine & worldwide</span>
-                  </div>
-                  <button
-                    type="button"
-                    className={styles.checkoutPrimaryBtn}
-                    onClick={handleProceedToCheckout}
-                  >
-                    <span>Proceed to Checkout</span>
-                    <ArrowRight size={18} />
-                  </button>
+          {/* 2. CHECKOUT FORM VIEW */}
+          {step === "form" && (
+            <form id="checkout-form" onSubmit={handleSubmitOrder} className={styles.checkoutForm}>
+              {errorMessage && (
+                <div className={styles.errorAlert} role="alert">
+                  {errorMessage}
                 </div>
-              </>
-            )}
-          </>
-        )}
+              )}
 
-        {/* ── STEP 2: CHECKOUT FORM ── */}
-        {step === "form" && (
-          <form onSubmit={handleSubmitOrder} className={styles.formContainer}>
-            <div className={styles.formHeader}>
-              <h3 className={styles.formTitle}>Shipping & Contact Details</h3>
-              <p className={styles.formSub}>
-                Please fill in your delivery details to complete your order.
-              </p>
-            </div>
-
-            {errorMessage && <div className={styles.errorBox}>{errorMessage}</div>}
-
-            <div className={styles.content} style={{ paddingRight: "0.25rem" }}>
-              <div className={styles.field}>
-                <label className={styles.fieldLabel} htmlFor="cart_name">
-                  Full Name *
-                </label>
+              <div className={styles.formGroup}>
+                <label htmlFor="checkout-name">{t("cart.yourName")} *</label>
                 <input
-                  id="cart_name"
+                  id="checkout-name"
                   name="name"
                   type="text"
                   required
-                  placeholder="e.g. Olena Kovalenko"
+                  placeholder="Alex Doe"
                   value={formData.name}
                   onChange={handleInputChange}
                   className={styles.input}
                 />
               </div>
 
-              <div className={styles.field}>
-                <label className={styles.fieldLabel} htmlFor="cart_phone">
-                  Phone Number *
-                </label>
-                <input
-                  id="cart_phone"
-                  name="phone"
-                  type="tel"
-                  required
-                  placeholder="+380 99 123 4567"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className={styles.input}
-                />
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label htmlFor="checkout-phone">{t("cart.phone")} *</label>
+                  <input
+                    id="checkout-phone"
+                    name="phone"
+                    type="tel"
+                    required
+                    placeholder="+380..."
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className={styles.input}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label htmlFor="checkout-email">{t("cart.email")} *</label>
+                  <input
+                    id="checkout-email"
+                    name="email"
+                    type="email"
+                    required
+                    placeholder="alex@example.com"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className={styles.input}
+                  />
+                </div>
               </div>
 
-              <div className={styles.field}>
-                <label className={styles.fieldLabel} htmlFor="cart_email">
-                  Email Address *
-                </label>
+              <div className={styles.formGroup}>
+                <label htmlFor="checkout-city">{t("cart.city")} *</label>
                 <input
-                  id="cart_email"
-                  name="email"
-                  type="email"
-                  required
-                  placeholder="olena@example.com"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className={styles.input}
-                />
-              </div>
-
-              <div className={styles.field}>
-                <label className={styles.fieldLabel} htmlFor="cart_city">
-                  City (Nova Poshta) *
-                </label>
-                <input
-                  id="cart_city"
+                  id="checkout-city"
                   name="city"
                   type="text"
                   required
-                  placeholder="e.g. Kyiv, Lviv, Odesa"
+                  placeholder="Kyiv"
                   value={formData.city}
                   onChange={handleInputChange}
                   className={styles.input}
                 />
               </div>
 
-              <div className={styles.field}>
-                <label className={styles.fieldLabel} htmlFor="cart_address">
-                  Nova Poshta Branch / Address *
-                </label>
+              <div className={styles.formGroup}>
+                <label htmlFor="checkout-address">{t("cart.address")} *</label>
                 <input
-                  id="cart_address"
+                  id="checkout-address"
                   name="address"
                   type="text"
                   required
-                  placeholder="Branch #12 or courier address"
+                  placeholder="Nova Poshta Branch №1"
                   value={formData.address}
                   onChange={handleInputChange}
                   className={styles.input}
                 />
               </div>
 
-              <div className={styles.field}>
-                <label className={styles.fieldLabel} htmlFor="cart_comment">
-                  Order Notes (Optional)
-                </label>
+              <div className={styles.formGroup}>
+                <label htmlFor="checkout-comment">{t("cart.comment")}</label>
                 <textarea
-                  id="cart_comment"
+                  id="checkout-comment"
                   name="comment"
-                  placeholder="Any special requests or packaging notes..."
+                  rows={2}
+                  placeholder="Special instructions or notes"
                   value={formData.comment}
                   onChange={handleInputChange}
                   className={styles.textarea}
                 />
               </div>
-            </div>
 
-            <div className={styles.formActions}>
+              <div className={styles.deliveryNotice}>
+                <Truck size={18} />
+                <span>{t("cart.shippingCalculated")}</span>
+              </div>
+            </form>
+          )}
+
+          {/* 3. SUCCESS / CONFIRMATION VIEW */}
+          {step === "success" && (
+            <div className={styles.successView}>
+              <div className={styles.successIcon}>
+                <Check size={40} strokeWidth={2.5} />
+              </div>
+              <h3>{t("cart.orderConfirmed")}</h3>
+              <p className={styles.orderNumberText}>
+                {t("cart.orderNumber")}: <strong>{orderNumber}</strong>
+              </p>
+              <p className={styles.successMessage}>
+                {t("cart.thankYou")}
+              </p>
               <button
                 type="button"
-                className={styles.backBtn}
-                onClick={() => setStep("cart")}
-                disabled={isPending}
+                onClick={handleModalClose}
+                className={styles.primaryActionBtn}
               >
-                <ArrowLeft size={16} />
+                {t("cart.continueShopping")}
               </button>
+            </div>
+          )}
+        </div>
+
+        {/* ── Footer / Actions ── */}
+        {step !== "success" && cart.length > 0 && (
+          <footer className={styles.footer}>
+            <div className={styles.summaryRow}>
+              <span className={styles.subtotalLabel}>{t("cart.subtotal")}</span>
+              <span className={styles.subtotalValue}>{totalPrice.toLocaleString("en-US")} €</span>
+            </div>
+
+            {step === "cart" && (
+              <button
+                type="button"
+                onClick={handleProceedToCheckout}
+                className={styles.primaryActionBtn}
+              >
+                <span>{t("cart.checkout")}</span>
+                <ArrowRight size={18} />
+              </button>
+            )}
+
+            {step === "form" && (
               <button
                 type="submit"
-                className={styles.submitBtn}
+                form="checkout-form"
                 disabled={isPending}
+                className={styles.primaryActionBtn}
               >
                 {isPending ? (
                   <>
-                    <Loader2 size={18} className="animate-spin" />
-                    <span>Processing...</span>
+                    <Loader2 size={18} className={styles.spinner} />
+                    <span>{t("cart.processing")}</span>
                   </>
                 ) : (
                   <>
-                    <span>Confirm Order ({totalPrice.toLocaleString("en-US")} €)</span>
-                    <Check size={18} />
+                    <span>{t("cart.placeOrder")}</span>
+                    <ArrowRight size={18} />
                   </>
                 )}
               </button>
-            </div>
-          </form>
+            )}
+          </footer>
         )}
-
-        {/* ── STEP 3: ORDER SUCCESS ── */}
-        {step === "success" && (
-          <div className={styles.stateScreen}>
-            <div className={styles.successIcon}>
-              <Check size={32} />
-            </div>
-            <h3 className={styles.emptyTitle}>Order Successfully Placed!</h3>
-            <p className={styles.emptyText}>
-              Thank you for supporting Ukrainian art. We have received your order and will contact you shortly to confirm shipping.
-            </p>
-            <div className={styles.orderNumBox}>
-              Order #{orderNumber}
-            </div>
-            <button
-              type="button"
-              onClick={handleCloseAndReset}
-              className={styles.exploreBtn}
-            >
-              Continue Shopping
-            </button>
-          </div>
-        )}
-      </aside>
+      </div>
     </div>
   );
 }

@@ -55,8 +55,13 @@ export default function CollectionNewForm({ authors }: { authors: Author[] }) {
       {state?.error && <p className={styles.error}>{state.error}</p>}
 
       <div className={styles.field}>
-        <label className={styles.label}>Назва *</label>
-        <input className={styles.input} name="title" placeholder="Назва колекції" required />
+        <label className={styles.label}>Назва (EN) *</label>
+        <input className={styles.input} name="title" placeholder="Collection title in English" required />
+      </div>
+
+      <div className={styles.field}>
+        <label className={styles.label}>Назва (Українська)</label>
+        <input className={styles.input} name="titleUk" placeholder="Назва колекції українською" />
       </div>
 
       <div className={styles.field}>

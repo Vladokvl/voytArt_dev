@@ -7,6 +7,7 @@ import styles from "../_formStyles.module.scss";
 export type VariantItem = {
   id?: number;
   title: string;
+  titleUk?: string;
   price: number | string;
   stock: number | string;
   sku?: string;
@@ -28,11 +29,12 @@ export default function VariantEditor({
     onChange?.(next);
   };
 
-  const addVariant = (title = "", price: number | string = "", stock: number | string = 5) => {
+  const addVariant = (title = "", titleUk = "", price: number | string = "", stock: number | string = 5) => {
     const next = [
       ...variants,
       {
         title,
+        titleUk,
         price,
         stock,
         sku: "",
@@ -55,6 +57,7 @@ export default function VariantEditor({
     const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
     const next = sizes.map((s) => ({
       title: s,
+      titleUk: s,
       price: "",
       stock: 5,
       sku: "",
@@ -64,13 +67,14 @@ export default function VariantEditor({
 
   const applyPrintSizes = () => {
     const prints = [
-      { title: "A4 (21×30 см)", price: Math.round(basePrice * 0.7) || "" },
-      { title: "A3 (30×42 см)", price: basePrice || "" },
-      { title: "A2 (42×60 см)", price: Math.round(basePrice * 1.5) || "" },
-      { title: "A1 (60×84 см)", price: Math.round(basePrice * 2.2) || "" },
+      { title: "A4 (21×30 cm)", titleUk: "A4 (21×30 см)", price: Math.round(basePrice * 0.7) || "" },
+      { title: "A3 (30×42 cm)", titleUk: "A3 (30×42 см)", price: basePrice || "" },
+      { title: "A2 (42×60 cm)", titleUk: "A2 (42×60 см)", price: Math.round(basePrice * 1.5) || "" },
+      { title: "A1 (60×84 cm)", titleUk: "A1 (60×84 см)", price: Math.round(basePrice * 2.2) || "" },
     ];
     const next = prints.map((p) => ({
       title: p.title,
+      titleUk: p.titleUk,
       price: p.price,
       stock: 10,
       sku: "",
@@ -130,7 +134,7 @@ export default function VariantEditor({
           </p>
           <button
             type="button"
-            onClick={() => addVariant("Розмір S")}
+            onClick={() => addVariant("Size S", "Розмір S")}
             className={styles.submitBtn}
             style={{ padding: "0.45rem 1rem", fontSize: "0.825rem", margin: "0 auto" }}
           >
@@ -143,7 +147,7 @@ export default function VariantEditor({
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "2fr 1fr 1fr 1fr 40px",
+              gridTemplateColumns: "1.5fr 1.5fr 1fr 1fr 1fr 40px",
               gap: "0.5rem",
               fontSize: "0.75rem",
               fontWeight: 600,
@@ -152,7 +156,8 @@ export default function VariantEditor({
               padding: "0 0.5rem",
             }}
           >
-            <span>Назва варіанту / Розмір *</span>
+            <span>Назва (EN) *</span>
+            <span>Назва (UA)</span>
             <span>Ціна (€, опц.)</span>
             <span>Залишок (шт) *</span>
             <span>Артикул / SKU</span>
@@ -164,7 +169,7 @@ export default function VariantEditor({
               key={idx}
               style={{
                 display: "grid",
-                gridTemplateColumns: "2fr 1fr 1fr 1fr 40px",
+                gridTemplateColumns: "1.5fr 1.5fr 1fr 1fr 1fr 40px",
                 gap: "0.5rem",
                 alignItems: "center",
                 background: "#f8fafc",
@@ -177,9 +182,16 @@ export default function VariantEditor({
                 className={styles.input}
                 style={{ padding: "0.45rem 0.65rem", fontSize: "0.85rem" }}
                 value={v.title}
-                placeholder="напр. Розмір M"
+                placeholder="e.g. Size M"
                 onChange={(e) => updateVariant(idx, "title", e.target.value)}
                 required
+              />
+              <input
+                className={styles.input}
+                style={{ padding: "0.45rem 0.65rem", fontSize: "0.85rem" }}
+                value={v.titleUk ?? ""}
+                placeholder="напр. Розмір M"
+                onChange={(e) => updateVariant(idx, "titleUk", e.target.value)}
               />
               <input
                 className={styles.input}

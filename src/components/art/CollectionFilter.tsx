@@ -3,10 +3,13 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import styles from "@/app/art/[[...artistId]]/art.module.scss";
+import { useTranslation } from "~/context/LanguageContext";
+import { getLocalized } from "~/lib/i18n";
 
 type Collection = {
   id: number;
   title: string;
+  titleUk?: string | null;
   coverPhotoUrl: string | null;
 };
 
@@ -21,6 +24,7 @@ export default function CollectionFilter({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t, locale } = useTranslation();
   const isNeon = searchParams.get("neon") === "true";
 
   function select(id: number | null) {
@@ -41,31 +45,34 @@ export default function CollectionFilter({
         <span className={styles.chipIconWrap}>
           <span className={styles.chipIconAll}>✦</span>
         </span>
-        All paintings
+        {t("art.allPaintings")}
       </button>
 
-      {collections.map((col) => (
-        <button
-          key={col.id}
-          className={`${styles.collectionChip} ${selectedId === col.id ? styles.collectionChipActive : ""}`}
-          onClick={() => select(col.id)}
-        >
-          <span className={styles.chipIconWrap}>
-            {col.coverPhotoUrl ? (
-              <Image
-                src={getOptimizedImageUrl(col.coverPhotoUrl, { preset: "thumb" })}
-                alt={col.title}
-                width={32}
-                height={32}
-                className={styles.chipImg}
-              />
-            ) : (
-              <span className={styles.chipImgPlaceholder} />
-            )}
-          </span>
-          {col.title}
-        </button>
-      ))}
+      {collections.map((col) => {
+        const colTitle = getLocalized(col, "title", locale);
+        return (
+          <button
+            key={col.id}
+            className={`${styles.collectionChip} ${selectedId === col.id ? styles.collectionChipActive : ""}`}
+            onClick={() => select(col.id)}
+          >
+            <span className={styles.chipIconWrap}>
+              {col.coverPhotoUrl ? (
+                <Image
+                  src={getOptimizedImageUrl(col.coverPhotoUrl, { preset: "thumb" })}
+                  alt={colTitle}
+                  width={32}
+                  height={32}
+                  className={styles.chipImg}
+                />
+              ) : (
+                <span className={styles.chipIcon}>◈</span>
+              )}
+            </span>
+            {colTitle}
+          </button>
+        );
+      })}
     </div>
   );
 }

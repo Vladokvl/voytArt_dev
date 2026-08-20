@@ -4,13 +4,16 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import styles from "./Header.module.scss";
+import { useTranslation } from "~/context/LanguageContext";
 
 export default function Header() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { getLocalizedHref } = useTranslation();
 
   const [isVisible, setIsVisible] = useState(false);
   const lastScrollY = useRef(0);
+  const lastScrollTime = useRef(0);
   const isTransitioningRef = useRef(false);
 
   const isHome = pathname === "/";
@@ -27,39 +30,19 @@ export default function Header() {
 
     let timer: ReturnType<typeof setTimeout> | null = null;
 
-    if (isHeroPage && initScrollY < 120) {
-      setIsVisible(false);
-    } else if (isArt) {
-      // На сторінці артів блокуємо появу хедера на 1.25с, поки шторка повністю не підніметься
-      setIsVisible(false);
-      isTransitioningRef.current = true;
-      timer = setTimeout(() => {
-        isTransitioningRef.current = false;
-        setIsVisible(true);
-      }, 1250);
-    } else if (initScrollY < 40) {
-      setIsVisible(true);
-    }
-
     const handleScroll = () => {
-      // Ігноруємо скрол-івенти під час переходів шторки
-      if (isTransitioningRef.current) return;
+      const now = Date.now();
+      if (now - lastScrollTime.current < 40) return;
+      lastScrollTime.current = now;
 
       const currentScrollY = window.scrollY;
       const delta = currentScrollY - lastScrollY.current;
 
-      const isAtHeroTop = pathname === "/gallery" && currentScrollY < 120;
-
-      if (isAtHeroTop) {
-        setIsVisible(false);
-      } else if (currentScrollY < 30) {
-        // На самому верху сторінки (в т.ч. /art та /shop) — видимий
+      if (currentScrollY < 50) {
         setIsVisible(true);
       } else if (delta > 6) {
-        // Скрол ВНИЗ -> плавно ховаємо вгору
         setIsVisible(false);
       } else if (delta < -6) {
-        // Скрол ВГОРУ -> плавно виїжджає зверху
         setIsVisible(true);
       }
 
@@ -75,9 +58,6 @@ export default function Header() {
     }
 
     return () => {
-      if (timer) {
-        clearTimeout(timer);
-      }
       window.removeEventListener("scroll", handleScroll);
       if (lenis?.off) {
         lenis.off("scroll", handleScroll);
@@ -97,7 +77,7 @@ export default function Header() {
         isVisible ? styles.headerVisible : styles.headerHidden
       }`}
     >
-      <Link href="/" className={styles.logoLink} aria-label="VoytArt Gallery — На головну">
+      <Link href={getLocalizedHref("/")} className={styles.logoLink} aria-label="VoytArt Gallery — На головну">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/voyt.svg"

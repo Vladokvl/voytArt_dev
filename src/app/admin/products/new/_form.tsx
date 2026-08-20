@@ -20,6 +20,7 @@ import { useImageCrop } from "~/hooks/use-image-crop";
 import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
 import VariantEditor from "../_VariantEditor";
 import { ArrowLeft, Save, Plus } from "lucide-react";
+import LanguageTabs from "../../_components/LanguageTabs";
 
 type Author = { id: number; firstName: string; lastName: string };
 type Category = { id: number; name: string };
@@ -34,7 +35,9 @@ export default function ProductForm({
   const [state, formAction] = useActionState(createProductAction, undefined);
   const [uploading, setUploading] = useState(false);
   const [pending, startTransition] = useTransition();
+  const [langTab, setLangTab] = useState<"en" | "uk">("en");
   const [description, setDescription] = useState("");
+  const [descriptionUk, setDescriptionUk] = useState("");
   const [preview, setPreview] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [price, setPrice] = useState<number>(0);
@@ -119,14 +122,29 @@ export default function ProductForm({
               <span className={styles.cardDesc}>Базові реквізити товару</span>
             </div>
 
-            <div className={styles.field}>
-              <label className={styles.label}>Назва товару *</label>
-              <input
-                className={styles.input}
-                name="title"
-                placeholder="напр. Худі VoytArt 'Мотанка'"
-                required
-              />
+            <LanguageTabs activeTab={langTab} onChange={setLangTab} />
+
+            <div style={{ display: langTab === "en" ? "block" : "none" }}>
+              <div className={styles.field}>
+                <label className={styles.label}>Title (EN) *</label>
+                <input
+                  className={styles.input}
+                  name="title"
+                  placeholder="e.g. Hoodie VoytArt 'Motanka'"
+                  required
+                />
+              </div>
+            </div>
+
+            <div style={{ display: langTab === "uk" ? "block" : "none" }}>
+              <div className={styles.field}>
+                <label className={styles.label}>Назва товару (Українська)</label>
+                <input
+                  className={styles.input}
+                  name="titleUk"
+                  placeholder="напр. Худі VoytArt 'Мотанка'"
+                />
+              </div>
             </div>
 
             <div className={styles.row}>
@@ -195,12 +213,27 @@ export default function ProductForm({
               <h3 className={styles.cardTitle}>Детальний опис товару</h3>
               <span className={styles.cardDesc}>Матеріали, догляд та опис</span>
             </div>
-            <div className={styles.field}>
-              <TipTapEditor
-                content={description}
-                onChange={(html) => setDescription(html)}
-              />
-              <input type="hidden" name="description" value={description} />
+
+            <div style={{ display: langTab === "en" ? "block" : "none" }}>
+              <div className={styles.field}>
+                <label className={styles.label}>Description (EN)</label>
+                <TipTapEditor
+                  content={description}
+                  onChange={(html) => setDescription(html)}
+                />
+                <input type="hidden" name="description" value={description} />
+              </div>
+            </div>
+
+            <div style={{ display: langTab === "uk" ? "block" : "none" }}>
+              <div className={styles.field}>
+                <label className={styles.label}>Опис товару (Українська)</label>
+                <TipTapEditor
+                  content={descriptionUk}
+                  onChange={(html) => setDescriptionUk(html)}
+                />
+                <input type="hidden" name="descriptionUk" value={descriptionUk} />
+              </div>
             </div>
           </div>
         </div>

@@ -31,7 +31,7 @@ export default async function GalleryPage() {
   const posts = await db.galleryPost.findMany({
     orderBy: { date: "desc" },
     take: limit,
-    select: { id: true, title: true, content: true, coverUrl: true, date: true },
+    select: { id: true, title: true, titleUk: true, content: true, contentUk: true, coverUrl: true, date: true },
   });
 
   const total = await db.galleryPost.count();

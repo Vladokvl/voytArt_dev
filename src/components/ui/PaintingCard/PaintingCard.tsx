@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import { createPaintingInquiryAction } from "~/app/art/_inquiryActions";
+import { useTranslation } from "~/context/LanguageContext";
+import { getLocalized } from "~/lib/i18n";
 import {
   Send,
   MessageCircle,
@@ -30,14 +32,17 @@ type MediaItem = {
 type PaintingCardProps = {
   id: number;
   title: string;
+  titleUk?: string | null;
   description: string | null;
+  descriptionUk?: string | null;
   coverUrl: string;
   year: number | null;
-  author: { firstName: string; lastName: string };
+  author: { firstName: string; firstNameUk?: string | null; lastName: string; lastNameUk?: string | null };
   media: MediaItem[];
 };
 
 export default function PaintingCard({ painting }: { painting: PaintingCardProps }) {
+  const { t, locale } = useTranslation();
   const searchParams = useSearchParams();
   const isGlobalNeon = searchParams.get("neon") === "true";
 
@@ -175,7 +180,8 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
 
   const handleCopyLink = () => {
     if (typeof window !== "undefined") {
-      const url = `${window.location.origin}/art?painting=${painting.id}`;
+      const langParam = locale === "uk" ? "&lang=ua" : "";
+      const url = `${window.location.origin}/art?painting=${painting.id}${langParam}`;
       void navigator.clipboard.writeText(url).then(() => {
         setCopiedLink(true);
         setTimeout(() => setCopiedLink(false), 2000);
@@ -183,8 +189,13 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
     }
   };
 
+  const authorName = painting.author
+    ? `${getLocalized(painting.author, "firstName", locale)} ${getLocalized(painting.author, "lastName", locale)}`.trim()
+    : "VoytArt Artist";
+  const paintingTitle = getLocalized(painting, "title", locale);
+
   const telegramDirectUrl = `https://t.me/voytart?text=${encodeURIComponent(
-    `Привіт! Мене цікавить картина "${painting.title}" (${painting.author.firstName} ${painting.author.lastName})`
+    `Привіт! Мене цікавить картина "${paintingTitle}" (${authorName})`
   )}`;
 
   return (
@@ -200,7 +211,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
         >
           <Image
             src={getOptimizedImageUrl(gridCoverUrl, { preset: "card" })}
-            alt={painting.title}
+            alt={paintingTitle}
             width={1200}
             height={1200}
             className={styles.cardImage}
@@ -237,8 +248,8 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                     e.currentTarget.style.setProperty("--mouse-y", `${y}%`);
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.setProperty("--mouse-x", `50%`);
-                    e.currentTarget.style.setProperty("--mouse-y", `50%`);
+                    e.currentTarget.style.setProperty("--mouse-x", "50%");
+                    e.currentTarget.style.setProperty("--mouse-y", "50%");
                   }}
                 >
                   {item.type === "VIDEO" ? (
@@ -253,7 +264,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                   ) : (
                     <Image
                       src={getOptimizedImageUrl(item.url, { preset: "large" })}
-                      alt={painting.title}
+                      alt={paintingTitle}
                       fill
                       className={styles.mediaEl}
                       sizes="(max-width: 768px) 100vw, 66vw"
@@ -329,7 +340,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                   <div className={styles.scrollableContent} data-lenis-prevent>
                     <div className={styles.authorHeader}>
                       <span className={styles.authorLabel}>
-                        {painting.author.firstName} {painting.author.lastName}
+                        {authorName}
                       </span>
                       <button
                         type="button"
@@ -339,22 +350,22 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                         aria-label="Copy link to painting"
                       >
                         <Share2 size={15} />
-                        <span>{copiedLink ? "Copied!" : "Share"}</span>
+                        <span>{copiedLink ? t("art.copied") : t("art.share")}</span>
                       </button>
                     </div>
 
-                    <Dialog.Title className={styles.title}>{painting.title}</Dialog.Title>
+                    <Dialog.Title className={styles.title}>{paintingTitle}</Dialog.Title>
 
                     {/* Specs Badges */}
                     <div className={styles.specsRow}>
                       {painting.year && (
                         <span className={styles.specBadge}>{painting.year}</span>
                       )}
-                      <span className={styles.specBadge}>Original Artwork</span>
+                      <span className={styles.specBadge}>{t("art.originalArtwork")}</span>
                       {hasNeonMedia && (
                         <span className={styles.specBadgeNeon}>
                           <Sparkles size={12} />
-                          <span>UV Neon Glow</span>
+                          <span>{t("art.uvNeonGlow")}</span>
                         </span>
                       )}
                     </div>
@@ -367,14 +378,14 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                           className={`${styles.pillOption} ${!isNeon ? styles.pillOptionActive : ""}`}
                         >
                           <Sun size={14} />
-                          <span>Daylight</span>
+                          <span>{t("art.daylight")}</span>
                         </button>
                         <button
                           type="button"
                           className={`${styles.pillOption} ${isNeon ? styles.pillOptionNeonActive : ""}`}
                         >
                           <Moon size={14} />
-                          <span>Neon Glow</span>
+                          <span>{t("art.neonGlow")}</span>
                         </button>
                       </div>
                     )}
@@ -383,7 +394,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                       <div
                         className={styles.description}
                         data-lenis-prevent
-                        dangerouslySetInnerHTML={{ __html: painting.description }}
+                        dangerouslySetInnerHTML={{ __html: getLocalized(painting, "description", locale) || "" }}
                       />
                     )}
                   </div>
@@ -394,9 +405,9 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                       onClick={() => setIsInquiryOpen(true)}
                       className={styles.btnPrimary}
                     >
-                      <span>Interested ?</span>
+                      <span>{t("art.interested")}</span>
                     </button>
-                    <Dialog.Close className={styles.btnGhost}>Close</Dialog.Close>
+                    <Dialog.Close className={styles.btnGhost}>{t("art.close")}</Dialog.Close>
                   </div>
                 </motion.div>
               ) : (
@@ -420,9 +431,9 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                         className={styles.backBtn}
                       >
                         <ArrowLeft size={16} />
-                        <span>Back</span>
+                        <span>{t("art.inquiryBack")}</span>
                       </button>
-                      <span className={styles.inquiryTitle}>Interested in this artwork</span>
+                      <span className={styles.inquiryTitle}>{t("art.inquiryTitle")}</span>
                     </div>
 
                     {/* Painting Mini Preview */}
@@ -430,15 +441,15 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                       <div className={styles.snippetThumbWrap}>
                         <Image
                           src={getOptimizedImageUrl(painting.coverUrl, { preset: "thumb" })}
-                          alt={painting.title}
+                          alt={paintingTitle}
                           fill
                           className={styles.snippetImg}
                         />
                       </div>
                       <div className={styles.snippetDetails}>
-                        <span className={styles.snippetTitle}>{painting.title}</span>
+                        <span className={styles.snippetTitle}>{paintingTitle}</span>
                         <span className={styles.snippetAuthor}>
-                          {painting.author.firstName} {painting.author.lastName}
+                          {authorName}
                         </span>
                       </div>
                     </div>
@@ -446,12 +457,12 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                     {inquiryResult?.success ? (
                       <div className={styles.inquirySuccessBox}>
                         <CheckCircle2 size={44} className={styles.successIcon} />
-                        <h4 className={styles.successTitle}>Inquiry Sent!</h4>
+                        <h4 className={styles.successTitle}>{t("art.inquirySuccessTitle")}</h4>
                         <p className={styles.successText}>
-                          Reference: <strong>{inquiryResult.inquiryNumber}</strong>
+                          {t("art.inquiryReference")}: <strong>{inquiryResult.inquiryNumber}</strong>
                         </p>
                         <p className={styles.successSub}>
-                          We will reach out to you shortly to share details, private viewing opportunities, and acquisition info.
+                          {t("art.inquirySuccessDesc")}
                         </p>
                       </div>
                     ) : (
@@ -461,7 +472,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                         )}
 
                         <div className={styles.inquiryField}>
-                          <label className={styles.fieldLabel}>Your Name *</label>
+                          <label className={styles.fieldLabel}>{t("art.yourName")} *</label>
                           <input
                             type="text"
                             required
@@ -473,7 +484,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                         </div>
 
                         <div className={styles.inquiryField}>
-                          <label className={styles.fieldLabel}>Phone or @Telegram *</label>
+                          <label className={styles.fieldLabel}>{t("art.phoneTelegram")} *</label>
                           <input
                             type="text"
                             required
@@ -485,7 +496,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                         </div>
 
                         <div className={styles.inquiryField}>
-                          <label className={styles.fieldLabel}>Preferred Contact Method</label>
+                          <label className={styles.fieldLabel}>{t("art.preferredContact")}</label>
                           <div className={styles.preferredContactGroup}>
                             {["TELEGRAM", "PHONE", "WHATSAPP", "EMAIL"].map((method) => (
                               <button
@@ -504,7 +515,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                         </div>
 
                         <div className={styles.inquiryField}>
-                          <label className={styles.fieldLabel}>Message / Question (Optional)</label>
+                          <label className={styles.fieldLabel}>{t("art.messageOptional")}</label>
                           <textarea
                             placeholder="e.g. Inquiring about price, dimensions, or gallery viewing in Kyiv..."
                             value={message}
@@ -519,14 +530,14 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                           className={styles.inquirySubmitBtn}
                         >
                           <Send size={16} />
-                          <span>{isPending ? "Sending..." : "Submit Inquiry"}</span>
+                          <span>{isPending ? t("art.sending") : t("art.submitInquiry")}</span>
                         </button>
                       </form>
                     )}
 
                     {/* Direct Telegram Chat Option */}
                     <div className={styles.directTelegramWrap}>
-                      <span className={styles.orDivider}>or contact us directly</span>
+                      <span className={styles.orDivider}>{t("art.orContactDirectly")}</span>
                       <a
                         href={telegramDirectUrl}
                         target="_blank"
@@ -534,7 +545,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                         className={styles.telegramDirectBtn}
                       >
                         <MessageCircle size={17} />
-                        <span>Chat directly on Telegram</span>
+                        <span>{t("art.chatTelegram")}</span>
                       </a>
                     </div>
                   </div>

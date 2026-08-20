@@ -6,7 +6,7 @@ export async function fetchPaginatedPosts(offset: number, limit: number) {
     orderBy: { date: "desc" },
     skip: offset,
     take: limit,
-    select: { id: true, title: true, content: true, coverUrl: true, date: true },
+    select: { id: true, title: true, titleUk: true, content: true, contentUk: true, coverUrl: true, date: true },
   });
 
   const total = await db.galleryPost.count();

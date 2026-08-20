@@ -16,17 +16,18 @@ const TipTapEditor = dynamic(() => import("~/components/admin/TipTapEditor"), {
 });
 import { useImageCrop } from "~/hooks/use-image-crop";
 import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
+import LanguageTabs from "../../_components/LanguageTabs";
 
 export default function PostForm() {
   const [state, formAction] = useActionState(createPostAction, undefined);
   const [uploading, setUploading] = useState(false);
   const [pending, startTransition] = useTransition();
+  const [langTab, setLangTab] = useState<"en" | "uk">("en");
   const [content, setContent] = useState("");
+  const [contentUk, setContentUk] = useState("");
   const [preview, setPreview] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-
 
   const {
     cropFile,
@@ -70,23 +71,43 @@ export default function PostForm() {
       <h1 style={{ fontSize: "1.25rem", fontWeight: 600 }}>Новий пост</h1>
       {state?.error && <p className={styles.error}>{state.error}</p>}
 
-      <div className={styles.field}>
-        <label className={styles.label}>Заголовок *</label>
-        <input className={styles.input} name="title" placeholder="Заголовок" required />
+      <LanguageTabs activeTab={langTab} onChange={setLangTab} />
+
+      <div style={{ display: langTab === "en" ? "block" : "none" }}>
+        <div className={styles.field}>
+          <label className={styles.label}>Title (EN) *</label>
+          <input className={styles.input} name="title" placeholder="Post title in English" required />
+        </div>
+
+        <div className={styles.field}>
+          <label className={styles.label}>Content (EN) *</label>
+          <TipTapEditor
+            content={content}
+            onChange={(html) => setContent(html)}
+          />
+          <input type="hidden" name="content" value={content} />
+        </div>
+      </div>
+
+      <div style={{ display: langTab === "uk" ? "block" : "none" }}>
+        <div className={styles.field}>
+          <label className={styles.label}>Заголовок (Українська)</label>
+          <input className={styles.input} name="titleUk" placeholder="Заголовок українською" />
+        </div>
+
+        <div className={styles.field}>
+          <label className={styles.label}>Контент (Українська)</label>
+          <TipTapEditor
+            content={contentUk}
+            onChange={(html) => setContentUk(html)}
+          />
+          <input type="hidden" name="contentUk" value={contentUk} />
+        </div>
       </div>
 
       <div className={styles.field}>
         <label className={styles.label}>Дата</label>
         <input className={styles.input} name="date" type="date" />
-      </div>
-
-      <div className={styles.field}>
-        <label className={styles.label}>Контент *</label>
-        <TipTapEditor
-          content={content}
-          onChange={(html) => setContent(html)}
-        />
-        <input type="hidden" name="content" value={content} />
       </div>
 
       <div className={styles.field}>

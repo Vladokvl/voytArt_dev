@@ -10,13 +10,18 @@ import { useImageCrop } from "~/hooks/use-image-crop";
 import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
 import { useSetBreadcrumb } from "@/app/admin/_components/BreadcrumbContext";
 import { ArrowLeft, Save } from "lucide-react";
+import LanguageTabs from "@/app/admin/_components/LanguageTabs";
 
 type Author = {
   id: number;
   firstName: string;
   lastName: string;
+  firstNameUk?: string | null;
+  lastNameUk?: string | null;
   bio: string | null;
+  bioUk?: string | null;
   shortDesc: string | null;
+  shortDescUk?: string | null;
   photoUrl: string | null;
   bgPhotoUrl: string | null;
   order: number;
@@ -28,10 +33,17 @@ export default function AuthorEditForm({ author }: { author: Author }) {
   const [uploading, setUploading] = useState(false);
   const [pending, startTransition] = useTransition();
 
+  const [langTab, setLangTab] = useState<"en" | "uk">("en");
+
   // Поля форми в локальному стані для живого прев'ю
   const [firstName, setFirstName] = useState(author.firstName);
   const [lastName, setLastName] = useState(author.lastName);
   const [shortDesc, setShortDesc] = useState(author.shortDesc ?? "");
+
+  const [firstNameUk, setFirstNameUk] = useState(author.firstNameUk ?? "");
+  const [lastNameUk, setLastNameUk] = useState(author.lastNameUk ?? "");
+  const [shortDescUk, setShortDescUk] = useState(author.shortDescUk ?? "");
+  const [bioUk, setBioUk] = useState(author.bioUk ?? "");
 
   useSetBreadcrumb(`${firstName} ${lastName}`.trim() || `${author.firstName} ${author.lastName}`);
 
@@ -188,48 +200,100 @@ export default function AuthorEditForm({ author }: { author: Author }) {
             <span className={styles.cardDesc}>Імʼя, прізвище та статус</span>
           </div>
 
-          <div className={styles.row}>
+          <LanguageTabs activeTab={langTab} onChange={setLangTab} />
+
+          <div style={{ display: langTab === "en" ? "block" : "none" }}>
+            <div className={styles.row}>
+              <div className={styles.field}>
+                <label className={styles.label}>First Name (EN) *</label>
+                <input
+                  className={styles.input}
+                  name="firstName"
+                  required
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
+              </div>
+              <div className={styles.field}>
+                <label className={styles.label}>Last Name (EN) *</label>
+                <input
+                  className={styles.input}
+                  name="lastName"
+                  required
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
+              </div>
+            </div>
+
             <div className={styles.field}>
-              <label className={styles.label}>Імʼя *</label>
+              <label className={styles.label}>Short Description (EN)</label>
               <input
                 className={styles.input}
-                name="firstName"
-                required
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
+                name="shortDesc"
+                placeholder="Short description for slider in English"
+                value={shortDesc}
+                onChange={(e) => setShortDesc(e.target.value)}
               />
             </div>
+
             <div className={styles.field}>
-              <label className={styles.label}>Прізвище *</label>
-              <input
-                className={styles.input}
-                name="lastName"
-                required
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
+              <label className={styles.label}>Biography (EN)</label>
+              <textarea
+                className={styles.textarea}
+                name="bio"
+                defaultValue={author.bio ?? ""}
+                rows={4}
               />
             </div>
           </div>
 
-          <div className={styles.field}>
-            <label className={styles.label}>Короткий опис (для відображення в слайдері)</label>
-            <input
-              className={styles.input}
-              name="shortDesc"
-              placeholder="Короткий опис автора в слайдері"
-              value={shortDesc}
-              onChange={(e) => setShortDesc(e.target.value)}
-            />
-          </div>
+          <div style={{ display: langTab === "uk" ? "block" : "none" }}>
+            <div className={styles.row}>
+              <div className={styles.field}>
+                <label className={styles.label}>Імʼя (Українська)</label>
+                <input
+                  className={styles.input}
+                  name="firstNameUk"
+                  placeholder="Імʼя українською"
+                  value={firstNameUk}
+                  onChange={(e) => setFirstNameUk(e.target.value)}
+                />
+              </div>
+              <div className={styles.field}>
+                <label className={styles.label}>Прізвище (Українська)</label>
+                <input
+                  className={styles.input}
+                  name="lastNameUk"
+                  placeholder="Прізвище українською"
+                  value={lastNameUk}
+                  onChange={(e) => setLastNameUk(e.target.value)}
+                />
+              </div>
+            </div>
 
-          <div className={styles.field}>
-            <label className={styles.label}>Біографія (для сторінки робіт)</label>
-            <textarea
-              className={styles.textarea}
-              name="bio"
-              defaultValue={author.bio ?? ""}
-              rows={4}
-            />
+            <div className={styles.field}>
+              <label className={styles.label}>Короткий опис (Українська)</label>
+              <input
+                className={styles.input}
+                name="shortDescUk"
+                placeholder="Короткий опис автора українською"
+                value={shortDescUk}
+                onChange={(e) => setShortDescUk(e.target.value)}
+              />
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>Біографія (Українська)</label>
+              <textarea
+                className={styles.textarea}
+                name="bioUk"
+                placeholder="Повна біографія автора українською"
+                value={bioUk}
+                onChange={(e) => setBioUk(e.target.value)}
+                rows={4}
+              />
+            </div>
           </div>
 
           <div className={styles.checkboxField}>

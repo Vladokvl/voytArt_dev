@@ -1,11 +1,12 @@
-import ArtHero from "../../../components/art/ArtHero";
-import CollectionFilter from "../../../components/art/CollectionFilter";
+import ArtHero from "~/components/art/ArtHero";
+import CollectionFilter from "~/components/art/CollectionFilter";
+import NeonToggle from "~/components/art/NeonToggle";
 import PaintingGrid from "~/components/art/PaintingGrid";
+import ArtGalleryTitle from "~/components/art/ArtGalleryTitle";
 import { db } from "~/lib/db";
 import styles from "./art.module.scss";
 import { type Metadata } from "next";
 import { Suspense } from "react";
-import NeonToggle from "~/components/art/NeonToggle";
 
 export async function generateMetadata({
   searchParams,
@@ -146,9 +147,10 @@ export default async function ArtPage({
 
       <section className={styles.gallery}>
         <div className={styles.galleryHeader}>
-          <h2 className={styles.galleryTitle}>
-            {selectedAuthor ? `${selectedAuthor.firstName} — Works` : "Our Paintings"}
-          </h2>
+          <ArtGalleryTitle
+            selectedAuthor={selectedAuthor ? { firstName: selectedAuthor.firstName, firstNameUk: selectedAuthor.firstNameUk } : null}
+            className={styles.galleryTitle}
+          />
           <Suspense fallback={null}>
             <NeonToggle />
           </Suspense>

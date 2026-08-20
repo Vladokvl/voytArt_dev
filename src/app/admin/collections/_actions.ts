@@ -9,6 +9,7 @@ export async function createCollectionAction(
   formData: FormData,
 ): Promise<{ error: string } | undefined> {
   const title = formData.get("title") as string;
+  const titleUk = (formData.get("titleUk") as string)?.trim() || null;
   const authorId = Number(formData.get("authorId"));
   const coverPhotoUrl = (formData.get("coverPhotoUrl") as string) || null;
   const coverPhotoPublicId = coverPhotoUrl ? (getPublicIdFromCloudinaryUrl(coverPhotoUrl) ?? "") : "";
@@ -18,12 +19,13 @@ export async function createCollectionAction(
   }
 
   await db.collection.create({
-    data: { title, authorId, coverPhotoUrl, coverPhotoPublicId },
+    data: { title, titleUk, authorId, coverPhotoUrl, coverPhotoPublicId },
   });
 
   revalidatePath("/admin/collections");
   revalidatePath("/admin");
   revalidatePath("/admin/paintings/new");
+  revalidatePath("/art");
   redirect("/admin/collections");
 }
 
@@ -33,6 +35,7 @@ export async function updateCollectionAction(
 ): Promise<{ error: string } | undefined> {
   const id = Number(formData.get("id"));
   const title = formData.get("title") as string;
+  const titleUk = (formData.get("titleUk") as string)?.trim() || null;
   const authorId = Number(formData.get("authorId"));
   const coverPhotoUrl = (formData.get("coverPhotoUrl") as string) || null;
   const coverPhotoPublicId = coverPhotoUrl ? (getPublicIdFromCloudinaryUrl(coverPhotoUrl) ?? "") : "";
@@ -43,12 +46,13 @@ export async function updateCollectionAction(
 
   await db.collection.update({
     where: { id },
-    data: { title, authorId, coverPhotoUrl, coverPhotoPublicId },
+    data: { title, titleUk, authorId, coverPhotoUrl, coverPhotoPublicId },
   });
 
   revalidatePath("/admin/collections");
   revalidatePath("/admin");
   revalidatePath("/admin/paintings/new");
+  revalidatePath("/art");
   redirect("/admin/collections");
 }
 

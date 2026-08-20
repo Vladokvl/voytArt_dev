@@ -6,26 +6,21 @@ import styles from "./GalleryPosts.module.scss";
 import { fetchPaginatedPosts } from "~/app/gallery/_actions";
 import { motion } from "framer-motion";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
+import { useTranslation } from "~/context/LanguageContext";
+import { getLocalized, formatLocalizedDate } from "~/lib/i18n";
 
 type Post = {
   id: number;
   title: string;
+  titleUk?: string | null;
   content: string;
+  contentUk?: string | null;
   coverUrl: string | null;
   date: Date | null;
 };
 
 function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-}
-
-function formatDate(date: Date | null): string {
-  if (!date) return "";
-  return new Intl.DateTimeFormat("en-US", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(new Date(date));
 }
 
 export default function GalleryPosts({
@@ -37,6 +32,7 @@ export default function GalleryPosts({
   initialHasMore: boolean;
   limit: number;
 }) {
+  const { t, locale, getLocalizedHref } = useTranslation();
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
@@ -65,49 +61,54 @@ export default function GalleryPosts({
     <section className={styles.section}>
       <div className={styles.inner}>
         <div className={styles.header}>
-          <h2 className={styles.heading}>Gallery Posts</h2>
+          <h2 className={styles.heading}>{t("gallery.postsTitle")}</h2>
         </div>
 
         <div className={styles.grid}>
           {posts.length === 0 ? (
-            <p className={styles.empty}>No posts yet.</p>
+            <p className={styles.empty}>{t("gallery.empty")}</p>
           ) : (
-            posts.map((post) => (
-              <motion.div
-                key={post.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-              >
-                <Link
-                  href={`/gallery/${post.id}`}
-                  className={styles.card}
-                >
-                  <div className={styles.coverWrapper}>
-                    {post.coverUrl ? (
-                      <Image
-                        src={getOptimizedImageUrl(post.coverUrl, { preset: "card" })}
-                        alt={post.title}
-                        fill
-                        className={styles.coverImage}
-                      />
-                    ) : (
-                      <div className={styles.noImage}>🖼</div>
-                    )}
-                  </div>
+            posts.map((post) => {
+              const localizedTitle = getLocalized(post, "title", locale);
+              const localizedContent = getLocalized(post, "content", locale);
 
-                  <div className={styles.cardBody}>
-                    {post.date && (
-                      <span className={styles.date}>{formatDate(post.date)}</span>
-                    )}
-                    <h3 className={styles.title}>{post.title}</h3>
-                    <p className={styles.excerpt}>{stripHtml(post.content)}</p>
-                    <span className={styles.readMore}>Learn more →</span>
-                  </div>
-                </Link>
-              </motion.div>
-            ))
+              return (
+                <motion.div
+                  key={post.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                >
+                  <Link
+                    href={getLocalizedHref(`/gallery/${post.id}`)}
+                    className={styles.card}
+                  >
+                    <div className={styles.coverWrapper}>
+                      {post.coverUrl ? (
+                        <Image
+                          src={getOptimizedImageUrl(post.coverUrl, { preset: "card" })}
+                          alt={localizedTitle}
+                          fill
+                          className={styles.coverImage}
+                        />
+                      ) : (
+                        <div className={styles.noImage}>🖼</div>
+                      )}
+                    </div>
+
+                    <div className={styles.cardBody}>
+                      {post.date && (
+                        <span className={styles.date}>{formatLocalizedDate(post.date, locale)}</span>
+                      )}
+                      <h3 className={styles.title}>{localizedTitle}</h3>
+                      <p className={styles.excerpt}>{stripHtml(localizedContent)}</p>
+                      <span className={styles.readMore}>{t("gallery.readMore")}</span>
+                    </div>
+                  </Link>
+                </motion.div>
+              );
+            })
           )}
         </div>
 
@@ -118,7 +119,7 @@ export default function GalleryPosts({
               disabled={loading}
               className={styles.loadMoreBtn}
             >
-              {loading ? "Loading..." : "Show More"}
+              {loading ? t("gallery.loading") : t("gallery.showMore")}
             </button>
           </div>
         )}

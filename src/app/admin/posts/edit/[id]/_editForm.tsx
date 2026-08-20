@@ -20,11 +20,14 @@ import { useImageCrop } from "~/hooks/use-image-crop";
 import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
 import { useSetBreadcrumb } from "@/app/admin/_components/BreadcrumbContext";
 import { ArrowLeft, Save } from "lucide-react";
+import LanguageTabs from "@/app/admin/_components/LanguageTabs";
 
 type Post = {
   id: number;
   title: string;
+  titleUk?: string | null;
   content: string;
+  contentUk?: string | null;
   coverUrl: string | null;
   date: Date | null;
 };
@@ -34,7 +37,9 @@ export default function PostEditForm({ post }: { post: Post }) {
   const [state, formAction] = useActionState(updatePostAction, undefined);
   const [uploading, setUploading] = useState(false);
   const [pending, startTransition] = useTransition();
+  const [langTab, setLangTab] = useState<"en" | "uk">("en");
   const [content, setContent] = useState(post.content);
+  const [contentUk, setContentUk] = useState(post.contentUk ?? "");
   const [preview, setPreview] = useState<string | null>(post.coverUrl);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -118,24 +123,49 @@ export default function PostEditForm({ post }: { post: Post }) {
               <span className={styles.cardDesc}>Текст та заголовок публікації</span>
             </div>
 
-            <div className={styles.field}>
-              <label className={styles.label}>Заголовок публікації *</label>
-              <input
-                className={styles.input}
-                name="title"
-                defaultValue={post.title}
-                placeholder="Заголовок поста"
-                required
-              />
+            <LanguageTabs activeTab={langTab} onChange={setLangTab} />
+
+            <div style={{ display: langTab === "en" ? "block" : "none" }}>
+              <div className={styles.field}>
+                <label className={styles.label}>Title (EN) *</label>
+                <input
+                  className={styles.input}
+                  name="title"
+                  defaultValue={post.title}
+                  placeholder="Post title in English"
+                  required
+                />
+              </div>
+
+              <div className={styles.field}>
+                <label className={styles.label}>Content (EN) *</label>
+                <TipTapEditor
+                  content={content}
+                  onChange={(html) => setContent(html)}
+                />
+                <input type="hidden" name="content" value={content} />
+              </div>
             </div>
 
-            <div className={styles.field}>
-              <label className={styles.label}>Контент *</label>
-              <TipTapEditor
-                content={content}
-                onChange={(html) => setContent(html)}
-              />
-              <input type="hidden" name="content" value={content} />
+            <div style={{ display: langTab === "uk" ? "block" : "none" }}>
+              <div className={styles.field}>
+                <label className={styles.label}>Заголовок (Українська)</label>
+                <input
+                  className={styles.input}
+                  name="titleUk"
+                  defaultValue={post.titleUk ?? ""}
+                  placeholder="Заголовок українською"
+                />
+              </div>
+
+              <div className={styles.field}>
+                <label className={styles.label}>Контент (Українська)</label>
+                <TipTapEditor
+                  content={contentUk}
+                  onChange={(html) => setContentUk(html)}
+                />
+                <input type="hidden" name="contentUk" value={contentUk} />
+              </div>
             </div>
           </div>
         </div>

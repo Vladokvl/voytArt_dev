@@ -2,8 +2,11 @@
 
 import styles from "./OurStory.module.scss";
 import { motion } from "framer-motion";
+import { useTranslation } from "~/context/LanguageContext";
 
 export default function OurStory() {
+  const { t } = useTranslation();
+
   return (
     <section className={styles.section}>
       <motion.div
@@ -13,18 +16,11 @@ export default function OurStory() {
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
-        <span className={styles.eyebrow}>Our Story</span>
-        <h2 className={styles.heading}>Where Art Meets Community</h2>
+        <span className={styles.eyebrow}>{t("gallery.ourStory")}</span>
+        <h2 className={styles.heading}>{t("gallery.whereArtMeetsCommunity")}</h2>
         <div className={styles.body}>
-          <p>
-            VoytArt Gallery is more than a space for paintings — it is a living
-            chronicle of events, exhibitions and human connections that happen
-            around art every day.
-          </p>
-          <p>
-            Browse our gallery posts to see exhibitions, artist talks, opening
-            nights and behind-the-scenes moments that make our community unique.
-          </p>
+          <p>{t("gallery.storyP1")}</p>
+          <p>{t("gallery.storyP2")}</p>
         </div>
         <div className={styles.divider} />
       </motion.div>

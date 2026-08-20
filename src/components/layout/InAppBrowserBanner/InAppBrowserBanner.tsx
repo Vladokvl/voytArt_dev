@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import styles from "./InAppBrowserBanner.module.scss";
+import { useTranslation } from "~/context/LanguageContext";
 
 export default function InAppBrowserBanner() {
+  const { t } = useTranslation();
   const [inAppName, setInAppName] = useState<string | null>(null);
   const [isDismissed, setIsDismissed] = useState(false);
 
@@ -56,8 +58,8 @@ export default function InAppBrowserBanner() {
   return (
     <aside className={styles.banner} role="alert" aria-label="In-App Browser Warning">
       <div className={styles.content}>
-        <strong>Вбудований браузер {inAppName}</strong>
-        <span>Для плавної 60fps анімації та повного звуку відкрийте у Safari або Chrome</span>
+        <strong>{t("banner.title", { name: inAppName })}</strong>
+        <span>{t("banner.desc")}</span>
       </div>
       <div className={styles.actions}>
         <button
@@ -65,13 +67,13 @@ export default function InAppBrowserBanner() {
           onClick={handleOpenSafari}
           className={styles.openBtn}
         >
-          Відкрити ↗
+          {t("banner.open")}
         </button>
         <button
           type="button"
           onClick={handleDismiss}
           className={styles.closeBtn}
-          aria-label="Закрити повідомлення"
+          aria-label="Close message"
         >
           ✕
         </button>

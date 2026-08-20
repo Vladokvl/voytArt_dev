@@ -10,6 +10,9 @@ import Header from "~/components/layout/Header/Header";
 import AnalyticsTracker from "~/components/analytics/AnalyticsTracker";
 import InAppBrowserBanner from "~/components/layout/InAppBrowserBanner/InAppBrowserBanner";
 import VhFix from "~/components/layout/VhFix/VhFix";
+import { LanguageProvider } from "~/context/LanguageContext";
+import { cookies } from "next/headers";
+import { type Locale } from "~/lib/i18n";
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL
   ? (process.env.NEXT_PUBLIC_APP_URL.startsWith("http")
@@ -88,33 +91,39 @@ const montserrat = Montserrat({
   variable: "--font-montserrat",
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const cookieStore = await cookies();
+  const rawLocale = cookieStore.get("NEXT_LOCALE")?.value;
+  const initialLocale: Locale = rawLocale === "uk" ? "uk" : "en";
+
   return (
-    <html lang="uk" className={montserrat.variable}>
+    <html lang={initialLocale} className={montserrat.variable}>
       <head>
         <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
       </head>
       <body>
         <script dangerouslySetInnerHTML={{ __html: "history.scrollRestoration='manual';window.scrollTo(0,0);" }} />
-        <VhFix />
-        <InAppBrowserBanner />
-        <Suspense fallback={null}>
-          <AnalyticsTracker />
-        </Suspense>
-        <PageLoader />
-        <Suspense fallback={null}>
-          <Header />
-        </Suspense>
-        <NavMenu />
-        <SmoothScroll>
-          {children}
+        <LanguageProvider initialLocale={initialLocale}>
+          <VhFix />
+          <InAppBrowserBanner />
           <Suspense fallback={null}>
-            <FooterWrapper />
+            <AnalyticsTracker />
           </Suspense>
-        </SmoothScroll>
+          <PageLoader />
+          <Suspense fallback={null}>
+            <Header />
+          </Suspense>
+          <NavMenu />
+          <SmoothScroll>
+            {children}
+            <Suspense fallback={null}>
+              <FooterWrapper />
+            </Suspense>
+          </SmoothScroll>
+        </LanguageProvider>
       </body>
     </html>
   );

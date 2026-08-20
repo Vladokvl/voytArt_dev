@@ -11,6 +11,7 @@ import NeonSection from "../Sections/NeonSection";
 import { getMobileFrameUrl, MOBILE_NEON_VIDEO_URL } from "~/data/framesManifest";
 import { getFrameStride, snapFrameToStride } from "~/utils/adaptiveQuality";
 import styles from "./Hero.module.scss";
+import { useTranslation } from "~/context/LanguageContext";
 
 gsap.registerPlugin(ScrollTrigger, Observer);
 
@@ -45,6 +46,7 @@ const MOBILE_NEON_SNAP = 0.9;
 const MOBILE_SNAP_DURATION = 2;
 
 export default function HeroMobile() {
+  const { t } = useTranslation();
   const [isMainReady, setIsMainReady] = useState(false);
   const [loaderProgress, setLoaderProgress] = useState(0);
   const [loaderTitle, setLoaderTitle] = useState("Loading Mobile Frames");
@@ -908,7 +910,7 @@ export default function HeroMobile() {
     <div className={styles.fixedHud}>
       {/* Scroll-підказка */}
       <div ref={scrollHintRef} className={styles.scrollHint}>
-        <span>scroll</span>
+        <span>{t("hero.scroll")}</span>
         <div className={styles.scrollLine} />
       </div>
       {/* Прогрес-бар: чорний трек + сірий буфер завантаження + жовтий маркер */}

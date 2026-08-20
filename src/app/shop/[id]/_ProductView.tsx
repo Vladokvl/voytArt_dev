@@ -8,6 +8,8 @@ import { useCart } from "~/context/CartContext";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import ProductCarousel from "~/components/shop/ProductCarousel";
 import styles from "./product-page.module.scss";
+import { useTranslation } from "~/context/LanguageContext";
+import { getLocalized } from "~/lib/i18n";
 
 type ProductImage = {
   id: number;
@@ -19,6 +21,7 @@ type ProductImage = {
 type ProductVariant = {
   id: number;
   title: string;
+  titleUk?: string | null;
   price: number | null;
   stock: number;
   sku?: string | null;
@@ -28,21 +31,27 @@ type ProductVariant = {
 type Author = {
   id: number;
   firstName: string;
+  firstNameUk?: string | null;
   lastName: string;
+  lastNameUk?: string | null;
   photoUrl?: string | null;
   shortDesc?: string | null;
+  shortDescUk?: string | null;
 };
 
 type Category = {
   id: number;
   name: string;
+  nameUk?: string | null;
   slug: string;
 };
 
 export type FullProduct = {
   id: number;
   title: string;
+  titleUk?: string | null;
   description: string | null;
+  descriptionUk?: string | null;
   price: number;
   stock: number;
   coverUrl: string;
@@ -60,6 +69,7 @@ export default function ProductView({
   relatedProducts?: FullProduct[];
 }) {
   const { addToCart } = useCart();
+  const { t, locale, getLocalizedHref } = useTranslation();
 
   // Consolidate images (cover + gallery)
   const allImages = useMemo(() => {
@@ -99,38 +109,27 @@ export default function ProductView({
     return allImages;
   }, [allImages, selectedVariant]);
 
-  const [activeImage, setActiveImage] = useState(
-    visibleImages[0]?.url ?? product.coverUrl,
-  );
-
-  // When variant changes, auto-switch active image to variant's photo if available
-  const handleVariantSelect = (v: ProductVariant) => {
-    setSelectedVariant(v);
-    setQuantity(1);
-
-    const variantPhoto = allImages.find((img) => img.variantId === v.id);
-    if (variantPhoto) {
-      setActiveImage(variantPhoto.url);
-    }
-  };
-
-  const handleThumbnailClick = (img: ProductImage) => {
-    setActiveImage(img.url);
-    if (img.variantId && hasVariants) {
-      const matchedVariant = product.variants.find((v) => v.id === img.variantId);
-      if (matchedVariant) {
-        setSelectedVariant(matchedVariant);
-      }
-    }
-  };
-
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [addedAnimation, setAddedAnimation] = useState(false);
 
-  // Active Price & Stock
   const currentPrice = selectedVariant?.price ?? product.price;
   const currentStock = selectedVariant ? selectedVariant.stock : product.stock;
   const isOutOfStock = currentStock <= 0;
+
+  const handleVariantSelect = (variant: ProductVariant) => {
+    setSelectedVariant(variant);
+    setActiveImageIndex(0);
+    setQuantity(1);
+  };
+
+  const localizedProductTitle = getLocalized(product, "title", locale);
+  const localizedProductDesc = getLocalized(product, "description", locale);
+  const localizedCategoryName = product.category ? getLocalized(product.category, "name", locale) : "";
+  const authorFirstName = product.author ? getLocalized(product.author, "firstName", locale) : "";
+  const authorLastName = product.author ? getLocalized(product.author, "lastName", locale) : "";
+  const authorFullName = product.author ? `${authorFirstName} ${authorLastName}`.trim() : "";
+  const authorShortDesc = product.author ? getLocalized(product.author, "shortDesc", locale) : "";
 
   const handleAddToCart = () => {
     if (isOutOfStock) return;
@@ -138,65 +137,71 @@ export default function ProductView({
     addToCart({
       product: {
         id: product.id,
-        title: product.title,
+        title: localizedProductTitle,
         price: currentPrice,
-        coverUrl: activeImage || product.coverUrl,
+        coverUrl: product.coverUrl,
         author: product.author,
         category: product.category,
       },
       variantId: selectedVariant?.id ?? null,
-      variantTitle: selectedVariant?.title ?? null,
+      variantTitle: selectedVariant ? getLocalized(selectedVariant, "title", locale) : null,
       quantity,
       maxStock: currentStock,
     });
 
     setAddedAnimation(true);
-    setTimeout(() => setAddedAnimation(false), 2000);
+    setTimeout(() => setAddedAnimation(false), 1500);
   };
 
   return (
     <div className={styles.pageContainer}>
       {/* Breadcrumbs */}
       <nav className={styles.breadcrumbs} aria-label="Breadcrumb">
-        <Link href="/">Home</Link>
+        <Link href={getLocalizedHref("/shop")}>{t("nav.shop")}</Link>
         <ChevronRight size={14} />
-        <Link href="/shop">Shop</Link>
-        <ChevronRight size={14} />
-        <span className={styles.current}>{product.title}</span>
+        {product.category && (
+          <>
+            <span>{localizedCategoryName}</span>
+            <ChevronRight size={14} />
+          </>
+        )}
+        <span className={styles.current}>{localizedProductTitle}</span>
       </nav>
 
-      {/* Main Product Layout */}
+      {/* Main 2-Column Product Layout */}
       <div className={styles.productLayout}>
         {/* Left: Gallery */}
         <div className={styles.galleryCol}>
           <div className={styles.mainImageWrap}>
-            <Image
-              src={getOptimizedImageUrl(activeImage, { preset: "large" })}
-              alt={product.title}
-              fill
-              priority
-              sizes="(max-width: 960px) 100vw, 50vw"
-              className={styles.mainImage}
-            />
+            {visibleImages[activeImageIndex] ? (
+              <Image
+                src={getOptimizedImageUrl(visibleImages[activeImageIndex].url, { preset: "large" })}
+                alt={localizedProductTitle}
+                fill
+                priority
+                className={styles.mainImage}
+                sizes="(max-width: 1024px) 100vw, 55vw"
+              />
+            ) : (
+              <div className={styles.imagePlaceholder}>No image</div>
+            )}
           </div>
 
+          {/* Thumbnails */}
           {visibleImages.length > 1 && (
             <div className={styles.thumbsList}>
-              {visibleImages.map((img, i) => (
+              {visibleImages.map((img, idx) => (
                 <button
-                  key={i}
+                  key={img.id || idx}
                   type="button"
-                  onClick={() => handleThumbnailClick(img)}
-                  className={`${styles.thumbBtn} ${
-                    activeImage === img.url ? styles.thumbBtnActive : ""
-                  }`}
-                  aria-label={`View image ${i + 1}`}
+                  onClick={() => setActiveImageIndex(idx)}
+                  className={`${styles.thumbBtn} ${idx === activeImageIndex ? styles.thumbBtnActive : ""}`}
+                  aria-label={`View image ${idx + 1}`}
                 >
                   <Image
                     src={getOptimizedImageUrl(img.url, { preset: "thumb" })}
                     alt=""
                     fill
-                    sizes="72px"
                     style={{ objectFit: "cover" }}
                   />
                 </button>
@@ -208,8 +213,8 @@ export default function ProductView({
         {/* Right: Details & Purchase */}
         <div className={styles.detailsCol}>
           <div className={styles.headerInfo}>
-            <span className={styles.categoryBadge}>{product.category.name}</span>
-            <h1 className={styles.title}>{product.title}</h1>
+            <span className={styles.categoryBadge}>{localizedCategoryName}</span>
+            <h1 className={styles.title}>{localizedProductTitle}</h1>
             <div className={styles.priceRow}>
               <span className={styles.price}>
                 {currentPrice.toLocaleString("en-US")} €
@@ -220,11 +225,12 @@ export default function ProductView({
           {/* Variant Selector */}
           {hasVariants && (
             <div className={styles.variantSection}>
-              <span className={styles.sectionLabel}>Select Option / Size:</span>
+              <span className={styles.sectionLabel}>{t("shop.selectVariant")}</span>
               <div className={styles.variantChips}>
                 {product.variants.map((v) => {
                   const active = selectedVariant?.id === v.id;
                   const outOfStock = v.stock <= 0;
+                  const localizedVariantTitle = getLocalized(v, "title", locale);
                   return (
                     <button
                       key={v.id}
@@ -235,7 +241,7 @@ export default function ProductView({
                         outOfStock ? styles.chipDisabled : ""
                       }`}
                     >
-                      <span>{v.title}</span>
+                      <span>{localizedVariantTitle}</span>
                       {v.price && v.price !== product.price && (
                         <span style={{ fontSize: "0.8rem", marginLeft: "0.35rem", opacity: 0.85 }}>
                           ({v.price.toLocaleString("en-US")} €)
@@ -251,10 +257,10 @@ export default function ProductView({
           {/* Stock Status */}
           <div className={styles.stockStatus}>
             {isOutOfStock ? (
-              <span className={styles.stockOut}>✕ Out of Stock</span>
+              <span className={styles.stockOut}>✕ {t("shop.outOfStock")}</span>
             ) : (
               <span className={styles.stockIn}>
-                ● In Stock ({currentStock} available)
+                ● {t("shop.inStock", { count: currentStock })}
               </span>
             )}
           </div>
@@ -292,36 +298,36 @@ export default function ProductView({
               {addedAnimation ? (
                 <>
                   <Check size={18} />
-                  <span>Added to Cart!</span>
+                  <span>{t("shop.addedToCart")}</span>
                 </>
               ) : isOutOfStock ? (
-                <span>Sold Out</span>
+                <span>{t("shop.soldOut")}</span>
               ) : (
                 <>
                   <ShoppingBag size={18} />
-                  <span>Add to Cart</span>
+                  <span>{t("shop.addToCart")}</span>
                 </>
               )}
             </button>
           </div>
 
           {/* Description */}
-          {product.description && (
+          {localizedProductDesc && (
             <div className={styles.descriptionBox}>
-              <h3>Product Details</h3>
-              <div dangerouslySetInnerHTML={{ __html: product.description }} />
+              <h3>{t("shop.productDetails")}</h3>
+              <div dangerouslySetInnerHTML={{ __html: localizedProductDesc }} />
             </div>
           )}
 
           {/* Author info card */}
           {product.author && (
-            <Link href={`/art`} className={styles.authorCard}>
+            <Link href={getLocalizedHref("/art")} className={styles.authorCard}>
               <div className={styles.authorMeta}>
                 {product.author.photoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={getOptimizedImageUrl(product.author.photoUrl, { preset: "thumb" })}
-                    alt={product.author.firstName}
+                    alt={authorFirstName}
                     className={styles.authorAvatar}
                   />
                 ) : (
@@ -336,15 +342,15 @@ export default function ProductView({
                       fontWeight: 700,
                     }}
                   >
-                    {product.author.firstName[0]}
+                    {authorFirstName[0] || "V"}
                   </div>
                 )}
                 <div>
                   <h4 className={styles.authorName}>
-                    {product.author.firstName} {product.author.lastName}
+                    {authorFullName}
                   </h4>
                   <p className={styles.authorSubtitle}>
-                    {product.author.shortDesc ?? "VoytArt Gallery Artist"}
+                    {authorShortDesc || "VoytArt Gallery Artist"}
                   </p>
                 </div>
               </div>
@@ -358,20 +364,20 @@ export default function ProductView({
       {relatedProducts.length > 0 && (
         <section style={{ marginTop: "5rem", paddingTop: "3rem", borderTop: "1px solid #f1f5f9" }}>
           <ProductCarousel
-            title="You May Also Like"
+            title={t("shop.youMayAlsoLike")}
             products={relatedProducts}
             onAddToCart={(relProduct) => {
               addToCart({
                 product: {
                   id: relProduct.id,
-                  title: relProduct.title,
+                  title: getLocalized(relProduct, "title", locale),
                   price: relProduct.price,
                   coverUrl: relProduct.coverUrl ?? "",
                   author: relProduct.author
                     ? {
                         id: relProduct.author.id,
-                        firstName: relProduct.author.firstName,
-                        lastName: relProduct.author.lastName,
+                        firstName: getLocalized(relProduct.author, "firstName", locale),
+                        lastName: getLocalized(relProduct.author, "lastName", locale),
                       }
                     : { id: 0, firstName: "VoytArt", lastName: "Artist" },
                   category: relProduct.category ?? undefined,

@@ -20,13 +20,16 @@ import Image from "next/image";
 import MediaSection from "./_MediaSection";
 import { useSetBreadcrumb } from "@/app/admin/_components/BreadcrumbContext";
 import { ArrowLeft, Save } from "lucide-react";
+import LanguageTabs from "../../_components/LanguageTabs";
 
 type PaintingMedia = { id: number; url: string; isNeon: boolean; order: number; type: "IMAGE" | "VIDEO" };
 
 type PaintingForEdit = {
   id: number;
   title: string;
+  titleUk?: string | null;
   description: string | null;
+  descriptionUk?: string | null;
   coverUrl: string;
   year: number | null;
   hasNeon: boolean;
@@ -48,7 +51,9 @@ export default function PaintingEditForm({
   useSetBreadcrumb(painting.title);
   const [state, formAction] = useActionState(updatePaintingAction, undefined);
   const [pending, startTransition] = useTransition();
+  const [langTab, setLangTab] = useState<"en" | "uk">("en");
   const [description, setDescription] = useState(painting.description ?? "");
+  const [descriptionUk, setDescriptionUk] = useState(painting.descriptionUk ?? "");
   const [selectedAuthorId, setSelectedAuthorId] = useState(String(painting.authorId));
   const [selectedCollectionId, setSelectedCollectionId] = useState(
     painting.collectionId ? String(painting.collectionId) : ""
@@ -124,15 +129,31 @@ export default function PaintingEditForm({
               <span className={formStyles.cardDesc}>Назва, автор та колекція</span>
             </div>
 
-            <div className={formStyles.field}>
-              <label className={formStyles.label}>Назва картини *</label>
-              <input
-                className={formStyles.input}
-                name="title"
-                placeholder="Назва картини"
-                defaultValue={painting.title}
-                required
-              />
+            <LanguageTabs activeTab={langTab} onChange={setLangTab} />
+
+            <div style={{ display: langTab === "en" ? "block" : "none" }}>
+              <div className={formStyles.field}>
+                <label className={formStyles.label}>Title (EN) *</label>
+                <input
+                  className={formStyles.input}
+                  name="title"
+                  placeholder="Painting title in English"
+                  defaultValue={painting.title}
+                  required
+                />
+              </div>
+            </div>
+
+            <div style={{ display: langTab === "uk" ? "block" : "none" }}>
+              <div className={formStyles.field}>
+                <label className={formStyles.label}>Назва (Українська)</label>
+                <input
+                  className={formStyles.input}
+                  name="titleUk"
+                  placeholder="Назва картини українською"
+                  defaultValue={painting.titleUk ?? ""}
+                />
+              </div>
             </div>
 
             <div className={formStyles.row}>
@@ -193,12 +214,26 @@ export default function PaintingEditForm({
               <span className={formStyles.cardDesc}>Історія та деталі полотна</span>
             </div>
 
-            <div className={formStyles.field}>
-              <TipTapEditor
-                content={description}
-                onChange={(html) => setDescription(html)}
-              />
-              <input type="hidden" name="description" value={description} />
+            <div style={{ display: langTab === "en" ? "block" : "none" }}>
+              <div className={formStyles.field}>
+                <label className={formStyles.label}>Description (EN)</label>
+                <TipTapEditor
+                  content={description}
+                  onChange={(html) => setDescription(html)}
+                />
+                <input type="hidden" name="description" value={description} />
+              </div>
+            </div>
+
+            <div style={{ display: langTab === "uk" ? "block" : "none" }}>
+              <div className={formStyles.field}>
+                <label className={formStyles.label}>Опис (Українська)</label>
+                <TipTapEditor
+                  content={descriptionUk}
+                  onChange={(html) => setDescriptionUk(html)}
+                />
+                <input type="hidden" name="descriptionUk" value={descriptionUk} />
+              </div>
             </div>
           </div>
 

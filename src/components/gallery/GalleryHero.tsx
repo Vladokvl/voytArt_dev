@@ -3,8 +3,11 @@
 import Image from "next/image";
 import styles from "./GalleryHero.module.scss";
 import { motion } from "framer-motion";
+import { useTranslation } from "~/context/LanguageContext";
 
 export default function GalleryHero() {
+  const { t } = useTranslation();
+
   return (
     <div className={styles.wrapper}>
       <section className={styles.hero}>
@@ -32,7 +35,7 @@ export default function GalleryHero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.15 }}
           >
-            Discover Our Gallery
+            {t("gallery.heroTitle")}
           </motion.h1>
           <motion.p
             className={styles.subheading}
@@ -40,13 +43,8 @@ export default function GalleryHero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            Stories, events and moments captured through art and photography
+            {t("gallery.heroSubtitle")}
           </motion.p>
-        </div>
-
-        <div className={styles.scrollHint}>
-          <span>scroll</span>
-          <div className={styles.scrollLine} />
         </div>
       </section>
     </div>

@@ -2528,6 +2528,10 @@ export namespace Prisma {
     lastName: string | null
     bio: string | null
     shortDesc: string | null
+    firstNameUk: string | null
+    lastNameUk: string | null
+    bioUk: string | null
+    shortDescUk: string | null
     photoUrl: string | null
     photoPublicId: string | null
     bgPhotoUrl: string | null
@@ -2544,6 +2548,10 @@ export namespace Prisma {
     lastName: string | null
     bio: string | null
     shortDesc: string | null
+    firstNameUk: string | null
+    lastNameUk: string | null
+    bioUk: string | null
+    shortDescUk: string | null
     photoUrl: string | null
     photoPublicId: string | null
     bgPhotoUrl: string | null
@@ -2560,6 +2568,10 @@ export namespace Prisma {
     lastName: number
     bio: number
     shortDesc: number
+    firstNameUk: number
+    lastNameUk: number
+    bioUk: number
+    shortDescUk: number
     photoUrl: number
     photoPublicId: number
     bgPhotoUrl: number
@@ -2588,6 +2600,10 @@ export namespace Prisma {
     lastName?: true
     bio?: true
     shortDesc?: true
+    firstNameUk?: true
+    lastNameUk?: true
+    bioUk?: true
+    shortDescUk?: true
     photoUrl?: true
     photoPublicId?: true
     bgPhotoUrl?: true
@@ -2604,6 +2620,10 @@ export namespace Prisma {
     lastName?: true
     bio?: true
     shortDesc?: true
+    firstNameUk?: true
+    lastNameUk?: true
+    bioUk?: true
+    shortDescUk?: true
     photoUrl?: true
     photoPublicId?: true
     bgPhotoUrl?: true
@@ -2620,6 +2640,10 @@ export namespace Prisma {
     lastName?: true
     bio?: true
     shortDesc?: true
+    firstNameUk?: true
+    lastNameUk?: true
+    bioUk?: true
+    shortDescUk?: true
     photoUrl?: true
     photoPublicId?: true
     bgPhotoUrl?: true
@@ -2723,6 +2747,10 @@ export namespace Prisma {
     lastName: string
     bio: string | null
     shortDesc: string | null
+    firstNameUk: string | null
+    lastNameUk: string | null
+    bioUk: string | null
+    shortDescUk: string | null
     photoUrl: string | null
     photoPublicId: string
     bgPhotoUrl: string | null
@@ -2758,6 +2786,10 @@ export namespace Prisma {
     lastName?: boolean
     bio?: boolean
     shortDesc?: boolean
+    firstNameUk?: boolean
+    lastNameUk?: boolean
+    bioUk?: boolean
+    shortDescUk?: boolean
     photoUrl?: boolean
     photoPublicId?: boolean
     bgPhotoUrl?: boolean
@@ -2778,6 +2810,10 @@ export namespace Prisma {
     lastName?: boolean
     bio?: boolean
     shortDesc?: boolean
+    firstNameUk?: boolean
+    lastNameUk?: boolean
+    bioUk?: boolean
+    shortDescUk?: boolean
     photoUrl?: boolean
     photoPublicId?: boolean
     bgPhotoUrl?: boolean
@@ -2794,6 +2830,10 @@ export namespace Prisma {
     lastName?: boolean
     bio?: boolean
     shortDesc?: boolean
+    firstNameUk?: boolean
+    lastNameUk?: boolean
+    bioUk?: boolean
+    shortDescUk?: boolean
     photoUrl?: boolean
     photoPublicId?: boolean
     bgPhotoUrl?: boolean
@@ -2810,6 +2850,10 @@ export namespace Prisma {
     lastName?: boolean
     bio?: boolean
     shortDesc?: boolean
+    firstNameUk?: boolean
+    lastNameUk?: boolean
+    bioUk?: boolean
+    shortDescUk?: boolean
     photoUrl?: boolean
     photoPublicId?: boolean
     bgPhotoUrl?: boolean
@@ -2820,7 +2864,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type AuthorOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "firstName" | "lastName" | "bio" | "shortDesc" | "photoUrl" | "photoPublicId" | "bgPhotoUrl" | "bgPhotoPublicId" | "order" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["author"]>
+  export type AuthorOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "firstName" | "lastName" | "bio" | "shortDesc" | "firstNameUk" | "lastNameUk" | "bioUk" | "shortDescUk" | "photoUrl" | "photoPublicId" | "bgPhotoUrl" | "bgPhotoPublicId" | "order" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["author"]>
   export type AuthorInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     paintings?: boolean | Author$paintingsArgs<ExtArgs>
     collections?: boolean | Author$collectionsArgs<ExtArgs>
@@ -2843,6 +2887,10 @@ export namespace Prisma {
       lastName: string
       bio: string | null
       shortDesc: string | null
+      firstNameUk: string | null
+      lastNameUk: string | null
+      bioUk: string | null
+      shortDescUk: string | null
       photoUrl: string | null
       photoPublicId: string
       bgPhotoUrl: string | null
@@ -3282,6 +3330,10 @@ export namespace Prisma {
     readonly lastName: FieldRef<"Author", 'String'>
     readonly bio: FieldRef<"Author", 'String'>
     readonly shortDesc: FieldRef<"Author", 'String'>
+    readonly firstNameUk: FieldRef<"Author", 'String'>
+    readonly lastNameUk: FieldRef<"Author", 'String'>
+    readonly bioUk: FieldRef<"Author", 'String'>
+    readonly shortDescUk: FieldRef<"Author", 'String'>
     readonly photoUrl: FieldRef<"Author", 'String'>
     readonly photoPublicId: FieldRef<"Author", 'String'>
     readonly bgPhotoUrl: FieldRef<"Author", 'String'>
@@ -3798,6 +3850,7 @@ export namespace Prisma {
   export type CollectionMinAggregateOutputType = {
     id: number | null
     title: string | null
+    titleUk: string | null
     coverPhotoUrl: string | null
     coverPhotoPublicId: string | null
     authorId: number | null
@@ -3808,6 +3861,7 @@ export namespace Prisma {
   export type CollectionMaxAggregateOutputType = {
     id: number | null
     title: string | null
+    titleUk: string | null
     coverPhotoUrl: string | null
     coverPhotoPublicId: string | null
     authorId: number | null
@@ -3818,6 +3872,7 @@ export namespace Prisma {
   export type CollectionCountAggregateOutputType = {
     id: number
     title: number
+    titleUk: number
     coverPhotoUrl: number
     coverPhotoPublicId: number
     authorId: number
@@ -3840,6 +3895,7 @@ export namespace Prisma {
   export type CollectionMinAggregateInputType = {
     id?: true
     title?: true
+    titleUk?: true
     coverPhotoUrl?: true
     coverPhotoPublicId?: true
     authorId?: true
@@ -3850,6 +3906,7 @@ export namespace Prisma {
   export type CollectionMaxAggregateInputType = {
     id?: true
     title?: true
+    titleUk?: true
     coverPhotoUrl?: true
     coverPhotoPublicId?: true
     authorId?: true
@@ -3860,6 +3917,7 @@ export namespace Prisma {
   export type CollectionCountAggregateInputType = {
     id?: true
     title?: true
+    titleUk?: true
     coverPhotoUrl?: true
     coverPhotoPublicId?: true
     authorId?: true
@@ -3957,6 +4015,7 @@ export namespace Prisma {
   export type CollectionGroupByOutputType = {
     id: number
     title: string
+    titleUk: string | null
     coverPhotoUrl: string | null
     coverPhotoPublicId: string
     authorId: number
@@ -3986,6 +4045,7 @@ export namespace Prisma {
   export type CollectionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     title?: boolean
+    titleUk?: boolean
     coverPhotoUrl?: boolean
     coverPhotoPublicId?: boolean
     authorId?: boolean
@@ -3999,6 +4059,7 @@ export namespace Prisma {
   export type CollectionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     title?: boolean
+    titleUk?: boolean
     coverPhotoUrl?: boolean
     coverPhotoPublicId?: boolean
     authorId?: boolean
@@ -4010,6 +4071,7 @@ export namespace Prisma {
   export type CollectionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     title?: boolean
+    titleUk?: boolean
     coverPhotoUrl?: boolean
     coverPhotoPublicId?: boolean
     authorId?: boolean
@@ -4021,6 +4083,7 @@ export namespace Prisma {
   export type CollectionSelectScalar = {
     id?: boolean
     title?: boolean
+    titleUk?: boolean
     coverPhotoUrl?: boolean
     coverPhotoPublicId?: boolean
     authorId?: boolean
@@ -4028,7 +4091,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type CollectionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "coverPhotoUrl" | "coverPhotoPublicId" | "authorId" | "createdAt" | "updatedAt", ExtArgs["result"]["collection"]>
+  export type CollectionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "titleUk" | "coverPhotoUrl" | "coverPhotoPublicId" | "authorId" | "createdAt" | "updatedAt", ExtArgs["result"]["collection"]>
   export type CollectionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     author?: boolean | AuthorDefaultArgs<ExtArgs>
     paintings?: boolean | Collection$paintingsArgs<ExtArgs>
@@ -4050,6 +4113,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: number
       title: string
+      titleUk: string | null
       coverPhotoUrl: string | null
       coverPhotoPublicId: string
       authorId: number
@@ -4482,6 +4546,7 @@ export namespace Prisma {
   interface CollectionFieldRefs {
     readonly id: FieldRef<"Collection", 'Int'>
     readonly title: FieldRef<"Collection", 'String'>
+    readonly titleUk: FieldRef<"Collection", 'String'>
     readonly coverPhotoUrl: FieldRef<"Collection", 'String'>
     readonly coverPhotoPublicId: FieldRef<"Collection", 'String'>
     readonly authorId: FieldRef<"Collection", 'Int'>
@@ -4962,6 +5027,8 @@ export namespace Prisma {
     id: number | null
     title: string | null
     description: string | null
+    titleUk: string | null
+    descriptionUk: string | null
     coverUrl: string | null
     coverPublicId: string | null
     hasNeon: boolean | null
@@ -4978,6 +5045,8 @@ export namespace Prisma {
     id: number | null
     title: string | null
     description: string | null
+    titleUk: string | null
+    descriptionUk: string | null
     coverUrl: string | null
     coverPublicId: string | null
     hasNeon: boolean | null
@@ -4994,6 +5063,8 @@ export namespace Prisma {
     id: number
     title: number
     description: number
+    titleUk: number
+    descriptionUk: number
     coverUrl: number
     coverPublicId: number
     hasNeon: number
@@ -5028,6 +5099,8 @@ export namespace Prisma {
     id?: true
     title?: true
     description?: true
+    titleUk?: true
+    descriptionUk?: true
     coverUrl?: true
     coverPublicId?: true
     hasNeon?: true
@@ -5044,6 +5117,8 @@ export namespace Prisma {
     id?: true
     title?: true
     description?: true
+    titleUk?: true
+    descriptionUk?: true
     coverUrl?: true
     coverPublicId?: true
     hasNeon?: true
@@ -5060,6 +5135,8 @@ export namespace Prisma {
     id?: true
     title?: true
     description?: true
+    titleUk?: true
+    descriptionUk?: true
     coverUrl?: true
     coverPublicId?: true
     hasNeon?: true
@@ -5163,6 +5240,8 @@ export namespace Prisma {
     id: number
     title: string
     description: string | null
+    titleUk: string | null
+    descriptionUk: string | null
     coverUrl: string
     coverPublicId: string
     hasNeon: boolean
@@ -5198,6 +5277,8 @@ export namespace Prisma {
     id?: boolean
     title?: boolean
     description?: boolean
+    titleUk?: boolean
+    descriptionUk?: boolean
     coverUrl?: boolean
     coverPublicId?: boolean
     hasNeon?: boolean
@@ -5219,6 +5300,8 @@ export namespace Prisma {
     id?: boolean
     title?: boolean
     description?: boolean
+    titleUk?: boolean
+    descriptionUk?: boolean
     coverUrl?: boolean
     coverPublicId?: boolean
     hasNeon?: boolean
@@ -5237,6 +5320,8 @@ export namespace Prisma {
     id?: boolean
     title?: boolean
     description?: boolean
+    titleUk?: boolean
+    descriptionUk?: boolean
     coverUrl?: boolean
     coverPublicId?: boolean
     hasNeon?: boolean
@@ -5255,6 +5340,8 @@ export namespace Prisma {
     id?: boolean
     title?: boolean
     description?: boolean
+    titleUk?: boolean
+    descriptionUk?: boolean
     coverUrl?: boolean
     coverPublicId?: boolean
     hasNeon?: boolean
@@ -5267,7 +5354,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type PaintingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "coverUrl" | "coverPublicId" | "hasNeon" | "isForSale" | "sortOrder" | "year" | "authorId" | "collectionId" | "createdAt" | "updatedAt", ExtArgs["result"]["painting"]>
+  export type PaintingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "titleUk" | "descriptionUk" | "coverUrl" | "coverPublicId" | "hasNeon" | "isForSale" | "sortOrder" | "year" | "authorId" | "collectionId" | "createdAt" | "updatedAt", ExtArgs["result"]["painting"]>
   export type PaintingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     author?: boolean | AuthorDefaultArgs<ExtArgs>
     collection?: boolean | Painting$collectionArgs<ExtArgs>
@@ -5296,6 +5383,8 @@ export namespace Prisma {
       id: number
       title: string
       description: string | null
+      titleUk: string | null
+      descriptionUk: string | null
       coverUrl: string
       coverPublicId: string
       hasNeon: boolean
@@ -5736,6 +5825,8 @@ export namespace Prisma {
     readonly id: FieldRef<"Painting", 'Int'>
     readonly title: FieldRef<"Painting", 'String'>
     readonly description: FieldRef<"Painting", 'String'>
+    readonly titleUk: FieldRef<"Painting", 'String'>
+    readonly descriptionUk: FieldRef<"Painting", 'String'>
     readonly coverUrl: FieldRef<"Painting", 'String'>
     readonly coverPublicId: FieldRef<"Painting", 'String'>
     readonly hasNeon: FieldRef<"Painting", 'Boolean'>
@@ -7386,6 +7477,7 @@ export namespace Prisma {
   export type CategoryMinAggregateOutputType = {
     id: number | null
     name: string | null
+    nameUk: string | null
     slug: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -7394,6 +7486,7 @@ export namespace Prisma {
   export type CategoryMaxAggregateOutputType = {
     id: number | null
     name: string | null
+    nameUk: string | null
     slug: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -7402,6 +7495,7 @@ export namespace Prisma {
   export type CategoryCountAggregateOutputType = {
     id: number
     name: number
+    nameUk: number
     slug: number
     createdAt: number
     updatedAt: number
@@ -7420,6 +7514,7 @@ export namespace Prisma {
   export type CategoryMinAggregateInputType = {
     id?: true
     name?: true
+    nameUk?: true
     slug?: true
     createdAt?: true
     updatedAt?: true
@@ -7428,6 +7523,7 @@ export namespace Prisma {
   export type CategoryMaxAggregateInputType = {
     id?: true
     name?: true
+    nameUk?: true
     slug?: true
     createdAt?: true
     updatedAt?: true
@@ -7436,6 +7532,7 @@ export namespace Prisma {
   export type CategoryCountAggregateInputType = {
     id?: true
     name?: true
+    nameUk?: true
     slug?: true
     createdAt?: true
     updatedAt?: true
@@ -7531,6 +7628,7 @@ export namespace Prisma {
   export type CategoryGroupByOutputType = {
     id: number
     name: string
+    nameUk: string | null
     slug: string
     createdAt: Date
     updatedAt: Date
@@ -7558,6 +7656,7 @@ export namespace Prisma {
   export type CategorySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
+    nameUk?: boolean
     slug?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -7568,6 +7667,7 @@ export namespace Prisma {
   export type CategorySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
+    nameUk?: boolean
     slug?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -7576,6 +7676,7 @@ export namespace Prisma {
   export type CategorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
+    nameUk?: boolean
     slug?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -7584,12 +7685,13 @@ export namespace Prisma {
   export type CategorySelectScalar = {
     id?: boolean
     name?: boolean
+    nameUk?: boolean
     slug?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type CategoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "createdAt" | "updatedAt", ExtArgs["result"]["category"]>
+  export type CategoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "nameUk" | "slug" | "createdAt" | "updatedAt", ExtArgs["result"]["category"]>
   export type CategoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Category$productsArgs<ExtArgs>
     _count?: boolean | CategoryCountOutputTypeDefaultArgs<ExtArgs>
@@ -7605,6 +7707,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: number
       name: string
+      nameUk: string | null
       slug: string
       createdAt: Date
       updatedAt: Date
@@ -8034,6 +8137,7 @@ export namespace Prisma {
   interface CategoryFieldRefs {
     readonly id: FieldRef<"Category", 'Int'>
     readonly name: FieldRef<"Category", 'String'>
+    readonly nameUk: FieldRef<"Category", 'String'>
     readonly slug: FieldRef<"Category", 'String'>
     readonly createdAt: FieldRef<"Category", 'DateTime'>
     readonly updatedAt: FieldRef<"Category", 'DateTime'>
@@ -8506,6 +8610,8 @@ export namespace Prisma {
     id: number | null
     title: string | null
     description: string | null
+    titleUk: string | null
+    descriptionUk: string | null
     price: number | null
     stock: number | null
     sortOrder: number | null
@@ -8523,6 +8629,8 @@ export namespace Prisma {
     id: number | null
     title: string | null
     description: string | null
+    titleUk: string | null
+    descriptionUk: string | null
     price: number | null
     stock: number | null
     sortOrder: number | null
@@ -8540,6 +8648,8 @@ export namespace Prisma {
     id: number
     title: number
     description: number
+    titleUk: number
+    descriptionUk: number
     price: number
     stock: number
     sortOrder: number
@@ -8577,6 +8687,8 @@ export namespace Prisma {
     id?: true
     title?: true
     description?: true
+    titleUk?: true
+    descriptionUk?: true
     price?: true
     stock?: true
     sortOrder?: true
@@ -8594,6 +8706,8 @@ export namespace Prisma {
     id?: true
     title?: true
     description?: true
+    titleUk?: true
+    descriptionUk?: true
     price?: true
     stock?: true
     sortOrder?: true
@@ -8611,6 +8725,8 @@ export namespace Prisma {
     id?: true
     title?: true
     description?: true
+    titleUk?: true
+    descriptionUk?: true
     price?: true
     stock?: true
     sortOrder?: true
@@ -8715,6 +8831,8 @@ export namespace Prisma {
     id: number
     title: string
     description: string | null
+    titleUk: string | null
+    descriptionUk: string | null
     price: number
     stock: number
     sortOrder: number
@@ -8751,6 +8869,8 @@ export namespace Prisma {
     id?: boolean
     title?: boolean
     description?: boolean
+    titleUk?: boolean
+    descriptionUk?: boolean
     price?: boolean
     stock?: boolean
     sortOrder?: boolean
@@ -8774,6 +8894,8 @@ export namespace Prisma {
     id?: boolean
     title?: boolean
     description?: boolean
+    titleUk?: boolean
+    descriptionUk?: boolean
     price?: boolean
     stock?: boolean
     sortOrder?: boolean
@@ -8793,6 +8915,8 @@ export namespace Prisma {
     id?: boolean
     title?: boolean
     description?: boolean
+    titleUk?: boolean
+    descriptionUk?: boolean
     price?: boolean
     stock?: boolean
     sortOrder?: boolean
@@ -8812,6 +8936,8 @@ export namespace Prisma {
     id?: boolean
     title?: boolean
     description?: boolean
+    titleUk?: boolean
+    descriptionUk?: boolean
     price?: boolean
     stock?: boolean
     sortOrder?: boolean
@@ -8825,7 +8951,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "price" | "stock" | "sortOrder" | "isFeatured" | "isActive" | "coverUrl" | "coverPublicId" | "categoryId" | "authorId" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
+  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "titleUk" | "descriptionUk" | "price" | "stock" | "sortOrder" | "isFeatured" | "isActive" | "coverUrl" | "coverPublicId" | "categoryId" | "authorId" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
   export type ProductInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     category?: boolean | CategoryDefaultArgs<ExtArgs>
     author?: boolean | AuthorDefaultArgs<ExtArgs>
@@ -8856,6 +8982,8 @@ export namespace Prisma {
       id: number
       title: string
       description: string | null
+      titleUk: string | null
+      descriptionUk: string | null
       price: number
       stock: number
       sortOrder: number
@@ -9298,6 +9426,8 @@ export namespace Prisma {
     readonly id: FieldRef<"Product", 'Int'>
     readonly title: FieldRef<"Product", 'String'>
     readonly description: FieldRef<"Product", 'String'>
+    readonly titleUk: FieldRef<"Product", 'String'>
+    readonly descriptionUk: FieldRef<"Product", 'String'>
     readonly price: FieldRef<"Product", 'Float'>
     readonly stock: FieldRef<"Product", 'Int'>
     readonly sortOrder: FieldRef<"Product", 'Int'>
@@ -9831,6 +9961,7 @@ export namespace Prisma {
   export type ProductVariantMinAggregateOutputType = {
     id: number | null
     title: string | null
+    titleUk: string | null
     price: number | null
     stock: number | null
     sku: string | null
@@ -9843,6 +9974,7 @@ export namespace Prisma {
   export type ProductVariantMaxAggregateOutputType = {
     id: number | null
     title: string | null
+    titleUk: string | null
     price: number | null
     stock: number | null
     sku: string | null
@@ -9855,6 +9987,7 @@ export namespace Prisma {
   export type ProductVariantCountAggregateOutputType = {
     id: number
     title: number
+    titleUk: number
     price: number
     stock: number
     sku: number
@@ -9885,6 +10018,7 @@ export namespace Prisma {
   export type ProductVariantMinAggregateInputType = {
     id?: true
     title?: true
+    titleUk?: true
     price?: true
     stock?: true
     sku?: true
@@ -9897,6 +10031,7 @@ export namespace Prisma {
   export type ProductVariantMaxAggregateInputType = {
     id?: true
     title?: true
+    titleUk?: true
     price?: true
     stock?: true
     sku?: true
@@ -9909,6 +10044,7 @@ export namespace Prisma {
   export type ProductVariantCountAggregateInputType = {
     id?: true
     title?: true
+    titleUk?: true
     price?: true
     stock?: true
     sku?: true
@@ -10008,6 +10144,7 @@ export namespace Prisma {
   export type ProductVariantGroupByOutputType = {
     id: number
     title: string
+    titleUk: string | null
     price: number | null
     stock: number
     sku: string | null
@@ -10039,6 +10176,7 @@ export namespace Prisma {
   export type ProductVariantSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     title?: boolean
+    titleUk?: boolean
     price?: boolean
     stock?: boolean
     sku?: boolean
@@ -10055,6 +10193,7 @@ export namespace Prisma {
   export type ProductVariantSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     title?: boolean
+    titleUk?: boolean
     price?: boolean
     stock?: boolean
     sku?: boolean
@@ -10068,6 +10207,7 @@ export namespace Prisma {
   export type ProductVariantSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     title?: boolean
+    titleUk?: boolean
     price?: boolean
     stock?: boolean
     sku?: boolean
@@ -10081,6 +10221,7 @@ export namespace Prisma {
   export type ProductVariantSelectScalar = {
     id?: boolean
     title?: boolean
+    titleUk?: boolean
     price?: boolean
     stock?: boolean
     sku?: boolean
@@ -10090,7 +10231,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type ProductVariantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "price" | "stock" | "sku" | "sortOrder" | "productId" | "createdAt" | "updatedAt", ExtArgs["result"]["productVariant"]>
+  export type ProductVariantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "titleUk" | "price" | "stock" | "sku" | "sortOrder" | "productId" | "createdAt" | "updatedAt", ExtArgs["result"]["productVariant"]>
   export type ProductVariantInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     product?: boolean | ProductDefaultArgs<ExtArgs>
     images?: boolean | ProductVariant$imagesArgs<ExtArgs>
@@ -10114,6 +10255,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: number
       title: string
+      titleUk: string | null
       price: number | null
       stock: number
       sku: string | null
@@ -10549,6 +10691,7 @@ export namespace Prisma {
   interface ProductVariantFieldRefs {
     readonly id: FieldRef<"ProductVariant", 'Int'>
     readonly title: FieldRef<"ProductVariant", 'String'>
+    readonly titleUk: FieldRef<"ProductVariant", 'String'>
     readonly price: FieldRef<"ProductVariant", 'Float'>
     readonly stock: FieldRef<"ProductVariant", 'Int'>
     readonly sku: FieldRef<"ProductVariant", 'String'>
@@ -14622,7 +14765,9 @@ export namespace Prisma {
   export type GalleryPostMinAggregateOutputType = {
     id: number | null
     title: string | null
+    titleUk: string | null
     content: string | null
+    contentUk: string | null
     coverUrl: string | null
     coverPublicId: string | null
     date: Date | null
@@ -14633,7 +14778,9 @@ export namespace Prisma {
   export type GalleryPostMaxAggregateOutputType = {
     id: number | null
     title: string | null
+    titleUk: string | null
     content: string | null
+    contentUk: string | null
     coverUrl: string | null
     coverPublicId: string | null
     date: Date | null
@@ -14644,7 +14791,9 @@ export namespace Prisma {
   export type GalleryPostCountAggregateOutputType = {
     id: number
     title: number
+    titleUk: number
     content: number
+    contentUk: number
     coverUrl: number
     coverPublicId: number
     date: number
@@ -14665,7 +14814,9 @@ export namespace Prisma {
   export type GalleryPostMinAggregateInputType = {
     id?: true
     title?: true
+    titleUk?: true
     content?: true
+    contentUk?: true
     coverUrl?: true
     coverPublicId?: true
     date?: true
@@ -14676,7 +14827,9 @@ export namespace Prisma {
   export type GalleryPostMaxAggregateInputType = {
     id?: true
     title?: true
+    titleUk?: true
     content?: true
+    contentUk?: true
     coverUrl?: true
     coverPublicId?: true
     date?: true
@@ -14687,7 +14840,9 @@ export namespace Prisma {
   export type GalleryPostCountAggregateInputType = {
     id?: true
     title?: true
+    titleUk?: true
     content?: true
+    contentUk?: true
     coverUrl?: true
     coverPublicId?: true
     date?: true
@@ -14785,7 +14940,9 @@ export namespace Prisma {
   export type GalleryPostGroupByOutputType = {
     id: number
     title: string
+    titleUk: string | null
     content: string
+    contentUk: string | null
     coverUrl: string | null
     coverPublicId: string
     date: Date | null
@@ -14815,7 +14972,9 @@ export namespace Prisma {
   export type GalleryPostSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     title?: boolean
+    titleUk?: boolean
     content?: boolean
+    contentUk?: boolean
     coverUrl?: boolean
     coverPublicId?: boolean
     date?: boolean
@@ -14828,7 +14987,9 @@ export namespace Prisma {
   export type GalleryPostSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     title?: boolean
+    titleUk?: boolean
     content?: boolean
+    contentUk?: boolean
     coverUrl?: boolean
     coverPublicId?: boolean
     date?: boolean
@@ -14839,7 +15000,9 @@ export namespace Prisma {
   export type GalleryPostSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     title?: boolean
+    titleUk?: boolean
     content?: boolean
+    contentUk?: boolean
     coverUrl?: boolean
     coverPublicId?: boolean
     date?: boolean
@@ -14850,7 +15013,9 @@ export namespace Prisma {
   export type GalleryPostSelectScalar = {
     id?: boolean
     title?: boolean
+    titleUk?: boolean
     content?: boolean
+    contentUk?: boolean
     coverUrl?: boolean
     coverPublicId?: boolean
     date?: boolean
@@ -14858,7 +15023,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type GalleryPostOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "content" | "coverUrl" | "coverPublicId" | "date" | "createdAt" | "updatedAt", ExtArgs["result"]["galleryPost"]>
+  export type GalleryPostOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "titleUk" | "content" | "contentUk" | "coverUrl" | "coverPublicId" | "date" | "createdAt" | "updatedAt", ExtArgs["result"]["galleryPost"]>
   export type GalleryPostInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     media?: boolean | GalleryPost$mediaArgs<ExtArgs>
     _count?: boolean | GalleryPostCountOutputTypeDefaultArgs<ExtArgs>
@@ -14874,7 +15039,9 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: number
       title: string
+      titleUk: string | null
       content: string
+      contentUk: string | null
       coverUrl: string | null
       coverPublicId: string
       date: Date | null
@@ -15306,7 +15473,9 @@ export namespace Prisma {
   interface GalleryPostFieldRefs {
     readonly id: FieldRef<"GalleryPost", 'Int'>
     readonly title: FieldRef<"GalleryPost", 'String'>
+    readonly titleUk: FieldRef<"GalleryPost", 'String'>
     readonly content: FieldRef<"GalleryPost", 'String'>
+    readonly contentUk: FieldRef<"GalleryPost", 'String'>
     readonly coverUrl: FieldRef<"GalleryPost", 'String'>
     readonly coverPublicId: FieldRef<"GalleryPost", 'String'>
     readonly date: FieldRef<"GalleryPost", 'DateTime'>
@@ -20193,6 +20362,10 @@ export namespace Prisma {
     lastName: 'lastName',
     bio: 'bio',
     shortDesc: 'shortDesc',
+    firstNameUk: 'firstNameUk',
+    lastNameUk: 'lastNameUk',
+    bioUk: 'bioUk',
+    shortDescUk: 'shortDescUk',
     photoUrl: 'photoUrl',
     photoPublicId: 'photoPublicId',
     bgPhotoUrl: 'bgPhotoUrl',
@@ -20209,6 +20382,7 @@ export namespace Prisma {
   export const CollectionScalarFieldEnum: {
     id: 'id',
     title: 'title',
+    titleUk: 'titleUk',
     coverPhotoUrl: 'coverPhotoUrl',
     coverPhotoPublicId: 'coverPhotoPublicId',
     authorId: 'authorId',
@@ -20223,6 +20397,8 @@ export namespace Prisma {
     id: 'id',
     title: 'title',
     description: 'description',
+    titleUk: 'titleUk',
+    descriptionUk: 'descriptionUk',
     coverUrl: 'coverUrl',
     coverPublicId: 'coverPublicId',
     hasNeon: 'hasNeon',
@@ -20254,6 +20430,7 @@ export namespace Prisma {
   export const CategoryScalarFieldEnum: {
     id: 'id',
     name: 'name',
+    nameUk: 'nameUk',
     slug: 'slug',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -20266,6 +20443,8 @@ export namespace Prisma {
     id: 'id',
     title: 'title',
     description: 'description',
+    titleUk: 'titleUk',
+    descriptionUk: 'descriptionUk',
     price: 'price',
     stock: 'stock',
     sortOrder: 'sortOrder',
@@ -20285,6 +20464,7 @@ export namespace Prisma {
   export const ProductVariantScalarFieldEnum: {
     id: 'id',
     title: 'title',
+    titleUk: 'titleUk',
     price: 'price',
     stock: 'stock',
     sku: 'sku',
@@ -20345,7 +20525,9 @@ export namespace Prisma {
   export const GalleryPostScalarFieldEnum: {
     id: 'id',
     title: 'title',
+    titleUk: 'titleUk',
     content: 'content',
+    contentUk: 'contentUk',
     coverUrl: 'coverUrl',
     coverPublicId: 'coverPublicId',
     date: 'date',
@@ -20574,6 +20756,10 @@ export namespace Prisma {
     lastName?: StringFilter<"Author"> | string
     bio?: StringNullableFilter<"Author"> | string | null
     shortDesc?: StringNullableFilter<"Author"> | string | null
+    firstNameUk?: StringNullableFilter<"Author"> | string | null
+    lastNameUk?: StringNullableFilter<"Author"> | string | null
+    bioUk?: StringNullableFilter<"Author"> | string | null
+    shortDescUk?: StringNullableFilter<"Author"> | string | null
     photoUrl?: StringNullableFilter<"Author"> | string | null
     photoPublicId?: StringFilter<"Author"> | string
     bgPhotoUrl?: StringNullableFilter<"Author"> | string | null
@@ -20593,6 +20779,10 @@ export namespace Prisma {
     lastName?: SortOrder
     bio?: SortOrderInput | SortOrder
     shortDesc?: SortOrderInput | SortOrder
+    firstNameUk?: SortOrderInput | SortOrder
+    lastNameUk?: SortOrderInput | SortOrder
+    bioUk?: SortOrderInput | SortOrder
+    shortDescUk?: SortOrderInput | SortOrder
     photoUrl?: SortOrderInput | SortOrder
     photoPublicId?: SortOrder
     bgPhotoUrl?: SortOrderInput | SortOrder
@@ -20615,6 +20805,10 @@ export namespace Prisma {
     lastName?: StringFilter<"Author"> | string
     bio?: StringNullableFilter<"Author"> | string | null
     shortDesc?: StringNullableFilter<"Author"> | string | null
+    firstNameUk?: StringNullableFilter<"Author"> | string | null
+    lastNameUk?: StringNullableFilter<"Author"> | string | null
+    bioUk?: StringNullableFilter<"Author"> | string | null
+    shortDescUk?: StringNullableFilter<"Author"> | string | null
     photoUrl?: StringNullableFilter<"Author"> | string | null
     photoPublicId?: StringFilter<"Author"> | string
     bgPhotoUrl?: StringNullableFilter<"Author"> | string | null
@@ -20634,6 +20828,10 @@ export namespace Prisma {
     lastName?: SortOrder
     bio?: SortOrderInput | SortOrder
     shortDesc?: SortOrderInput | SortOrder
+    firstNameUk?: SortOrderInput | SortOrder
+    lastNameUk?: SortOrderInput | SortOrder
+    bioUk?: SortOrderInput | SortOrder
+    shortDescUk?: SortOrderInput | SortOrder
     photoUrl?: SortOrderInput | SortOrder
     photoPublicId?: SortOrder
     bgPhotoUrl?: SortOrderInput | SortOrder
@@ -20658,6 +20856,10 @@ export namespace Prisma {
     lastName?: StringWithAggregatesFilter<"Author"> | string
     bio?: StringNullableWithAggregatesFilter<"Author"> | string | null
     shortDesc?: StringNullableWithAggregatesFilter<"Author"> | string | null
+    firstNameUk?: StringNullableWithAggregatesFilter<"Author"> | string | null
+    lastNameUk?: StringNullableWithAggregatesFilter<"Author"> | string | null
+    bioUk?: StringNullableWithAggregatesFilter<"Author"> | string | null
+    shortDescUk?: StringNullableWithAggregatesFilter<"Author"> | string | null
     photoUrl?: StringNullableWithAggregatesFilter<"Author"> | string | null
     photoPublicId?: StringWithAggregatesFilter<"Author"> | string
     bgPhotoUrl?: StringNullableWithAggregatesFilter<"Author"> | string | null
@@ -20674,6 +20876,7 @@ export namespace Prisma {
     NOT?: CollectionWhereInput | CollectionWhereInput[]
     id?: IntFilter<"Collection"> | number
     title?: StringFilter<"Collection"> | string
+    titleUk?: StringNullableFilter<"Collection"> | string | null
     coverPhotoUrl?: StringNullableFilter<"Collection"> | string | null
     coverPhotoPublicId?: StringFilter<"Collection"> | string
     authorId?: IntFilter<"Collection"> | number
@@ -20686,6 +20889,7 @@ export namespace Prisma {
   export type CollectionOrderByWithRelationInput = {
     id?: SortOrder
     title?: SortOrder
+    titleUk?: SortOrderInput | SortOrder
     coverPhotoUrl?: SortOrderInput | SortOrder
     coverPhotoPublicId?: SortOrder
     authorId?: SortOrder
@@ -20701,6 +20905,7 @@ export namespace Prisma {
     OR?: CollectionWhereInput[]
     NOT?: CollectionWhereInput | CollectionWhereInput[]
     title?: StringFilter<"Collection"> | string
+    titleUk?: StringNullableFilter<"Collection"> | string | null
     coverPhotoUrl?: StringNullableFilter<"Collection"> | string | null
     coverPhotoPublicId?: StringFilter<"Collection"> | string
     authorId?: IntFilter<"Collection"> | number
@@ -20713,6 +20918,7 @@ export namespace Prisma {
   export type CollectionOrderByWithAggregationInput = {
     id?: SortOrder
     title?: SortOrder
+    titleUk?: SortOrderInput | SortOrder
     coverPhotoUrl?: SortOrderInput | SortOrder
     coverPhotoPublicId?: SortOrder
     authorId?: SortOrder
@@ -20731,6 +20937,7 @@ export namespace Prisma {
     NOT?: CollectionScalarWhereWithAggregatesInput | CollectionScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"Collection"> | number
     title?: StringWithAggregatesFilter<"Collection"> | string
+    titleUk?: StringNullableWithAggregatesFilter<"Collection"> | string | null
     coverPhotoUrl?: StringNullableWithAggregatesFilter<"Collection"> | string | null
     coverPhotoPublicId?: StringWithAggregatesFilter<"Collection"> | string
     authorId?: IntWithAggregatesFilter<"Collection"> | number
@@ -20745,6 +20952,8 @@ export namespace Prisma {
     id?: IntFilter<"Painting"> | number
     title?: StringFilter<"Painting"> | string
     description?: StringNullableFilter<"Painting"> | string | null
+    titleUk?: StringNullableFilter<"Painting"> | string | null
+    descriptionUk?: StringNullableFilter<"Painting"> | string | null
     coverUrl?: StringFilter<"Painting"> | string
     coverPublicId?: StringFilter<"Painting"> | string
     hasNeon?: BoolFilter<"Painting"> | boolean
@@ -20765,6 +20974,8 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     description?: SortOrderInput | SortOrder
+    titleUk?: SortOrderInput | SortOrder
+    descriptionUk?: SortOrderInput | SortOrder
     coverUrl?: SortOrder
     coverPublicId?: SortOrder
     hasNeon?: SortOrder
@@ -20788,6 +20999,8 @@ export namespace Prisma {
     NOT?: PaintingWhereInput | PaintingWhereInput[]
     title?: StringFilter<"Painting"> | string
     description?: StringNullableFilter<"Painting"> | string | null
+    titleUk?: StringNullableFilter<"Painting"> | string | null
+    descriptionUk?: StringNullableFilter<"Painting"> | string | null
     coverUrl?: StringFilter<"Painting"> | string
     coverPublicId?: StringFilter<"Painting"> | string
     hasNeon?: BoolFilter<"Painting"> | boolean
@@ -20808,6 +21021,8 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     description?: SortOrderInput | SortOrder
+    titleUk?: SortOrderInput | SortOrder
+    descriptionUk?: SortOrderInput | SortOrder
     coverUrl?: SortOrder
     coverPublicId?: SortOrder
     hasNeon?: SortOrder
@@ -20832,6 +21047,8 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"Painting"> | number
     title?: StringWithAggregatesFilter<"Painting"> | string
     description?: StringNullableWithAggregatesFilter<"Painting"> | string | null
+    titleUk?: StringNullableWithAggregatesFilter<"Painting"> | string | null
+    descriptionUk?: StringNullableWithAggregatesFilter<"Painting"> | string | null
     coverUrl?: StringWithAggregatesFilter<"Painting"> | string
     coverPublicId?: StringWithAggregatesFilter<"Painting"> | string
     hasNeon?: BoolWithAggregatesFilter<"Painting"> | boolean
@@ -20917,6 +21134,7 @@ export namespace Prisma {
     NOT?: CategoryWhereInput | CategoryWhereInput[]
     id?: IntFilter<"Category"> | number
     name?: StringFilter<"Category"> | string
+    nameUk?: StringNullableFilter<"Category"> | string | null
     slug?: StringFilter<"Category"> | string
     createdAt?: DateTimeFilter<"Category"> | Date | string
     updatedAt?: DateTimeFilter<"Category"> | Date | string
@@ -20926,6 +21144,7 @@ export namespace Prisma {
   export type CategoryOrderByWithRelationInput = {
     id?: SortOrder
     name?: SortOrder
+    nameUk?: SortOrderInput | SortOrder
     slug?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -20939,6 +21158,7 @@ export namespace Prisma {
     AND?: CategoryWhereInput | CategoryWhereInput[]
     OR?: CategoryWhereInput[]
     NOT?: CategoryWhereInput | CategoryWhereInput[]
+    nameUk?: StringNullableFilter<"Category"> | string | null
     createdAt?: DateTimeFilter<"Category"> | Date | string
     updatedAt?: DateTimeFilter<"Category"> | Date | string
     products?: ProductListRelationFilter
@@ -20947,6 +21167,7 @@ export namespace Prisma {
   export type CategoryOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
+    nameUk?: SortOrderInput | SortOrder
     slug?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -20963,6 +21184,7 @@ export namespace Prisma {
     NOT?: CategoryScalarWhereWithAggregatesInput | CategoryScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"Category"> | number
     name?: StringWithAggregatesFilter<"Category"> | string
+    nameUk?: StringNullableWithAggregatesFilter<"Category"> | string | null
     slug?: StringWithAggregatesFilter<"Category"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Category"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Category"> | Date | string
@@ -20975,6 +21197,8 @@ export namespace Prisma {
     id?: IntFilter<"Product"> | number
     title?: StringFilter<"Product"> | string
     description?: StringNullableFilter<"Product"> | string | null
+    titleUk?: StringNullableFilter<"Product"> | string | null
+    descriptionUk?: StringNullableFilter<"Product"> | string | null
     price?: FloatFilter<"Product"> | number
     stock?: IntFilter<"Product"> | number
     sortOrder?: IntFilter<"Product"> | number
@@ -20997,6 +21221,8 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     description?: SortOrderInput | SortOrder
+    titleUk?: SortOrderInput | SortOrder
+    descriptionUk?: SortOrderInput | SortOrder
     price?: SortOrder
     stock?: SortOrder
     sortOrder?: SortOrder
@@ -21022,6 +21248,8 @@ export namespace Prisma {
     NOT?: ProductWhereInput | ProductWhereInput[]
     title?: StringFilter<"Product"> | string
     description?: StringNullableFilter<"Product"> | string | null
+    titleUk?: StringNullableFilter<"Product"> | string | null
+    descriptionUk?: StringNullableFilter<"Product"> | string | null
     price?: FloatFilter<"Product"> | number
     stock?: IntFilter<"Product"> | number
     sortOrder?: IntFilter<"Product"> | number
@@ -21044,6 +21272,8 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     description?: SortOrderInput | SortOrder
+    titleUk?: SortOrderInput | SortOrder
+    descriptionUk?: SortOrderInput | SortOrder
     price?: SortOrder
     stock?: SortOrder
     sortOrder?: SortOrder
@@ -21069,6 +21299,8 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"Product"> | number
     title?: StringWithAggregatesFilter<"Product"> | string
     description?: StringNullableWithAggregatesFilter<"Product"> | string | null
+    titleUk?: StringNullableWithAggregatesFilter<"Product"> | string | null
+    descriptionUk?: StringNullableWithAggregatesFilter<"Product"> | string | null
     price?: FloatWithAggregatesFilter<"Product"> | number
     stock?: IntWithAggregatesFilter<"Product"> | number
     sortOrder?: IntWithAggregatesFilter<"Product"> | number
@@ -21088,6 +21320,7 @@ export namespace Prisma {
     NOT?: ProductVariantWhereInput | ProductVariantWhereInput[]
     id?: IntFilter<"ProductVariant"> | number
     title?: StringFilter<"ProductVariant"> | string
+    titleUk?: StringNullableFilter<"ProductVariant"> | string | null
     price?: FloatNullableFilter<"ProductVariant"> | number | null
     stock?: IntFilter<"ProductVariant"> | number
     sku?: StringNullableFilter<"ProductVariant"> | string | null
@@ -21103,6 +21336,7 @@ export namespace Prisma {
   export type ProductVariantOrderByWithRelationInput = {
     id?: SortOrder
     title?: SortOrder
+    titleUk?: SortOrderInput | SortOrder
     price?: SortOrderInput | SortOrder
     stock?: SortOrder
     sku?: SortOrderInput | SortOrder
@@ -21121,6 +21355,7 @@ export namespace Prisma {
     OR?: ProductVariantWhereInput[]
     NOT?: ProductVariantWhereInput | ProductVariantWhereInput[]
     title?: StringFilter<"ProductVariant"> | string
+    titleUk?: StringNullableFilter<"ProductVariant"> | string | null
     price?: FloatNullableFilter<"ProductVariant"> | number | null
     stock?: IntFilter<"ProductVariant"> | number
     sku?: StringNullableFilter<"ProductVariant"> | string | null
@@ -21136,6 +21371,7 @@ export namespace Prisma {
   export type ProductVariantOrderByWithAggregationInput = {
     id?: SortOrder
     title?: SortOrder
+    titleUk?: SortOrderInput | SortOrder
     price?: SortOrderInput | SortOrder
     stock?: SortOrder
     sku?: SortOrderInput | SortOrder
@@ -21156,6 +21392,7 @@ export namespace Prisma {
     NOT?: ProductVariantScalarWhereWithAggregatesInput | ProductVariantScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"ProductVariant"> | number
     title?: StringWithAggregatesFilter<"ProductVariant"> | string
+    titleUk?: StringNullableWithAggregatesFilter<"ProductVariant"> | string | null
     price?: FloatNullableWithAggregatesFilter<"ProductVariant"> | number | null
     stock?: IntWithAggregatesFilter<"ProductVariant"> | number
     sku?: StringNullableWithAggregatesFilter<"ProductVariant"> | string | null
@@ -21411,7 +21648,9 @@ export namespace Prisma {
     NOT?: GalleryPostWhereInput | GalleryPostWhereInput[]
     id?: IntFilter<"GalleryPost"> | number
     title?: StringFilter<"GalleryPost"> | string
+    titleUk?: StringNullableFilter<"GalleryPost"> | string | null
     content?: StringFilter<"GalleryPost"> | string
+    contentUk?: StringNullableFilter<"GalleryPost"> | string | null
     coverUrl?: StringNullableFilter<"GalleryPost"> | string | null
     coverPublicId?: StringFilter<"GalleryPost"> | string
     date?: DateTimeNullableFilter<"GalleryPost"> | Date | string | null
@@ -21423,7 +21662,9 @@ export namespace Prisma {
   export type GalleryPostOrderByWithRelationInput = {
     id?: SortOrder
     title?: SortOrder
+    titleUk?: SortOrderInput | SortOrder
     content?: SortOrder
+    contentUk?: SortOrderInput | SortOrder
     coverUrl?: SortOrderInput | SortOrder
     coverPublicId?: SortOrder
     date?: SortOrderInput | SortOrder
@@ -21438,7 +21679,9 @@ export namespace Prisma {
     OR?: GalleryPostWhereInput[]
     NOT?: GalleryPostWhereInput | GalleryPostWhereInput[]
     title?: StringFilter<"GalleryPost"> | string
+    titleUk?: StringNullableFilter<"GalleryPost"> | string | null
     content?: StringFilter<"GalleryPost"> | string
+    contentUk?: StringNullableFilter<"GalleryPost"> | string | null
     coverUrl?: StringNullableFilter<"GalleryPost"> | string | null
     coverPublicId?: StringFilter<"GalleryPost"> | string
     date?: DateTimeNullableFilter<"GalleryPost"> | Date | string | null
@@ -21450,7 +21693,9 @@ export namespace Prisma {
   export type GalleryPostOrderByWithAggregationInput = {
     id?: SortOrder
     title?: SortOrder
+    titleUk?: SortOrderInput | SortOrder
     content?: SortOrder
+    contentUk?: SortOrderInput | SortOrder
     coverUrl?: SortOrderInput | SortOrder
     coverPublicId?: SortOrder
     date?: SortOrderInput | SortOrder
@@ -21469,7 +21714,9 @@ export namespace Prisma {
     NOT?: GalleryPostScalarWhereWithAggregatesInput | GalleryPostScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"GalleryPost"> | number
     title?: StringWithAggregatesFilter<"GalleryPost"> | string
+    titleUk?: StringNullableWithAggregatesFilter<"GalleryPost"> | string | null
     content?: StringWithAggregatesFilter<"GalleryPost"> | string
+    contentUk?: StringNullableWithAggregatesFilter<"GalleryPost"> | string | null
     coverUrl?: StringNullableWithAggregatesFilter<"GalleryPost"> | string | null
     coverPublicId?: StringWithAggregatesFilter<"GalleryPost"> | string
     date?: DateTimeNullableWithAggregatesFilter<"GalleryPost"> | Date | string | null
@@ -21772,6 +22019,10 @@ export namespace Prisma {
     lastName: string
     bio?: string | null
     shortDesc?: string | null
+    firstNameUk?: string | null
+    lastNameUk?: string | null
+    bioUk?: string | null
+    shortDescUk?: string | null
     photoUrl?: string | null
     photoPublicId?: string
     bgPhotoUrl?: string | null
@@ -21791,6 +22042,10 @@ export namespace Prisma {
     lastName: string
     bio?: string | null
     shortDesc?: string | null
+    firstNameUk?: string | null
+    lastNameUk?: string | null
+    bioUk?: string | null
+    shortDescUk?: string | null
     photoUrl?: string | null
     photoPublicId?: string
     bgPhotoUrl?: string | null
@@ -21809,6 +22064,10 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    firstNameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    lastNameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    bioUk?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDescUk?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
     bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -21828,6 +22087,10 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    firstNameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    lastNameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    bioUk?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDescUk?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
     bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -21847,6 +22110,10 @@ export namespace Prisma {
     lastName: string
     bio?: string | null
     shortDesc?: string | null
+    firstNameUk?: string | null
+    lastNameUk?: string | null
+    bioUk?: string | null
+    shortDescUk?: string | null
     photoUrl?: string | null
     photoPublicId?: string
     bgPhotoUrl?: string | null
@@ -21862,6 +22129,10 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    firstNameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    lastNameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    bioUk?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDescUk?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
     bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -21878,6 +22149,10 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    firstNameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    lastNameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    bioUk?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDescUk?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
     bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -21890,6 +22165,7 @@ export namespace Prisma {
 
   export type CollectionCreateInput = {
     title: string
+    titleUk?: string | null
     coverPhotoUrl?: string | null
     coverPhotoPublicId?: string
     createdAt?: Date | string
@@ -21901,6 +22177,7 @@ export namespace Prisma {
   export type CollectionUncheckedCreateInput = {
     id?: number
     title: string
+    titleUk?: string | null
     coverPhotoUrl?: string | null
     coverPhotoPublicId?: string
     authorId: number
@@ -21911,6 +22188,7 @@ export namespace Prisma {
 
   export type CollectionUpdateInput = {
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverPhotoPublicId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -21922,6 +22200,7 @@ export namespace Prisma {
   export type CollectionUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverPhotoPublicId?: StringFieldUpdateOperationsInput | string
     authorId?: IntFieldUpdateOperationsInput | number
@@ -21933,6 +22212,7 @@ export namespace Prisma {
   export type CollectionCreateManyInput = {
     id?: number
     title: string
+    titleUk?: string | null
     coverPhotoUrl?: string | null
     coverPhotoPublicId?: string
     authorId: number
@@ -21942,6 +22222,7 @@ export namespace Prisma {
 
   export type CollectionUpdateManyMutationInput = {
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverPhotoPublicId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -21951,6 +22232,7 @@ export namespace Prisma {
   export type CollectionUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverPhotoPublicId?: StringFieldUpdateOperationsInput | string
     authorId?: IntFieldUpdateOperationsInput | number
@@ -21961,6 +22243,8 @@ export namespace Prisma {
   export type PaintingCreateInput = {
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     coverUrl: string
     coverPublicId?: string
     hasNeon?: boolean
@@ -21979,6 +22263,8 @@ export namespace Prisma {
     id?: number
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     coverUrl: string
     coverPublicId?: string
     hasNeon?: boolean
@@ -21996,6 +22282,8 @@ export namespace Prisma {
   export type PaintingUpdateInput = {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: StringFieldUpdateOperationsInput | string
     coverPublicId?: StringFieldUpdateOperationsInput | string
     hasNeon?: BoolFieldUpdateOperationsInput | boolean
@@ -22014,6 +22302,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: StringFieldUpdateOperationsInput | string
     coverPublicId?: StringFieldUpdateOperationsInput | string
     hasNeon?: BoolFieldUpdateOperationsInput | boolean
@@ -22032,6 +22322,8 @@ export namespace Prisma {
     id?: number
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     coverUrl: string
     coverPublicId?: string
     hasNeon?: boolean
@@ -22047,6 +22339,8 @@ export namespace Prisma {
   export type PaintingUpdateManyMutationInput = {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: StringFieldUpdateOperationsInput | string
     coverPublicId?: StringFieldUpdateOperationsInput | string
     hasNeon?: BoolFieldUpdateOperationsInput | boolean
@@ -22061,6 +22355,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: StringFieldUpdateOperationsInput | string
     coverPublicId?: StringFieldUpdateOperationsInput | string
     hasNeon?: BoolFieldUpdateOperationsInput | boolean
@@ -22141,6 +22437,7 @@ export namespace Prisma {
 
   export type CategoryCreateInput = {
     name: string
+    nameUk?: string | null
     slug: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -22150,6 +22447,7 @@ export namespace Prisma {
   export type CategoryUncheckedCreateInput = {
     id?: number
     name: string
+    nameUk?: string | null
     slug: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -22158,6 +22456,7 @@ export namespace Prisma {
 
   export type CategoryUpdateInput = {
     name?: StringFieldUpdateOperationsInput | string
+    nameUk?: NullableStringFieldUpdateOperationsInput | string | null
     slug?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22167,6 +22466,7 @@ export namespace Prisma {
   export type CategoryUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
+    nameUk?: NullableStringFieldUpdateOperationsInput | string | null
     slug?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22176,6 +22476,7 @@ export namespace Prisma {
   export type CategoryCreateManyInput = {
     id?: number
     name: string
+    nameUk?: string | null
     slug: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -22183,6 +22484,7 @@ export namespace Prisma {
 
   export type CategoryUpdateManyMutationInput = {
     name?: StringFieldUpdateOperationsInput | string
+    nameUk?: NullableStringFieldUpdateOperationsInput | string | null
     slug?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22191,6 +22493,7 @@ export namespace Prisma {
   export type CategoryUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
+    nameUk?: NullableStringFieldUpdateOperationsInput | string | null
     slug?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22199,6 +22502,8 @@ export namespace Prisma {
   export type ProductCreateInput = {
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     price: number
     stock?: number
     sortOrder?: number
@@ -22219,6 +22524,8 @@ export namespace Prisma {
     id?: number
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     price: number
     stock?: number
     sortOrder?: number
@@ -22238,6 +22545,8 @@ export namespace Prisma {
   export type ProductUpdateInput = {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -22258,6 +22567,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -22278,6 +22589,8 @@ export namespace Prisma {
     id?: number
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     price: number
     stock?: number
     sortOrder?: number
@@ -22294,6 +22607,8 @@ export namespace Prisma {
   export type ProductUpdateManyMutationInput = {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -22309,6 +22624,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -22324,6 +22641,7 @@ export namespace Prisma {
 
   export type ProductVariantCreateInput = {
     title: string
+    titleUk?: string | null
     price?: number | null
     stock?: number
     sku?: string | null
@@ -22338,6 +22656,7 @@ export namespace Prisma {
   export type ProductVariantUncheckedCreateInput = {
     id?: number
     title: string
+    titleUk?: string | null
     price?: number | null
     stock?: number
     sku?: string | null
@@ -22351,6 +22670,7 @@ export namespace Prisma {
 
   export type ProductVariantUpdateInput = {
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     stock?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
@@ -22365,6 +22685,7 @@ export namespace Prisma {
   export type ProductVariantUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     stock?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
@@ -22379,6 +22700,7 @@ export namespace Prisma {
   export type ProductVariantCreateManyInput = {
     id?: number
     title: string
+    titleUk?: string | null
     price?: number | null
     stock?: number
     sku?: string | null
@@ -22390,6 +22712,7 @@ export namespace Prisma {
 
   export type ProductVariantUpdateManyMutationInput = {
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     stock?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
@@ -22401,6 +22724,7 @@ export namespace Prisma {
   export type ProductVariantUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     stock?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
@@ -22654,7 +22978,9 @@ export namespace Prisma {
 
   export type GalleryPostCreateInput = {
     title: string
+    titleUk?: string | null
     content: string
+    contentUk?: string | null
     coverUrl?: string | null
     coverPublicId?: string
     date?: Date | string | null
@@ -22666,7 +22992,9 @@ export namespace Prisma {
   export type GalleryPostUncheckedCreateInput = {
     id?: number
     title: string
+    titleUk?: string | null
     content: string
+    contentUk?: string | null
     coverUrl?: string | null
     coverPublicId?: string
     date?: Date | string | null
@@ -22677,7 +23005,9 @@ export namespace Prisma {
 
   export type GalleryPostUpdateInput = {
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     content?: StringFieldUpdateOperationsInput | string
+    contentUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverPublicId?: StringFieldUpdateOperationsInput | string
     date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -22689,7 +23019,9 @@ export namespace Prisma {
   export type GalleryPostUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     content?: StringFieldUpdateOperationsInput | string
+    contentUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverPublicId?: StringFieldUpdateOperationsInput | string
     date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -22701,7 +23033,9 @@ export namespace Prisma {
   export type GalleryPostCreateManyInput = {
     id?: number
     title: string
+    titleUk?: string | null
     content: string
+    contentUk?: string | null
     coverUrl?: string | null
     coverPublicId?: string
     date?: Date | string | null
@@ -22711,7 +23045,9 @@ export namespace Prisma {
 
   export type GalleryPostUpdateManyMutationInput = {
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     content?: StringFieldUpdateOperationsInput | string
+    contentUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverPublicId?: StringFieldUpdateOperationsInput | string
     date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -22722,7 +23058,9 @@ export namespace Prisma {
   export type GalleryPostUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     content?: StringFieldUpdateOperationsInput | string
+    contentUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverPublicId?: StringFieldUpdateOperationsInput | string
     date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -23139,6 +23477,10 @@ export namespace Prisma {
     lastName?: SortOrder
     bio?: SortOrder
     shortDesc?: SortOrder
+    firstNameUk?: SortOrder
+    lastNameUk?: SortOrder
+    bioUk?: SortOrder
+    shortDescUk?: SortOrder
     photoUrl?: SortOrder
     photoPublicId?: SortOrder
     bgPhotoUrl?: SortOrder
@@ -23160,6 +23502,10 @@ export namespace Prisma {
     lastName?: SortOrder
     bio?: SortOrder
     shortDesc?: SortOrder
+    firstNameUk?: SortOrder
+    lastNameUk?: SortOrder
+    bioUk?: SortOrder
+    shortDescUk?: SortOrder
     photoUrl?: SortOrder
     photoPublicId?: SortOrder
     bgPhotoUrl?: SortOrder
@@ -23176,6 +23522,10 @@ export namespace Prisma {
     lastName?: SortOrder
     bio?: SortOrder
     shortDesc?: SortOrder
+    firstNameUk?: SortOrder
+    lastNameUk?: SortOrder
+    bioUk?: SortOrder
+    shortDescUk?: SortOrder
     photoUrl?: SortOrder
     photoPublicId?: SortOrder
     bgPhotoUrl?: SortOrder
@@ -23273,6 +23623,7 @@ export namespace Prisma {
   export type CollectionCountOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
+    titleUk?: SortOrder
     coverPhotoUrl?: SortOrder
     coverPhotoPublicId?: SortOrder
     authorId?: SortOrder
@@ -23288,6 +23639,7 @@ export namespace Prisma {
   export type CollectionMaxOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
+    titleUk?: SortOrder
     coverPhotoUrl?: SortOrder
     coverPhotoPublicId?: SortOrder
     authorId?: SortOrder
@@ -23298,6 +23650,7 @@ export namespace Prisma {
   export type CollectionMinOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
+    titleUk?: SortOrder
     coverPhotoUrl?: SortOrder
     coverPhotoPublicId?: SortOrder
     authorId?: SortOrder
@@ -23350,6 +23703,8 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     description?: SortOrder
+    titleUk?: SortOrder
+    descriptionUk?: SortOrder
     coverUrl?: SortOrder
     coverPublicId?: SortOrder
     hasNeon?: SortOrder
@@ -23374,6 +23729,8 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     description?: SortOrder
+    titleUk?: SortOrder
+    descriptionUk?: SortOrder
     coverUrl?: SortOrder
     coverPublicId?: SortOrder
     hasNeon?: SortOrder
@@ -23390,6 +23747,8 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     description?: SortOrder
+    titleUk?: SortOrder
+    descriptionUk?: SortOrder
     coverUrl?: SortOrder
     coverPublicId?: SortOrder
     hasNeon?: SortOrder
@@ -23493,6 +23852,7 @@ export namespace Prisma {
   export type CategoryCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    nameUk?: SortOrder
     slug?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -23505,6 +23865,7 @@ export namespace Prisma {
   export type CategoryMaxOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    nameUk?: SortOrder
     slug?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -23513,6 +23874,7 @@ export namespace Prisma {
   export type CategoryMinOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    nameUk?: SortOrder
     slug?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -23572,6 +23934,8 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     description?: SortOrder
+    titleUk?: SortOrder
+    descriptionUk?: SortOrder
     price?: SortOrder
     stock?: SortOrder
     sortOrder?: SortOrder
@@ -23598,6 +23962,8 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     description?: SortOrder
+    titleUk?: SortOrder
+    descriptionUk?: SortOrder
     price?: SortOrder
     stock?: SortOrder
     sortOrder?: SortOrder
@@ -23615,6 +23981,8 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     description?: SortOrder
+    titleUk?: SortOrder
+    descriptionUk?: SortOrder
     price?: SortOrder
     stock?: SortOrder
     sortOrder?: SortOrder
@@ -23672,6 +24040,7 @@ export namespace Prisma {
   export type ProductVariantCountOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
+    titleUk?: SortOrder
     price?: SortOrder
     stock?: SortOrder
     sku?: SortOrder
@@ -23692,6 +24061,7 @@ export namespace Prisma {
   export type ProductVariantMaxOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
+    titleUk?: SortOrder
     price?: SortOrder
     stock?: SortOrder
     sku?: SortOrder
@@ -23704,6 +24074,7 @@ export namespace Prisma {
   export type ProductVariantMinOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
+    titleUk?: SortOrder
     price?: SortOrder
     stock?: SortOrder
     sku?: SortOrder
@@ -23960,7 +24331,9 @@ export namespace Prisma {
   export type GalleryPostCountOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
+    titleUk?: SortOrder
     content?: SortOrder
+    contentUk?: SortOrder
     coverUrl?: SortOrder
     coverPublicId?: SortOrder
     date?: SortOrder
@@ -23975,7 +24348,9 @@ export namespace Prisma {
   export type GalleryPostMaxOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
+    titleUk?: SortOrder
     content?: SortOrder
+    contentUk?: SortOrder
     coverUrl?: SortOrder
     coverPublicId?: SortOrder
     date?: SortOrder
@@ -23986,7 +24361,9 @@ export namespace Prisma {
   export type GalleryPostMinOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
+    titleUk?: SortOrder
     content?: SortOrder
+    contentUk?: SortOrder
     coverUrl?: SortOrder
     coverPublicId?: SortOrder
     date?: SortOrder
@@ -25368,6 +25745,8 @@ export namespace Prisma {
   export type PaintingCreateWithoutAuthorInput = {
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     coverUrl: string
     coverPublicId?: string
     hasNeon?: boolean
@@ -25385,6 +25764,8 @@ export namespace Prisma {
     id?: number
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     coverUrl: string
     coverPublicId?: string
     hasNeon?: boolean
@@ -25410,6 +25791,7 @@ export namespace Prisma {
 
   export type CollectionCreateWithoutAuthorInput = {
     title: string
+    titleUk?: string | null
     coverPhotoUrl?: string | null
     coverPhotoPublicId?: string
     createdAt?: Date | string
@@ -25420,6 +25802,7 @@ export namespace Prisma {
   export type CollectionUncheckedCreateWithoutAuthorInput = {
     id?: number
     title: string
+    titleUk?: string | null
     coverPhotoUrl?: string | null
     coverPhotoPublicId?: string
     createdAt?: Date | string
@@ -25440,6 +25823,8 @@ export namespace Prisma {
   export type ProductCreateWithoutAuthorInput = {
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     price: number
     stock?: number
     sortOrder?: number
@@ -25459,6 +25844,8 @@ export namespace Prisma {
     id?: number
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     price: number
     stock?: number
     sortOrder?: number
@@ -25507,6 +25894,8 @@ export namespace Prisma {
     id?: IntFilter<"Painting"> | number
     title?: StringFilter<"Painting"> | string
     description?: StringNullableFilter<"Painting"> | string | null
+    titleUk?: StringNullableFilter<"Painting"> | string | null
+    descriptionUk?: StringNullableFilter<"Painting"> | string | null
     coverUrl?: StringFilter<"Painting"> | string
     coverPublicId?: StringFilter<"Painting"> | string
     hasNeon?: BoolFilter<"Painting"> | boolean
@@ -25541,6 +25930,7 @@ export namespace Prisma {
     NOT?: CollectionScalarWhereInput | CollectionScalarWhereInput[]
     id?: IntFilter<"Collection"> | number
     title?: StringFilter<"Collection"> | string
+    titleUk?: StringNullableFilter<"Collection"> | string | null
     coverPhotoUrl?: StringNullableFilter<"Collection"> | string | null
     coverPhotoPublicId?: StringFilter<"Collection"> | string
     authorId?: IntFilter<"Collection"> | number
@@ -25571,6 +25961,8 @@ export namespace Prisma {
     id?: IntFilter<"Product"> | number
     title?: StringFilter<"Product"> | string
     description?: StringNullableFilter<"Product"> | string | null
+    titleUk?: StringNullableFilter<"Product"> | string | null
+    descriptionUk?: StringNullableFilter<"Product"> | string | null
     price?: FloatFilter<"Product"> | number
     stock?: IntFilter<"Product"> | number
     sortOrder?: IntFilter<"Product"> | number
@@ -25589,6 +25981,10 @@ export namespace Prisma {
     lastName: string
     bio?: string | null
     shortDesc?: string | null
+    firstNameUk?: string | null
+    lastNameUk?: string | null
+    bioUk?: string | null
+    shortDescUk?: string | null
     photoUrl?: string | null
     photoPublicId?: string
     bgPhotoUrl?: string | null
@@ -25607,6 +26003,10 @@ export namespace Prisma {
     lastName: string
     bio?: string | null
     shortDesc?: string | null
+    firstNameUk?: string | null
+    lastNameUk?: string | null
+    bioUk?: string | null
+    shortDescUk?: string | null
     photoUrl?: string | null
     photoPublicId?: string
     bgPhotoUrl?: string | null
@@ -25627,6 +26027,8 @@ export namespace Prisma {
   export type PaintingCreateWithoutCollectionInput = {
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     coverUrl: string
     coverPublicId?: string
     hasNeon?: boolean
@@ -25644,6 +26046,8 @@ export namespace Prisma {
     id?: number
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     coverUrl: string
     coverPublicId?: string
     hasNeon?: boolean
@@ -25683,6 +26087,10 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    firstNameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    lastNameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    bioUk?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDescUk?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
     bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -25701,6 +26109,10 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    firstNameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    lastNameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    bioUk?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDescUk?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
     bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -25734,6 +26146,10 @@ export namespace Prisma {
     lastName: string
     bio?: string | null
     shortDesc?: string | null
+    firstNameUk?: string | null
+    lastNameUk?: string | null
+    bioUk?: string | null
+    shortDescUk?: string | null
     photoUrl?: string | null
     photoPublicId?: string
     bgPhotoUrl?: string | null
@@ -25752,6 +26168,10 @@ export namespace Prisma {
     lastName: string
     bio?: string | null
     shortDesc?: string | null
+    firstNameUk?: string | null
+    lastNameUk?: string | null
+    bioUk?: string | null
+    shortDescUk?: string | null
     photoUrl?: string | null
     photoPublicId?: string
     bgPhotoUrl?: string | null
@@ -25771,6 +26191,7 @@ export namespace Prisma {
 
   export type CollectionCreateWithoutPaintingsInput = {
     title: string
+    titleUk?: string | null
     coverPhotoUrl?: string | null
     coverPhotoPublicId?: string
     createdAt?: Date | string
@@ -25781,6 +26202,7 @@ export namespace Prisma {
   export type CollectionUncheckedCreateWithoutPaintingsInput = {
     id?: number
     title: string
+    titleUk?: string | null
     coverPhotoUrl?: string | null
     coverPhotoPublicId?: string
     authorId: number
@@ -25871,6 +26293,10 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    firstNameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    lastNameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    bioUk?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDescUk?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
     bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -25889,6 +26315,10 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    firstNameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    lastNameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    bioUk?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDescUk?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
     bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -25914,6 +26344,7 @@ export namespace Prisma {
 
   export type CollectionUpdateWithoutPaintingsInput = {
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverPhotoPublicId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -25924,6 +26355,7 @@ export namespace Prisma {
   export type CollectionUncheckedUpdateWithoutPaintingsInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverPhotoPublicId?: StringFieldUpdateOperationsInput | string
     authorId?: IntFieldUpdateOperationsInput | number
@@ -25996,6 +26428,8 @@ export namespace Prisma {
   export type PaintingCreateWithoutMediaInput = {
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     coverUrl: string
     coverPublicId?: string
     hasNeon?: boolean
@@ -26013,6 +26447,8 @@ export namespace Prisma {
     id?: number
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     coverUrl: string
     coverPublicId?: string
     hasNeon?: boolean
@@ -26045,6 +26481,8 @@ export namespace Prisma {
   export type PaintingUpdateWithoutMediaInput = {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: StringFieldUpdateOperationsInput | string
     coverPublicId?: StringFieldUpdateOperationsInput | string
     hasNeon?: BoolFieldUpdateOperationsInput | boolean
@@ -26062,6 +26500,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: StringFieldUpdateOperationsInput | string
     coverPublicId?: StringFieldUpdateOperationsInput | string
     hasNeon?: BoolFieldUpdateOperationsInput | boolean
@@ -26078,6 +26518,8 @@ export namespace Prisma {
   export type ProductCreateWithoutCategoryInput = {
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     price: number
     stock?: number
     sortOrder?: number
@@ -26097,6 +26539,8 @@ export namespace Prisma {
     id?: number
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     price: number
     stock?: number
     sortOrder?: number
@@ -26140,6 +26584,7 @@ export namespace Prisma {
 
   export type CategoryCreateWithoutProductsInput = {
     name: string
+    nameUk?: string | null
     slug: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -26148,6 +26593,7 @@ export namespace Prisma {
   export type CategoryUncheckedCreateWithoutProductsInput = {
     id?: number
     name: string
+    nameUk?: string | null
     slug: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -26163,6 +26609,10 @@ export namespace Prisma {
     lastName: string
     bio?: string | null
     shortDesc?: string | null
+    firstNameUk?: string | null
+    lastNameUk?: string | null
+    bioUk?: string | null
+    shortDescUk?: string | null
     photoUrl?: string | null
     photoPublicId?: string
     bgPhotoUrl?: string | null
@@ -26181,6 +26631,10 @@ export namespace Prisma {
     lastName: string
     bio?: string | null
     shortDesc?: string | null
+    firstNameUk?: string | null
+    lastNameUk?: string | null
+    bioUk?: string | null
+    shortDescUk?: string | null
     photoUrl?: string | null
     photoPublicId?: string
     bgPhotoUrl?: string | null
@@ -26225,6 +26679,7 @@ export namespace Prisma {
 
   export type ProductVariantCreateWithoutProductInput = {
     title: string
+    titleUk?: string | null
     price?: number | null
     stock?: number
     sku?: string | null
@@ -26238,6 +26693,7 @@ export namespace Prisma {
   export type ProductVariantUncheckedCreateWithoutProductInput = {
     id?: number
     title: string
+    titleUk?: string | null
     price?: number | null
     stock?: number
     sku?: string | null
@@ -26300,6 +26756,7 @@ export namespace Prisma {
 
   export type CategoryUpdateWithoutProductsInput = {
     name?: StringFieldUpdateOperationsInput | string
+    nameUk?: NullableStringFieldUpdateOperationsInput | string | null
     slug?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -26308,6 +26765,7 @@ export namespace Prisma {
   export type CategoryUncheckedUpdateWithoutProductsInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
+    nameUk?: NullableStringFieldUpdateOperationsInput | string | null
     slug?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -26329,6 +26787,10 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    firstNameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    lastNameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    bioUk?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDescUk?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
     bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -26347,6 +26809,10 @@ export namespace Prisma {
     lastName?: StringFieldUpdateOperationsInput | string
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     shortDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    firstNameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    lastNameUk?: NullableStringFieldUpdateOperationsInput | string | null
+    bioUk?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDescUk?: NullableStringFieldUpdateOperationsInput | string | null
     photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     photoPublicId?: StringFieldUpdateOperationsInput | string
     bgPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -26409,6 +26875,7 @@ export namespace Prisma {
     NOT?: ProductVariantScalarWhereInput | ProductVariantScalarWhereInput[]
     id?: IntFilter<"ProductVariant"> | number
     title?: StringFilter<"ProductVariant"> | string
+    titleUk?: StringNullableFilter<"ProductVariant"> | string | null
     price?: FloatNullableFilter<"ProductVariant"> | number | null
     stock?: IntFilter<"ProductVariant"> | number
     sku?: StringNullableFilter<"ProductVariant"> | string | null
@@ -26451,6 +26918,8 @@ export namespace Prisma {
   export type ProductCreateWithoutVariantsInput = {
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     price: number
     stock?: number
     sortOrder?: number
@@ -26470,6 +26939,8 @@ export namespace Prisma {
     id?: number
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     price: number
     stock?: number
     sortOrder?: number
@@ -26558,6 +27029,8 @@ export namespace Prisma {
   export type ProductUpdateWithoutVariantsInput = {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -26577,6 +27050,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -26627,6 +27102,8 @@ export namespace Prisma {
   export type ProductCreateWithoutImagesInput = {
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     price: number
     stock?: number
     sortOrder?: number
@@ -26646,6 +27123,8 @@ export namespace Prisma {
     id?: number
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     price: number
     stock?: number
     sortOrder?: number
@@ -26668,6 +27147,7 @@ export namespace Prisma {
 
   export type ProductVariantCreateWithoutImagesInput = {
     title: string
+    titleUk?: string | null
     price?: number | null
     stock?: number
     sku?: string | null
@@ -26681,6 +27161,7 @@ export namespace Prisma {
   export type ProductVariantUncheckedCreateWithoutImagesInput = {
     id?: number
     title: string
+    titleUk?: string | null
     price?: number | null
     stock?: number
     sku?: string | null
@@ -26710,6 +27191,8 @@ export namespace Prisma {
   export type ProductUpdateWithoutImagesInput = {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -26729,6 +27212,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -26757,6 +27242,7 @@ export namespace Prisma {
 
   export type ProductVariantUpdateWithoutImagesInput = {
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     stock?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
@@ -26770,6 +27256,7 @@ export namespace Prisma {
   export type ProductVariantUncheckedUpdateWithoutImagesInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     stock?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
@@ -26864,6 +27351,8 @@ export namespace Prisma {
   export type ProductCreateWithoutOrderItemsInput = {
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     price: number
     stock?: number
     sortOrder?: number
@@ -26883,6 +27372,8 @@ export namespace Prisma {
     id?: number
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     price: number
     stock?: number
     sortOrder?: number
@@ -26905,6 +27396,7 @@ export namespace Prisma {
 
   export type ProductVariantCreateWithoutOrderItemsInput = {
     title: string
+    titleUk?: string | null
     price?: number | null
     stock?: number
     sku?: string | null
@@ -26918,6 +27410,7 @@ export namespace Prisma {
   export type ProductVariantUncheckedCreateWithoutOrderItemsInput = {
     id?: number
     title: string
+    titleUk?: string | null
     price?: number | null
     stock?: number
     sku?: string | null
@@ -26989,6 +27482,8 @@ export namespace Prisma {
   export type ProductUpdateWithoutOrderItemsInput = {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -27008,6 +27503,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -27036,6 +27533,7 @@ export namespace Prisma {
 
   export type ProductVariantUpdateWithoutOrderItemsInput = {
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     stock?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
@@ -27049,6 +27547,7 @@ export namespace Prisma {
   export type ProductVariantUncheckedUpdateWithoutOrderItemsInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     stock?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
@@ -27114,7 +27613,9 @@ export namespace Prisma {
 
   export type GalleryPostCreateWithoutMediaInput = {
     title: string
+    titleUk?: string | null
     content: string
+    contentUk?: string | null
     coverUrl?: string | null
     coverPublicId?: string
     date?: Date | string | null
@@ -27125,7 +27626,9 @@ export namespace Prisma {
   export type GalleryPostUncheckedCreateWithoutMediaInput = {
     id?: number
     title: string
+    titleUk?: string | null
     content: string
+    contentUk?: string | null
     coverUrl?: string | null
     coverPublicId?: string
     date?: Date | string | null
@@ -27151,7 +27654,9 @@ export namespace Prisma {
 
   export type GalleryPostUpdateWithoutMediaInput = {
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     content?: StringFieldUpdateOperationsInput | string
+    contentUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverPublicId?: StringFieldUpdateOperationsInput | string
     date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -27162,7 +27667,9 @@ export namespace Prisma {
   export type GalleryPostUncheckedUpdateWithoutMediaInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     content?: StringFieldUpdateOperationsInput | string
+    contentUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverPublicId?: StringFieldUpdateOperationsInput | string
     date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -27173,6 +27680,8 @@ export namespace Prisma {
   export type PaintingCreateWithoutInquiriesInput = {
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     coverUrl: string
     coverPublicId?: string
     hasNeon?: boolean
@@ -27190,6 +27699,8 @@ export namespace Prisma {
     id?: number
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     coverUrl: string
     coverPublicId?: string
     hasNeon?: boolean
@@ -27222,6 +27733,8 @@ export namespace Prisma {
   export type PaintingUpdateWithoutInquiriesInput = {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: StringFieldUpdateOperationsInput | string
     coverPublicId?: StringFieldUpdateOperationsInput | string
     hasNeon?: BoolFieldUpdateOperationsInput | boolean
@@ -27239,6 +27752,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: StringFieldUpdateOperationsInput | string
     coverPublicId?: StringFieldUpdateOperationsInput | string
     hasNeon?: BoolFieldUpdateOperationsInput | boolean
@@ -27256,6 +27771,8 @@ export namespace Prisma {
     id?: number
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     coverUrl: string
     coverPublicId?: string
     hasNeon?: boolean
@@ -27270,6 +27787,7 @@ export namespace Prisma {
   export type CollectionCreateManyAuthorInput = {
     id?: number
     title: string
+    titleUk?: string | null
     coverPhotoUrl?: string | null
     coverPhotoPublicId?: string
     createdAt?: Date | string
@@ -27280,6 +27798,8 @@ export namespace Prisma {
     id?: number
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     price: number
     stock?: number
     sortOrder?: number
@@ -27295,6 +27815,8 @@ export namespace Prisma {
   export type PaintingUpdateWithoutAuthorInput = {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: StringFieldUpdateOperationsInput | string
     coverPublicId?: StringFieldUpdateOperationsInput | string
     hasNeon?: BoolFieldUpdateOperationsInput | boolean
@@ -27312,6 +27834,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: StringFieldUpdateOperationsInput | string
     coverPublicId?: StringFieldUpdateOperationsInput | string
     hasNeon?: BoolFieldUpdateOperationsInput | boolean
@@ -27329,6 +27853,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: StringFieldUpdateOperationsInput | string
     coverPublicId?: StringFieldUpdateOperationsInput | string
     hasNeon?: BoolFieldUpdateOperationsInput | boolean
@@ -27342,6 +27868,7 @@ export namespace Prisma {
 
   export type CollectionUpdateWithoutAuthorInput = {
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverPhotoPublicId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -27352,6 +27879,7 @@ export namespace Prisma {
   export type CollectionUncheckedUpdateWithoutAuthorInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverPhotoPublicId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -27362,6 +27890,7 @@ export namespace Prisma {
   export type CollectionUncheckedUpdateManyWithoutAuthorInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverPhotoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverPhotoPublicId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -27371,6 +27900,8 @@ export namespace Prisma {
   export type ProductUpdateWithoutAuthorInput = {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -27390,6 +27921,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -27409,6 +27942,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -27425,6 +27960,8 @@ export namespace Prisma {
     id?: number
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     coverUrl: string
     coverPublicId?: string
     hasNeon?: boolean
@@ -27439,6 +27976,8 @@ export namespace Prisma {
   export type PaintingUpdateWithoutCollectionInput = {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: StringFieldUpdateOperationsInput | string
     coverPublicId?: StringFieldUpdateOperationsInput | string
     hasNeon?: BoolFieldUpdateOperationsInput | boolean
@@ -27456,6 +27995,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: StringFieldUpdateOperationsInput | string
     coverPublicId?: StringFieldUpdateOperationsInput | string
     hasNeon?: BoolFieldUpdateOperationsInput | boolean
@@ -27473,6 +28014,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: StringFieldUpdateOperationsInput | string
     coverPublicId?: StringFieldUpdateOperationsInput | string
     hasNeon?: BoolFieldUpdateOperationsInput | boolean
@@ -27574,6 +28117,8 @@ export namespace Prisma {
     id?: number
     title: string
     description?: string | null
+    titleUk?: string | null
+    descriptionUk?: string | null
     price: number
     stock?: number
     sortOrder?: number
@@ -27589,6 +28134,8 @@ export namespace Prisma {
   export type ProductUpdateWithoutCategoryInput = {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -27608,6 +28155,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -27627,6 +28176,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: FloatFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -27650,6 +28201,7 @@ export namespace Prisma {
   export type ProductVariantCreateManyProductInput = {
     id?: number
     title: string
+    titleUk?: string | null
     price?: number | null
     stock?: number
     sku?: string | null
@@ -27693,6 +28245,7 @@ export namespace Prisma {
 
   export type ProductVariantUpdateWithoutProductInput = {
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     stock?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
@@ -27706,6 +28259,7 @@ export namespace Prisma {
   export type ProductVariantUncheckedUpdateWithoutProductInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     stock?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
@@ -27719,6 +28273,7 @@ export namespace Prisma {
   export type ProductVariantUncheckedUpdateManyWithoutProductInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    titleUk?: NullableStringFieldUpdateOperationsInput | string | null
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     stock?: IntFieldUpdateOperationsInput | number
     sku?: NullableStringFieldUpdateOperationsInput | string | null
