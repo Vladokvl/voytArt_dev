@@ -44,7 +44,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
 
-  // Load initial cart from localStorage
+  // 1. Load initial cart from localStorage on mount
   useEffect(() => {
     try {
       const saved = localStorage.getItem(CART_STORAGE_KEY);
@@ -56,33 +56,32 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
     setIsHydrated(true);
 
-    const handleExternalSync = () => {
-      try {
-        const saved = localStorage.getItem(CART_STORAGE_KEY);
-        if (saved) setCart(JSON.parse(saved) as CartItem[]);
-      } catch (e) {
-        console.error(e);
+    // Sync across browser tabs
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === CART_STORAGE_KEY && e.newValue) {
+        try {
+          setCart(JSON.parse(e.newValue) as CartItem[]);
+        } catch (err) {
+          console.error(err);
+        }
       }
     };
 
-    window.addEventListener("storage", handleExternalSync);
-    window.addEventListener("cartUpdated", handleExternalSync);
+    window.addEventListener("storage", handleStorageChange);
     return () => {
-      window.removeEventListener("storage", handleExternalSync);
-      window.removeEventListener("cartUpdated", handleExternalSync);
+      window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
 
-  // Save cart to localStorage on changes
-  const saveCart = useCallback((newCart: CartItem[]) => {
-    setCart(newCart);
+  // 2. Persist cart to localStorage whenever it changes
+  useEffect(() => {
+    if (!isHydrated) return;
     try {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(newCart));
-      window.dispatchEvent(new Event("cartUpdated"));
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
     } catch (e) {
-      console.error("Failed to save cart:", e);
+      console.error("Failed to save cart to localStorage:", e);
     }
-  }, []);
+  }, [cart, isHydrated]);
 
   const openCart = useCallback(() => setIsCartOpen(true), []);
   const closeCart = useCallback(() => setIsCartOpen(false), []);
@@ -101,40 +100,36 @@ export function CartProvider({ children }: { children: ReactNode }) {
       quantity?: number;
       maxStock?: number;
     }) => {
+      const targetVariantId = variantId ?? null;
+      const targetVariantTitle = variantTitle ?? null;
+      const addQty = Math.max(1, quantity);
+
       setCart((prevCart) => {
         const existingIdx = prevCart.findIndex(
-          (item) => item.product.id === product.id && item.variantId === variantId,
+          (item) =>
+            item.product.id === product.id &&
+            (item.variantId ?? null) === targetVariantId,
         );
 
-        let newCart: CartItem[];
         if (existingIdx > -1) {
-          newCart = prevCart.map((item, idx) => {
+          return prevCart.map((item, idx) => {
             if (idx === existingIdx) {
-              const updatedQty = Math.min(maxStock, item.quantity + quantity);
+              const updatedQty = Math.min(maxStock, item.quantity + addQty);
               return { ...item, quantity: updatedQty };
             }
             return item;
           });
-        } else {
-          newCart = [
-            ...prevCart,
-            {
-              product,
-              variantId,
-              variantTitle,
-              quantity: Math.min(maxStock, quantity),
-            },
-          ];
         }
 
-        try {
-          localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(newCart));
-          window.dispatchEvent(new Event("cartUpdated"));
-        } catch (e) {
-          console.error(e);
-        }
-
-        return newCart;
+        return [
+          ...prevCart,
+          {
+            product,
+            variantId: targetVariantId,
+            variantTitle: targetVariantTitle,
+            quantity: Math.min(maxStock, addQty),
+          },
+        ];
       });
 
       setIsCartOpen(true);
@@ -142,49 +137,29 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const updateQuantity = useCallback(
-    (index: number, delta: number) => {
-      setCart((prevCart) => {
-        const newCart = prevCart
-          .map((item, idx) => {
-            if (idx === index) {
-              const newQty = item.quantity + delta;
-              if (newQty <= 0) return null;
-              return { ...item, quantity: newQty };
-            }
-            return item;
-          })
-          .filter(Boolean) as CartItem[];
-
-        try {
-          localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(newCart));
-          window.dispatchEvent(new Event("cartUpdated"));
-        } catch (e) {
-          console.error(e);
-        }
-
-        return newCart;
-      });
-    },
-    [],
-  );
-
-  const removeFromCart = useCallback((index: number) => {
+  const updateQuantity = useCallback((index: number, delta: number) => {
     setCart((prevCart) => {
-      const newCart = prevCart.filter((_, idx) => idx !== index);
-      try {
-        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(newCart));
-        window.dispatchEvent(new Event("cartUpdated"));
-      } catch (e) {
-        console.error(e);
-      }
-      return newCart;
+      if (index < 0 || index >= prevCart.length) return prevCart;
+      return prevCart
+        .map((item, idx) => {
+          if (idx === index) {
+            const newQty = item.quantity + delta;
+            if (newQty <= 0) return null;
+            return { ...item, quantity: newQty };
+          }
+          return item;
+        })
+        .filter(Boolean) as CartItem[];
     });
   }, []);
 
+  const removeFromCart = useCallback((index: number) => {
+    setCart((prevCart) => prevCart.filter((_, idx) => idx !== index));
+  }, []);
+
   const clearCart = useCallback(() => {
-    saveCart([]);
-  }, [saveCart]);
+    setCart([]);
+  }, []);
 
   const totalItems = isHydrated
     ? cart.reduce((sum, item) => sum + item.quantity, 0)
