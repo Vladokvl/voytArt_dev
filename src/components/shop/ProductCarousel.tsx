@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import styles from "./ProductCarousel.module.scss";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
+import { useTranslation } from "~/context/LanguageContext";
+import { getLocalized } from "~/lib/i18n";
 
 export type CarouselItem = {
   id: number;
@@ -24,10 +26,12 @@ interface ProductCarouselProps<T extends CarouselItem = CarouselItem> {
 }
 
 export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
+
   title,
   products,
   onAddToCart,
 }: ProductCarouselProps<T>) {
+  const { t, locale } = useTranslation();
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);

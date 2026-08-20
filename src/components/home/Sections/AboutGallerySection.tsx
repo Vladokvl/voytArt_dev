@@ -1,27 +1,26 @@
+"use client";
 import Link from "next/link";
 import styles from "./Sections.module.scss";
+import { useTranslation } from "~/context/LanguageContext";
 
-// ── AboutGallerySection ───────────────────────────────────────────────────
-// Чистий вміст панелі 0: «About our gallery».
-// Позиціонування (.panel) та анімація задаються у HeroDesktop / HeroMobile.
 export default function AboutGallerySection() {
+  const { t, getLocalizedHref } = useTranslation();
+
   return (
     <>
       <div className={styles.metaRow}>
-        <span className={styles.sceneStep}>01 / 04</span>
-        <span className={styles.stat}>Latest stories</span>
+        <span className={styles.sceneStep}>{t("section.about.num")}</span>
+        <span className={styles.stat}>{t("section.about.tag")}</span>
       </div>
-      <p className={styles.tagline}>About</p>
+      <p className={styles.tagline}>{t("section.about.label")}</p>
       <h2 className={styles.heading}>
-        About our
-        <br />
-        gallery
+        {t("section.about.title")}
       </h2>
       <p className={styles.description}>
-        Step inside our exhibitions, behind-the-scenes process, and moments from the space.
+        {t("section.about.desc")}
       </p>
-      <Link href="/gallery" className={styles.cta}>
-        View gallery stories →
+      <Link href={getLocalizedHref("/gallery")} className={styles.cta}>
+        {t("section.about.btn")}
       </Link>
     </>
   );

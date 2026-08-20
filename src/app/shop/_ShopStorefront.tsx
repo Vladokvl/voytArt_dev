@@ -9,16 +9,20 @@ import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import { useCart } from "~/context/CartContext";
 import ProductCarousel from "~/components/shop/ProductCarousel";
 import styles from "./shop.module.scss";
+import { useTranslation } from "~/context/LanguageContext";
+import { getLocalized } from "~/lib/i18n";
 
 type ProductImage = { id: number; url: string; order: number };
-type ProductVariant = { id: number; title: string; price: number | null; stock: number };
-type Author = { id: number; firstName: string; lastName: string };
-type Category = { id: number; name: string; slug: string };
+type ProductVariant = { id: number; title: string; titleUk?: string | null; price: number | null; stock: number };
+type Author = { id: number; firstName: string; firstNameUk?: string | null; lastName: string; lastNameUk?: string | null };
+type Category = { id: number; name: string; nameUk?: string | null; slug: string };
 
 export type Product = {
   id: number;
   title: string;
+  titleUk?: string | null;
   description: string | null;
+  descriptionUk?: string | null;
   price: number;
   stock: number;
   sortOrder: number;
@@ -41,6 +45,7 @@ export default function ShopStorefront({
 }) {
   const router = useRouter();
   const { addToCart, openCart, totalItems } = useCart();
+  const { t, locale, getLocalizedHref } = useTranslation();
 
   const productsList = Array.isArray(initialProducts) ? initialProducts : [];
   const categoriesList = Array.isArray(categories) ? categories : [];
@@ -57,16 +62,15 @@ export default function ShopStorefront({
   const handleProductAdd = (product: Product) => {
     if (product.stock <= 0) return;
 
-    // If product has variants, navigate to the detail page to choose size/variant
     if (product.variants && product.variants.length > 0) {
-      router.push(`/shop/${product.id}`);
+      router.push(getLocalizedHref(`/shop/${product.id}`));
       return;
     }
 
     addToCart({
       product: {
         id: product.id,
-        title: product.title,
+        title: getLocalized(product, "title", locale),
         price: product.price,
         coverUrl: product.coverUrl,
         author: product.author,
@@ -88,11 +92,11 @@ export default function ShopStorefront({
       <section className={styles.shopHero}>
         <div className={styles.heroBadge}>
           <Sparkles size={14} />
-          <span>Curated Editions & Apparel</span>
+          <span>{t("shop.curatedBadge")}</span>
         </div>
-        <h1 className={styles.shopTitle}>Gallery Store</h1>
+        <h1 className={styles.shopTitle}>{t("shop.storeTitle")}</h1>
         <p className={styles.shopSub}>
-          Original prints, limited apparel, and collectible design objects crafted by Ukrainian contemporary artists.
+          {t("shop.storeSubtitle")}
         </p>
       </section>
 
@@ -100,7 +104,7 @@ export default function ShopStorefront({
       {featuredProducts.length > 0 && !selectedCategory && (
         <section className={styles.featuredSection}>
           <ProductCarousel
-            title="Featured Releases"
+            title={t("shop.featuredReleases")}
             products={featuredProducts}
             onAddToCart={handleProductAdd}
           />
@@ -115,10 +119,11 @@ export default function ShopStorefront({
             className={`${styles.catButton} ${selectedCategory === null ? styles.catButtonActive : ""}`}
             onClick={() => setSelectedCategory(null)}
           >
-            All Collections ({productsList.length})
+            {t("shop.allCollections", { count: productsList.length })}
           </button>
           {categoriesList.map((cat) => {
             const count = productsList.filter((p) => p.categoryId === cat.id).length;
+            const localizedCatName = getLocalized(cat, "name", locale);
             return (
               <button
                 key={cat.id}
@@ -126,7 +131,7 @@ export default function ShopStorefront({
                 className={`${styles.catButton} ${selectedCategory === cat.id ? styles.catButtonActive : ""}`}
                 onClick={() => setSelectedCategory(cat.id)}
               >
-                {cat.name} {count > 0 ? `(${count})` : ""}
+                {localizedCatName} {count > 0 ? `(${count})` : ""}
               </button>
             );
           })}
@@ -139,7 +144,7 @@ export default function ShopStorefront({
           aria-label={`Open shopping cart with ${totalItems} items`}
         >
           <ShoppingBag size={18} />
-          <span>Cart</span>
+          <span>{t("shop.cart")}</span>
           {totalItems > 0 && <span className={styles.cartCountBadge}>{totalItems}</span>}
         </button>
       </nav>
@@ -148,7 +153,7 @@ export default function ShopStorefront({
       <main className={styles.gridSection}>
         {filteredProducts.length === 0 ? (
           <div className={styles.empty}>
-            <p>No products available in this category at the moment.</p>
+            <p>{t("shop.noProducts")}</p>
           </div>
         ) : (
           <div className={styles.productGrid}>
@@ -160,14 +165,18 @@ export default function ShopStorefront({
 
               const isOutOfStock = product.stock <= 0;
               const isAdded = addedItemAnimationId === product.id;
+              const localizedTitle = getLocalized(product, "title", locale);
+              const authorFirstName = product.author ? getLocalized(product.author, "firstName", locale) : "";
+              const authorLastName = product.author ? getLocalized(product.author, "lastName", locale) : "";
+              const authorFullName = product.author ? `${authorFirstName} ${authorLastName}`.trim() : "VoytArt Gallery";
 
               return (
                 <article key={product.id} className={styles.productCard}>
                   <div className={styles.imageWrapper}>
-                    <Link href={`/shop/${product.id}`} className={styles.imageLink}>
+                    <Link href={getLocalizedHref(`/shop/${product.id}`)} className={styles.imageLink}>
                       <Image
                         src={coverImg}
-                        alt={product.title}
+                        alt={localizedTitle}
                         fill
                         priority={index < 4}
                         className={styles.productImage}
@@ -176,21 +185,19 @@ export default function ShopStorefront({
                     </Link>
 
                     {isOutOfStock ? (
-                      <span className={styles.soldOut}>Sold Out</span>
+                      <span className={styles.soldOut}>{t("shop.soldOut")}</span>
                     ) : product.isFeatured ? (
-                      <span className={styles.featuredBadge}>Featured</span>
+                      <span className={styles.featuredBadge}>{t("shop.featured")}</span>
                     ) : null}
                   </div>
 
                   <div className={styles.cardInfo}>
                     <span className={styles.authorName}>
-                      {product.author
-                        ? `${product.author.firstName} ${product.author.lastName}`
-                        : "VoytArt Gallery"}
+                      {authorFullName}
                     </span>
 
-                    <Link href={`/shop/${product.id}`} className={styles.titleLink}>
-                      <h2 className={styles.productTitle}>{product.title}</h2>
+                    <Link href={getLocalizedHref(`/shop/${product.id}`)} className={styles.titleLink}>
+                      <h2 className={styles.productTitle}>{localizedTitle}</h2>
                     </Link>
 
                     <div className={styles.cardFooter}>
@@ -200,7 +207,7 @@ export default function ShopStorefront({
                         </span>
                         {product.variants && product.variants.length > 0 && (
                           <span className={styles.variantCountNote}>
-                            {product.variants.length} options
+                            {t("shop.optionsCount", { count: product.variants.length })}
                           </span>
                         )}
                       </div>
@@ -210,24 +217,24 @@ export default function ShopStorefront({
                         onClick={() => handleProductAdd(product)}
                         disabled={isOutOfStock}
                         className={`${styles.addToCartBtn} ${isAdded ? styles.addedSuccess : ""}`}
-                        aria-label={`Add ${product.title} to cart`}
+                        aria-label={`Add ${localizedTitle} to cart`}
                       >
                         {isOutOfStock ? (
-                          "Sold Out"
+                          t("shop.soldOut")
                         ) : isAdded ? (
                           <>
                             <Check size={14} />
-                            <span>Added</span>
+                            <span>{t("shop.added")}</span>
                           </>
                         ) : product.variants && product.variants.length > 0 ? (
                           <>
-                            <span>Options</span>
+                            <span>{t("shop.options")}</span>
                             <ArrowRight size={14} />
                           </>
                         ) : (
                           <>
                             <ShoppingBag size={14} />
-                            <span>Add</span>
+                            <span>{t("shop.add")}</span>
                           </>
                         )}
                       </button>

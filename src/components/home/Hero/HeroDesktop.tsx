@@ -15,6 +15,7 @@ import {
   snapFrameToStride,
 } from "~/utils/adaptiveQuality";
 import styles from "./Hero.module.scss";
+import { useTranslation } from "~/context/LanguageContext";
 
 gsap.registerPlugin(ScrollTrigger, Observer);
 
@@ -49,6 +50,7 @@ const DESKTOP_NEON_SNAP = 0.9;
 const DESKTOP_SNAP_DURATION = 2;
 
 export default function HeroDesktop() {
+  const { t } = useTranslation();
   const [isMainReady, setIsMainReady] = useState(false);
   const [loaderProgress, setLoaderProgress] = useState(0);
   const [loaderHint, setLoaderHint] = useState("Preparing first frames");
@@ -960,7 +962,7 @@ export default function HeroDesktop() {
       <div className={styles.fixedHud}>
         {/* Scroll-підказка */}
         <div ref={scrollHintRef} className={styles.scrollHint}>
-          <span>scroll</span>
+          <span>{t("hero.scroll")}</span>
           <div className={styles.scrollLine} />
         </div>
         {/* Прогрес-бар: чорний трек + сірий буфер завантаження + жовтий маркер */}

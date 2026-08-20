@@ -1,29 +1,30 @@
+"use client";
+
 import Image from "next/image";
 import styles from "./PostHero.module.scss";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
+import { useTranslation } from "~/context/LanguageContext";
+import { getLocalized, formatLocalizedDate } from "~/lib/i18n";
 
 type Props = {
-  title: string;
-  coverUrl: string | null;
-  date: Date | null;
+  post: {
+    title: string;
+    titleUk?: string | null;
+    coverUrl: string | null;
+    date: Date | null;
+  };
 };
 
-function formatDate(date: Date | null): string {
-  if (!date) return "";
-  return new Intl.DateTimeFormat("en-US", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(new Date(date));
-}
+export default function PostHero({ post }: Props) {
+  const { locale } = useTranslation();
+  const title = getLocalized(post, "title", locale);
 
-export default function PostHero({ title, coverUrl, date }: Props) {
   return (
     <div className={styles.wrapper}>
       <section className={styles.hero}>
-        {coverUrl ? (
+        {post.coverUrl ? (
           <Image
-            src={getOptimizedImageUrl(coverUrl, { preset: "banner" })}
+            src={getOptimizedImageUrl(post.coverUrl, { preset: "banner" })}
             alt={title}
             fill
             priority
@@ -35,7 +36,7 @@ export default function PostHero({ title, coverUrl, date }: Props) {
         <div className={styles.overlay} />
 
         <div className={styles.content}>
-          {date && <span className={styles.date}>{formatDate(date)}</span>}
+          {post.date && <span className={styles.date}>{formatLocalizedDate(post.date, locale)}</span>}
           <h1 className={styles.title}>{title}</h1>
         </div>
       </section>

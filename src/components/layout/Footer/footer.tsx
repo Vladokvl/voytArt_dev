@@ -1,15 +1,20 @@
+"use client";
+
 import Link from "next/link";
 import styles from "./Footer.module.scss";
+import { useTranslation } from "~/context/LanguageContext";
 
 export default function Footer() {
+  const { t, getLocalizedHref } = useTranslation();
+
   return (
     <footer className={styles.footer}>
       <div className={styles.inner}>
 
         {/* Contact */}
         <div>
-          <p className={styles.blockTitle}>Contact</p>
-          <p className={styles.tagline}>Get in touch</p>
+          <p className={styles.blockTitle}>{t("footer.contact")}</p>
+          <p className={styles.tagline}>{t("footer.getInTouch")}</p>
           <div className={styles.socials}>
             {/* Instagram */}
             <a
@@ -53,19 +58,19 @@ export default function Footer() {
 
         {/* Quick nav */}
         <div>
-          <p className={styles.blockTitle}>Navigate</p>
+          <p className={styles.blockTitle}>{t("footer.navigate")}</p>
           <nav className={styles.quickNav} aria-label="Footer navigation">
-            <Link href="/" className={`${styles.quickLink} ${styles.quickLinkHome}`}>
-              Home
+            <Link href={getLocalizedHref("/")} className={`${styles.quickLink} ${styles.quickLinkHome}`}>
+              {t("nav.home")}
             </Link>
-            <Link href="/art" className={styles.quickLink}>
-              Art
+            <Link href={getLocalizedHref("/art")} className={styles.quickLink}>
+              {t("nav.art")}
             </Link>
-            <Link href="/gallery" className={styles.quickLink}>
-              Gallery
+            <Link href={getLocalizedHref("/gallery")} className={styles.quickLink}>
+              {t("nav.gallery")}
             </Link>
-            <Link href="/shop" className={styles.quickLink}>
-              Shop
+            <Link href={getLocalizedHref("/shop")} className={styles.quickLink}>
+              {t("nav.shop")}
             </Link>
           </nav>
         </div>
@@ -74,7 +79,7 @@ export default function Footer() {
 
       {/* Bottom bar */}
       <div className={styles.bottom}>
-        © {new Date().getFullYear()}. All rights reserved. VoytArtGallery
+        {t("footer.copyright", { year: new Date().getFullYear() })}
       </div>
     </footer>
   );

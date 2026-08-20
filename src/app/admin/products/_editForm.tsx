@@ -22,12 +22,14 @@ import { useSetBreadcrumb } from "@/app/admin/_components/BreadcrumbContext";
 import VariantEditor, { type VariantItem } from "./_VariantEditor";
 import MediaSection from "./edit/[id]/_MediaSection";
 import { ArrowLeft, ExternalLink, Save, Eye } from "lucide-react";
+import LanguageTabs from "../_components/LanguageTabs";
 
 type Author = { id: number; firstName: string; lastName: string };
 type Category = { id: number; name: string };
 type ProductVariant = {
   id: number;
   title: string;
+  titleUk?: string | null;
   price: number | null;
   stock: number;
   sku: string | null;
@@ -42,7 +44,9 @@ type ProductImage = {
 type Product = {
   id: number;
   title: string;
+  titleUk?: string | null;
   description: string | null;
+  descriptionUk?: string | null;
   price: number;
   stock: number;
   sortOrder: number;
@@ -69,7 +73,9 @@ export default function ProductEditForm({
   const [state, formAction] = useActionState(updateProductAction, undefined);
   const [uploading, setUploading] = useState(false);
   const [pending, startTransition] = useTransition();
+  const [langTab, setLangTab] = useState<"en" | "uk">("en");
   const [description, setDescription] = useState(product.description ?? "");
+  const [descriptionUk, setDescriptionUk] = useState(product.descriptionUk ?? "");
   const [preview, setPreview] = useState<string | null>(product.coverUrl || null);
   const [dragOver, setDragOver] = useState(false);
   const [price, setPrice] = useState<number>(product.price);
@@ -78,6 +84,7 @@ export default function ProductEditForm({
   const initialVariants: VariantItem[] = (product.variants ?? []).map((v) => ({
     id: v.id,
     title: v.title,
+    titleUk: v.titleUk ?? "",
     price: v.price ?? "",
     stock: v.stock,
     sku: v.sku ?? "",
@@ -186,15 +193,31 @@ export default function ProductEditForm({
               <span className={styles.cardDesc}>Базові реквізити товару</span>
             </div>
 
-            <div className={styles.field}>
-              <label className={styles.label}>Назва товару *</label>
-              <input
-                className={styles.input}
-                name="title"
-                defaultValue={product.title}
-                placeholder="напр. Фірмове худі VoytArt Black"
-                required
-              />
+            <LanguageTabs activeTab={langTab} onChange={setLangTab} />
+
+            <div style={{ display: langTab === "en" ? "block" : "none" }}>
+              <div className={styles.field}>
+                <label className={styles.label}>Title (EN) *</label>
+                <input
+                  className={styles.input}
+                  name="title"
+                  defaultValue={product.title}
+                  placeholder="e.g. VoytArt Hoodie Black"
+                  required
+                />
+              </div>
+            </div>
+
+            <div style={{ display: langTab === "uk" ? "block" : "none" }}>
+              <div className={styles.field}>
+                <label className={styles.label}>Назва товару (Українська)</label>
+                <input
+                  className={styles.input}
+                  name="titleUk"
+                  defaultValue={product.titleUk ?? ""}
+                  placeholder="напр. Фірмове худі VoytArt Black"
+                />
+              </div>
             </div>
 
             <div className={styles.row}>
@@ -268,12 +291,27 @@ export default function ProductEditForm({
               <h3 className={styles.cardTitle}>Детальний опис товару</h3>
               <span className={styles.cardDesc}>Матеріали, догляд та опис</span>
             </div>
-            <div className={styles.field}>
-              <TipTapEditor
-                content={description}
-                onChange={(html) => setDescription(html)}
-              />
-              <input type="hidden" name="description" value={description} />
+
+            <div style={{ display: langTab === "en" ? "block" : "none" }}>
+              <div className={styles.field}>
+                <label className={styles.label}>Description (EN)</label>
+                <TipTapEditor
+                  content={description}
+                  onChange={(html) => setDescription(html)}
+                />
+                <input type="hidden" name="description" value={description} />
+              </div>
+            </div>
+
+            <div style={{ display: langTab === "uk" ? "block" : "none" }}>
+              <div className={styles.field}>
+                <label className={styles.label}>Опис товару (Українська)</label>
+                <TipTapEditor
+                  content={descriptionUk}
+                  onChange={(html) => setDescriptionUk(html)}
+                />
+                <input type="hidden" name="descriptionUk" value={descriptionUk} />
+              </div>
             </div>
           </div>
         </div>

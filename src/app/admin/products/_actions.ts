@@ -7,6 +7,7 @@ import { deleteAsset, getPublicIdFromCloudinaryUrl } from "~/lib/cloudinary";
 export type VariantInput = {
   id?: number;
   title: string;
+  titleUk?: string | null;
   price?: number | string | null;
   stock: number | string;
   sku?: string | null;
@@ -17,7 +18,9 @@ export async function createProductAction(
   formData: FormData,
 ): Promise<{ error: string } | undefined> {
   const title = formData.get("title") as string;
+  const titleUk = (formData.get("titleUk") as string)?.trim() || null;
   const description = (formData.get("description") as string) || null;
+  const descriptionUk = (formData.get("descriptionUk") as string) || null;
   const price = parseFloat(formData.get("price") as string);
   const baseStock = parseInt(formData.get("stock") as string, 10);
   const sortOrder = parseInt(formData.get("sortOrder") as string, 10) || 0;
@@ -48,7 +51,9 @@ export async function createProductAction(
   await db.product.create({
     data: {
       title,
+      titleUk,
       description,
+      descriptionUk,
       price,
       stock: totalStock,
       sortOrder,
@@ -63,6 +68,7 @@ export async function createProductAction(
             variants: {
               create: variants.map((v, i) => ({
                 title: v.title,
+                titleUk: v.titleUk ?? null,
                 price: v.price ? Number(v.price) : null,
                 stock: Number(v.stock) || 0,
                 sku: v.sku ?? null,
@@ -85,7 +91,9 @@ export async function updateProductAction(
 ): Promise<{ error: string } | undefined> {
   const id = parseInt(formData.get("id") as string, 10);
   const title = formData.get("title") as string;
+  const titleUk = (formData.get("titleUk") as string)?.trim() || null;
   const description = (formData.get("description") as string) || null;
+  const descriptionUk = (formData.get("descriptionUk") as string) || null;
   const price = parseFloat(formData.get("price") as string);
   const baseStock = parseInt(formData.get("stock") as string, 10);
   const sortOrder = parseInt(formData.get("sortOrder") as string, 10) || 0;
@@ -115,7 +123,9 @@ export async function updateProductAction(
 
   const dataToUpdate: Record<string, unknown> = {
     title,
+    titleUk,
     description,
+    descriptionUk,
     price,
     stock: totalStock,
     sortOrder,
@@ -156,6 +166,7 @@ export async function updateProductAction(
     const vPrice = v.price !== "" && v.price !== null && v.price !== undefined ? Number(v.price) : null;
     const vStock = Number(v.stock) || 0;
     const vSku = v.sku ?? null;
+    const vTitleUk = v.titleUk ?? null;
 
     if (v.id && existingMap.has(v.id)) {
       submittedIds.add(v.id);
@@ -163,6 +174,7 @@ export async function updateProductAction(
         where: { id: v.id },
         data: {
           title: v.title,
+          titleUk: vTitleUk,
           price: vPrice,
           stock: vStock,
           sku: vSku,
@@ -174,6 +186,7 @@ export async function updateProductAction(
         data: {
           productId: id,
           title: v.title,
+          titleUk: vTitleUk,
           price: vPrice,
           stock: vStock,
           sku: vSku,

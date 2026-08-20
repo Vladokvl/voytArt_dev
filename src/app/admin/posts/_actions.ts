@@ -9,7 +9,9 @@ export async function createPostAction(
   formData: FormData,
 ): Promise<{ error: string } | undefined> {
   const title = formData.get("title") as string;
+  const titleUk = (formData.get("titleUk") as string)?.trim() || null;
   const content = formData.get("content") as string;
+  const contentUk = (formData.get("contentUk") as string) || null;
   const coverUrl = (formData.get("coverUrl") as string) || null;
   const coverPublicId = coverUrl ? (getPublicIdFromCloudinaryUrl(coverUrl) ?? "") : "";
   const dateRaw = formData.get("date") as string;
@@ -19,9 +21,10 @@ export async function createPostAction(
     return { error: "Заповніть обовʼязкові поля" };
   }
 
-  await db.galleryPost.create({ data: { title, content, coverUrl, coverPublicId, date } });
+  await db.galleryPost.create({ data: { title, titleUk, content, contentUk, coverUrl, coverPublicId, date } });
 
   revalidatePath("/admin/posts");
+  revalidatePath("/gallery");
   redirect("/admin/posts");
 }
 
@@ -31,7 +34,9 @@ export async function updatePostAction(
 ): Promise<{ error: string } | undefined> {
   const id = Number(formData.get("id"));
   const title = formData.get("title") as string;
+  const titleUk = (formData.get("titleUk") as string)?.trim() || null;
   const content = formData.get("content") as string;
+  const contentUk = (formData.get("contentUk") as string) || null;
   const coverUrl = (formData.get("coverUrl") as string) || null;
   const coverPublicId = coverUrl ? (getPublicIdFromCloudinaryUrl(coverUrl) ?? "") : "";
   const dateRaw = formData.get("date") as string;
@@ -41,9 +46,11 @@ export async function updatePostAction(
     return { error: "Заповніть обовʼязкові поля" };
   }
 
-  await db.galleryPost.update({ where: { id }, data: { title, content, coverUrl, coverPublicId, date } });
+  await db.galleryPost.update({ where: { id }, data: { title, titleUk, content, contentUk, coverUrl, coverPublicId, date } });
 
   revalidatePath("/admin/posts");
+  revalidatePath("/gallery");
+  revalidatePath(`/gallery/${id}`);
   redirect("/admin/posts");
 }
 

@@ -15,6 +15,7 @@ import { ArrowLeft, Save } from "lucide-react";
 type CollectionForEdit = {
   id: number;
   title: string;
+  titleUk?: string | null;
   authorId: number;
   coverPhotoUrl: string | null;
 };
@@ -110,13 +111,23 @@ export default function CollectionEditForm({
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Назва колекції *</label>
+              <label className={styles.label}>Назва колекції (EN) *</label>
               <input
                 className={styles.input}
                 name="title"
-                placeholder="Назва колекції"
+                placeholder="Collection title in English"
                 defaultValue={collection.title}
                 required
+              />
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>Назва колекції (Українська)</label>
+              <input
+                className={styles.input}
+                name="titleUk"
+                placeholder="Назва колекції українською"
+                defaultValue={collection.titleUk ?? ""}
               />
             </div>
 

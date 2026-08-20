@@ -39,11 +39,17 @@ enum PaymentMethod {
 
 // ── Authors ───────────────────────────────────────────────────────────────────
 model Author {
-  id            Int     @id @default(autoincrement())
-  firstName     String  @map("first_name")
-  lastName      String  @map("last_name")
-  bio           String?
-  shortDesc     String? @map("short_desc")
+  id        Int     @id @default(autoincrement())
+  firstName String  @map("first_name")
+  lastName  String  @map("last_name")
+  bio       String?
+  shortDesc String? @map("short_desc")
+
+  firstNameUk String? @map("first_name_uk")
+  lastNameUk  String? @map("last_name_uk")
+  bioUk       String? @map("bio_uk")
+  shortDescUk String? @map("short_desc_uk")
+
   photoUrl      String? @map("photo_url")
   photoPublicId String  @default("") @map("photo_public_id")
 
@@ -68,6 +74,7 @@ model Author {
 model Collection {
   id                 Int     @id @default(autoincrement())
   title              String
+  titleUk            String? @map("title_uk")
   coverPhotoUrl      String? @map("cover_photo_url")
   coverPhotoPublicId String  @default("") @map("cover_photo_public_id")
 
@@ -85,9 +92,11 @@ model Collection {
 
 // ── Paintings ─────────────────────────────────────────────────────────────────
 model Painting {
-  id          Int     @id @default(autoincrement())
-  title       String
-  description String?
+  id            Int     @id @default(autoincrement())
+  title         String
+  description   String?
+  titleUk       String? @map("title_uk")
+  descriptionUk String? @map("description_uk")
 
   coverUrl      String @map("cover_url")
   coverPublicId String @default("") @map("cover_public_id")
@@ -133,9 +142,10 @@ model PaintingMedia {
 
 // ── Shop Categories ───────────────────────────────────────────────────────────
 model Category {
-  id   Int    @id @default(autoincrement())
-  name String @unique
-  slug String @unique
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
+  nameUk String? @map("name_uk")
+  slug   String  @unique
 
   products Product[]
 
@@ -147,14 +157,16 @@ model Category {
 
 // ── Shop Products ─────────────────────────────────────────────────────────────
 model Product {
-  id          Int     @id @default(autoincrement())
-  title       String
-  description String?
-  price       Float
-  stock       Int     @default(0)
-  sortOrder   Int     @default(autoincrement()) @map("sort_order")
-  isFeatured  Boolean @default(false) @map("is_featured")
-  isActive    Boolean @default(true) @map("is_active")
+  id            Int     @id @default(autoincrement())
+  title         String
+  description   String?
+  titleUk       String? @map("title_uk")
+  descriptionUk String? @map("description_uk")
+  price         Float
+  stock         Int     @default(0)
+  sortOrder     Int     @default(autoincrement()) @map("sort_order")
+  isFeatured    Boolean @default(false) @map("is_featured")
+  isActive      Boolean @default(true) @map("is_active")
 
   coverUrl      String @default("") @map("cover_url")
   coverPublicId String @default("") @map("cover_public_id")
@@ -184,6 +196,7 @@ model Product {
 model ProductVariant {
   id        Int     @id @default(autoincrement())
   title     String
+  titleUk   String? @map("title_uk")
   price     Float?
   stock     Int     @default(0)
   sku       String?
@@ -265,7 +278,9 @@ model OrderItem {
 model GalleryPost {
   id            Int       @id @default(autoincrement())
   title         String
+  titleUk       String?   @map("title_uk")
   content       String
+  contentUk     String?   @map("content_uk")
   coverUrl      String?   @map("cover_url")
   coverPublicId String    @default("") @map("cover_public_id")
   date          DateTime?

@@ -17,12 +17,15 @@ const TipTapEditor = dynamic(() => import("~/components/admin/TipTapEditor"), {
 });
 import { useImageCrop } from "~/hooks/use-image-crop";
 import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
+import LanguageTabs from "../../_components/LanguageTabs";
 
 export default function PaintingForm({ authors, collections }: { authors: Author[]; collections: { id: number; title: string; authorId: number }[] }) {
   const [state, formAction] = useActionState(createPaintingAction, undefined);
   const [uploading, setUploading] = useState(false);
   const [pending, startTransition] = useTransition();
+  const [langTab, setLangTab] = useState<"en" | "uk">("en");
   const [description, setDescription] = useState("");
+  const [descriptionUk, setDescriptionUk] = useState("");
   const [selectedAuthorId, setSelectedAuthorId] = useState("");
   const [selectedCollectionId, setSelectedCollectionId] = useState("");
 
@@ -101,24 +104,50 @@ export default function PaintingForm({ authors, collections }: { authors: Author
     <form onSubmit={handleSubmit} className={styles.form}>
       {state?.error && <p className={styles.error}>{state.error}</p>}
 
-      <div className={styles.field}>
-        <label className={styles.label}>Назва *</label>
-        <input
-          className={styles.input}
-          name="title"
-          placeholder="Назва"
-          required
-        />
+      <LanguageTabs activeTab={langTab} onChange={setLangTab} />
+
+      <div style={{ display: langTab === "en" ? "block" : "none" }}>
+        <div className={styles.field}>
+          <label className={styles.label}>Title (EN) *</label>
+          <input
+            className={styles.input}
+            name="title"
+            placeholder="Painting title in English"
+            required
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label className={styles.label}>Description (EN)</label>
+          <div className={styles.field}>
+            <TipTapEditor
+              content={description}
+              onChange={(html) => setDescription(html)}
+            />
+            <input type="hidden" name="description" value={description} />
+          </div>
+        </div>
       </div>
 
-      <div className={styles.field}>
-        <label className={styles.label}>Опис</label>
+      <div style={{ display: langTab === "uk" ? "block" : "none" }}>
         <div className={styles.field}>
-          <TipTapEditor
-            content={description}
-            onChange={(html) => setDescription(html)}
+          <label className={styles.label}>Назва (Українська)</label>
+          <input
+            className={styles.input}
+            name="titleUk"
+            placeholder="Назва картини українською"
           />
-          <input type="hidden" name="description" value={description} />
+        </div>
+
+        <div className={styles.field}>
+          <label className={styles.label}>Опис (Українська)</label>
+          <div className={styles.field}>
+            <TipTapEditor
+              content={descriptionUk}
+              onChange={(html) => setDescriptionUk(html)}
+            />
+            <input type="hidden" name="descriptionUk" value={descriptionUk} />
+          </div>
         </div>
       </div>
 

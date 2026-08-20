@@ -7,7 +7,7 @@ import styles from "@/app/admin/_formStyles.module.scss";
 import { useSetBreadcrumb } from "@/app/admin/_components/BreadcrumbContext";
 import { ArrowLeft, Save } from "lucide-react";
 
-type Category = { id: number; name: string; slug: string };
+type Category = { id: number; name: string; nameUk?: string | null; slug: string };
 
 export default function CategoryEditForm({ category }: { category: Category }) {
   useSetBreadcrumb(category.name);
@@ -50,13 +50,23 @@ export default function CategoryEditForm({ category }: { category: Category }) {
         </div>
 
         <div className={styles.field}>
-          <label className={styles.label}>Назва категорії *</label>
+          <label className={styles.label}>Назва категорії (EN) *</label>
           <input
             className={styles.input}
             name="name"
             defaultValue={category.name}
-            placeholder="напр. Одяг та аксесуари"
+            placeholder="e.g. Prints & Art"
             required
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label className={styles.label}>Назва категорії (Українська)</label>
+          <input
+            className={styles.input}
+            name="nameUk"
+            defaultValue={category.nameUk ?? ""}
+            placeholder="напр. Принти та мистецтво"
           />
         </div>
 

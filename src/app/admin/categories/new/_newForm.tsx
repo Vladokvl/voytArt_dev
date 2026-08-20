@@ -24,11 +24,11 @@ export default function CategoryForm() {
       {state?.error && <p className={styles.error}>{state.error}</p>}
 
       <div className={styles.field}>
-        <label className={styles.label}>Назва *</label>
+        <label className={styles.label}>Назва (EN) *</label>
         <input
           className={styles.input}
           name="name"
-          placeholder="Назва категорії"
+          placeholder="Category name in English"
           required
           onChange={(e) => {
             const slugInput = e.currentTarget.form?.elements.namedItem("slug") as HTMLInputElement | null;
@@ -36,6 +36,15 @@ export default function CategoryForm() {
               slugInput.value = toSlug(e.target.value);
             }
           }}
+        />
+      </div>
+
+      <div className={styles.field}>
+        <label className={styles.label}>Назва (Українська)</label>
+        <input
+          className={styles.input}
+          name="nameUk"
+          placeholder="Назва категорії українською"
         />
       </div>
 

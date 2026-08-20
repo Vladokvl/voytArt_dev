@@ -4,18 +4,21 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import styles from "./nav.module.scss";
-
-const navItems = [
-  { href: "/", label: "Home" },
-  { href: "/art", label: "Art" },
-  { href: "/gallery", label: "Gallery" },
-  { href: "/shop", label: "Shop" },
-];
+import { useTranslation } from "~/context/LanguageContext";
+import LanguageSwitcher from "~/components/ui/LanguageSwitcher/LanguageSwitcher";
 
 export default function NavMenu() {
   const pathname = usePathname();
+  const { t, getLocalizedHref } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const navItems = [
+    { href: "/", label: t("nav.home") },
+    { href: "/art", label: t("nav.art") },
+    { href: "/gallery", label: t("nav.gallery") },
+    { href: "/shop", label: t("nav.shop") },
+  ];
 
   useEffect(() => {
     setIsOpen(false);
@@ -56,13 +59,14 @@ export default function NavMenu() {
           return (
             <Link
               key={item.href}
-              href={item.href}
+              href={getLocalizedHref(item.href)}
               className={`${styles.menuLink} ${isActive ? styles.menuLinkActive : ""}`}
             >
               {item.label}
             </Link>
           );
         })}
+        <LanguageSwitcher inMenu />
       </nav>
       
       <button
@@ -73,7 +77,7 @@ export default function NavMenu() {
         aria-controls="site-menu-panel"
         onClick={() => setIsOpen((open) => !open)}
       >
-        <span className={styles.menuLabel}>Menu</span>
+        <span className={styles.menuLabel}>{t("nav.menu")}</span>
         <span className={styles.menuIcon} aria-hidden="true">
           <svg
             viewBox="0 0 24 24"

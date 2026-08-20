@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import PaintingCard from "~/components/ui/PaintingCard/PaintingCard";
 import styles from "~/app/art/[[...artistId]]/art.module.scss";
 import { fetchPaginatedPaintings } from "~/app/art/_actions";
+import { useTranslation } from "~/context/LanguageContext";
 
 type MediaItem = {
   id: number;
@@ -16,10 +17,12 @@ type MediaItem = {
 type Painting = {
   id: number;
   title: string;
+  titleUk?: string | null;
   description: string | null;
+  descriptionUk?: string | null;
   coverUrl: string;
   year: number | null;
-  author: { firstName: string; lastName: string };
+  author: { firstName: string; firstNameUk?: string | null; lastName: string; lastNameUk?: string | null };
   media: MediaItem[];
 };
 
@@ -37,6 +40,7 @@ export default function PaintingGrid({
   collectionId: number | null;
 }) {
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
   const isNeon = searchParams.get("neon") === "true";
 
   const [paintings, setPaintings] = useState<Painting[]>(initialPaintings);
@@ -73,7 +77,7 @@ export default function PaintingGrid({
   return (
     <>
       {paintings.length === 0 ? (
-        <p className={styles.empty}>No paintings found.</p>
+        <p className={styles.empty}>{t("art.empty")}</p>
       ) : (
         <>
           <div className={styles.masonry}>
@@ -91,7 +95,7 @@ export default function PaintingGrid({
                 disabled={loading}
                 className={styles.loadMoreBtn}
               >
-                {loading ? "Loading..." : "Show more"}
+                {loading ? t("art.loading") : t("art.showMore")}
               </button>
             </div>
           )}

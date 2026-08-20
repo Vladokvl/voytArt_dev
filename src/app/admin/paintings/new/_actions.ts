@@ -22,10 +22,12 @@ export async function createPaintingAction(
   await db.painting.create({
     data: {
       title,
+      titleUk: (formData.get("titleUk") as string)?.trim() || null,
       authorId,
       coverUrl,
       coverPublicId: getPublicIdFromCloudinaryUrl(coverUrl) ?? "",
       description: (formData.get("description") as string) || null,
+      descriptionUk: (formData.get("descriptionUk") as string) || null,
       year: formData.get("year") ? Number(formData.get("year")) : null,
       hasNeon: formData.get("hasNeon") === "on",
       isForSale: formData.get("isForSale") === "on",

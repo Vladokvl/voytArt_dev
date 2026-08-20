@@ -1,27 +1,26 @@
+"use client";
 import Link from "next/link";
 import styles from "./Sections.module.scss";
+import { useTranslation } from "~/context/LanguageContext";
 
-// ── NeonSection ─────────────────────────────────────────────────────────────
-// Чистий вміст панелі неон-сцени.
-// Позиціонування (.panel) та анімація задаються у HeroDesktop / HeroMobile.
 export default function NeonSection() {
+  const { t, getLocalizedHref } = useTranslation();
+
   return (
     <>
       <div className={styles.metaRow}>
-        <span className={styles.sceneStep}>04 / 04</span>
-        <span className={`${styles.stat} ${styles.statBonus}`}>Bonus scene</span>
+        <span className={styles.sceneStep}>{t("section.neon.num")}</span>
+        <span className={`${styles.stat} ${styles.statBonus}`}>{t("section.neon.tag")}</span>
       </div>
-      <p className={styles.tagline}>Neon</p>
+      <p className={styles.tagline}>{t("section.neon.label")}</p>
       <h2 className={styles.heading}>
-        Neon
-        <br />
-        paintings
+        {t("section.neon.title")}
       </h2>
       <p className={styles.description}>
-        A UV-lit concept room where special pigments reveal hidden layers of selected works.
+        {t("section.neon.desc")}
       </p>
-      <Link href="/art?neon=true" className={styles.cta}>
-        Explore neon →
+      <Link href={getLocalizedHref("/art?neon=true")} className={styles.cta}>
+        {t("section.neon.btn")}
       </Link>
     </>
   );

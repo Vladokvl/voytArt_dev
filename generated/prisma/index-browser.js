@@ -126,6 +126,10 @@ exports.Prisma.AuthorScalarFieldEnum = {
   lastName: 'lastName',
   bio: 'bio',
   shortDesc: 'shortDesc',
+  firstNameUk: 'firstNameUk',
+  lastNameUk: 'lastNameUk',
+  bioUk: 'bioUk',
+  shortDescUk: 'shortDescUk',
   photoUrl: 'photoUrl',
   photoPublicId: 'photoPublicId',
   bgPhotoUrl: 'bgPhotoUrl',
@@ -139,6 +143,7 @@ exports.Prisma.AuthorScalarFieldEnum = {
 exports.Prisma.CollectionScalarFieldEnum = {
   id: 'id',
   title: 'title',
+  titleUk: 'titleUk',
   coverPhotoUrl: 'coverPhotoUrl',
   coverPhotoPublicId: 'coverPhotoPublicId',
   authorId: 'authorId',
@@ -150,6 +155,8 @@ exports.Prisma.PaintingScalarFieldEnum = {
   id: 'id',
   title: 'title',
   description: 'description',
+  titleUk: 'titleUk',
+  descriptionUk: 'descriptionUk',
   coverUrl: 'coverUrl',
   coverPublicId: 'coverPublicId',
   hasNeon: 'hasNeon',
@@ -175,6 +182,7 @@ exports.Prisma.PaintingMediaScalarFieldEnum = {
 exports.Prisma.CategoryScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  nameUk: 'nameUk',
   slug: 'slug',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -184,6 +192,8 @@ exports.Prisma.ProductScalarFieldEnum = {
   id: 'id',
   title: 'title',
   description: 'description',
+  titleUk: 'titleUk',
+  descriptionUk: 'descriptionUk',
   price: 'price',
   stock: 'stock',
   sortOrder: 'sortOrder',
@@ -200,6 +210,7 @@ exports.Prisma.ProductScalarFieldEnum = {
 exports.Prisma.ProductVariantScalarFieldEnum = {
   id: 'id',
   title: 'title',
+  titleUk: 'titleUk',
   price: 'price',
   stock: 'stock',
   sku: 'sku',
@@ -248,7 +259,9 @@ exports.Prisma.OrderItemScalarFieldEnum = {
 exports.Prisma.GalleryPostScalarFieldEnum = {
   id: 'id',
   title: 'title',
+  titleUk: 'titleUk',
   content: 'content',
+  contentUk: 'contentUk',
   coverUrl: 'coverUrl',
   coverPublicId: 'coverPublicId',
   date: 'date',

@@ -4,15 +4,19 @@ import Image from "next/image";
 import * as Dialog from "@radix-ui/react-dialog";
 import styles from "./productModal.module.scss";
 import { useState, useEffect } from "react";
+import { useTranslation } from "~/context/LanguageContext";
+import { getLocalized } from "~/lib/i18n";
 
 type ProductImage = { id: number; url: string; order: number };
-type Author = { id: number; firstName: string; lastName: string };
-type Category = { id: number; name: string; slug: string };
+type Author = { id: number; firstName: string; firstNameUk?: string | null; lastName: string; lastNameUk?: string | null };
+type Category = { id: number; name: string; nameUk?: string | null; slug: string };
 
 type Product = {
   id: number;
   title: string;
+  titleUk?: string | null;
   description: string | null;
+  descriptionUk?: string | null;
   price: number;
   stock: number;
   sortOrder: number;
@@ -32,6 +36,7 @@ interface ProductModalProps {
 }
 
 export default function ProductModal({ product, onClose, onAddToCart }: ProductModalProps) {
+  const { t, locale } = useTranslation();
   const [activeIndex, setActiveIndex] = useState(0);
   const [loadedSet, setLoadedSet] = useState<Set<string>>(new Set());
 
@@ -159,26 +164,26 @@ export default function ProductModal({ product, onClose, onAddToCart }: ProductM
           <div className={styles.info}>
             <div className={styles.scrollableContent} data-lenis-prevent>
               <p className={styles.authorLabel}>
-                {product.author.firstName} {product.author.lastName}
+                {product.author ? `${getLocalized(product.author, "firstName", locale)} ${getLocalized(product.author, "lastName", locale)}` : "VoytArt Gallery"}
               </p>
-              <Dialog.Title className={styles.title}>{product.title}</Dialog.Title>
+              <Dialog.Title className={styles.title}>{getLocalized(product, "title", locale)}</Dialog.Title>
               <span className={styles.modalPrice}>
-                {product.price.toLocaleString("uk-UA")} €
+                {product.price.toLocaleString("en-US")} €
               </span>
 
               {product.description && (
                 <div
                   className={styles.description}
                   data-lenis-prevent
-                  dangerouslySetInnerHTML={{ __html: product.description }}
+                  dangerouslySetInnerHTML={{ __html: getLocalized(product, "description", locale) || "" }}
                 />
               )}
 
               <div className={styles.stockStatus}>
                 {product.stock > 0 ? (
-                  <span className={styles.inStock}>In Stock ({product.stock})</span>
+                  <span className={styles.inStock}>{t("shop.inStock", { count: product.stock })}</span>
                 ) : (
-                  <span className={styles.outOfStock}>Out of stock</span>
+                  <span className={styles.outOfStock}>{t("shop.outOfStock")}</span>
                 )}
               </div>
             </div>
@@ -192,9 +197,9 @@ export default function ProductModal({ product, onClose, onAddToCart }: ProductM
                 disabled={product.stock <= 0}
                 className={styles.btnPrimary}
               >
-                Add to Cart
+                {t("shop.addToCart")}
               </button>
-              <Dialog.Close className={styles.btnGhost}>Close</Dialog.Close>
+              <Dialog.Close className={styles.btnGhost}>{t("art.close")}</Dialog.Close>
             </div>
           </div>
         </Dialog.Content>

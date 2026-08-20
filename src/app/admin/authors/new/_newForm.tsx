@@ -6,16 +6,23 @@ import artStyles from "@/app/art/[[...artistId]]/art.module.scss";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
 import { useImageCrop } from "~/hooks/use-image-crop";
 import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
+import LanguageTabs from "../../_components/LanguageTabs";
 
 export default function AuthorForm() {
   const [state, formAction] = useActionState(createAuthorAction, undefined);
   const [uploading, setUploading] = useState(false);
   const [pending, startTransition] = useTransition();
 
+  const [langTab, setLangTab] = useState<"en" | "uk">("en");
+
   // Поля форми в локальному стані для живого прев'ю
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [shortDesc, setShortDesc] = useState("");
+
+  const [firstNameUk, setFirstNameUk] = useState("");
+  const [lastNameUk, setLastNameUk] = useState("");
+  const [shortDescUk, setShortDescUk] = useState("");
 
   // Режими ховеру прев'ю
   const [previewHover, setPreviewHover] = useState(false);
@@ -133,45 +140,90 @@ export default function AuthorForm() {
         <h1 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "1.5rem" }}>Новий автор</h1>
         {state?.error && <p className={styles.error}>{state.error}</p>}
 
-        <div className={styles.row}>
+        <LanguageTabs activeTab={langTab} onChange={setLangTab} />
+
+        <div style={{ display: langTab === "en" ? "block" : "none" }}>
+          <div className={styles.row}>
+            <div className={styles.field}>
+              <label className={styles.label}>First Name (EN) *</label>
+              <input
+                className={styles.input}
+                name="firstName"
+                placeholder="First Name in English"
+                required
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+            </div>
+            <div className={styles.field}>
+              <label className={styles.label}>Last Name (EN) *</label>
+              <input
+                className={styles.input}
+                name="lastName"
+                placeholder="Last Name in English"
+                required
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </div>
+          </div>
+
           <div className={styles.field}>
-            <label className={styles.label}>Імʼя *</label>
+            <label className={styles.label}>Short Description (EN)</label>
             <input
               className={styles.input}
-              name="firstName"
-              placeholder="Імʼя"
-              required
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              name="shortDesc"
+              placeholder="Short description for slider in English"
+              value={shortDesc}
+              onChange={(e) => setShortDesc(e.target.value)}
             />
           </div>
+
           <div className={styles.field}>
-            <label className={styles.label}>Прізвище *</label>
-            <input
-              className={styles.input}
-              name="lastName"
-              placeholder="Прізвище"
-              required
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-            />
+            <label className={styles.label}>Biography (EN)</label>
+            <textarea className={styles.textarea} name="bio" placeholder="Author biography in English" />
           </div>
         </div>
 
-        <div className={styles.field}>
-          <label className={styles.label}>Короткий опис (для відображення в слайдері)</label>
-          <input
-            className={styles.input}
-            name="shortDesc"
-            placeholder="Короткий опис автора в слайдері"
-            value={shortDesc}
-            onChange={(e) => setShortDesc(e.target.value)}
-          />
-        </div>
+        <div style={{ display: langTab === "uk" ? "block" : "none" }}>
+          <div className={styles.row}>
+            <div className={styles.field}>
+              <label className={styles.label}>Імʼя (Українська)</label>
+              <input
+                className={styles.input}
+                name="firstNameUk"
+                placeholder="Імʼя українською"
+                value={firstNameUk}
+                onChange={(e) => setFirstNameUk(e.target.value)}
+              />
+            </div>
+            <div className={styles.field}>
+              <label className={styles.label}>Прізвище (Українська)</label>
+              <input
+                className={styles.input}
+                name="lastNameUk"
+                placeholder="Прізвище українською"
+                value={lastNameUk}
+                onChange={(e) => setLastNameUk(e.target.value)}
+              />
+            </div>
+          </div>
 
-        <div className={styles.field}>
-          <label className={styles.label}>Біографія (для сторінки робіт)</label>
-          <textarea className={styles.textarea} name="bio" placeholder="Повна біографія автора" />
+          <div className={styles.field}>
+            <label className={styles.label}>Короткий опис (Українська)</label>
+            <input
+              className={styles.input}
+              name="shortDescUk"
+              placeholder="Короткий опис автора українською"
+              value={shortDescUk}
+              onChange={(e) => setShortDescUk(e.target.value)}
+            />
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label}>Біографія (Українська)</label>
+            <textarea className={styles.textarea} name="bioUk" placeholder="Повна біографія автора українською" />
+          </div>
         </div>
 
         <div className={styles.row}>

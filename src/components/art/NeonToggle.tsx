@@ -2,10 +2,12 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import styles from "@/app/art/[[...artistId]]/art.module.scss";
+import { useTranslation } from "~/context/LanguageContext";
 
 export default function NeonToggle() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
   const isNeon = searchParams.get("neon") === "true";
 
   function handleToggle() {
@@ -20,7 +22,7 @@ export default function NeonToggle() {
 
   return (
     <div className={styles.neonToggleWrapper}>
-      <span className={styles.neonToggleLabel}>UV Neon Mode</span>
+      <span className={styles.neonToggleLabel}>{t("art.neonMode")}</span>
       <label className={styles.neonSwitchWrap} aria-label="Toggle global neon mode">
         <span className={styles.neonSwitchTrack}>
           <input

@@ -1,28 +1,29 @@
+"use client";
 import Link from "next/link";
 import styles from "./Sections.module.scss";
+import { useTranslation } from "~/context/LanguageContext";
 
-// ── ArtShopSection ────────────────────────────────────────────────────────
-// Чистий вміст панелі 2: «Art shop».
-// Позиціонування (.panel .panelRight) та анімація задаються у HeroDesktop / HeroMobile.
 export default function ArtShopSection() {
+  const { t, getLocalizedHref } = useTranslation();
+
   return (
     <>
       <div className={styles.metaRow}>
-        <span className={styles.sceneStep}>03 / 04</span>
-        <span className={styles.stat}>Limited pieces</span>
+        <span className={styles.sceneStep}>{t("section.shop.num")}</span>
+        <span className={styles.stat}>{t("section.shop.tag")}</span>
       </div>
-      <p className={styles.tagline}>Shop</p>
+      <p className={styles.tagline}>{t("section.shop.label")}</p>
       <h2 className={styles.heading}>
-        Art shop
+        {t("section.shop.title")}
       </h2>
       <p className={styles.description}>
-        Collect prints, objects, and curated pieces inspired by our current exhibitions.
+        {t("section.shop.desc")}
       </p>
       <Link
-        href="/shop"
+        href={getLocalizedHref("/shop")}
         className={`${styles.cta} ${styles.ctaAccent}`}
       >
-        Explore the shop →
+        {t("section.shop.btn")}
       </Link>
     </>
   );

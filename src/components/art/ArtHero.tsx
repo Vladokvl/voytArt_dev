@@ -4,13 +4,19 @@ import { useRouter, useSearchParams } from "next/navigation";
 import gsap from "gsap";
 import styles from "@/app/art/[[...artistId]]/art.module.scss";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
+import { useTranslation } from "~/context/LanguageContext";
+import { getLocalized } from "~/lib/i18n";
 
 type DBAuthor = {
   id: number;
   firstName: string;
   lastName: string;
+  firstNameUk?: string | null;
+  lastNameUk?: string | null;
   bio: string | null;
+  bioUk?: string | null;
   shortDesc: string | null;
+  shortDescUk?: string | null;
   photoUrl: string | null;
   bgPhotoUrl: string | null;
   order: number;
@@ -29,6 +35,7 @@ export default function ArtHero({
   artistParam: string | null;
   authors: DBAuthor[];
 }) {
+  const { t, locale } = useTranslation();
   const isTwoAuthors = authors.length === 2;
   const colWidthVw = isTwoAuthors ? 50 : 33.333;
 
@@ -331,7 +338,7 @@ export default function ArtHero({
 
                 {/* Контейнер імені та короткого опису */}
                 <div className={styles.infoWrap}>
-                  <h2 className={styles.colName}>{author.firstName}</h2>
+                  <h2 className={styles.colName}>{getLocalized(author, "firstName", locale)}</h2>
 
                   <div
                     className={`${styles.colText} ${
@@ -339,7 +346,7 @@ export default function ArtHero({
                     }`}
                   >
                     <p className={styles.colDesc}>
-                      {author.shortDesc ?? ""}
+                      {getLocalized(author, "shortDesc", locale)}
                     </p>
                   </div>
                 </div>
@@ -389,7 +396,7 @@ export default function ArtHero({
             transition: "opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
-          <span className={styles.swipeText}>Swipe</span>
+          <span className={styles.swipeText}>{t("art.swipeHint")}</span>
           <span className={styles.swipeArrow}>→</span>
         </div>
       )}
