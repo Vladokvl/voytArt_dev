@@ -53,13 +53,18 @@
 }
 
 .counterBadge {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--color-text-muted, #666);
-  background: rgba(26, 26, 26, 0.06);
-  padding: 0.2rem 0.55rem;
-  border-radius: 999px;
-  font-feature-settings: "tnum";
+  display: none;
+
+  @media (max-width: 640px) {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-text-muted, #666);
+    background: rgba(26, 26, 26, 0.06);
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    font-feature-settings: "tnum";
+  }
 }
 
 .buttons {
@@ -284,14 +289,18 @@
   }
 }
 
-/* ── Pagination Dots ── */
+/* ── Pagination Dots (Mobile Only) ── */
 .dotsWrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  margin-top: 6px;
-  padding: 6px 0;
+  display: none;
+
+  @media (max-width: 640px) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    padding: 6px 0;
+  }
 }
 
 .dot {
@@ -313,3 +322,43 @@
   width: 26px;
   background: var(--color-text, #1a1a1a);
 }
+
+/* ── Desktop Progress Bar ── */
+.desktopProgressWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 0 4px;
+  width: 100%;
+
+  @media (max-width: 640px) {
+    display: none;
+  }
+}
+
+.progressTrack {
+  position: relative;
+  width: 240px;
+  height: 4px;
+  background: rgba(26, 26, 26, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: height 0.2s ease, background-color 0.2s ease;
+
+  &:hover {
+    height: 6px;
+    background: rgba(26, 26, 26, 0.14);
+  }
+}
+
+.progressBar {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: var(--color-text, #1a1a1a);
+  border-radius: 999px;
+  transition: left 0.15s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s ease;
+  will-change: left, width;
+}
+
