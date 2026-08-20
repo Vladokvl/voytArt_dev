@@ -134,10 +134,10 @@ export default function CartDrawer() {
     }
   };
 
-  if (!isCartOpen) return null;
+
 
   return (
-    <div className={styles.drawerOverlay} onClick={handleModalClose}>
+    <div className={styles.drawerOverlay} data-open={isCartOpen} onClick={handleModalClose}>
       <div
         className={styles.drawerPanel}
         onClick={(e) => e.stopPropagation()}
@@ -146,6 +146,7 @@ export default function CartDrawer() {
         aria-label="Shopping Cart"
       >
         {/* ── Header ── */}
+
         <header className={styles.header}>
           <div className={styles.headerLeft}>
             {step === "form" && (
