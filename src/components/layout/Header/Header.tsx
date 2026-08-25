@@ -28,7 +28,7 @@ export default function Header() {
     const isHeroPage = pathname === "/gallery";
     const isArt = pathname.startsWith("/art");
 
-    let timer: ReturnType<typeof setTimeout> | null = null;
+    const timer: ReturnType<typeof setTimeout> | null = null;
 
     const handleScroll = () => {
       const now = Date.now();

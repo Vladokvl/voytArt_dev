@@ -3,11 +3,13 @@ import { db } from "~/lib/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { deleteAsset, getPublicIdFromCloudinaryUrl } from "~/lib/cloudinary";
+import { requireAdmin } from "~/lib/admin-guard";
 
 export async function createAuthorAction(
   _prev: { error: string } | undefined,
   formData: FormData,
 ): Promise<{ error: string } | undefined> {
+  await requireAdmin();
   const firstName = formData.get("firstName") as string;
   const lastName = formData.get("lastName") as string;
   const bio = (formData.get("bio") as string) || null;
@@ -59,6 +61,7 @@ export async function updateAuthorAction(
   _prev: { error: string } | undefined,
   formData: FormData,
 ): Promise<{ error: string } | undefined> {
+  await requireAdmin();
   const id = Number(formData.get("id"));
   const firstName = formData.get("firstName") as string;
   const lastName = formData.get("lastName") as string;
@@ -122,6 +125,7 @@ export async function updateAuthorAction(
 }
 
 export async function deleteAuthorAction(id: number): Promise<void> {
+  await requireAdmin();
   const author = await db.author.findUnique({
     where: { id },
     select: {
@@ -222,12 +226,14 @@ export async function deleteAuthorAction(id: number): Promise<void> {
 }
 
 export async function swapAuthorOrderAction(idA: number, idB: number) {
+  await requireAdmin();
   const [a, b] = await Promise.all([
     db.author.findUnique({ where: { id: idA }, select: { order: true } }),
     db.author.findUnique({ where: { id: idB }, select: { order: true } }),
   ]);
   if (!a || !b) return;
-  await Promise.all([
+  // Атомарний обмін порядком в межах однієї транзакції
+  await db.$transaction([
     db.author.update({ where: { id: idA }, data: { order: b.order } }),
     db.author.update({ where: { id: idB }, data: { order: a.order } }),
   ]);
@@ -236,12 +242,16 @@ export async function swapAuthorOrderAction(idA: number, idB: number) {
 }
 
 export async function moveAuthorToPositionAction(id: number, targetIndex: number) {
+  await requireAdmin();
   const all = await db.author.findMany({ orderBy: { order: "asc" }, select: { id: true } });
   const without = all.filter((p) => p.id !== id);
   const clamped = Math.max(0, Math.min(targetIndex, without.length));
   without.splice(clamped, 0, { id });
-  await Promise.all(
-    without.map((p, i) => db.author.update({ where: { id: p.id }, data: { order: i } })),
+  // Атомарне оновлення порядку — без race conditions та часткових оновлень
+  await db.$transaction(
+    without.map((p, i) =>
+      db.author.update({ where: { id: p.id }, data: { order: i } }),
+    ),
   );
   revalidatePath("/admin/authors");
   revalidatePath("/art");

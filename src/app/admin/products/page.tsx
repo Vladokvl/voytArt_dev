@@ -1,4 +1,5 @@
 import { db, type Prisma } from "~/lib/db";
+import { decimalToNumber } from "~/lib/plain-product";
 import styles from "../admin-table.module.scss";
 import Link from "next/link";
 import { Plus, Edit2, ArrowUp, ArrowDown, ArrowRight } from "lucide-react";
@@ -58,6 +59,8 @@ export default async function ProductsPage({
     db.product.count(),
   ]);
 
+  const plainProducts = products.map((p) => ({ ...p, price: decimalToNumber(p.price) }));
+
   return (
     <div>
       {/* Header */}
@@ -88,14 +91,14 @@ export default async function ProductsPage({
             </tr>
           </thead>
           <tbody>
-            {products.length === 0 ? (
+            {plainProducts.length === 0 ? (
               <tr>
                 <td colSpan={9} className={styles.empty}>
                   Товарів у магазині ще немає
                 </td>
               </tr>
             ) : (
-              products.map((p, i) => (
+              plainProducts.map((p, i) => (
                 <tr key={p.id}>
                   <td className={styles.tdThumb}>
                     {p.coverUrl ?? p.images[0]?.url ? (

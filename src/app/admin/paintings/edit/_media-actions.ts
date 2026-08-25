@@ -2,8 +2,10 @@
 import { db } from "~/lib/db";
 import { revalidatePath } from "next/cache";
 import { deleteAsset, getPublicIdFromCloudinaryUrl } from "~/lib/cloudinary";
+import { requireAdmin } from "~/lib/admin-guard";
 
 export async function addPaintingMediaAction(formData: FormData) {
+  await requireAdmin();
   const paintingId = Number(formData.get("paintingId"));
   const url = formData.get("url") as string;
   const isNeon = formData.get("isNeon") === "true";
@@ -33,6 +35,7 @@ export async function addPaintingMediaAction(formData: FormData) {
 }
 
 export async function deletePaintingMediaAction(formData: FormData) {
+  await requireAdmin();
   const id = Number(formData.get("id"));
   const paintingId = Number(formData.get("paintingId"));
 

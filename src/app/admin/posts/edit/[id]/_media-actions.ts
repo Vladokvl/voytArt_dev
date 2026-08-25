@@ -2,8 +2,10 @@
 import { db } from "~/lib/db";
 import { revalidatePath } from "next/cache";
 import { deleteAsset, getPublicIdFromCloudinaryUrl } from "~/lib/cloudinary";
+import { requireAdmin } from "~/lib/admin-guard";
 
 export async function addPostMediaAction(formData: FormData) {
+  await requireAdmin();
   const postId = Number(formData.get("postId"));
   const url = formData.get("url") as string;
   const type = (formData.get("type") as string) === "VIDEO" ? "VIDEO" : "IMAGE";
@@ -30,6 +32,7 @@ export async function addPostMediaAction(formData: FormData) {
 }
 
 export async function deletePostMediaAction(formData: FormData) {
+  await requireAdmin();
   const id = Number(formData.get("id"));
   const postId = Number(formData.get("postId"));
 

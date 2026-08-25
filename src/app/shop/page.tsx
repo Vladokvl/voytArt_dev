@@ -1,4 +1,5 @@
 import { db } from "~/lib/db";
+import { plainProduct } from "~/lib/plain-product";
 import ShopStorefront from "./_ShopStorefront";
 import { type Metadata } from "next";
 
@@ -21,7 +22,8 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = "force-dynamic";
+// ISR: контент змінюється лише через адмінку; admin actions викликають revalidatePath("/shop")
+export const revalidate = 60;
 
 export default async function ShopPage() {
   const [products, categories] = await Promise.all([
@@ -42,7 +44,7 @@ export default async function ShopPage() {
 
   return (
     <ShopStorefront
-      initialProducts={products}
+      initialProducts={products.map(plainProduct)}
       categories={categories}
     />
   );

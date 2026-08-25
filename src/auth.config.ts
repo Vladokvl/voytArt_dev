@@ -13,7 +13,9 @@ export const authConfig: NextAuthConfig = {
 
       if (isAdminRoute && !isLoginPage && !isLoggedIn) return false
       if (isLoginPage && isLoggedIn) {
-        return Response.redirect(new URL('/admin', nextUrl))
+        // Зберігаємо callbackUrl, якщо він був переданий
+        const callbackUrl = nextUrl.searchParams.get('callbackUrl')
+        return Response.redirect(new URL(callbackUrl ?? '/admin', nextUrl))
       }
       return true
     },

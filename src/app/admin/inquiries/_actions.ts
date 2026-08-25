@@ -2,11 +2,13 @@
 
 import { db } from "~/lib/db";
 import { revalidatePath } from "next/cache";
+import { requireAdmin } from "~/lib/admin-guard";
 
 export async function updateInquiryStatusAction(
   id: number,
   status: "NEW" | "IN_PROGRESS" | "CONTACTED" | "SOLD" | "CANCELLED"
 ) {
+  await requireAdmin();
   try {
     await db.paintingInquiry.update({
       where: { id },
@@ -21,6 +23,7 @@ export async function updateInquiryStatusAction(
 }
 
 export async function deleteInquiryAction(id: number) {
+  await requireAdmin();
   try {
     await db.paintingInquiry.delete({
       where: { id },

@@ -3,6 +3,7 @@ import { db } from "~/lib/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { deleteAsset, getPublicIdFromCloudinaryUrl } from "~/lib/cloudinary";
+import { requireAdmin } from "~/lib/admin-guard";
 
 export type VariantInput = {
   id?: number;
@@ -17,6 +18,7 @@ export async function createProductAction(
   _prev: { error: string } | undefined,
   formData: FormData,
 ): Promise<{ error: string } | undefined> {
+  await requireAdmin();
   const title = formData.get("title") as string;
   const titleUk = (formData.get("titleUk") as string)?.trim() || null;
   const description = (formData.get("description") as string) || null;
@@ -89,6 +91,7 @@ export async function updateProductAction(
   _prev: { error: string } | undefined,
   formData: FormData,
 ): Promise<{ error: string } | undefined> {
+  await requireAdmin();
   const id = parseInt(formData.get("id") as string, 10);
   const title = formData.get("title") as string;
   const titleUk = (formData.get("titleUk") as string)?.trim() || null;
@@ -216,6 +219,7 @@ export async function updateProductAction(
 }
 
 export async function toggleProductActiveAction(id: number, isActive: boolean) {
+  await requireAdmin();
   await db.product.update({
     where: { id },
     data: { isActive },
@@ -225,6 +229,7 @@ export async function toggleProductActiveAction(id: number, isActive: boolean) {
 }
 
 export async function deleteProductAction(id: number): Promise<void> {
+  await requireAdmin();
   const images = await db.productImage.findMany({
     where: { productId: id },
     select: { url: true, publicId: true },
@@ -255,12 +260,13 @@ export async function deleteProductAction(id: number): Promise<void> {
 }
 
 export async function swapProductOrderAction(idA: number, idB: number) {
+  await requireAdmin();
   const [a, b] = await Promise.all([
     db.product.findUnique({ where: { id: idA }, select: { sortOrder: true } }),
     db.product.findUnique({ where: { id: idB }, select: { sortOrder: true } }),
   ]);
   if (!a || !b) return;
-  await Promise.all([
+  await db.$transaction([
     db.product.update({ where: { id: idA }, data: { sortOrder: b.sortOrder } }),
     db.product.update({ where: { id: idB }, data: { sortOrder: a.sortOrder } }),
   ]);
@@ -269,12 +275,16 @@ export async function swapProductOrderAction(idA: number, idB: number) {
 }
 
 export async function moveProductToPositionAction(id: number, targetIndex: number) {
+  await requireAdmin();
   const all = await db.product.findMany({ orderBy: { sortOrder: "asc" }, select: { id: true } });
   const without = all.filter((p) => p.id !== id);
   const clamped = Math.max(0, Math.min(targetIndex, without.length));
   without.splice(clamped, 0, { id });
-  await Promise.all(
-    without.map((p, i) => db.product.update({ where: { id: p.id }, data: { sortOrder: i } })),
+  // Атомарне оновлення порядку в межах однієї транзакції
+  await db.$transaction(
+    without.map((p, i) =>
+      db.product.update({ where: { id: p.id }, data: { sortOrder: i } }),
+    ),
   );
   revalidatePath("/admin/products");
   revalidatePath("/shop");

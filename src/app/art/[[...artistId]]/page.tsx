@@ -8,6 +8,13 @@ import styles from "./art.module.scss";
 import { type Metadata } from "next";
 import { Suspense } from "react";
 
+/** Безпечний парсинг числового URL-параметра: "abc" → null замість NaN → 500. */
+function parseIdParam(value: string | undefined): number | null {
+  if (!value) return null;
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
 export async function generateMetadata({
   searchParams,
 }: {
@@ -16,10 +23,13 @@ export async function generateMetadata({
   const { artist, collection } = await searchParams;
 
   if (artist) {
-    const author = await db.author.findUnique({
-      where: { id: Number(artist) },
-      select: { firstName: true, lastName: true, bio: true, photoUrl: true },
-    });
+    const artistId = parseIdParam(artist);
+    const author = artistId
+      ? await db.author.findUnique({
+          where: { id: artistId },
+          select: { firstName: true, lastName: true, bio: true, photoUrl: true },
+        })
+      : null;
     if (author) {
       const name = `${author.firstName} ${author.lastName}`;
       const desc = author.bio ?? `Original contemporary paintings and collections by ${name}.`;
@@ -38,14 +48,17 @@ export async function generateMetadata({
   }
 
   if (collection) {
-    const coll = await db.collection.findUnique({
-      where: { id: Number(collection) },
-      select: {
-        title: true,
-        coverPhotoUrl: true,
-        author: { select: { firstName: true, lastName: true } },
-      },
-    });
+    const collectionId = parseIdParam(collection);
+    const coll = collectionId
+      ? await db.collection.findUnique({
+          where: { id: collectionId },
+          select: {
+            title: true,
+            coverPhotoUrl: true,
+            author: { select: { firstName: true, lastName: true } },
+          },
+        })
+      : null;
     if (coll) {
       const desc = `Art collection "${coll.title}" by ${coll.author.firstName} ${coll.author.lastName}.`;
       return {
@@ -87,9 +100,9 @@ export default async function ArtPage({
 }) {
   const { artist, collection, neon } = await searchParams;
   const isNeonMode = neon === "true";
-  const isArtistSelected = !!artist;
-  const selectedAuthorId = artist ? Number(artist) : null;
-  const selectedCollectionId = collection ? Number(collection) : null;
+  const selectedAuthorId = parseIdParam(artist);
+  const selectedCollectionId = parseIdParam(collection);
+  const isArtistSelected = artist !== undefined && artist !== "";
 
   const limit = 9;
   const [paintings, totalPaintings, authors, collections] = await Promise.all([

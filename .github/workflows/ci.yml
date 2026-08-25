@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      SKIP_ENV_VALIDATION: "1"
+      AUTH_SECRET: "ci-placeholder-secret"
+      DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
+      DIRECT_URL: "postgresql://ci:ci@localhost:5432/ci"
+      CLOUDINARY_CLOUD_NAME: "ci"
+      CLOUDINARY_API_KEY: "ci"
+      CLOUDINARY_API_SECRET: "ci"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build

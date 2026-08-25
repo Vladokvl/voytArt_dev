@@ -3,8 +3,10 @@ import { db } from "~/lib/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getPublicIdFromCloudinaryUrl } from "~/lib/cloudinary";
+import { requireAdmin } from "~/lib/admin-guard";
 
 export async function updatePaintingAction(_prev: { error: string } | undefined, formData: FormData) {
+  await requireAdmin();
   const id = Number(formData.get("id"));
   const title = formData.get("title") as string;
   const authorId = Number(formData.get("authorId"));

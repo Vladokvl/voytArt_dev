@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "~/lib/db";
+import { requireAdmin } from "~/lib/admin-guard";
 import os from "os";
 
 export type CloudinaryUsageData = {
@@ -73,6 +74,7 @@ function formatBytes(bytes: number, decimals = 2): string {
 }
 
 export async function getCloudinaryUsageAction(): Promise<CloudinaryUsageData> {
+  await requireAdmin();
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim().replace(/^["']|["']$/g, "");
   const apiKey = process.env.CLOUDINARY_API_KEY?.trim().replace(/^["']|["']$/g, "");
   const apiSecret = process.env.CLOUDINARY_API_SECRET?.trim().replace(/^["']|["']$/g, "");
@@ -154,6 +156,7 @@ export async function getCloudinaryUsageAction(): Promise<CloudinaryUsageData> {
 }
 
 export async function getDatabaseUsageAction(): Promise<DatabaseUsageData> {
+  await requireAdmin();
   try {
     const [
       sizeResult,
@@ -225,6 +228,7 @@ export async function getDatabaseUsageAction(): Promise<DatabaseUsageData> {
 }
 
 export async function getServerHealthAction(): Promise<ServerHealthData> {
+  await requireAdmin();
   const totalMem = os.totalmem();
   const freeMem = os.freemem();
   const usedMem = totalMem - freeMem;

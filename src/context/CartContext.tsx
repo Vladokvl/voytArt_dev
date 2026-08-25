@@ -1,16 +1,21 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import { fetchCartProductsAction } from "~/app/shop/_actions/cart-refresh";
+
+export type CartProduct = {
+  id: number;
+  title: string;
+  price: number;
+  coverUrl: string;
+  author?: { id: number; firstName: string; lastName: string } | null;
+  category?: { id: number; name: string; slug: string };
+  stock?: number;
+  variants?: Array<{ id: number; title: string; titleUk?: string | null; price: number | null; stock: number }> | null;
+};
 
 export type CartItem = {
-  product: {
-    id: number;
-    title: string;
-    price: number;
-    coverUrl: string;
-    author: { id: number; firstName: string; lastName: string };
-    category?: { id: number; name: string; slug: string };
-  };
+  product: CartProduct;
   variantId?: number | null;
   variantTitle?: string | null;
   quantity: number;
@@ -46,10 +51,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // 1. Load initial cart from localStorage on mount
   useEffect(() => {
+    let savedItems: CartItem[] = [];
     try {
       const saved = localStorage.getItem(CART_STORAGE_KEY);
       if (saved) {
-        setCart(JSON.parse(saved) as CartItem[]);
+        savedItems = JSON.parse(saved) as CartItem[];
+        setCart(savedItems);
       }
     } catch (e) {
       console.error("Failed to load cart from localStorage:", e);
@@ -72,6 +79,47 @@ export function CartProvider({ children }: { children: ReactNode }) {
       window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
+
+  // 1b. Refresh product data (prices/stock) from the server after hydration —
+  // localStorage містить лише снапшот, тому ціни можуть застаріти
+  useEffect(() => {
+    if (!isHydrated) return;
+    setCart((current) => {
+      if (current.length === 0) return current;
+      // fire-and-forget refresh
+      void (async () => {
+        try {
+          const fresh = await fetchCartProductsAction(current.map((i) => i.product.id));
+          if (fresh.length === 0) {
+            setCart([]);
+            return;
+          }
+          const freshMap = new Map(fresh.map((p) => [p.id, p]));
+          setCart((prev) =>
+            prev.flatMap((item) => {
+              const p = freshMap.get(item.product.id);
+              if (!p) return []; // продукт видалено/деактивовано
+              const variant =
+                item.variantId != null ? p.variants?.find((v) => v.id === item.variantId) : null;
+              const maxStock = variant ? variant.stock : (p.stock ?? 999);
+              const qty = Math.min(item.quantity, Math.max(1, maxStock));
+              return [
+                {
+                  ...item,
+                  quantity: qty,
+                  variantTitle: variant ? variant.title : item.variantTitle,
+                  product: { ...p },
+                },
+              ];
+            }),
+          );
+        } catch {
+          // не блокуємо кошик, якщо refresh не вдався
+        }
+      })();
+      return current;
+    });
+  }, [isHydrated]);
 
   // 2. Persist cart to localStorage whenever it changes
   useEffect(() => {

@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { db } from "~/lib/db";
 import crypto from "crypto";
+import { rateLimit, getClientIp } from "~/lib/rate-limit";
 
 function parseDeviceAndBrowser(userAgent: string): {
   device: string;
@@ -74,7 +75,17 @@ function isPrivateIp(ip: string): boolean {
   return false;
 }
 
+// In-memory geo cache з витісненням найстарішого запису (FIFO) замість повного очищення
+const GEO_CACHE_MAX = 3000;
 const geoCache = new Map<string, { country: string; city: string | null }>();
+
+function cacheGeo(ip: string, result: { country: string; city: string | null }) {
+  if (geoCache.size >= GEO_CACHE_MAX) {
+    const oldest = geoCache.keys().next().value;
+    if (oldest !== undefined) geoCache.delete(oldest);
+  }
+  geoCache.set(ip, result);
+}
 
 async function resolveGeo(rawIp: string, req: NextRequest): Promise<{ country: string; city: string | null }> {
   // Normalize IP
@@ -112,30 +123,8 @@ async function resolveGeo(rawIp: string, req: NextRequest): Promise<{ country: s
     return cached;
   }
 
-  // 4. Primary Provider: ip-api.com (1.2s timeout)
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 1200);
-
-    const res = await fetch(`http://ip-api.com/json/${encodeURIComponent(ip)}?fields=status,countryCode,city`, {
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
-
-    if (res.ok) {
-      const data = (await res.json()) as { status: string; countryCode?: string; city?: string };
-      if (data.status === "success" && data.countryCode?.length === 2) {
-        const result = { country: data.countryCode.toUpperCase(), city: data.city ?? null };
-        if (geoCache.size > 3000) geoCache.clear();
-        geoCache.set(ip, result);
-        return result;
-      }
-    }
-  } catch {
-    // Continue to fallback
-  }
-
-  // 5. Secondary Fallback Provider: ipwho.is
+  // 4. HTTPS-only provider: ipwho.is (короткий таймаут; HTTP ip-api.com прибрано —
+  // приватність IP-адрес користувачів)
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 1200);
@@ -149,20 +138,37 @@ async function resolveGeo(rawIp: string, req: NextRequest): Promise<{ country: s
       const data = (await res.json()) as { success?: boolean; country_code?: string; city?: string };
       if (data.success && data.country_code?.length === 2) {
         const result = { country: data.country_code.toUpperCase(), city: data.city ?? null };
-        if (geoCache.size > 3000) geoCache.clear();
-        geoCache.set(ip, result);
+        cacheGeo(ip, result);
         return result;
       }
     }
   } catch {
-    // Continue to fallback
+    // Fall through to UNKNOWN
   }
 
   return { country: "UNKNOWN", city: null };
 }
 
+// In-memory TTL-cache для dedup (ключ → timestamp останньої події)
+const dedupCache = new Map<string, number>();
+const DEDUP_CACHE_MAX = 10000;
+
+function pruneDedupCache() {
+  if (dedupCache.size < DEDUP_CACHE_MAX) return;
+  const cutoff = Date.now() - 5000;
+  for (const [key, ts] of dedupCache) {
+    if (ts < cutoff) dedupCache.delete(key);
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
+    // Rate-limit: максимум 30 подій за хвилину на IP
+    const rl = rateLimit(`analytics:${getClientIp(req.headers)}`, { limit: 30, windowMs: 60 * 1000 });
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const body = (await req.json().catch(() => ({}))) as {
       path?: string;
       pageType?: string;
@@ -198,28 +204,25 @@ export async function POST(req: NextRequest) {
       if (!isNaN(parsedId)) finalTargetId = parsedId;
     }
 
-    // Anonymized daily visitor hash (GDPR compliant, zero cookie tracking)
+    // Anonymized daily visitor hash (GDPR compliant, zero cookie tracking).
+    // Сіль з AUTH_SECRET ускладнює відновлення IP з хешу.
     const today = new Date().toISOString().slice(0, 10);
+    const salt = process.env.AUTH_SECRET ?? "";
     const visitorHash = crypto
       .createHash("sha256")
-      .update(`${ip}_${userAgent}_${today}`)
+      .update(`${ip}_${userAgent}_${today}_${salt}`)
       .digest("hex")
       .slice(0, 16);
 
-    // Deduplication guard: ignore identical events within 3 seconds (React StrictMode / double navigation)
-    const threeSecondsAgo = new Date(Date.now() - 3000);
-    const duplicate = await db.analyticsEvent.findFirst({
-      where: {
-        visitorHash,
-        path,
-        createdAt: { gte: threeSecondsAgo },
-      },
-      select: { id: true },
-    });
-
-    if (duplicate) {
+    // Deduplication guard (in-memory TTL-cache замість запиту findFirst на кожен event):
+    // ігноруємо ідентичні події протягом 3 секунд (React StrictMode / подвійна навігація)
+    pruneDedupCache();
+    const dedupKey = `${visitorHash}:${path}`;
+    const lastSeen = dedupCache.get(dedupKey);
+    if (lastSeen !== undefined && Date.now() - lastSeen < 3000) {
       return NextResponse.json({ deduplicated: true });
     }
+    dedupCache.set(dedupKey, Date.now());
 
     // Asynchronously insert into database
     await db.analyticsEvent.create({

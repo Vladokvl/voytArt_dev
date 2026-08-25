@@ -2,8 +2,10 @@
 import { db } from "~/lib/db";
 import { revalidatePath } from "next/cache";
 import { deleteAsset, getPublicIdFromCloudinaryUrl } from "~/lib/cloudinary";
+import { requireAdmin } from "~/lib/admin-guard";
 
 export async function addProductMediaAction(formData: FormData) {
+  await requireAdmin();
   const productId = parseInt(formData.get("productId") as string, 10);
   const url = formData.get("url") as string;
   const rawVariantId = formData.get("variantId") as string;
@@ -34,6 +36,7 @@ export async function addProductMediaAction(formData: FormData) {
 }
 
 export async function updateProductMediaVariantAction(id: number, productId: number, variantId: number | null) {
+  await requireAdmin();
   if (!id || !productId) return;
 
   await db.productImage.update({
@@ -48,6 +51,7 @@ export async function updateProductMediaVariantAction(id: number, productId: num
 }
 
 export async function deleteProductMediaAction(formData: FormData) {
+  await requireAdmin();
   const id = parseInt(formData.get("id") as string, 10);
   const productId = parseInt(formData.get("productId") as string, 10);
   if (!id || !productId) return;

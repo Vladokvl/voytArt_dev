@@ -21,8 +21,7 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
     });
 
     // Expose lenis to window so we can control it on route transitions and modals
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    (window as any).lenis = lenis;
+    window.__lenis = lenis;
 
     const driverFn = (time: number) => lenis.raf(time * 1000);
     gsap.ticker.add(driverFn);
@@ -56,8 +55,7 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
   // При кожній зміні маршруту гарантовано скидаємо скрол у 0 та перераховуємо розміри
   useEffect(() => {
     window.scrollTo(0, 0);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    const lenis = (window as any).lenis as Lenis | undefined;
+    const lenis = window.__lenis;
     if (lenis) {
       lenis.scrollTo(0, { immediate: true, force: true });
       lenis.resize();

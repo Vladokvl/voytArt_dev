@@ -1,4 +1,5 @@
 import { db, type Prisma } from "~/lib/db";
+import { decimalToNumber } from "~/lib/plain-product";
 import styles from "../admin-table.module.scss";
 import { MapPin, Clock } from "lucide-react";
 import OrderStatusSelect from "./_OrderStatusSelect";
@@ -55,6 +56,12 @@ export default async function OrdersPage({
     db.order.count(),
   ]);
 
+  const plainOrders = orders.map((o) => ({
+    ...o,
+    totalAmount: decimalToNumber(o.totalAmount),
+    items: o.items.map((i) => ({ ...i, price: decimalToNumber(i.price) })),
+  }));
+
   return (
     <div>
       {/* Header */}
@@ -79,14 +86,14 @@ export default async function OrdersPage({
             </tr>
           </thead>
           <tbody>
-            {orders.length === 0 ? (
+            {plainOrders.length === 0 ? (
               <tr>
                 <td colSpan={7} className={styles.empty}>
                   Замовлень ще немає
                 </td>
               </tr>
             ) : (
-              orders.map((o) => (
+              plainOrders.map((o) => (
                 <tr key={o.id}>
                   <td className={styles.td}>
                     <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem" }}>

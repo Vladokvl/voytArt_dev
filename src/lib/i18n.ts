@@ -8,30 +8,32 @@ export const translations = {
   uk,
 };
 
+/** Валюта магазину (винесено в конфіг замість хардкоду) */
+export const CURRENCY = "€";
+
 /**
  * Universal fallback accessor for multi-lingual database entities
  * e.g. getLocalized(painting, "title", "uk") -> returns painting.titleUk or painting.title
  */
-export function getLocalized<T extends Record<string, any>>(
+export function getLocalized<T extends object>(
   entity: T | null | undefined,
   field: string,
   locale: Locale = "en"
 ): string {
   if (!entity) return "";
+  const record = entity as Record<string, unknown>;
+
+  const pick = (key: string): string => {
+    const value = record[key];
+    return typeof value === "string" && value.trim() !== "" ? value : "";
+  };
 
   if (locale === "uk") {
-    const ukField = `${field}Uk`;
-    if (entity[ukField] && typeof entity[ukField] === "string" && entity[ukField].trim() !== "") {
-      return entity[ukField];
-    }
+    const ukValue = pick(`${field}Uk`);
+    if (ukValue) return ukValue;
   }
 
-  const enField = `${field}En`;
-  if (entity[enField] && typeof entity[enField] === "string" && entity[enField].trim() !== "") {
-    return entity[enField];
-  }
-
-  return (entity[field] as string) || "";
+  return pick(field);
 }
 
 /**
@@ -58,5 +60,5 @@ export function formatLocalizedDate(
  */
 export function formatLocalizedPrice(amount: number, locale: Locale = "en"): string {
   const intlLocale = locale === "uk" ? "uk-UA" : "en-US";
-  return `${amount.toLocaleString(intlLocale)} €`;
+  return `${amount.toLocaleString(intlLocale)} ${CURRENCY}`;
 }

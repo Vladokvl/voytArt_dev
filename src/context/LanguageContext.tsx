@@ -32,7 +32,7 @@ export function LanguageProvider({
       try {
         const [base, hash] = href.split("#");
         const [path, query] = (base ?? "").split("?");
-        const params = new URLSearchParams(query || "");
+        const params = new URLSearchParams(query ?? "");
 
         if (locale === "uk") {
           params.set("lang", "ua");
@@ -103,30 +103,19 @@ export function LanguageProvider({
 
   const t = useCallback(
     (path: string, params?: Record<string, string | number>): string => {
-      const keys = path.split(".");
-      let result: any = (translations as any)[locale];
-
-      for (const k of keys) {
-        if (result && typeof result === "object" && k in result) {
-          result = result[k];
-        } else {
-          let fallbackResult: any = (translations as any)["en"];
-          for (const fk of keys) {
-            if (fallbackResult && typeof fallbackResult === "object" && fk in fallbackResult) {
-              fallbackResult = fallbackResult[fk];
-            } else {
-              fallbackResult = path;
-              break;
-            }
+      const resolve = (loc: Locale): string | undefined => {
+        let result: unknown = translations[loc];
+        for (const key of path.split(".")) {
+          if (result && typeof result === "object" && key in (result as Record<string, unknown>)) {
+            result = (result as Record<string, unknown>)[key];
+          } else {
+            return undefined;
           }
-          result = fallbackResult;
-          break;
         }
-      }
+        return typeof result === "string" ? result : undefined;
+      };
 
-      if (typeof result !== "string") {
-        return path;
-      }
+      const result = resolve(locale) ?? resolve("en") ?? path;
 
       if (params) {
         return Object.entries(params).reduce((acc, [pKey, pVal]) => {

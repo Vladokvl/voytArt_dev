@@ -342,7 +342,7 @@ export default function ProductView({
                       fontWeight: 700,
                     }}
                   >
-                    {authorFirstName[0] || "V"}
+                    {authorFirstName[0] ?? "V"}
                   </div>
                 )}
                 <div>

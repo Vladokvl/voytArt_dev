@@ -2,11 +2,15 @@
 import { db } from "~/lib/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { requireAdmin } from "~/lib/admin-guard";
+import { revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "~/lib/cache-tags";
 
 export async function createCategoryAction(
   _prev: { error: string } | undefined,
   formData: FormData,
 ): Promise<{ error: string } | undefined> {
+  await requireAdmin();
   const name = formData.get("name") as string;
   const nameUk = (formData.get("nameUk") as string)?.trim() || null;
   const slug = formData.get("slug") as string;
@@ -22,6 +26,7 @@ export async function createCategoryAction(
 
   revalidatePath("/admin/categories");
   revalidatePath("/shop");
+  revalidateTag(CACHE_TAGS.shop);
   redirect("/admin/categories");
 }
 
@@ -29,6 +34,7 @@ export async function updateCategoryAction(
   _prev: { error: string } | undefined,
   formData: FormData,
 ): Promise<{ error: string } | undefined> {
+  await requireAdmin();
   const id = Number(formData.get("id"));
   const name = formData.get("name") as string;
   const nameUk = (formData.get("nameUk") as string)?.trim() || null;
@@ -45,10 +51,13 @@ export async function updateCategoryAction(
 
   revalidatePath("/admin/categories");
   revalidatePath("/shop");
+  revalidateTag(CACHE_TAGS.shop);
   redirect("/admin/categories");
 }
 
 export async function deleteCategoryAction(id: number): Promise<void> {
+  await requireAdmin();
   await db.category.delete({ where: { id } });
   revalidatePath("/admin/categories");
+  revalidateTag(CACHE_TAGS.shop);
 }

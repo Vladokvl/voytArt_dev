@@ -3,8 +3,10 @@
 import { db } from "~/lib/db";
 import { revalidatePath } from "next/cache";
 import { deleteAsset, getPublicIdFromCloudinaryUrl } from "~/lib/cloudinary";
+import { requireAdmin } from "~/lib/admin-guard";
 
 export async function deletePaintingAction(id: number) {
+  await requireAdmin();
   const painting: {
     coverUrl: string;
     coverPublicId: string;
@@ -43,12 +45,14 @@ export async function deletePaintingAction(id: number) {
 }
 
 export async function swapPaintingOrderAction(idA: number, idB: number) {
+  await requireAdmin();
   const [a, b] = await Promise.all([
     db.painting.findUnique({ where: { id: idA }, select: { sortOrder: true } }),
     db.painting.findUnique({ where: { id: idB }, select: { sortOrder: true } }),
   ]);
   if (!a || !b) return;
-  await Promise.all([
+  // Атомарний обмін порядком в межах однієї транзакції
+  await db.$transaction([
     db.painting.update({ where: { id: idA }, data: { sortOrder: b.sortOrder } }),
     db.painting.update({ where: { id: idB }, data: { sortOrder: a.sortOrder } }),
   ]);
@@ -57,12 +61,16 @@ export async function swapPaintingOrderAction(idA: number, idB: number) {
 }
 
 export async function movePaintingToPositionAction(id: number, targetIndex: number) {
+  await requireAdmin();
   const all = await db.painting.findMany({ orderBy: { sortOrder: "asc" }, select: { id: true } });
   const without = all.filter((p) => p.id !== id);
   const clamped = Math.max(0, Math.min(targetIndex, without.length));
   without.splice(clamped, 0, { id });
-  await Promise.all(
-    without.map((p, i) => db.painting.update({ where: { id: p.id }, data: { sortOrder: i } })),
+  // Атомарне оновлення порядку — без race conditions та часткових оновлень
+  await db.$transaction(
+    without.map((p, i) =>
+      db.painting.update({ where: { id: p.id }, data: { sortOrder: i } }),
+    ),
   );
   revalidatePath("/admin/paintings");
   revalidatePath("/art");

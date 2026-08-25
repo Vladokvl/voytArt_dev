@@ -78,8 +78,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
           wrapperRef.current.style.opacity = "1";
         }
         if (typeof window !== "undefined") {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
-          (window as any).ScrollTrigger?.refresh();
+          window.ScrollTrigger?.refresh();
         }
       }}
     >

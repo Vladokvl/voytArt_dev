@@ -3,11 +3,13 @@ import { db } from "~/lib/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { deleteAsset, getPublicIdFromCloudinaryUrl } from "~/lib/cloudinary";
+import { requireAdmin } from "~/lib/admin-guard";
 
 export async function createCollectionAction(
   _prev: { error: string } | undefined,
   formData: FormData,
 ): Promise<{ error: string } | undefined> {
+  await requireAdmin();
   const title = formData.get("title") as string;
   const titleUk = (formData.get("titleUk") as string)?.trim() || null;
   const authorId = Number(formData.get("authorId"));
@@ -33,6 +35,7 @@ export async function updateCollectionAction(
   _prev: { error: string } | undefined,
   formData: FormData,
 ): Promise<{ error: string } | undefined> {
+  await requireAdmin();
   const id = Number(formData.get("id"));
   const title = formData.get("title") as string;
   const titleUk = (formData.get("titleUk") as string)?.trim() || null;
@@ -57,6 +60,7 @@ export async function updateCollectionAction(
 }
 
 export async function deleteCollectionAction(id: number): Promise<void> {
+  await requireAdmin();
   const collection = await db.collection.findUnique({
     where: { id },
     select: { coverPhotoUrl: true, coverPhotoPublicId: true },

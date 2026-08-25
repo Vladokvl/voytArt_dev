@@ -13,12 +13,7 @@ import VhFix from "~/components/layout/VhFix/VhFix";
 import { LanguageProvider } from "~/context/LanguageContext";
 import { cookies } from "next/headers";
 import { type Locale } from "~/lib/i18n";
-
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL
-  ? (process.env.NEXT_PUBLIC_APP_URL.startsWith("http")
-      ? process.env.NEXT_PUBLIC_APP_URL
-      : `https://${process.env.NEXT_PUBLIC_APP_URL}`)
-  : "https://testing.zhovtok.work";
+import { siteUrl } from "~/lib/site-url";
 
 export const viewport: Viewport = {
   width: "device-width",

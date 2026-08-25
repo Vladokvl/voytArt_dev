@@ -120,7 +120,7 @@ export default async function AnalyticsPage({
     }),
     db.product.findMany({
       select: { id: true, title: true, price: true, coverUrl: true, author: { select: { firstName: true, lastName: true } } },
-    }),
+    }).then((rows) => rows.map((p) => ({ ...p, price: Number(p.price) }))),
     db.painting.findMany({
       select: {
         id: true,

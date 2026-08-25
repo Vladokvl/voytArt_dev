@@ -24,7 +24,8 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = "force-dynamic";
+// ISR: контент змінюється лише через адмінку; admin actions викликають revalidatePath("/gallery")
+export const revalidate = 60;
 
 export default async function GalleryPage() {
   const limit = 6;

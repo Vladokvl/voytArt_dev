@@ -3,11 +3,13 @@ import { db } from "~/lib/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getPublicIdFromCloudinaryUrl } from "~/lib/cloudinary";
+import { requireAdmin } from "~/lib/admin-guard";
 
 export async function createPaintingAction(
   _prev: { error: string } | undefined,
   formData: FormData,
 ): Promise<{ error: string } | undefined> {
+  await requireAdmin();
   const title = formData.get("title") as string;
   const authorId = Number(formData.get("authorId"));
   const coverUrl = formData.get("coverUrl") as string;

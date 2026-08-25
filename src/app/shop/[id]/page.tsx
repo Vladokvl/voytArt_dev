@@ -1,6 +1,7 @@
 import { db } from "~/lib/db";
 import { notFound } from "next/navigation";
 import { type Metadata } from "next";
+import { plainProduct } from "~/lib/plain-product";
 import ProductView from "./_ProductView";
 
 type Props = {
@@ -86,5 +87,10 @@ export default async function ProductDetailPage({ params }: Props) {
     notFound();
   }
 
-  return <ProductView product={product} relatedProducts={relatedProducts} />;
+  return (
+    <ProductView
+      product={plainProduct(product)}
+      relatedProducts={relatedProducts.map(plainProduct)}
+    />
+  );
 }

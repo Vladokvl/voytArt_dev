@@ -1,5 +1,6 @@
 import { db } from "~/lib/db";
 import { notFound } from "next/navigation";
+import { plainProduct } from "~/lib/plain-product";
 import ProductEditForm from "../../_editForm";
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
@@ -19,5 +20,5 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
 
   if (!product) notFound();
 
-  return <ProductEditForm product={product} authors={authors} categories={categories} />;
+  return <ProductEditForm product={plainProduct(product)} authors={authors} categories={categories} />;
 }

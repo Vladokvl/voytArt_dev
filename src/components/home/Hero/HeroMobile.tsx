@@ -763,10 +763,8 @@ export default function HeroMobile() {
         targetY = progress * maxScroll;
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      const lenis = (window as any).lenis;
+      const lenis = window.__lenis;
       if (lenis) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         lenis.scrollTo(targetY, {
           duration: MOBILE_SNAP_DURATION,
           force: true,

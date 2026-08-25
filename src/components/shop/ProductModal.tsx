@@ -52,18 +52,15 @@ export default function ProductModal({ product, onClose, onAddToCart }: ProductM
   useEffect(() => {
     if (product) {
       document.body.style.overflow = "hidden";
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
-      if (typeof window !== "undefined" && (window as any).lenis) (window as any).lenis.stop();
+      if (typeof window !== "undefined" && window.__lenis) window.__lenis.stop();
     } else {
       document.body.style.overflow = "";
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
-      if (typeof window !== "undefined" && (window as any).lenis) (window as any).lenis.start();
+      if (typeof window !== "undefined" && window.__lenis) window.__lenis.start();
     }
 
     return () => {
       document.body.style.overflow = "";
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
-      if (typeof window !== "undefined" && (window as any).lenis) (window as any).lenis.start();
+      if (typeof window !== "undefined" && window.__lenis) window.__lenis.start();
     };
   }, [product]);
 
