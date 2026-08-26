@@ -4,7 +4,7 @@ import { addPostMediaAction, deletePostMediaAction } from "./_media-actions";
 import styles from "@/app/admin/_formStyles.module.scss";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
 import { useImageCrop } from "~/hooks/use-image-crop";
-import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
+import ImageCropModal from "~/components/ui/ImageCropModal/LazyImageCropModal";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 
 type MediaItem = { id: number; url: string; type: "IMAGE" | "VIDEO"; order: number };

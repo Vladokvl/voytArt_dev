@@ -5,6 +5,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import styles from "./productModal.module.scss";
 import { useState, useEffect } from "react";
 import { useTranslation } from "~/context/LanguageContext";
+import { useLenis } from "~/context/LenisContext";
 import { getLocalized } from "~/lib/i18n";
 
 type ProductImage = { id: number; url: string; order: number };
@@ -37,6 +38,7 @@ interface ProductModalProps {
 
 export default function ProductModal({ product, onClose, onAddToCart }: ProductModalProps) {
   const { t, locale } = useTranslation();
+  const { start: startLenis, stop: stopLenis } = useLenis();
   const [activeIndex, setActiveIndex] = useState(0);
   const [loadedSet, setLoadedSet] = useState<Set<string>>(new Set());
 
@@ -52,17 +54,17 @@ export default function ProductModal({ product, onClose, onAddToCart }: ProductM
   useEffect(() => {
     if (product) {
       document.body.style.overflow = "hidden";
-      if (typeof window !== "undefined" && window.__lenis) window.__lenis.stop();
+      stopLenis();
     } else {
       document.body.style.overflow = "";
-      if (typeof window !== "undefined" && window.__lenis) window.__lenis.start();
+      startLenis();
     }
 
     return () => {
       document.body.style.overflow = "";
-      if (typeof window !== "undefined" && window.__lenis) window.__lenis.start();
+      startLenis();
     };
-  }, [product]);
+  }, [product, startLenis, stopLenis]);
 
   if (!product) return null;
 

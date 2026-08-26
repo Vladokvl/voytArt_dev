@@ -7,7 +7,7 @@ import styles from "@/app/admin/_formStyles.module.scss";
 import artStyles from "@/app/art/[[...artistId]]/art.module.scss";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
 import { useImageCrop } from "~/hooks/use-image-crop";
-import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
+import ImageCropModal from "~/components/ui/ImageCropModal/LazyImageCropModal";
 import { useSetBreadcrumb } from "@/app/admin/_components/BreadcrumbContext";
 import { ArrowLeft, Save } from "lucide-react";
 import LanguageTabs from "@/app/admin/_components/LanguageTabs";

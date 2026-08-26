@@ -5,7 +5,7 @@ import styles from "../../_formStyles.module.scss";
 import artStyles from "@/app/art/[[...artistId]]/art.module.scss";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
 import { useImageCrop } from "~/hooks/use-image-crop";
-import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
+import ImageCropModal from "~/components/ui/ImageCropModal/LazyImageCropModal";
 import LanguageTabs from "../../_components/LanguageTabs";
 
 export default function AuthorForm() {

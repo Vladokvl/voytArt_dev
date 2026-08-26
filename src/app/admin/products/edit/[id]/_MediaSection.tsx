@@ -9,7 +9,7 @@ import {
 import styles from "../../../_formStyles.module.scss";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
 import { useImageCrop } from "~/hooks/use-image-crop";
-import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
+import ImageCropModal from "~/components/ui/ImageCropModal/LazyImageCropModal";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import { Trash2, Tag, UploadCloud } from "lucide-react";
 

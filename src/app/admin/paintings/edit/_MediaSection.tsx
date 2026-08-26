@@ -5,7 +5,7 @@ import styles from "../paintings.module.scss";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import { useImageCrop } from "~/hooks/use-image-crop";
-import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
+import ImageCropModal from "~/components/ui/ImageCropModal/LazyImageCropModal";
 
 type MediaItem = { id: number; url: string; isNeon: boolean; order: number; type: "IMAGE" | "VIDEO" };
 

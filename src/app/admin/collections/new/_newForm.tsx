@@ -5,7 +5,7 @@ import { type Author } from "@/types/Author";
 import styles from "../../_formStyles.module.scss";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
 import { useImageCrop } from "~/hooks/use-image-crop";
-import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
+import ImageCropModal from "~/components/ui/ImageCropModal/LazyImageCropModal";
 
 export default function CollectionNewForm({ authors }: { authors: Author[] }) {
   const [state, formAction] = useActionState(createCollectionAction, undefined);

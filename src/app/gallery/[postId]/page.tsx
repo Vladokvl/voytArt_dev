@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import PostHero from "~/components/gallery/posts/PostHero";
 import PostContent from "~/components/gallery/posts/PostContent";
 import PostMedia from "~/components/gallery/posts/PostMedia";
+import JsonLd from "~/components/seo/JsonLd";
+import { siteUrl } from "~/lib/site-url";
 import { type Metadata } from "next";
 
 export async function generateMetadata({
@@ -56,8 +58,30 @@ export default async function GalleryPostPage({
   });
   if (!post) notFound();
 
+  // Schema.org Article — структуровані дані для Rich Snippets
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    url: `${siteUrl}/gallery/${post.id}`,
+    ...(post.coverUrl ? { image: [post.coverUrl] } : {}),
+    datePublished: (post.date ?? post.createdAt).toISOString(),
+    dateModified: post.updatedAt.toISOString(),
+    author: {
+      "@type": "Organization",
+      name: "VoytArt Gallery",
+      url: siteUrl,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "VoytArt Gallery",
+      url: siteUrl,
+    },
+  };
+
   return (
     <div>
+      <JsonLd schema={articleJsonLd} />
       <PostHero post={post} />
       <PostContent post={post} />
       <PostMedia items={post.media} />

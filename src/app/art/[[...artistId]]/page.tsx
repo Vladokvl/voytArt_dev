@@ -3,17 +3,12 @@ import CollectionFilter from "~/components/art/CollectionFilter";
 import NeonToggle from "~/components/art/NeonToggle";
 import PaintingGrid from "~/components/art/PaintingGrid";
 import ArtGalleryTitle from "~/components/art/ArtGalleryTitle";
+import JsonLd from "~/components/seo/JsonLd";
 import { db } from "~/lib/db";
+import { parseIdParam } from "~/lib/parse-id";
 import styles from "./art.module.scss";
 import { type Metadata } from "next";
 import { Suspense } from "react";
-
-/** Безпечний парсинг числового URL-параметра: "abc" → null замість NaN → 500. */
-function parseIdParam(value: string | undefined): number | null {
-  if (!value) return null;
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
-}
 
 export async function generateMetadata({
   searchParams,
@@ -146,11 +141,42 @@ export default async function ArtPage({
 
   const hasMore = paintings.length < totalPaintings;
 
+  // Schema.org ItemList из VisualArtwork — структуровані дані для Rich Snippets
+  const paintingsJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    numberOfItems: paintings.length,
+    itemListElement: paintings.map((p, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "VisualArtwork",
+        name: p.title,
+        image: p.coverUrl,
+        creator: {
+          "@type": "Person",
+          name: `${p.author.firstName} ${p.author.lastName}`,
+        },
+        ...(p.description
+          ? {
+              description: p.description
+                .replace(/<[^>]*>/g, " ")
+                .replace(/\s+/g, " ")
+                .trim()
+                .slice(0, 300),
+            }
+          : {}),
+        ...(p.year ? { dateCreated: String(p.year) } : {}),
+      },
+    })),
+  };
+
   return (
     <div
       className={`${styles.wrapper} ${!isArtistSelected ? styles.lockedScroll : ""}`}
       data-neon-mode={isNeonMode ? "true" : undefined}
     >
+      <JsonLd schema={paintingsJsonLd} />
       <Suspense fallback={null}>
         <ArtHero
           artistParam={artist ?? null}

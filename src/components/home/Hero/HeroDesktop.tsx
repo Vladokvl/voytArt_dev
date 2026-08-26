@@ -16,6 +16,7 @@ import {
 } from "~/utils/adaptiveQuality";
 import styles from "./Hero.module.scss";
 import { useTranslation } from "~/context/LanguageContext";
+import { useLenis } from "~/context/LenisContext";
 
 gsap.registerPlugin(ScrollTrigger, Observer);
 
@@ -51,6 +52,12 @@ const DESKTOP_SNAP_DURATION = 2;
 
 export default function HeroDesktop() {
   const { t } = useTranslation();
+  // Доступ до Lenis через контекст (не через window-глобал); ref — щоб не перезапускати важкі ефекти
+  const { lenis } = useLenis();
+  const lenisRef = useRef(lenis);
+  useEffect(() => {
+    lenisRef.current = lenis;
+  }, [lenis]);
   const [isMainReady, setIsMainReady] = useState(false);
   const [loaderProgress, setLoaderProgress] = useState(0);
   const [loaderHint, setLoaderHint] = useState("Preparing first frames");
@@ -813,7 +820,7 @@ export default function HeroDesktop() {
         targetY = progress * maxScroll;
       }
 
-      const lenis = window.__lenis;
+      const lenis = lenisRef.current;
       if (lenis) {
         lenis.scrollTo(targetY, {
           duration: DESKTOP_SNAP_DURATION,

@@ -3,6 +3,7 @@
  * for Docker builds.
  */
 import { env } from "./src/env.js";
+import withBundleAnalyzer from "@next/bundle-analyzer";
 
 /** @type {import("next").NextConfig} */
 const config = {
@@ -54,4 +55,10 @@ const config = {
 };
 
 
-export default config;
+// Аналіз розміру бандла: ANALYZE=true npm run build
+const wrappedConfig =
+  process.env.ANALYZE === "true"
+    ? withBundleAnalyzer({ enabled: true })(config)
+    : config;
+
+export default wrappedConfig;

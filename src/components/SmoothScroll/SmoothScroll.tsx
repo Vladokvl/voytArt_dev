@@ -1,14 +1,17 @@
 "use client";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { LenisProvider } from "~/context/LenisContext";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function SmoothScroll({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  // Інстанс тримаємо в стані, щоб усі споживачі через LenisContext отримували його реактивно
+  const [lenisInstance, setLenisInstance] = useState<Lenis | null>(null);
 
   useEffect(() => {
     // GSAP керує Lenis через свій ticker — вони завжди в одному кадрі.
@@ -20,7 +23,8 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
       anchors: true,
     });
 
-    // Expose lenis to window so we can control it on route transitions and modals
+    setLenisInstance(lenis);
+    // Залишено для backward-compat / дебагу в консолі — новий код має використовувати useLenis()
     window.__lenis = lenis;
 
     const driverFn = (time: number) => lenis.raf(time * 1000);
@@ -49,44 +53,50 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
       window.removeEventListener("popstate", handlePopState);
       gsap.ticker.remove(driverFn);
       lenis.destroy();
+      if (window.__lenis === lenis) window.__lenis = undefined;
+      setLenisInstance(null);
     };
   }, []);
 
   // При кожній зміні маршруту гарантовано скидаємо скрол у 0 та перераховуємо розміри
   useEffect(() => {
+    if (!lenisInstance) return;
+    const lenis = lenisInstance;
+
     window.scrollTo(0, 0);
-    const lenis = window.__lenis;
-    if (lenis) {
+    lenis.scrollTo(0, { immediate: true, force: true });
+    lenis.resize();
+    ScrollTrigger.refresh();
+
+    // Додаткові таймери для сторінок, які довантажують зображення та DOM
+    const rafId = requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
       lenis.scrollTo(0, { immediate: true, force: true });
       lenis.resize();
       ScrollTrigger.refresh();
+    });
 
-      // Додаткові таймери для сторінок, які довантажують зображення та DOM
-      const rafId = requestAnimationFrame(() => {
-        window.scrollTo(0, 0);
-        lenis.scrollTo(0, { immediate: true, force: true });
-        lenis.resize();
-        ScrollTrigger.refresh();
-      });
+    const t1 = setTimeout(() => {
+      lenis.scrollTo(0, { immediate: true, force: true });
+      lenis.resize();
+      ScrollTrigger.refresh();
+    }, 50);
 
-      const t1 = setTimeout(() => {
-        lenis.scrollTo(0, { immediate: true, force: true });
-        lenis.resize();
-        ScrollTrigger.refresh();
-      }, 50);
+    const t2 = setTimeout(() => {
+      lenis.resize();
+      ScrollTrigger.refresh();
+    }, 200);
 
-      const t2 = setTimeout(() => {
-        lenis.resize();
-        ScrollTrigger.refresh();
-      }, 200);
+    return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [pathname, lenisInstance]);
 
-      return () => {
-        cancelAnimationFrame(rafId);
-        clearTimeout(t1);
-        clearTimeout(t2);
-      };
-    }
-  }, [pathname]);
+  const providerValue = useMemo(() => lenisInstance, [lenisInstance]);
 
-  return <>{children}</>;
+  return (
+    <LenisProvider lenis={providerValue}>{children}</LenisProvider>
+  );
 }

@@ -9,6 +9,7 @@ import { useSearchParams } from "next/navigation";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import { createPaintingInquiryAction } from "~/app/art/_inquiryActions";
 import { useTranslation } from "~/context/LanguageContext";
+import { useLenis } from "~/context/LenisContext";
 import { getLocalized } from "~/lib/i18n";
 import {
   Send,
@@ -145,22 +146,22 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
       : true;
 
   // Block Lenis scroll when modal is open
-  useEffect(() => {
-    const win = typeof window !== "undefined" ? (window as unknown as { lenis?: { start: () => void; stop: () => void } }) : null;
+  const { start: startLenis, stop: stopLenis } = useLenis();
 
+  useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
-      if (win?.lenis) win.lenis.stop();
+      stopLenis();
     } else {
       document.body.style.overflow = "";
-      if (win?.lenis) win.lenis.start();
+      startLenis();
     }
 
     return () => {
       document.body.style.overflow = "";
-      if (win?.lenis) win.lenis.start();
+      startLenis();
     };
-  }, [open]);
+  }, [open, startLenis, stopLenis]);
 
   const handleInquirySubmit = (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,6 +1,8 @@
 import { headers } from "next/headers";
 import dynamic from "next/dynamic";
 import styles from "./page.module.scss";
+import JsonLd from "~/components/seo/JsonLd";
+import { siteUrl } from "~/lib/site-url";
 
 // Dynamic imports — завантажуємо тільки потрібний компонент
 const HeroDesktop = dynamic(
@@ -20,6 +22,26 @@ export default async function Home() {
 
   return (
     <main className={styles.main}>
+      <JsonLd
+        schema={[
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "VoytArt Gallery",
+            url: siteUrl,
+            logo: `${siteUrl}/voytCirclelogo.svg`,
+            description:
+              "Contemporary Ukrainian art gallery featuring original paintings, neon installations, limited edition prints, and curated design collectibles.",
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "VoytArt Gallery",
+            url: siteUrl,
+            inLanguage: ["en", "uk"],
+          },
+        ]}
+      />
       {isMobile ? <HeroMobile /> : <HeroDesktop />}
     </main>
   );

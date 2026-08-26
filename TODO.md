@@ -14,13 +14,14 @@
 - [x] Транзакції для reorder actions; `Promise.all` у pagination action
 - [x] Analytics: HTTPS-only геолокація, FIFO geo-cache, in-memory dedup
 - [x] Свіжі дані продуктів у кошику (refetch після hydration)
+- [x] Рефакторинг скролу: React-context для Lenis (`LenisProvider` + `useLenis()`) замість window-глобали, виправлено рантайм-баг `win.lenis.start is not a function`
 - [x] Sitemap + robots, CI (GitHub Actions), Dockerfile, seed-admin
 - [x] Валідація середовища через t3-env (`src/env.js`)
 - [x] Виправлено скрипт `db:generate`, додано `db:migrate:dev`, `.env.example` доповнено
 
 ## Наступні кроки
 
-- [ ] i18n: перехід на route-based локалі `[locale]` (next-intl) — стратегічне рішення
-- [ ] Рефакторинг скролу: React-context для Lenis замість window-глобали
-- [ ] Тести: Vitest (unit) + Playwright (checkout/auth e2e)
-- [ ] JSON-LD structured data (Organization, Product, Artwork)
+- [ ] **i18n:** перехід на route-based локалі `/[locale]` (детальний поетапний план у `PROJECT_ANALYSIS.md`)
+- [~] **Тести:** Vitest налаштовано ✅ (18 unit-тестів для i18n/parse-id, крок у CI) · залишилось: integration-тести checkout + Playwright e2e
+- [x] **SEO:** JSON-LD structured data — ✅ виконано 2026-08-26 (`JsonLd` компонент: Organization+WebSite на головній, ItemList/VisualArtwork на /art, Product+Offer на /shop/[id], Article на /gallery/[postId])
+- [~] **Оптимізація бандла:** ✅ LazyImageCropModal (react-easy-crop) в 12 адмін-формах, `npm run analyze` (@next/bundle-analyzer) · залишилось: розподіл GSAP/Framer при рефакторингу анімацій

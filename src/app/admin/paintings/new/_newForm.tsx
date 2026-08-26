@@ -16,7 +16,7 @@ const TipTapEditor = dynamic(() => import("~/components/admin/TipTapEditor"), {
   ),
 });
 import { useImageCrop } from "~/hooks/use-image-crop";
-import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
+import ImageCropModal from "~/components/ui/ImageCropModal/LazyImageCropModal";
 import LanguageTabs from "../../_components/LanguageTabs";
 
 export default function PaintingForm({ authors, collections }: { authors: Author[]; collections: { id: number; title: string; authorId: number }[] }) {

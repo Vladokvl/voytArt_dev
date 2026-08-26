@@ -2,6 +2,8 @@ import { db } from "~/lib/db";
 import { notFound } from "next/navigation";
 import { type Metadata } from "next";
 import { plainProduct } from "~/lib/plain-product";
+import JsonLd from "~/components/seo/JsonLd";
+import { siteUrl } from "~/lib/site-url";
 import ProductView from "./_ProductView";
 
 type Props = {
@@ -24,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ? product.description.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 160)
     : `${product.title} by ${artistName}. Exclusive Ukrainian contemporary art edition.`;
 
-  const ogDescription = `${product.price} € · ${product.category.name} · ${cleanDescription}`;
+  const ogDescription = `${Number(product.price)} € · ${product.category.name} · ${cleanDescription}`;
 
   return {
     title: `${product.title} by ${artistName}`,
@@ -87,10 +89,39 @@ export default async function ProductDetailPage({ params }: Props) {
     notFound();
   }
 
+  // Schema.org Product + Offer — структуровані дані для Rich Snippets
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.title,
+    image: [product.coverUrl, ...product.images.map((i) => i.url)].filter(Boolean),
+    description:
+      product.description != null && product.description.trim() !== ""
+        ? product.description.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 300)
+        : `${product.title} by ${product.author.firstName} ${product.author.lastName}.`,
+    category: product.category.name,
+    brand: { "@type": "Brand", name: "VoytArt Gallery" },
+    ...(product.stock > 0
+      ? {
+          offers: {
+            "@type": "Offer",
+            url: `${siteUrl}/shop/${product.id}`,
+            priceCurrency: "EUR",
+            price: Number(product.price).toFixed(2),
+            availability: "https://schema.org/InStock",
+            itemCondition: "https://schema.org/NewCondition",
+          },
+        }
+      : {}),
+  };
+
   return (
-    <ProductView
-      product={plainProduct(product)}
-      relatedProducts={relatedProducts.map(plainProduct)}
-    />
+    <>
+      <JsonLd schema={productJsonLd} />
+      <ProductView
+        product={plainProduct(product)}
+        relatedProducts={relatedProducts.map(plainProduct)}
+      />
+    </>
   );
 }

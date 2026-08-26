@@ -12,6 +12,7 @@ import { getMobileFrameUrl, MOBILE_NEON_VIDEO_URL } from "~/data/framesManifest"
 import { getFrameStride, snapFrameToStride } from "~/utils/adaptiveQuality";
 import styles from "./Hero.module.scss";
 import { useTranslation } from "~/context/LanguageContext";
+import { useLenis } from "~/context/LenisContext";
 
 gsap.registerPlugin(ScrollTrigger, Observer);
 
@@ -47,6 +48,12 @@ const MOBILE_SNAP_DURATION = 2;
 
 export default function HeroMobile() {
   const { t } = useTranslation();
+  // Доступ до Lenis через контекст (не через window-глобал); ref — щоб не перезапускати важкі ефекти
+  const { lenis } = useLenis();
+  const lenisRef = useRef(lenis);
+  useEffect(() => {
+    lenisRef.current = lenis;
+  }, [lenis]);
   const [isMainReady, setIsMainReady] = useState(false);
   const [loaderProgress, setLoaderProgress] = useState(0);
   const [loaderTitle, setLoaderTitle] = useState("Loading Mobile Frames");
@@ -763,7 +770,7 @@ export default function HeroMobile() {
         targetY = progress * maxScroll;
       }
 
-      const lenis = window.__lenis;
+      const lenis = lenisRef.current;
       if (lenis) {
         lenis.scrollTo(targetY, {
           duration: MOBILE_SNAP_DURATION,

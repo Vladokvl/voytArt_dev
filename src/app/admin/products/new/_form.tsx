@@ -17,7 +17,7 @@ const TipTapEditor = dynamic(() => import("~/components/admin/TipTapEditor"), {
   ),
 });
 import { useImageCrop } from "~/hooks/use-image-crop";
-import ImageCropModal from "~/components/ui/ImageCropModal/ImageCropModal";
+import ImageCropModal from "~/components/ui/ImageCropModal/LazyImageCropModal";
 import VariantEditor from "../_VariantEditor";
 import { ArrowLeft, Save, Plus } from "lucide-react";
 import LanguageTabs from "../../_components/LanguageTabs";

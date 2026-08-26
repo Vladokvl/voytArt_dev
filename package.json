@@ -21,6 +21,9 @@
     "lint:fix": "next lint --fix",
     "preview": "next build && next start",
     "start": "next start",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "analyze": "cross-env ANALYZE=true next build",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -57,17 +60,20 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
+    "@next/bundle-analyzer": "^16.3.3",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.14.10",
     "@types/pg": "^8.20.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "cross-env": "^10.1.0",
     "eslint": "^9.23.0",
     "eslint-config-next": "^15.2.3",
     "prettier": "^3.5.3",
     "prisma": "^7.8.0",
     "typescript": "^5.8.2",
-    "typescript-eslint": "^8.27.0"
+    "typescript-eslint": "^8.27.0",
+    "vitest": "^4.1.11"
   },
   "ct3aMetadata": {
     "initVersion": "7.40.0"
