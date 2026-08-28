@@ -3,7 +3,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./GalleryPosts.module.scss";
-import { fetchPaginatedPosts } from "~/app/gallery/_actions";
+import { fetchPaginatedPosts } from "~/app/(site)/[locale]/gallery/_actions";
 import { motion } from "framer-motion";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import { useTranslation } from "~/context/LanguageContext";

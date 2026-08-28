@@ -2,7 +2,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import gsap from "gsap";
-import styles from "@/app/art/[[...artistId]]/art.module.scss";
+import styles from "~/app/(site)/[locale]/art/[[...artistId]]/art.module.scss";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import { useTranslation } from "~/context/LanguageContext";
 import { getLocalized } from "~/lib/i18n";
@@ -35,7 +35,7 @@ export default function ArtHero({
   artistParam: string | null;
   authors: DBAuthor[];
 }) {
-  const { t, locale } = useTranslation();
+  const { t, locale, getLocalizedHref } = useTranslation();
   const isTwoAuthors = authors.length === 2;
   const colWidthVw = isTwoAuthors ? 50 : 33.333;
 
@@ -201,7 +201,7 @@ export default function ArtHero({
     const params = new URLSearchParams();
     params.set("artist", String(authorId));
     if (isNeon) params.set("neon", "true");
-    router.push("/art?" + params.toString());
+    router.push(getLocalizedHref("/art") + "?" + params.toString());
   };
 
   // ── Кнопка повернення (шторка вниз) ─────────────────────────────────────────
@@ -234,7 +234,7 @@ export default function ArtHero({
         const params = new URLSearchParams();
         if (isNeon) params.set("neon", "true");
         const queryStr = params.toString();
-        router.push("/art" + (queryStr ? "?" + queryStr : ""));
+        router.push(getLocalizedHref("/art") + (queryStr ? "?" + queryStr : ""));
       },
     });
   };

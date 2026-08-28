@@ -7,10 +7,11 @@ import { useState, useEffect, useTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
-import { createPaintingInquiryAction } from "~/app/art/_inquiryActions";
+import { createPaintingInquiryAction } from "~/app/(site)/[locale]/art/_inquiryActions";
 import { useTranslation } from "~/context/LanguageContext";
 import { useLenis } from "~/context/LenisContext";
 import { getLocalized } from "~/lib/i18n";
+import { sanitizeHtml } from "~/lib/sanitize-html";
 import {
   Send,
   MessageCircle,
@@ -395,7 +396,9 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                       <div
                         className={styles.description}
                         data-lenis-prevent
-                        dangerouslySetInnerHTML={{ __html: getLocalized(painting, "description", locale) || "" }}
+                        dangerouslySetInnerHTML={{
+                          __html: sanitizeHtml(getLocalized(painting, "description", locale)),
+                        }}
                       />
                     )}
                   </div>

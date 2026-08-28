@@ -5,7 +5,7 @@ import Image from "next/image";
 import { X, ShoppingBag, Trash2, ArrowRight, ArrowLeft, Check, Truck, Loader2 } from "lucide-react";
 import { useCart } from "~/context/CartContext";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
-import { createOrderAction } from "~/app/shop/_actions/checkout";
+import { createOrderAction } from "~/app/(site)/[locale]/shop/_actions/checkout";
 import styles from "./CartDrawer.module.scss";
 import { useTranslation } from "~/context/LanguageContext";
 

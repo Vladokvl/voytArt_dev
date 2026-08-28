@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "~/context/LanguageContext";
 import { useLenis } from "~/context/LenisContext";
 import { getLocalized } from "~/lib/i18n";
+import { sanitizeHtml } from "~/lib/sanitize-html";
 
 type ProductImage = { id: number; url: string; order: number };
 type Author = { id: number; firstName: string; firstNameUk?: string | null; lastName: string; lastNameUk?: string | null };
@@ -174,7 +175,9 @@ export default function ProductModal({ product, onClose, onAddToCart }: ProductM
                 <div
                   className={styles.description}
                   data-lenis-prevent
-                  dangerouslySetInnerHTML={{ __html: getLocalized(product, "description", locale) || "" }}
+                  dangerouslySetInnerHTML={{
+                    __html: sanitizeHtml(getLocalized(product, "description", locale)),
+                  }}
                 />
               )}
 

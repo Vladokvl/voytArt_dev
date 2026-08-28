@@ -5,16 +5,21 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import styles from "./Header.module.scss";
 import { useTranslation } from "~/context/LanguageContext";
+import { useLenis } from "~/context/LenisContext";
+import { stripLocaleFromPathname } from "~/lib/locale-path";
 
 export default function Header() {
-  const pathname = usePathname();
+  const rawPathname = usePathname();
+  // Нормалізуємо: /en/art → /art тощо
+  const pathname = stripLocaleFromPathname(rawPathname);
   const searchParams = useSearchParams();
   const { getLocalizedHref } = useTranslation();
+  // Підписка на скрол Lenis через контекст (window.lenis у lenis@1.3+ — не інстанс)
+  const { lenis } = useLenis();
 
   const [isVisible, setIsVisible] = useState(false);
   const lastScrollY = useRef(0);
   const lastScrollTime = useRef(0);
-  const isTransitioningRef = useRef(false);
 
   const isHome = pathname === "/";
   const isAdmin = pathname.startsWith("/admin");
@@ -24,11 +29,6 @@ export default function Header() {
   useEffect(() => {
     const initScrollY = typeof window !== "undefined" ? window.scrollY : 0;
     lastScrollY.current = initScrollY;
-
-    const isHeroPage = pathname === "/gallery";
-    const isArt = pathname.startsWith("/art");
-
-    const timer: ReturnType<typeof setTimeout> | null = null;
 
     const handleScroll = () => {
       const now = Date.now();
@@ -50,9 +50,8 @@ export default function Header() {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    
-    // Підтримка Lenis SmoothScroll
-    const lenis = (window as unknown as { lenis?: { on: (evt: string, fn: () => void) => void; off: (evt: string, fn: () => void) => void } }).lenis;
+
+    // Підтримка Lenis SmoothScroll через контекст (safe: lenis може бути null до mount)
     if (lenis?.on) {
       lenis.on("scroll", handleScroll);
     }
@@ -63,7 +62,7 @@ export default function Header() {
         lenis.off("scroll", handleScroll);
       }
     };
-  }, [pathname, searchParams]);
+  }, [pathname, searchParams, lenis]);
 
   if (isHome || isAdmin || isArtHeroActive) {
     return null;

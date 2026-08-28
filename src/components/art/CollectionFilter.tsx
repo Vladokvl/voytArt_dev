@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
-import styles from "@/app/art/[[...artistId]]/art.module.scss";
+import styles from "~/app/(site)/[locale]/art/[[...artistId]]/art.module.scss";
 import { useTranslation } from "~/context/LanguageContext";
 import { getLocalized } from "~/lib/i18n";
 
@@ -24,7 +24,7 @@ export default function CollectionFilter({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { t, locale } = useTranslation();
+  const { t, locale, getLocalizedHref } = useTranslation();
   const isNeon = searchParams.get("neon") === "true";
 
   function select(id: number | null) {
@@ -32,7 +32,7 @@ export default function CollectionFilter({
     if (artistParam) params.set("artist", artistParam);
     if (id !== null) params.set("collection", String(id));
     if (isNeon) params.set("neon", "true");
-    router.push("/art?" + params.toString());
+    router.push(getLocalizedHref("/art") + "?" + params.toString());
   }
 
   return (

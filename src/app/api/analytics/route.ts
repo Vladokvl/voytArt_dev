@@ -3,77 +3,17 @@ import { NextResponse } from "next/server";
 import { db } from "~/lib/db";
 import crypto from "crypto";
 import { rateLimit, getClientIp } from "~/lib/rate-limit";
-
-function parseDeviceAndBrowser(userAgent: string): {
-  device: string;
-  os: string;
-  browser: string;
-} {
-  let device = "Desktop";
-  if (/mobile|android|iphone|ipad|ipod/i.test(userAgent)) {
-    device = /ipad|tablet/i.test(userAgent) ? "Tablet" : "Mobile";
-  }
-
-  let os = "Other";
-  if (/windows/i.test(userAgent)) os = "Windows";
-  else if (/macintosh|mac os x/i.test(userAgent)) os = "macOS";
-  else if (/iphone|ipad|ipod/i.test(userAgent)) os = "iOS";
-  else if (/android/i.test(userAgent)) os = "Android";
-  else if (/linux/i.test(userAgent)) os = "Linux";
-
-  let browser = "Other";
-  if (/telegram/i.test(userAgent)) browser = "Telegram In-App";
-  else if (/instagram/i.test(userAgent)) browser = "Instagram In-App";
-  else if (/fbav|fban/i.test(userAgent)) browser = "Facebook In-App";
-  else if (/chrome|crios/i.test(userAgent)) browser = "Chrome";
-  else if (/safari/i.test(userAgent) && !/chrome/i.test(userAgent)) browser = "Safari";
-  else if (/firefox|fxios/i.test(userAgent)) browser = "Firefox";
-  else if (/edg/i.test(userAgent)) browser = "Edge";
-  else if (/opr|opera/i.test(userAgent)) browser = "Opera";
-
-  return { device, os, browser };
-}
-
-function parseReferrer(rawReferrer: string, userAgent: string): string {
-  if (/telegram/i.test(userAgent)) return "Telegram In-App";
-  if (/instagram/i.test(userAgent)) return "Instagram In-App";
-  if (/fbav|fban/i.test(userAgent)) return "Facebook In-App";
-
-  if (!rawReferrer) return "Direct";
-
-  try {
-    const host = new URL(rawReferrer).hostname.toLowerCase();
-    if (host.includes("t.me") || host.includes("telegram")) return "Telegram";
-    if (host.includes("instagram.com")) return "Instagram";
-    if (host.includes("google.")) return "Google Search";
-    if (host.includes("facebook.com") || host.includes("fb.me")) return "Facebook";
-    if (host.includes("tiktok.com")) return "TikTok";
-    if (host.includes("twitter.com") || host.includes("x.com")) return "Twitter / X";
-    if (host.includes("youtube.com")) return "YouTube";
-    if (host.includes("voyt.art") || host.includes("localhost")) return "Internal";
-    return host.replace(/^www\./, "");
-  } catch {
-    return rawReferrer.slice(0, 50);
-  }
-}
-
-function categorizePage(path: string): string {
-  if (path === "/" || path === "") return "HOME";
-  if (path.startsWith("/art")) return "GALLERY";
-  if (path.startsWith("/shop")) return "SHOP";
-  if (path.startsWith("/cart")) return "CART";
-  if (path.startsWith("/checkout")) return "CHECKOUT";
-  if (path.startsWith("/gallery")) return "POSTS";
-  return "OTHER";
-}
-
-function isPrivateIp(ip: string): boolean {
-  if (!ip || ip === "127.0.0.1" || ip === "::1" || ip === "localhost") return true;
-  if (ip.startsWith("10.") || ip.startsWith("192.168.")) return true;
-  if (/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(ip)) return true;
-  if (ip.startsWith("fe80:") || ip.startsWith("fc00:") || ip.startsWith("fd")) return true;
-  return false;
-}
+import {
+  BOT_UA_RE,
+  categorizePage,
+  isPrivateIp,
+  normalizeCustomPageType,
+  normalizeIp,
+  parseDeviceAndBrowser,
+  parseReferrer,
+  sanitizeAnalyticsPath,
+  sanitizeTargetId,
+} from "~/lib/analytics-helpers";
 
 // In-memory geo cache з витісненням найстарішого запису (FIFO) замість повного очищення
 const GEO_CACHE_MAX = 3000;
@@ -87,14 +27,8 @@ function cacheGeo(ip: string, result: { country: string; city: string | null }) 
   geoCache.set(ip, result);
 }
 
-async function resolveGeo(rawIp: string, req: NextRequest): Promise<{ country: string; city: string | null }> {
-  // Normalize IP
-  let ip = rawIp.trim();
-  if (ip.startsWith("::ffff:")) {
-    ip = ip.replace("::ffff:", "");
-  }
-
-  // 1. Direct Edge / Reverse Proxy Headers (Cloudflare, Vercel, AWS CloudFront, Nginx custom)
+/** Миттєва геолокація лише з edge/reverse-proxy headers (без мережевих запитів) */
+function readGeoFromHeaders(req: NextRequest): { country: string; city: string | null } | null {
   const headerCountry =
     req.headers.get("cf-ipcountry") ??
     req.headers.get("x-vercel-ip-country") ??
@@ -102,34 +36,31 @@ async function resolveGeo(rawIp: string, req: NextRequest): Promise<{ country: s
     req.headers.get("x-country-code") ??
     req.headers.get("x-geo-country");
 
+  if (!headerCountry || headerCountry === "XX" || headerCountry === "T1" || headerCountry.length !== 2) {
+    return null;
+  }
+
   const headerCity =
     req.headers.get("x-vercel-ip-city") ??
     req.headers.get("cf-ipcity") ??
     req.headers.get("cloudfront-viewer-city") ??
     null;
 
-  if (headerCountry && headerCountry !== "XX" && headerCountry !== "T1" && headerCountry.length === 2) {
-    return { country: headerCountry.toUpperCase(), city: headerCity };
-  }
+  return { country: headerCountry.toUpperCase(), city: headerCity };
+}
 
-  // 2. Private/Localhost IPs
-  if (isPrivateIp(ip)) {
-    return { country: "UA", city: "Localhost" };
-  }
-
-  // 3. In-memory cache
-  const cached = geoCache.get(ip);
-  if (cached) {
-    return cached;
-  }
-
-  // 4. HTTPS-only provider: ipwho.is (короткий таймаут; HTTP ip-api.com прибрано —
-  // приватність IP-адрес користувачів)
+/**
+ * Зовнішній HTTPS-провайдер геолокації (ipwho.is) — викликається ТІЛЬКИ
+ * асинхронно, після запису події в БД, щоб не блокувати запит клієнта.
+ * Результат оновлюється в записі постфактум; HTTP ip-api.com прибрано
+ * (приватність IP-адрес користувачів).
+ */
+async function resolveGeoExternal(rawIp: string): Promise<{ country: string; city: string | null }> {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 1200);
 
-    const res = await fetch(`https://ipwho.is/${encodeURIComponent(ip)}`, {
+    const res = await fetch(`https://ipwho.is/${encodeURIComponent(rawIp)}`, {
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
@@ -138,7 +69,7 @@ async function resolveGeo(rawIp: string, req: NextRequest): Promise<{ country: s
       const data = (await res.json()) as { success?: boolean; country_code?: string; city?: string };
       if (data.success && data.country_code?.length === 2) {
         const result = { country: data.country_code.toUpperCase(), city: data.city ?? null };
-        cacheGeo(ip, result);
+        cacheGeo(rawIp, result);
         return result;
       }
     }
@@ -154,19 +85,32 @@ const dedupCache = new Map<string, number>();
 const DEDUP_CACHE_MAX = 10000;
 
 function pruneDedupCache() {
-  if (dedupCache.size < DEDUP_CACHE_MAX) return;
-  const cutoff = Date.now() - 5000;
+  const now = Date.now();
+  // Спочатку прибираємо записи поза TTL-вікном (3 с дедупа + запас)
   for (const [key, ts] of dedupCache) {
-    if (ts < cutoff) dedupCache.delete(key);
+    if (now - ts > 5000) dedupCache.delete(key);
+  }
+  // Жорсткий FIFO-кап: навіть якщо всі записи свіжі (спам унікальними ключами),
+  // не даємо кешу рости необмежено
+  while (dedupCache.size >= DEDUP_CACHE_MAX) {
+    const oldest = dedupCache.keys().next().value;
+    if (oldest === undefined) break;
+    dedupCache.delete(oldest);
   }
 }
 
+
 export async function POST(req: NextRequest) {
   try {
-    // Rate-limit: максимум 30 подій за хвилину на IP
-    const rl = rateLimit(`analytics:${getClientIp(req.headers)}`, { limit: 30, windowMs: 60 * 1000 });
+    const clientIp = getClientIp(req.headers);
+
+    // Rate-limit: максимум 30 подій за хвилину на IP (+ Retry-After для чесних клієнтів)
+    const rl = rateLimit(`analytics:${clientIp}`, { limit: 30, windowMs: 60 * 1000 });
     if (!rl.allowed) {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+      return NextResponse.json(
+        { error: "Too many requests" },
+        { status: 429, headers: { "Retry-After": String(rl.retryAfterSeconds) } },
+      );
     }
 
     const body = (await req.json().catch(() => ({}))) as {
@@ -174,35 +118,62 @@ export async function POST(req: NextRequest) {
       pageType?: string;
       targetId?: number;
     };
-    const { path = "/", pageType: customPageType, targetId } = body;
 
-    // Ignore admin & api routes
+    // ─── Санітизація вхідних даних (усі поля приходять від клієнта) ─────────
+    const userAgent = req.headers.get("user-agent") ?? "";
+    // Без User-Agent (curl/скрипти) чи підозріло короткий UA — не записуємо
+    if (userAgent.length < 15) {
+      return NextResponse.json({ ignored: true });
+    }
+    // Ignore bots & crawlers from corrupting visit metrics
+    if (BOT_UA_RE.test(userAgent)) {
+      return NextResponse.json({ bot: true });
+    }
+
+    const path = sanitizeAnalyticsPath(body.path ?? "/");
+    if (!path) {
+      return NextResponse.json({ ignored: true, reason: "invalid path" });
+    }
+
+    const customPageType = normalizeCustomPageType(body.pageType);
+    let finalTargetId = sanitizeTargetId(body.targetId);
+
+    // Ignore admin & api routes (після санітизації path)
     if (path.startsWith("/admin") || path.startsWith("/api")) {
       return NextResponse.json({ ignored: true });
     }
 
-    const userAgent = req.headers.get("user-agent") ?? "";
-    // Ignore bots & crawlers from corrupting visit metrics
-    if (/bot|crawler|spider|googlebot|bingbot|yandex|duckduckbot|slurp|baiduspider/i.test(userAgent)) {
-      return NextResponse.json({ bot: true });
+    // Auto extract targetId from shop path if not explicitly provided
+    if (!finalTargetId && path.startsWith("/shop/")) {
+      finalTargetId = sanitizeTargetId(path.slice("/shop/".length).split(/[?#/]/)[0]);
     }
 
     const rawReferrer = req.headers.get("referer") ?? "";
-    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? req.headers.get("x-real-ip") ?? "127.0.0.1";
 
-    // Accurate Multi-Tier Country & City resolution
-    const { country, city } = await resolveGeo(ip, req);
+    // ─── Геолокація: миттєво з headers/кеша; зовнішній API — тільки асинхронно ──
+    const ip = normalizeIp(clientIp === "unknown" ? "" : clientIp);
+    let country = "UNKNOWN";
+    let city: string | null = null;
+    let needsAsyncGeo = false;
+
+    const headerGeo = readGeoFromHeaders(req);
+    if (headerGeo) {
+      ({ country, city } = headerGeo);
+    } else if (isPrivateIp(ip)) {
+      country = "UA";
+      city = "Localhost";
+    } else {
+      const cached = geoCache.get(ip);
+      if (cached) {
+        ({ country, city } = cached);
+      } else {
+        needsAsyncGeo = true; // заповнимо постфактум, не блокуючи відповідь
+      }
+    }
 
     const { device, os, browser } = parseDeviceAndBrowser(userAgent);
     const referer = parseReferrer(rawReferrer, userAgent);
     const pageType = customPageType ?? categorizePage(path);
-
-    // Auto extract targetId from shop path if not explicitly provided
-    let finalTargetId = targetId;
-    if (!finalTargetId && path.startsWith("/shop/")) {
-      const parsedId = parseInt(path.replace("/shop/", ""), 10);
-      if (!isNaN(parsedId)) finalTargetId = parsedId;
-    }
 
     // Anonymized daily visitor hash (GDPR compliant, zero cookie tracking).
     // Сіль з AUTH_SECRET ускладнює відновлення IP з хешу.
@@ -224,13 +195,13 @@ export async function POST(req: NextRequest) {
     }
     dedupCache.set(dedupKey, Date.now());
 
-    // Asynchronously insert into database
-    await db.analyticsEvent.create({
+    // Записуємо подію ОДРАЗУ (гео може бути UNKNOWN — оновимо нижче)
+    const created = await db.analyticsEvent.create({
       data: {
         path,
         pageType,
-        targetId: typeof finalTargetId === "number" ? finalTargetId : null,
-        country: country.toUpperCase(),
+        targetId: finalTargetId,
+        country,
         city,
         device,
         browser,
@@ -239,6 +210,23 @@ export async function POST(req: NextRequest) {
         visitorHash,
       },
     });
+
+    // Fire-and-forget дозапис геолокації з зовнішнього провайдера (≤1.2с),
+    // щоб геозапит ніколи не блокував відповідь клієнту.
+    if (needsAsyncGeo) {
+      void resolveGeoExternal(ip)
+        .then((geo) =>
+          geo.country !== "UNKNOWN"
+            ? db.analyticsEvent.update({
+                where: { id: created.id },
+                data: { country: geo.country, city: geo.city },
+              })
+            : undefined,
+        )
+        .catch(() => {
+          // Гео не критичне — тихо ігноруємо помилки фонового оновлення
+        });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

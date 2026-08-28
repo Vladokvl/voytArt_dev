@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
-import { fetchCartProductsAction } from "~/app/shop/_actions/cart-refresh";
+import { fetchCartProductsAction } from "~/app/(site)/[locale]/shop/_actions/cart-refresh";
 
 export type CartProduct = {
   id: number;

@@ -4,6 +4,7 @@ import Link from "next/link";
 import styles from "./PostContent.module.scss";
 import { useTranslation } from "~/context/LanguageContext";
 import { getLocalized } from "~/lib/i18n";
+import { sanitizeHtml } from "~/lib/sanitize-html";
 
 type Props = {
   post: {
@@ -24,7 +25,7 @@ export default function PostContent({ post }: Props) {
         </Link>
         <div
           className={styles.content}
-          dangerouslySetInnerHTML={{ __html: content }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
         />
       </div>
     </section>

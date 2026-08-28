@@ -1,4 +1,4 @@
-import { getCloudinarySignature } from "~/app/admin/cloudinary-actions";
+import { getCloudinarySignature } from "~/app/(admin)/admin/cloudinary-actions";
 
 export async function uploadToCloudinary(
   file: File,

@@ -52,8 +52,8 @@ export function rateLimit(
   return { allowed: true, remaining: limit - bucket.timestamps.length, retryAfterSeconds: 0 };
 }
 
-/** Витягує IP-адресу з headers запиту (для route handlers). */
-export function getClientIp(headers: Headers): string {
+/** Витягує IP-адресу з headers запиту (для route handlers та Server Actions). */
+export function getClientIp(headers: { get(name: string): string | null }): string {
   return (
     headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     headers.get("x-real-ip") ??

@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import PaintingCard from "~/components/ui/PaintingCard/PaintingCard";
-import styles from "~/app/art/[[...artistId]]/art.module.scss";
-import { fetchPaginatedPaintings } from "~/app/art/_actions";
+import styles from "~/app/(site)/[locale]/art/[[...artistId]]/art.module.scss";
+import { fetchPaginatedPaintings } from "~/app/(site)/[locale]/art/_actions";
 import { useTranslation } from "~/context/LanguageContext";
 
 type MediaItem = {

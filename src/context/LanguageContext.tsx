@@ -1,7 +1,9 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react";
+import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { type Locale, translations } from "~/lib/i18n";
+import { withLocalePrefix, stripLocaleFromPathname } from "~/lib/locale-path";
 
 interface LanguageContextType {
   locale: Locale;
@@ -12,7 +14,6 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-const STORAGE_KEY = "voyt_locale";
 const COOKIE_NAME = "NEXT_LOCALE";
 
 export function LanguageProvider({
@@ -23,83 +24,47 @@ export function LanguageProvider({
   initialLocale?: Locale;
 }) {
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
+  const router = useRouter();
 
-  const getLocalizedHref = useCallback(
-    (href: string): string => {
-      if (href.startsWith("http") || href.startsWith("mailto:") || href.startsWith("tel:") || href.startsWith("#")) {
-        return href;
-      }
+  // Джерело правди — URL (/en | /uk). Синхронізуємо стан після навігації
+  // між локалями (startState спрацьовує лише один раз).
+  useEffect(() => {
+    setLocaleState(initialLocale);
+  }, [initialLocale]);
+
+  /**
+   * Перемикання мови = навігація на той самий шлях з іншим префіксом локалі.
+   * Cookie зберігається як fallback для детектції локалі в middleware
+   * та для адмінки (яка поза [locale]).
+   */
+  const setLocale = useCallback(
+    (newLocale: Locale) => {
       try {
-        const [base, hash] = href.split("#");
-        const [path, query] = (base ?? "").split("?");
-        const params = new URLSearchParams(query ?? "");
-
-        if (locale === "uk") {
-          params.set("lang", "ua");
-        } else {
-          params.delete("lang");
-        }
-
-        const queryString = params.toString();
-        const hashString = hash ? `#${hash}` : "";
-        return `${path}${queryString ? `?${queryString}` : ""}${hashString}`;
+        document.cookie = `${COOKIE_NAME}=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
       } catch {
-        return href;
+        // ignore
       }
+
+      if (typeof window === "undefined") return;
+
+      const { pathname, search } = window.location;
+      const restPath = stripLocaleFromPathname(pathname);
+      // Шлях адмінки / не-публічні сторінки — залишаємо без префікса
+      const target =
+        restPath.startsWith("/admin")
+          ? pathname
+          : `/${newLocale}${restPath === "/" ? "" : restPath}${search}`;
+
+      router.push(target);
     },
-    [locale]
+    [router]
   );
 
-  const setLocale = useCallback((newLocale: Locale) => {
-    setLocaleState(newLocale);
-    try {
-      localStorage.setItem(STORAGE_KEY, newLocale);
-      document.cookie = `${COOKIE_NAME}=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
-
-      if (typeof window !== "undefined") {
-        const url = new URL(window.location.href);
-        if (newLocale === "uk") {
-          url.searchParams.set("lang", "ua");
-        } else {
-          url.searchParams.delete("lang");
-        }
-        window.history.replaceState(null, "", url.toString());
-      }
-    } catch {
-      // ignore
-    }
-  }, []);
-
-  useEffect(() => {
-    try {
-      if (typeof window !== "undefined") {
-        const params = new URLSearchParams(window.location.search);
-        const urlLang = params.get("lang")?.toLowerCase();
-
-        if (urlLang === "ua" || urlLang === "uk") {
-          setLocaleState("uk");
-          localStorage.setItem(STORAGE_KEY, "uk");
-          document.cookie = `${COOKIE_NAME}=uk; path=/; max-age=31536000; SameSite=Lax`;
-          return;
-        } else if (urlLang === "en") {
-          setLocaleState("en");
-          localStorage.setItem(STORAGE_KEY, "en");
-          document.cookie = `${COOKIE_NAME}=en; path=/; max-age=31536000; SameSite=Lax`;
-          return;
-        }
-      }
-
-      const savedLocale = localStorage.getItem(STORAGE_KEY) as Locale | null;
-      if (savedLocale === "en" || savedLocale === "uk") {
-        if (savedLocale !== initialLocale) {
-          setLocaleState(savedLocale);
-          document.cookie = `${COOKIE_NAME}=${savedLocale}; path=/; max-age=31536000; SameSite=Lax`;
-        }
-      }
-    } catch {
-      // ignore
-    }
-  }, [initialLocale]);
+  /** Локалізує внутрішні посилання: "/art?a=1" → "/uk/art?a=1" */
+  const getLocalizedHref = useCallback(
+    (href: string): string => withLocalePrefix(locale, href),
+    [locale]
+  );
 
   const t = useCallback(
     (path: string, params?: Record<string, string | number>): string => {
