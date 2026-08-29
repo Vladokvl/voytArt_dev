@@ -4,18 +4,18 @@ import { usePathname } from "next/navigation";
 import Image from "next/image";
 import gsap from "gsap";
 import styles from "./PageLoader.module.scss";
+import { stripLocaleFromPathname } from "~/lib/locale-path";
 
 // ══════════════════════════════════════════════════════════════════════════════
 // PageLoader — екран завантаження сторінки
 // • Якщо кадри ще вантажаться: показує кругле відео-лого та чекає hero-ready
 // • Якщо кадри вже в кеші: показує статичне лого і миттєво плавно розчиняється
 // ══════════════════════════════════════════════════════════════════════════════
-const LOADER_PAGES = ["/"];
 const HERO_READY_EVENT = "voyt:hero-ready";
 
 export default function PageLoader() {
   const pathname = usePathname();
-  const isLoaderPage = LOADER_PAGES.includes(pathname);
+  const isLoaderPage = stripLocaleFromPathname(pathname) === "/";
 
   const overlayRef = useRef<HTMLDivElement>(null);
   const circleRef = useRef<HTMLDivElement>(null);

@@ -16,13 +16,14 @@ type MediaItem = {
 
 type Painting = {
   id: number;
+  authorId?: number;
   title: string;
   titleUk?: string | null;
   description: string | null;
   descriptionUk?: string | null;
   coverUrl: string;
   year: number | null;
-  author: { firstName: string; firstNameUk?: string | null; lastName: string; lastNameUk?: string | null };
+  author: { id?: number; firstName: string; firstNameUk?: string | null; lastName: string; lastNameUk?: string | null };
   media: MediaItem[];
 };
 

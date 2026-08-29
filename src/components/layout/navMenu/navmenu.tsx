@@ -6,12 +6,14 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./nav.module.scss";
 import { useTranslation } from "~/context/LanguageContext";
 import LanguageSwitcher from "~/components/ui/LanguageSwitcher/LanguageSwitcher";
+import { stripLocaleFromPathname } from "~/lib/locale-path";
 
 export default function NavMenu() {
   const pathname = usePathname();
   const { t, getLocalizedHref } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const currentBaseRoute = stripLocaleFromPathname(pathname);
 
   const navItems = [
     { href: "/", label: t("nav.home") },
@@ -54,7 +56,10 @@ export default function NavMenu() {
         aria-label="Main navigation"
       >
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive =
+            item.href === "/"
+              ? currentBaseRoute === "/"
+              : currentBaseRoute.startsWith(item.href);
 
           return (
             <Link
@@ -66,7 +71,6 @@ export default function NavMenu() {
             </Link>
           );
         })}
-        <LanguageSwitcher inMenu />
       </nav>
       
       <button
@@ -92,6 +96,11 @@ export default function NavMenu() {
           </svg>
         </span>
       </button>
+
+      {/* Language Switcher emerging downwards from menu button */}
+      <div className={styles.langDropdown}>
+        <LanguageSwitcher inMenu />
+      </div>
     </div>
   );
 }

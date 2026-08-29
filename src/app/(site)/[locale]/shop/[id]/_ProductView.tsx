@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, ShoppingBag, ArrowRight, Check } from "lucide-react";
+import { ChevronRight, ShoppingBag, ArrowRight, ArrowLeft, Check } from "lucide-react";
 import { useCart } from "~/context/CartContext";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import ProductCarousel from "~/components/shop/ProductCarousel";
@@ -156,13 +156,27 @@ export default function ProductView({
 
   return (
     <div className={styles.pageContainer}>
+      {/* Floating circular back button on mobile (mirrors NavMenu on the left) */}
+      <Link
+        href={getLocalizedHref("/shop")}
+        className={styles.floatingBackBtn}
+        aria-label={t("gallery.back")}
+      >
+        <ArrowLeft size={18} />
+      </Link>
+
       {/* Breadcrumbs */}
       <nav className={styles.breadcrumbs} aria-label="Breadcrumb">
         <Link href={getLocalizedHref("/shop")}>{t("nav.shop")}</Link>
         <ChevronRight size={14} />
         {product.category && (
           <>
-            <span>{localizedCategoryName}</span>
+            <Link
+              href={getLocalizedHref(`/shop?category=${product.category.slug}`)}
+              className={styles.categoryLink}
+            >
+              {localizedCategoryName}
+            </Link>
             <ChevronRight size={14} />
           </>
         )}

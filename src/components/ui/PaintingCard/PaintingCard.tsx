@@ -3,7 +3,7 @@
 import Image from "next/image";
 import * as Dialog from "@radix-ui/react-dialog";
 import styles from "./paintingCard.module.scss";
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
@@ -33,18 +33,25 @@ type MediaItem = {
 
 type PaintingCardProps = {
   id: number;
+  authorId?: number;
   title: string;
   titleUk?: string | null;
   description: string | null;
   descriptionUk?: string | null;
   coverUrl: string;
   year: number | null;
-  author: { firstName: string; firstNameUk?: string | null; lastName: string; lastNameUk?: string | null };
+  author: {
+    id?: number;
+    firstName: string;
+    firstNameUk?: string | null;
+    lastName: string;
+    lastNameUk?: string | null;
+  };
   media: MediaItem[];
 };
 
 export default function PaintingCard({ painting }: { painting: PaintingCardProps }) {
-  const { t, locale } = useTranslation();
+  const { t, locale, getLocalizedHref } = useTranslation();
   const searchParams = useSearchParams();
   const isGlobalNeon = searchParams.get("neon") === "true";
 
@@ -70,6 +77,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
   ];
 
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [isNeon, setIsNeon] = useState(isGlobalNeon && hasNeonMedia);
   const [activeIndex, setActiveIndex] = useState(0);
   const [loadedSet, setLoadedSet] = useState<Set<string>>(new Set());
@@ -85,14 +93,48 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
   const [copiedLink, setCopiedLink] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     setIsNeon(isGlobalNeon && hasNeonMedia);
   }, [isGlobalNeon, hasNeonMedia]);
+
+  const initialOpenedRef = useRef(false);
+
+  // Deep-linking: auto-open modal on initial page load if ?painting=id (safely after hydration)
+  useEffect(() => {
+    if (!mounted || initialOpenedRef.current) return;
+    const urlPainting = searchParams.get("painting");
+    if (urlPainting && Number(urlPainting) === painting.id) {
+      initialOpenedRef.current = true;
+      const timer = setTimeout(() => {
+        setOpen(true);
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [mounted, searchParams, painting.id]);
 
   const activeItems = isNeon ? neonMedia : defaultItems;
   const hasMultiple = activeItems.length > 1;
 
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const authorId = painting.authorId ?? painting.author?.id;
+      if (next) {
+        if (authorId && !params.has("artist")) {
+          params.set("artist", String(authorId));
+        }
+        params.set("painting", String(painting.id));
+      } else {
+        params.delete("painting");
+      }
+      const qs = params.toString();
+      window.history.replaceState(null, "", `${window.location.pathname}${qs ? `?${qs}` : ""}`);
+    }
+
     if (next) {
       // Send background analytics event for painting modal open
       const payload = JSON.stringify({
@@ -136,6 +178,31 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
 
   const markLoaded = (url: string) => {
     setLoadedSet((s) => new Set([...s, url]));
+  };
+
+  // Touch Swipe gestures for mobile
+  const [touchStartPos, setTouchStartPos] = useState<{ x: number; y: number } | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches[0]) {
+      setTouchStartPos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartPos || !e.changedTouches[0]) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartPos.x;
+    const deltaY = e.changedTouches[0].clientY - touchStartPos.y;
+    setTouchStartPos(null);
+
+    // Swipe horizontal check (min 40px threshold and dominant horizontal direction)
+    if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX > 0) {
+        navigate("prev");
+      } else {
+        navigate("next");
+      }
+    }
   };
 
   const currentItem = activeItems[activeIndex];
@@ -182,8 +249,17 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
 
   const handleCopyLink = () => {
     if (typeof window !== "undefined") {
-      const langParam = locale === "uk" ? "&lang=ua" : "";
-      const url = `${window.location.origin}/art?painting=${painting.id}${langParam}`;
+      const params = new URLSearchParams();
+      const authorId = painting.authorId ?? painting.author?.id;
+      if (authorId) {
+        params.set("artist", String(authorId));
+      }
+      params.set("painting", String(painting.id));
+      if (isNeon) {
+        params.set("neon", "true");
+      }
+      const localizedPath = getLocalizedHref("/art");
+      const url = `${window.location.origin}${localizedPath}?${params.toString()}`;
       void navigator.clipboard.writeText(url).then(() => {
         setCopiedLink(true);
         setTimeout(() => setCopiedLink(false), 2000);
@@ -229,7 +305,11 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
           data-neon={isNeon ? "true" : undefined}
         >
           {/* ── Slider area ─────────────────────────────────── */}
-          <div className={styles.imageWrap}>
+          <div
+            className={styles.imageWrap}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             {/* Spinner shown while active image loads */}
             {!isCurrentLoaded && <div className={styles.spinner} aria-hidden="true" />}
 
@@ -264,14 +344,38 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                       <source src={item.url} />
                     </video>
                   ) : (
-                    <Image
-                      src={getOptimizedImageUrl(item.url, { preset: "large" })}
-                      alt={paintingTitle}
-                      fill
-                      className={styles.mediaEl}
-                      sizes="(max-width: 768px) 100vw, 66vw"
-                      onLoad={() => markLoaded(item.url)}
-                    />
+                    <>
+                      {/* Cached preview layer (reuse already loaded card cover without extra Cloudinary credits) */}
+                      {!loadedSet.has(item.url) && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={gridCoverUrl}
+                          alt=""
+                          className={styles.mediaEl}
+                          style={{
+                            filter: "blur(6px)",
+                            transform: "scale(1.02)",
+                            position: "absolute",
+                            inset: 0,
+                            zIndex: 1,
+                          }}
+                          aria-hidden="true"
+                        />
+                      )}
+                      <Image
+                        src={getOptimizedImageUrl(item.url, { preset: "large" })}
+                        alt={paintingTitle}
+                        fill
+                        className={styles.mediaEl}
+                        style={{
+                          opacity: loadedSet.has(item.url) ? 1 : 0,
+                          transition: "opacity 0.25s ease",
+                          zIndex: 2,
+                        }}
+                        sizes="(max-width: 768px) 100vw, 66vw"
+                        onLoad={() => markLoaded(item.url)}
+                      />
+                    </>
                   )}
                 </div>
               ))}

@@ -8,7 +8,7 @@ export default function Footer() {
   const { t, getLocalizedHref } = useTranslation();
 
   return (
-    <footer className={styles.footer}>
+    <footer className={styles.footer} suppressHydrationWarning>
       <div className={styles.inner}>
 
         {/* Contact */}

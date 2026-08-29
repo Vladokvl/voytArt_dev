@@ -124,7 +124,16 @@ export default async function ArtPage({
       },
     }),
     db.author.findMany({
-      where: { active: true },
+      where: {
+        active: true,
+        ...(isNeonMode
+          ? {
+              paintings: {
+                some: { hasNeon: true },
+              },
+            }
+          : {}),
+      },
       orderBy: { order: "asc" },
     }),
     selectedAuthorId

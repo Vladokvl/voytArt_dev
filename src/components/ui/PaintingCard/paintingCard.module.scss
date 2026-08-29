@@ -84,9 +84,10 @@
   color: var(--modal-text);
   border-radius: 18px;
   overflow: hidden;
-  width: 92vw;
+  width: 94vw;
   max-width: 1020px;
   height: 92vh;
+  height: 92dvh;
   max-height: 820px;
   display: flex;
   flex-direction: column;
@@ -102,6 +103,7 @@
   @media (min-width: 768px) {
     flex-direction: row;
     height: 88vh;
+    height: 88dvh;
   }
 }
 

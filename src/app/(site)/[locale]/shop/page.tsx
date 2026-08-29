@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { db } from "~/lib/db";
 import { plainProduct } from "~/lib/plain-product";
 import ShopStorefront from "./_ShopStorefront";
@@ -43,9 +44,11 @@ export default async function ShopPage() {
   ]);
 
   return (
-    <ShopStorefront
-      initialProducts={products.map(plainProduct)}
-      categories={categories}
-    />
+    <Suspense fallback={null}>
+      <ShopStorefront
+        initialProducts={products.map(plainProduct)}
+        categories={categories}
+      />
+    </Suspense>
   );
 }

@@ -194,10 +194,15 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
     let wheelSettleTimer: NodeJS.Timeout | null = null;
 
     const handleWheel = (e: WheelEvent) => {
+      // If user is scrolling vertically, do not intercept or block page scroll!
+      if (Math.abs(e.deltaY) >= Math.abs(e.deltaX) && !e.shiftKey) {
+        return;
+      }
+
       const deltaX = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : (e.shiftKey ? e.deltaY : 0);
       
       // Якщо жест горизонтальний (наприклад свайп двома пальцями на тачпаді)
-      if (Math.abs(deltaX) > 1.5) {
+      if (Math.abs(deltaX) > 2) {
         e.preventDefault();
         resetAutoplayTimer();
 

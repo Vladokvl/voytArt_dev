@@ -408,3 +408,40 @@
   background: #059669 !important;
   color: #ffffff !important;
 }
+
+.loadMoreContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 3.5rem;
+  margin-bottom: 2rem;
+}
+
+.loadMoreBtn {
+  background: var(--color-text);
+  color: #ffffff;
+  border: none;
+  padding: 0.85rem 2.5rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    background: #000000;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  @media (max-width: 640px) {
+    width: 100%;
+    max-width: 320px;
+    padding: 0.8rem 1.5rem;
+    font-size: 0.9rem;
+  }
+}

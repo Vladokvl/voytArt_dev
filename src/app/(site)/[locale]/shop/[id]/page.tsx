@@ -63,30 +63,78 @@ export default async function ProductDetailPage({ params }: Props) {
     notFound();
   }
 
-  const [product, relatedProducts] = await Promise.all([
-    db.product.findUnique({
-      where: { id: productId },
-      include: {
-        author: true,
-        category: true,
-        images: { orderBy: { order: "asc" } },
-        variants: { orderBy: { sortOrder: "asc" } },
-      },
-    }),
-    db.product.findMany({
-      where: { id: { not: productId }, isActive: true },
-      take: 4,
-      include: {
-        author: true,
-        category: true,
-        images: { orderBy: { order: "asc" } },
-        variants: { orderBy: { sortOrder: "asc" } },
-      },
-    }),
-  ]);
+  const product = await db.product.findUnique({
+    where: { id: productId },
+    include: {
+      author: true,
+      category: true,
+      images: { orderBy: { order: "asc" } },
+      variants: { orderBy: { sortOrder: "asc" } },
+    },
+  });
 
   if (!product) {
     notFound();
+  }
+
+  // 3-Tier Recommendation Algorithm (Category -> Author -> Top Active Products)
+  const sameCategoryProducts = await db.product.findMany({
+    where: {
+      id: { not: productId },
+      categoryId: product.categoryId,
+      isActive: true,
+    },
+    take: 4,
+    include: {
+      author: true,
+      category: true,
+      images: { orderBy: { order: "asc" } },
+      variants: { orderBy: { sortOrder: "asc" } },
+    },
+    orderBy: { sortOrder: "asc" },
+  });
+
+  let relatedProducts = [...sameCategoryProducts];
+
+  // Tier 2: Fill remaining slots with same author products
+  if (relatedProducts.length < 4) {
+    const existingIds = [productId, ...relatedProducts.map((p) => p.id)];
+    const sameAuthorProducts = await db.product.findMany({
+      where: {
+        id: { notIn: existingIds },
+        authorId: product.authorId,
+        isActive: true,
+      },
+      take: 4 - relatedProducts.length,
+      include: {
+        author: true,
+        category: true,
+        images: { orderBy: { order: "asc" } },
+        variants: { orderBy: { sortOrder: "asc" } },
+      },
+      orderBy: { sortOrder: "asc" },
+    });
+    relatedProducts = [...relatedProducts, ...sameAuthorProducts];
+  }
+
+  // Tier 3: Fallback with general active products
+  if (relatedProducts.length < 4) {
+    const existingIds = [productId, ...relatedProducts.map((p) => p.id)];
+    const fallbackProducts = await db.product.findMany({
+      where: {
+        id: { notIn: existingIds },
+        isActive: true,
+      },
+      take: 4 - relatedProducts.length,
+      include: {
+        author: true,
+        category: true,
+        images: { orderBy: { order: "asc" } },
+        variants: { orderBy: { sortOrder: "asc" } },
+      },
+      orderBy: { sortOrder: "asc" },
+    });
+    relatedProducts = [...relatedProducts, ...fallbackProducts];
   }
 
   // Schema.org Product + Offer — структуровані дані для Rich Snippets

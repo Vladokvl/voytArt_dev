@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ShoppingBag, ArrowRight, Sparkles, Check } from "lucide-react";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import { useCart } from "~/context/CartContext";
@@ -44,18 +44,64 @@ export default function ShopStorefront({
   categories?: Category[];
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { addToCart, openCart, totalItems } = useCart();
   const { t, locale, getLocalizedHref } = useTranslation();
 
-  const productsList = Array.isArray(initialProducts) ? initialProducts : [];
-  const categoriesList = Array.isArray(categories) ? categories : [];
+  const productsList = useMemo(
+    () => (Array.isArray(initialProducts) ? initialProducts : []),
+    [initialProducts],
+  );
+  const categoriesList = useMemo(
+    () => (Array.isArray(categories) ? categories : []),
+    [categories],
+  );
 
+  const PAGE_SIZE = 12;
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [visibleCount, setVisibleCount] = useState<number>(PAGE_SIZE);
   const [addedItemAnimationId, setAddedItemAnimationId] = useState<number | null>(null);
+
+  // Sync category filter with URL search param ?category=slug
+  const categoryParam = searchParams.get("category");
+  useEffect(() => {
+    if (categoryParam) {
+      const match = categoriesList.find(
+        (c) => c.slug === categoryParam || String(c.id) === categoryParam,
+      );
+      if (match) {
+        setSelectedCategory(match.id);
+        setVisibleCount(PAGE_SIZE);
+      }
+    }
+  }, [categoryParam, categoriesList]);
+
+  const handleSelectCategory = (categoryId: number | null) => {
+    setSelectedCategory(categoryId);
+    setVisibleCount(PAGE_SIZE);
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (categoryId === null) {
+        params.delete("category");
+      } else {
+        const cat = categoriesList.find((c) => c.id === categoryId);
+        params.set("category", cat ? cat.slug : String(categoryId));
+      }
+      const qs = params.toString();
+      window.history.replaceState(
+        null,
+        "",
+        `${window.location.pathname}${qs ? `?${qs}` : ""}`,
+      );
+    }
+  };
 
   const filteredProducts = selectedCategory
     ? productsList.filter((p) => p.categoryId === selectedCategory)
     : productsList;
+
+  const visibleProducts = filteredProducts.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredProducts.length;
 
   const featuredProducts = productsList.filter((p) => p.isFeatured);
 
@@ -101,7 +147,7 @@ export default function ShopStorefront({
       </section>
 
       {/* ── Featured Drops Carousel (if any) ── */}
-      {featuredProducts.length > 0 && !selectedCategory && (
+      {featuredProducts.length > 0 && (
         <section className={styles.featuredSection}>
           <ProductCarousel
             title={t("shop.featuredReleases")}
@@ -117,7 +163,7 @@ export default function ShopStorefront({
           <button
             type="button"
             className={`${styles.catButton} ${selectedCategory === null ? styles.catButtonActive : ""}`}
-            onClick={() => setSelectedCategory(null)}
+            onClick={() => handleSelectCategory(null)}
           >
             {t("shop.allCollections", { count: productsList.length })}
           </button>
@@ -129,7 +175,7 @@ export default function ShopStorefront({
                 key={cat.id}
                 type="button"
                 className={`${styles.catButton} ${selectedCategory === cat.id ? styles.catButtonActive : ""}`}
-                onClick={() => setSelectedCategory(cat.id)}
+                onClick={() => handleSelectCategory(cat.id)}
               >
                 {localizedCatName} {count > 0 ? `(${count})` : ""}
               </button>
@@ -156,94 +202,108 @@ export default function ShopStorefront({
             <p>{t("shop.noProducts")}</p>
           </div>
         ) : (
-          <div className={styles.productGrid}>
-            {filteredProducts.map((product, index) => {
-              const rawUrl = product.coverUrl ?? product.images?.[0]?.url;
-              const coverImg = rawUrl
-                ? getOptimizedImageUrl(rawUrl, { preset: "card" })
-                : "/voyt.svg";
+          <>
+            <div className={styles.productGrid}>
+              {visibleProducts.map((product, index) => {
+                const rawUrl = product.coverUrl ?? product.images?.[0]?.url;
+                const coverImg = rawUrl
+                  ? getOptimizedImageUrl(rawUrl, { preset: "card" })
+                  : "/voyt.svg";
 
-              const isOutOfStock = product.stock <= 0;
-              const isAdded = addedItemAnimationId === product.id;
-              const localizedTitle = getLocalized(product, "title", locale);
-              const authorFirstName = product.author ? getLocalized(product.author, "firstName", locale) : "";
-              const authorLastName = product.author ? getLocalized(product.author, "lastName", locale) : "";
-              const authorFullName = product.author ? `${authorFirstName} ${authorLastName}`.trim() : "VoytArt Gallery";
+                const isOutOfStock = product.stock <= 0;
+                const isAdded = addedItemAnimationId === product.id;
+                const localizedTitle = getLocalized(product, "title", locale);
+                const authorFirstName = product.author ? getLocalized(product.author, "firstName", locale) : "";
+                const authorLastName = product.author ? getLocalized(product.author, "lastName", locale) : "";
+                const authorFullName = product.author ? `${authorFirstName} ${authorLastName}`.trim() : "VoytArt Gallery";
 
-              return (
-                <article key={product.id} className={styles.productCard}>
-                  <div className={styles.imageWrapper}>
-                    <Link href={getLocalizedHref(`/shop/${product.id}`)} className={styles.imageLink}>
-                      <Image
-                        src={coverImg}
-                        alt={localizedTitle}
-                        fill
-                        priority={index < 4}
-                        className={styles.productImage}
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 320px"
-                      />
-                    </Link>
+                return (
+                  <article key={product.id} className={styles.productCard}>
+                    <div className={styles.imageWrapper}>
+                      <Link href={getLocalizedHref(`/shop/${product.id}`)} className={styles.imageLink}>
+                        <Image
+                          src={coverImg}
+                          alt={localizedTitle}
+                          fill
+                          priority={index < 4}
+                          className={styles.productImage}
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 320px"
+                        />
+                      </Link>
 
-                    {isOutOfStock ? (
-                      <span className={styles.soldOut}>{t("shop.soldOut")}</span>
-                    ) : product.isFeatured ? (
-                      <span className={styles.featuredBadge}>{t("shop.featured")}</span>
-                    ) : null}
-                  </div>
-
-                  <div className={styles.cardInfo}>
-                    <span className={styles.authorName}>
-                      {authorFullName}
-                    </span>
-
-                    <Link href={getLocalizedHref(`/shop/${product.id}`)} className={styles.titleLink}>
-                      <h2 className={styles.productTitle}>{localizedTitle}</h2>
-                    </Link>
-
-                    <div className={styles.cardFooter}>
-                      <div className={styles.priceWrap}>
-                        <span className={styles.price}>
-                          {product.price.toLocaleString("en-US")} €
-                        </span>
-                        {product.variants && product.variants.length > 0 && (
-                          <span className={styles.variantCountNote}>
-                            {t("shop.optionsCount", { count: product.variants.length })}
-                          </span>
-                        )}
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => handleProductAdd(product)}
-                        disabled={isOutOfStock}
-                        className={`${styles.addToCartBtn} ${isAdded ? styles.addedSuccess : ""}`}
-                        aria-label={`Add ${localizedTitle} to cart`}
-                      >
-                        {isOutOfStock ? (
-                          t("shop.soldOut")
-                        ) : isAdded ? (
-                          <>
-                            <Check size={14} />
-                            <span>{t("shop.added")}</span>
-                          </>
-                        ) : product.variants && product.variants.length > 0 ? (
-                          <>
-                            <span>{t("shop.options")}</span>
-                            <ArrowRight size={14} />
-                          </>
-                        ) : (
-                          <>
-                            <ShoppingBag size={14} />
-                            <span>{t("shop.add")}</span>
-                          </>
-                        )}
-                      </button>
+                      {isOutOfStock ? (
+                        <span className={styles.soldOut}>{t("shop.soldOut")}</span>
+                      ) : product.isFeatured ? (
+                        <span className={styles.featuredBadge}>{t("shop.featured")}</span>
+                      ) : null}
                     </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+
+                    <div className={styles.cardInfo}>
+                      <span className={styles.authorName}>
+                        {authorFullName}
+                      </span>
+
+                      <Link href={getLocalizedHref(`/shop/${product.id}`)} className={styles.titleLink}>
+                        <h2 className={styles.productTitle}>{localizedTitle}</h2>
+                      </Link>
+
+                      <div className={styles.cardFooter}>
+                        <div className={styles.priceWrap}>
+                          <span className={styles.price}>
+                            {product.price.toLocaleString("en-US")} €
+                          </span>
+                          {product.variants && product.variants.length > 0 && (
+                            <span className={styles.variantCountNote}>
+                              {t("shop.optionsCount", { count: product.variants.length })}
+                            </span>
+                          )}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleProductAdd(product)}
+                          disabled={isOutOfStock}
+                          className={`${styles.addToCartBtn} ${isAdded ? styles.addedSuccess : ""}`}
+                          aria-label={`Add ${localizedTitle} to cart`}
+                        >
+                          {isOutOfStock ? (
+                            t("shop.soldOut")
+                          ) : isAdded ? (
+                            <>
+                              <Check size={14} />
+                              <span>{t("shop.added")}</span>
+                            </>
+                          ) : product.variants && product.variants.length > 0 ? (
+                            <>
+                              <span>{t("shop.options")}</span>
+                              <ArrowRight size={14} />
+                            </>
+                          ) : (
+                            <>
+                              <ShoppingBag size={14} />
+                              <span>{t("shop.add")}</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+
+            {hasMore && (
+              <div className={styles.loadMoreContainer}>
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
+                  className={styles.loadMoreBtn}
+                >
+                  {t("gallery.showMore")}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>

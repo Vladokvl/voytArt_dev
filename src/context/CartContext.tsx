@@ -83,42 +83,51 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // 1b. Refresh product data (prices/stock) from the server after hydration —
   // localStorage містить лише снапшот, тому ціни можуть застаріти
   useEffect(() => {
-    if (!isHydrated) return;
-    setCart((current) => {
-      if (current.length === 0) return current;
-      // fire-and-forget refresh
-      void (async () => {
-        try {
-          const fresh = await fetchCartProductsAction(current.map((i) => i.product.id));
-          if (fresh.length === 0) {
-            setCart([]);
-            return;
-          }
-          const freshMap = new Map(fresh.map((p) => [p.id, p]));
-          setCart((prev) =>
-            prev.flatMap((item) => {
-              const p = freshMap.get(item.product.id);
-              if (!p) return []; // продукт видалено/деактивовано
-              const variant =
-                item.variantId != null ? p.variants?.find((v) => v.id === item.variantId) : null;
-              const maxStock = variant ? variant.stock : (p.stock ?? 999);
-              const qty = Math.min(item.quantity, Math.max(1, maxStock));
-              return [
-                {
-                  ...item,
-                  quantity: qty,
-                  variantTitle: variant ? variant.title : item.variantTitle,
-                  product: { ...p },
-                },
-              ];
-            }),
-          );
-        } catch {
-          // не блокуємо кошик, якщо refresh не вдався
+    if (!isHydrated || cart.length === 0) return;
+
+    let isMounted = true;
+
+    async function refreshCart() {
+      try {
+        const productIds = cart.map((i) => i.product.id);
+        const fresh = await fetchCartProductsAction(productIds);
+        if (!isMounted) return;
+
+        if (fresh.length === 0) {
+          setCart([]);
+          return;
         }
-      })();
-      return current;
-    });
+        const freshMap = new Map(fresh.map((p) => [p.id, p]));
+        setCart((prev) =>
+          prev.flatMap((item) => {
+            const p = freshMap.get(item.product.id);
+            if (!p) return []; // продукт видалено/деактивовано
+            const variant =
+              item.variantId != null ? p.variants?.find((v) => v.id === item.variantId) : null;
+            const maxStock = variant ? variant.stock : (p.stock ?? 999);
+            const qty = Math.min(item.quantity, Math.max(1, maxStock));
+            return [
+              {
+                ...item,
+                quantity: qty,
+                variantTitle: variant ? variant.title : item.variantTitle,
+                product: { ...p },
+              },
+            ];
+          }),
+        );
+      } catch {
+        // не блокуємо кошик, якщо refresh не вдався
+      }
+    }
+
+    void refreshCart();
+
+    return () => {
+      isMounted = false;
+    };
+    // Only run once after hydration completes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isHydrated]);
 
   // 2. Persist cart to localStorage whenever it changes

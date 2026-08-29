@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./GalleryPosts.module.scss";
@@ -36,6 +36,25 @@ export default function GalleryPosts({
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
+
+  // Restore scroll position when returning from a post
+  useEffect(() => {
+    try {
+      const lastPostId = sessionStorage.getItem("voyt_gallery_post_id");
+      if (lastPostId) {
+        sessionStorage.removeItem("voyt_gallery_post_id");
+        // Small timeout to allow DOM and layout to settle
+        setTimeout(() => {
+          const el = document.getElementById(`post-${lastPostId}`);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }, 150);
+      }
+    } catch {
+      // ignore storage access errors
+    }
+  }, []);
 
   const loadMore = async () => {
     if (loading) return;
@@ -75,6 +94,7 @@ export default function GalleryPosts({
               return (
                 <motion.div
                   key={post.id}
+                  id={`post-${post.id}`}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-50px" }}
@@ -83,6 +103,13 @@ export default function GalleryPosts({
                   <Link
                     href={getLocalizedHref(`/gallery/${post.id}`)}
                     className={styles.card}
+                    onClick={() => {
+                      try {
+                        sessionStorage.setItem("voyt_gallery_post_id", String(post.id));
+                      } catch {
+                        // ignore
+                      }
+                    }}
                   >
                     <div className={styles.coverWrapper}>
                       {post.coverUrl ? (
