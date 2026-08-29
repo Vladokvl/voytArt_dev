@@ -1,0 +1,263 @@
+/* PhoneInput Custom Styles for react-phone-input-2 */
+
+.react-tel-input .form-control {
+  width: 100% !important;
+  padding: calc(var(--spacing) * 2) calc(var(--spacing) * 3) calc(var(--spacing) * 2) 60px !important;
+  border: 1px solid var(--gray-100) !important;
+  border-radius: var(--radius-xl) !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  outline: none !important;
+  transition-property:
+    color,
+    background-color,
+    border-color,
+    outline-color,
+    text-decoration-color,
+    fill,
+    stroke,
+    --tw-gradient-from,
+    --tw-gradient-via,
+    --tw-gradient-to,
+    opacity,
+    box-shadow,
+    transform,
+    translate,
+    scale,
+    rotate,
+    filter,
+    -webkit-backdrop-filter,
+    backdrop-filter !important;
+  transition-timing-function: var(--ease-in-out) !important;
+  transition-duration: 0.15s !important;
+  overflow: hidden !important;
+  background-color: var(--gray-50) !important;
+}
+.react-tel-input .form-control.h-8 {
+  height: calc(var(--spacing) * 8) !important;
+}
+
+.react-tel-input .form-control.h-10 {
+  height: calc(var(--spacing) * 10) !important;
+}
+
+.react-tel-input .form-control.h-12 {
+  height: calc(var(--spacing) * 12) !important;
+}
+
+.react-tel-input .form-control.h-14 {
+  height: calc(var(--spacing) * 14) !important;
+}
+
+.react-tel-input .form-control:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 1px var(--primary) !important;
+}
+
+.react-tel-input .form-control::placeholder {
+  color: var(--gray-400) !important;
+}
+
+.react-tel-input .form-control:disabled {
+  background-color: var(--gray-50) !important;
+  cursor: not-allowed !important;
+  opacity: 0.6 !important;
+}
+
+/* Dark theme: input and dropdown use dark backgrounds */
+.dark .react-tel-input .form-control {
+  background-color: var(--gray-800, #1f2937) !important;
+  border-color: var(--gray-600, #4b5563) !important;
+  color: var(--gray-100, #f3f4f6) !important;
+}
+
+.dark .react-tel-input .form-control::placeholder {
+  color: var(--gray-500, #6b7280) !important;
+}
+
+.dark .react-tel-input .form-control:disabled {
+  background-color: var(--gray-800, #1f2937) !important;
+}
+
+.dark .react-tel-input .flag-dropdown {
+  border-right-color: var(--gray-600, #4b5563) !important;
+}
+
+.dark .react-tel-input .selected-flag,
+.dark .react-tel-input .flag-dropdown.open .selected-flag,
+.dark .react-tel-input .selected-flag:hover,
+.dark .react-tel-input .selected-flag:focus {
+  background: var(--gray-700, #374151) !important;
+  border-color: var(--gray-600, #4b5563) !important;
+}
+
+.dark .react-tel-input .country-list {
+  background: var(--gray-800, #1f2937) !important;
+  border-color: var(--gray-600, #4b5563) !important;
+}
+
+.dark .react-tel-input .country-list .search,
+.dark .react-tel-input .country-list .search-box {
+  background: var(--gray-800, #1f2937) !important;
+  border-color: var(--gray-600, #4b5563) !important;
+  color: var(--gray-100, #f3f4f6) !important;
+}
+
+.dark .react-tel-input .country-list .country {
+  color: var(--gray-100, #f3f4f6) !important;
+}
+
+/* Size variants */
+.react-tel-input.input-lg .form-control {
+  padding: calc(var(--spacing) * 3) calc(var(--spacing) * 4) calc(var(--spacing) * 3) 70px !important;
+  font-size: 16px !important;
+  border-radius: var(--radius-xl) !important;
+}
+
+.react-tel-input.input-md .form-control {
+  padding-block: calc(var(--spacing) * 2) !important;
+  outline: none !important;
+  font-size: 14px !important;
+  border-radius: var(--radius-xl) !important;
+}
+
+.react-tel-input.input-sm .form-control {
+  padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 2.5) calc(var(--spacing) * 1.5) 55px !important;
+  font-size: 13px !important;
+  border-radius: var(--radius-lg) !important;
+}
+
+.react-tel-input.input-xs .form-control {
+  padding: calc(var(--spacing)) calc(var(--spacing) * 2) calc(var(--spacing)) 50px !important;
+  font-size: 12px !important;
+  border-radius: var(--radius-lg) !important;
+}
+
+/* Контейнер */
+.react-tel-input-container {
+}
+
+/* Error state */
+.PhoneInput--invalid .react-tel-input .form-control {
+  border-color: var(--red-500) !important;
+}
+
+.PhoneInput--invalid .react-tel-input .form-control:focus {
+  border-color: var(--red-500) !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Dropdown */
+
+.react-tel-input .flag-dropdown {
+  background: transparent !important;
+  border-radius: var(--radius-xl) 0 0 var(--radius-xl) !important;
+  border: none !important;
+  border-right: 1px solid var(--gray-200) !important;
+  top: 1px !important;
+  bottom: 1px !important;
+  left: 1px !important;
+  /* overflow: hidden !important; */
+}
+.react-tel-input .selected-flag {
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg) !important;
+  border: 1px solid transparent !important;
+  transition: border-color 0.2s ease !important;
+  width: 42px !important;
+  transition: all 0.2s ease !important;
+}
+.react-tel-input .flag-dropdown.open .selected-flag,
+.react-tel-input .selected-flag:hover,
+.react-tel-input .selected-flag:focus {
+  background: var(--gray-100) !important;
+  border-color: var(--primary) !important;
+}
+
+.react-tel-input .country-list {
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
+  background: white !important;
+  border: 1px solid var(--gray-100) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  z-index: 50 !important;
+  max-height: 200px !important;
+  overflow-y: auto !important;
+  margin-top: calc(var(--spacing)) !important;
+  padding: 0 !important;
+}
+
+.react-tel-input .country-list .search {
+  padding: calc(var(--spacing) * 2) calc(var(--spacing) * 3) !important;
+  border: none !important;
+  border-bottom: 1px solid var(--gray-100) !important;
+  outline: none !important;
+  width: 100% !important;
+  font-size: 14px !important;
+}
+
+.react-tel-input .country-list .search-box {
+  transition-property:
+    color,
+    background-color,
+    border-color,
+    outline-color,
+    text-decoration-color,
+    fill,
+    stroke,
+    --tw-gradient-from,
+    --tw-gradient-via,
+    --tw-gradient-to,
+    opacity,
+    box-shadow,
+    transform,
+    translate,
+    scale,
+    rotate,
+    filter,
+    -webkit-backdrop-filter,
+    backdrop-filter !important;
+  transition-timing-function: var(--ease-in-out) !important;
+  transition-duration: 0.15s !important;
+}
+
+.react-tel-input .country-list .search-box:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 1px var(--primary) !important;
+}
+
+/* Country list */
+.react-tel-input .country-list .country {
+  padding: calc(var(--spacing) * 2) calc(var(--spacing) * 3) !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: calc(var(--spacing) * 2) !important;
+  font-size: 14px !important;
+  border: none !important;
+  background: transparent !important;
+  width: 100% !important;
+  text-align: left !important;
+}
+
+.react-tel-input .country-list .country:hover {
+  background-color: var(--primary-subtle) !important;
+}
+
+.react-tel-input .country-list .country.highlight {
+  background-color: var(--primary-subtle) !important;
+  color: var(--primary) !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .react-tel-input .flag-dropdown {
+    left: calc(var(--spacing) * 2) !important;
+  }
+
+  .react-tel-input .form-control {
+    padding-left: 50px !important;
+  }
+}

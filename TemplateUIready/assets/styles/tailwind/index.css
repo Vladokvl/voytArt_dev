@@ -1,0 +1,430 @@
+@import 'tailwindcss';
+
+@config '../../../../tailwind.config.ts';
+
+@layer theme {
+  :root {
+    --neutral: #ffffff;
+    --primary: #2a85ff;
+    --primary-deep: #0069f6;
+    --primary-mild: #4996ff;
+    --primary-subtle: #2a85ff1a;
+    --error: #ff6a55;
+    --error-subtle: #ff6a551a;
+    --success: #10b981;
+    --success-subtle: #05eb7624;
+    --info: #2a85ff;
+    --info-subtle: #2a85ff1a;
+    --warning: #f59e0b;
+    --warning-subtle: #ffd40045;
+    --gray-50: #fafafa;
+    --gray-100: #f5f5f5;
+    --gray-200: #e5e5e5;
+    --gray-300: #d4d4d4;
+    --gray-400: #a3a3a3;
+    --gray-500: #737373;
+    --gray-600: #525252;
+    --gray-700: #404040;
+    --gray-800: #262626;
+    --gray-900: #171717;
+    --gray-950: #0a0a0a;
+  }
+
+  .dark {
+    --neutral: #ffffff;
+    --primary: #2a85ff;
+    --primary-deep: #0069f6;
+    --primary-mild: #4996ff;
+    --primary-subtle: #2a85ff1a;
+    --error: #ff6a55;
+    --error-subtle: #ff6a551a;
+    --success: #10b981;
+    --success-subtle: #05eb7624;
+    --info: #2a85ff;
+    --info-subtle: #2a85ff1a;
+    --warning: #f59e0b;
+    --warning-subtle: #ffd40045;
+    --gray-50: #fafafa;
+    --gray-100: #f5f5f5;
+    --gray-200: #e5e5e5;
+    --gray-300: #d4d4d4;
+    --gray-400: #a3a3a3;
+    --gray-500: #737373;
+    --gray-600: #525252;
+    --gray-700: #404040;
+    --gray-800: #262626;
+    --gray-900: #171717;
+    --gray-950: #0a0a0a;
+  }
+}
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+
+  [type='button'] {
+    -webkit-appearance: none !important;
+  }
+
+  input[type='time']::-webkit-calendar-picker-indicator {
+    @apply rounded-md dark:bg-neutral-500;
+  }
+
+  button,
+  [role='button'] {
+    cursor: pointer;
+  }
+
+  body {
+    @apply text-gray-500 dark:text-gray-400 text-sm bg-gray-100 dark:bg-gray-950 leading-normal font-medium;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  .h1 {
+    @apply text-4xl font-bold text-gray-900 dark:text-gray-100;
+  }
+
+  h2,
+  .h2 {
+    @apply text-3xl font-bold text-gray-900 dark:text-gray-100;
+  }
+
+  h3,
+  .h3 {
+    @apply text-2xl font-bold text-gray-900 dark:text-gray-100;
+  }
+
+  h4,
+  .h4 {
+    @apply text-xl font-bold text-gray-900 dark:text-gray-100;
+  }
+
+  h5,
+  .h5 {
+    @apply text-lg font-bold text-gray-900 dark:text-gray-100;
+  }
+
+  h6,
+  .h6 {
+    @apply text-base font-semibold text-gray-900 dark:text-gray-100;
+  }
+
+  hr {
+    @apply border-gray-200 dark:border-gray-600;
+  }
+
+  root {
+    overflow: hidden;
+  }
+}
+
+@layer components {
+  .heading-text {
+    @apply text-gray-900 dark:text-gray-100;
+  }
+}
+
+/* ===================================
+   STORE SPECIFIC STYLES
+   =================================== */
+
+@layer utilities {
+  /* ===================================
+	   STORE LAYOUT UTILITIES
+	   =================================== */
+
+  /* .container {
+		margin-inline: auto;
+		padding-inline: 1.25rem;
+	}
+	
+	@media screen and (min-width: 640px) {
+		.container {
+			padding-inline: 2rem;
+		}
+	} */
+
+  .hidden-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hidden-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .z-max {
+    z-index: 999999;
+  }
+
+  .pl-container {
+    @apply pl-6 sm:pl-[calc((100vw-40rem+2.5rem)/2)] md:pl-[calc((100vw-48rem+4rem)/2)] lg:pl-[calc((100vw-64rem+4rem)/2)] xl:pl-[calc((100vw-80rem+4rem)/2)] 2xl:pl-[calc((100vw-96rem+4rem)/2)];
+  }
+
+  .pr-container {
+    @apply pr-6 sm:pr-[calc((100vw-40rem+2.5rem)/2)] md:pr-[calc((100vw-48rem+4rem)/2)] lg:pr-[calc((100vw-64rem+4rem)/2)] xl:pr-[calc((100vw-80rem+4rem)/2)] 2xl:pr-[calc((100vw-96rem+4rem)/2)];
+  }
+
+  /* ===================================
+	   STORE LISTING SECTION UTILITIES
+	   =================================== */
+
+  .listingSectionSidebar__wrap {
+    @apply flex w-full flex-col gap-y-6 border-neutral-200 px-0 sm:gap-y-8 sm:rounded-2xl sm:border sm:p-4 sm:pb-10 xl:p-8 dark:border-neutral-700;
+  }
+
+  .listingSection__wrap {
+    @apply flex w-full flex-col gap-y-6 border-b border-neutral-200 pb-14 sm:gap-y-8 dark:border-neutral-700;
+  }
+
+  /* ===================================
+	   STORE CARD UTILITIES
+	   =================================== */
+
+  .nc-card-title {
+    @apply transition-colors duration-75 hover:text-primary dark:hover:text-primary-mild;
+  }
+
+  /* ===================================
+	   STORE MENU UTILITIES
+	   =================================== */
+
+  .menu-item {
+    @apply flex;
+  }
+
+  .menu-item:hover > .sub-menu {
+    @apply block;
+  }
+
+  .sub-menu {
+    @apply hidden;
+  }
+
+  /* ===================================
+	   STORE OVERFLOW UTILITIES
+	   =================================== */
+
+  .overflow-initial {
+    overflow: initial;
+  }
+
+  /* Store nav horizontal scrollbar - thin, neutral, theme-aware */
+  .nav-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(163 163 163) transparent;
+  }
+
+  .dark .nav-scrollbar {
+    scrollbar-color: rgb(82 82 82) transparent;
+  }
+
+  .nav-scrollbar::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .nav-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .nav-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgb(163 163 163);
+    border-radius: 3px;
+  }
+
+  .nav-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(115 115 115);
+  }
+
+  .dark .nav-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgb(82 82 82);
+  }
+
+  .dark .nav-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(115 115 115);
+  }
+
+  /* ===================================
+	   STORE EMBLA CAROUSEL UTILITIES
+	   =================================== */
+
+  .embla {
+    overflow: hidden;
+  }
+
+  .embla-overflow-unset {
+    overflow: unset;
+  }
+
+  .embla__container {
+    display: flex;
+    touch-action: pan-y pinch-zoom;
+  }
+
+  .embla__slide {
+    flex-shrink: 0;
+    flex-grow: 0;
+    transform: translate3d(0, 0, 0);
+  }
+
+  /* ===================================
+	   STORE SHADOW UTILITIES
+	   =================================== */
+
+  .nc-shadow-lg {
+    @apply shadow-[2px_8px_40px_rgba(0,0,0,0.08)];
+  }
+
+  .nc-shadow-sketch {
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+  }
+
+  /* ===================================
+	   STORE RATING UTILITIES
+	   =================================== */
+
+  .nc-FiveStartIconForRate svg:hover ~ svg {
+    @apply text-gray-300;
+  }
+
+  /* ===================================
+	   STORE ANIMATION UTILITIES
+	   =================================== */
+
+  .fade--animation__dot {
+    animation-name: opacityAndWidthUp;
+    animation-duration: 150ms;
+    animation-timing-function: linear;
+  }
+
+  .fade--animation__image {
+    animation-name: opacityAndTranslateYDown;
+    animation-duration: 650ms;
+    animation-timing-function: ease-in-out;
+  }
+
+  .fade--animation__left {
+    animation-duration: 600ms;
+    animation-timing-function: ease-in-out;
+    animation-name: opacity0to1;
+  }
+
+  .fade--animation__button {
+    animation-name: opacityAndTranslateYUp;
+    animation-duration: 800ms;
+    animation-timing-function: ease-in-out;
+  }
+
+  .fade--animation__heading {
+    animation-name: opacityAndTranslateYUp;
+    animation-duration: 600ms;
+    animation-timing-function: ease-in-out;
+  }
+
+  .fade--animation__subheading {
+    animation-name: opacityAndTranslateYUp;
+    animation-timing-function: ease-in-out;
+    animation-duration: 400ms;
+  }
+}
+
+/* ===================================
+   STORE ANIMATION KEYFRAMES
+   =================================== */
+
+@keyframes opacityAndTranslateYDown {
+  from {
+    transform: scale(1.05) translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0px);
+    opacity: 1;
+  }
+}
+
+@keyframes opacityAndTranslateYUp {
+  from {
+    transform: translateX(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes opacity0to1 {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes opacityAndWidthUp {
+  from {
+    width: 30px;
+    opacity: 0;
+  }
+  to {
+    width: 80px;
+    opacity: 1;
+  }
+}
+
+/* ===================================
+   STORE RESPONSIVE UTILITIES
+   =================================== */
+
+@media (min-aspect-ratio: 3/2) {
+  .wide\:h-full {
+    height: 100%;
+  }
+}
+
+@media (min-width: 1280px) {
+  @media (min-height: 854px) {
+    .xl\:taller-than-854\:h-auto {
+      height: auto;
+    }
+  }
+}
+
+/* ===================================
+   STORE MENU STYLES
+   =================================== */
+
+.menuIsNew_lv1 > a::before {
+  content: 'New!';
+  position: absolute;
+  top: -2px;
+  right: 0;
+  display: inline-block;
+  padding: 0 5px;
+  line-height: 15px;
+  border-radius: 4px;
+  background-color: #f35656;
+  color: #fff;
+  font-size: 10px;
+  font-weight: normal;
+}
+
+.menuIsNew > a::after {
+  content: 'New!';
+  display: inline-block;
+  padding: 0 5px;
+  line-height: 15px;
+  border-radius: 4px;
+  background-color: #f35656;
+  color: #fff;
+  font-size: 10px;
+  margin-left: 6px;
+}

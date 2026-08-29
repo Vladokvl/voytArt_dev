@@ -21,6 +21,8 @@ import {
   Sun,
   Moon,
   ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 type MediaItem = {
@@ -48,6 +50,28 @@ type PaintingCardProps = {
     lastNameUk?: string | null;
   };
   media: MediaItem[];
+};
+
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? "100%" : "-100%",
+    opacity: 0,
+  }),
+  center: {
+    zIndex: 1,
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    zIndex: 0,
+    x: direction > 0 ? "-100%" : "100%",
+    opacity: 0,
+  }),
+};
+
+const swipeConfidenceThreshold = 10000;
+const swipePower = (offset: number, velocity: number) => {
+  return Math.abs(offset) * velocity;
 };
 
 export default function PaintingCard({ painting }: { painting: PaintingCardProps }) {
@@ -79,7 +103,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isNeon, setIsNeon] = useState(isGlobalNeon && hasNeonMedia);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [[page, direction], setPage] = useState([0, 0]);
   const [loadedSet, setLoadedSet] = useState<Set<string>>(new Set());
 
   // Inquiry form states
@@ -117,6 +141,18 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
 
   const activeItems = isNeon ? neonMedia : defaultItems;
   const hasMultiple = activeItems.length > 1;
+  const imageIndex = ((page % activeItems.length) + activeItems.length) % activeItems.length;
+
+  const paginate = (newDirection: number) => {
+    if (activeItems.length <= 1) return;
+    setPage(([currPage]) => [currPage + newDirection, newDirection]);
+  };
+
+  const jumpToSlide = (newIndex: number) => {
+    if (newIndex === imageIndex) return;
+    const dir = newIndex > imageIndex ? 1 : -1;
+    setPage([newIndex, dir]);
+  };
 
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
@@ -156,7 +192,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
       }
     } else {
       setIsNeon(false);
-      setActiveIndex(0);
+      setPage([0, 0]);
       setLoadedSet(new Set());
       setIsInquiryOpen(false);
       setInquiryResult(null);
@@ -165,47 +201,15 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
 
   const handleModeToggle = () => {
     setIsNeon((v) => !v);
-    setActiveIndex(0);
+    setPage([0, 0]);
     setLoadedSet(new Set());
-  };
-
-  const navigate = (dir: "prev" | "next") => {
-    const len = activeItems.length;
-    setActiveIndex((i) =>
-      dir === "prev" ? (i === 0 ? len - 1 : i - 1) : (i === len - 1 ? 0 : i + 1)
-    );
   };
 
   const markLoaded = (url: string) => {
     setLoadedSet((s) => new Set([...s, url]));
   };
 
-  // Touch Swipe gestures for mobile
-  const [touchStartPos, setTouchStartPos] = useState<{ x: number; y: number } | null>(null);
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (e.touches[0]) {
-      setTouchStartPos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
-    }
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (!touchStartPos || !e.changedTouches[0]) return;
-    const deltaX = e.changedTouches[0].clientX - touchStartPos.x;
-    const deltaY = e.changedTouches[0].clientY - touchStartPos.y;
-    setTouchStartPos(null);
-
-    // Swipe horizontal check (min 40px threshold and dominant horizontal direction)
-    if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY)) {
-      if (deltaX > 0) {
-        navigate("prev");
-      } else {
-        navigate("next");
-      }
-    }
-  };
-
-  const currentItem = activeItems[activeIndex];
+  const currentItem = activeItems[imageIndex];
   const isCurrentLoaded =
     currentItem?.type === "VIDEO"
       ? true
@@ -304,127 +308,99 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
           className={styles.modal}
           data-neon={isNeon ? "true" : undefined}
         >
-          {/* ── Slider area ─────────────────────────────────── */}
-          <div
-            className={styles.imageWrap}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
-          >
+          {/* ── Slider area with Framer Motion Gestures ──────────── */}
+          <div className={styles.imageWrap}>
             {/* Spinner shown while active image loads */}
             {!isCurrentLoaded && <div className={styles.spinner} aria-hidden="true" />}
 
-            {/* All slides pre-rendered; translateX reveals active slide */}
-            <div
-              className={styles.sliderTrack}
-              style={{ transform: `translateX(-${activeIndex * 100}%)` }}
-            >
-              {activeItems.map((item, idx) => (
-                <div
-                  className={styles.slide}
-                  key={`${item.id}-${item.url}`}
-                  onMouseMove={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const x = ((e.clientX - rect.left) / rect.width) * 100;
-                    const y = ((e.clientY - rect.top) / rect.height) * 100;
-                    e.currentTarget.style.setProperty("--mouse-x", `${x}%`);
-                    e.currentTarget.style.setProperty("--mouse-y", `${y}%`);
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.setProperty("--mouse-x", "50%");
-                    e.currentTarget.style.setProperty("--mouse-y", "50%");
-                  }}
-                >
-                  {item.type === "VIDEO" ? (
-                    <video
+            <AnimatePresence initial={false} custom={direction}>
+              <motion.div
+                key={page}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{
+                  x: { type: "spring", stiffness: 350, damping: 35 },
+                  opacity: { duration: 0.2 },
+                }}
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.8}
+                onDragEnd={(_e, { offset, velocity }) => {
+                  const swipe = swipePower(offset.x, velocity.x);
+                  if (swipe < -swipeConfidenceThreshold || offset.x < -50) {
+                    paginate(1);
+                  } else if (swipe > swipeConfidenceThreshold || offset.x > 50) {
+                    paginate(-1);
+                  }
+                }}
+                className={styles.slide}
+              >
+                {currentItem?.type === "VIDEO" ? (
+                  <video
+                    className={styles.mediaEl}
+                    controls
+                    autoPlay
+                    playsInline
+                  >
+                    <source src={currentItem.url} />
+                  </video>
+                ) : (
+                  currentItem && (
+                    <Image
+                      src={getOptimizedImageUrl(currentItem.url, { preset: "large" })}
+                      alt={paintingTitle}
+                      fill
                       className={styles.mediaEl}
-                      controls
-                      autoPlay={idx === activeIndex}
-                      playsInline
-                    >
-                      <source src={item.url} />
-                    </video>
-                  ) : (
-                    <>
-                      {/* Cached preview layer (reuse already loaded card cover without extra Cloudinary credits) */}
-                      {!loadedSet.has(item.url) && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={gridCoverUrl}
-                          alt=""
-                          className={styles.mediaEl}
-                          style={{
-                            filter: "blur(6px)",
-                            transform: "scale(1.02)",
-                            position: "absolute",
-                            inset: 0,
-                            zIndex: 1,
-                          }}
-                          aria-hidden="true"
-                        />
-                      )}
-                      <Image
-                        src={getOptimizedImageUrl(item.url, { preset: "large" })}
-                        alt={paintingTitle}
-                        fill
-                        className={styles.mediaEl}
-                        style={{
-                          opacity: loadedSet.has(item.url) ? 1 : 0,
-                          transition: "opacity 0.25s ease",
-                          zIndex: 2,
-                        }}
-                        sizes="(max-width: 768px) 100vw, 66vw"
-                        onLoad={() => markLoaded(item.url)}
-                      />
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
+                      sizes="(max-width: 768px) 100vw, 66vw"
+                      onLoad={() => markLoaded(currentItem.url)}
+                      draggable={false}
+                      priority={imageIndex === 0}
+                    />
+                  )
+                )}
+              </motion.div>
+            </AnimatePresence>
 
-            {/* Navigation arrows */}
+            {/* Desktop-only navigation arrows */}
             {hasMultiple && (
               <>
                 <button
                   type="button"
                   className={`${styles.navBtn} ${styles.navPrev}`}
-                  onClick={() => navigate("prev")}
+                  onClick={() => paginate(-1)}
                   aria-label="Previous image"
                 >
-                  ‹
+                  <ChevronLeft size={20} />
                 </button>
                 <button
                   type="button"
                   className={`${styles.navBtn} ${styles.navNext}`}
-                  onClick={() => navigate("next")}
+                  onClick={() => paginate(1)}
                   aria-label="Next image"
                 >
-                  ›
+                  <ChevronRight size={20} />
                 </button>
                 <div className={styles.counter}>
-                  {activeIndex + 1} / {activeItems.length}
+                  {imageIndex + 1} / {activeItems.length}
                 </div>
               </>
             )}
 
-            {/* Thumbnails row below active image */}
+            {/* Segmented Progress Indicator (tapping dashes smoothly scrolls to slide) */}
             {hasMultiple && (
-              <div className={styles.thumbnailsBar}>
+              <div className={styles.progressDashes} role="tablist" aria-label="Slides progress">
                 {activeItems.map((item, idx) => (
                   <button
-                    key={`thumb-${item.id}-${item.url}`}
+                    key={`dash-${item.id}-${item.url}`}
                     type="button"
-                    className={`${styles.thumbBtn} ${idx === activeIndex ? styles.thumbBtnActive : ""}`}
-                    onClick={() => setActiveIndex(idx)}
-                    aria-label={`View image ${idx + 1}`}
-                  >
-                    <Image
-                      src={getOptimizedImageUrl(item.url, { preset: "thumb" })}
-                      alt=""
-                      width={44}
-                      height={44}
-                      className={styles.thumbImg}
-                    />
-                  </button>
+                    className={`${styles.dashItem} ${idx === imageIndex ? styles.dashItemActive : ""}`}
+                    onClick={() => jumpToSlide(idx)}
+                    aria-label={`Go to slide ${idx + 1}`}
+                    aria-selected={idx === imageIndex}
+                  />
                 ))}
               </div>
             )}

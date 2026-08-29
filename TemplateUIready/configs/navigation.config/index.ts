@@ -1,0 +1,88 @@
+import { NAV_ITEM_TYPE_ITEM } from '@/constants/navigation.constant'
+import type { NavigationTree } from '@/@types/navigation'
+import { ADMIN } from '@/constants/roles.constant'
+
+const navigationConfig: NavigationTree[] = [
+  {
+    key: 'dashboard',
+    path: '/admin',
+    title: 'Dashboard',
+    translateKey: 'nav.dashboard',
+    icon: 'dashboard',
+    type: NAV_ITEM_TYPE_ITEM,
+    authority: [ADMIN],
+    subMenu: [],
+  },
+  {
+    key: 'users',
+    path: '/admin/users/list',
+    title: 'User Management',
+    translateKey: 'nav.users',
+    icon: 'users',
+    type: NAV_ITEM_TYPE_ITEM,
+    authority: [ADMIN],
+    subMenu: [],
+  },
+  {
+    key: 'invitations',
+    path: '/admin/invitations',
+    title: 'Invitation Management',
+    translateKey: 'nav.invitations',
+    icon: 'invitations',
+    type: NAV_ITEM_TYPE_ITEM,
+    authority: [ADMIN],
+    subMenu: [],
+  },
+  {
+    key: 'graph',
+    path: '/admin/graph',
+    title: 'Graph & Contacts',
+    translateKey: 'nav.graph',
+    icon: 'graph',
+    type: NAV_ITEM_TYPE_ITEM,
+    authority: [ADMIN],
+    subMenu: [],
+  },
+  {
+    key: 'scoring',
+    path: '/admin/scoring',
+    title: 'Scoring Parameters',
+    translateKey: 'nav.scoring',
+    icon: 'scoring',
+    type: NAV_ITEM_TYPE_ITEM,
+    authority: [ADMIN],
+    subMenu: [],
+  },
+  {
+    key: 'notifications',
+    path: '/admin/notifications',
+    title: 'Notifications',
+    translateKey: 'nav.notifications',
+    icon: 'notifications',
+    type: NAV_ITEM_TYPE_ITEM,
+    authority: [ADMIN],
+    subMenu: [],
+  },
+  {
+    key: 'moderation',
+    path: '/admin/moderation',
+    title: 'Moderation & Security',
+    translateKey: 'nav.moderation',
+    icon: 'moderation',
+    type: NAV_ITEM_TYPE_ITEM,
+    authority: [ADMIN],
+    subMenu: [],
+  },
+  {
+    key: 'settings',
+    path: '/admin/settings',
+    title: 'Settings',
+    translateKey: 'nav.settings',
+    icon: 'settings',
+    type: NAV_ITEM_TYPE_ITEM,
+    authority: [ADMIN],
+    subMenu: [],
+  },
+]
+
+export default navigationConfig

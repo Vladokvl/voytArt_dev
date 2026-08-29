@@ -1,0 +1,245 @@
+/* UniversalForm Base Styles */
+.universal-form {
+  width: 100%;
+}
+
+.universal-form-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Spacing Classes */
+.universal-form-spacing-sm > * + * {
+  margin-top: 0.5rem;
+}
+
+.universal-form-spacing-md > * + * {
+  margin-top: 1rem;
+}
+
+.universal-form-spacing-lg > * + * {
+  margin-top: 1.5rem;
+}
+
+/* Layout Classes */
+.universal-form-base {
+  width: 100%;
+}
+
+.universal-form-vertical {
+  display: flex;
+  flex-direction: column;
+}
+
+.universal-form-vertical > * + * {
+  margin-top: 1rem;
+}
+
+.universal-form-horizontal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.universal-form-horizontal > * {
+  flex: 1;
+  min-width: 0;
+}
+
+.universal-form-grid {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+}
+
+/* Grid Columns */
+.universal-form-grid-1 {
+  grid-template-columns: 1fr;
+}
+
+.universal-form-grid-2 {
+  grid-template-columns: 1fr;
+}
+
+.universal-form-grid-3 {
+  grid-template-columns: 1fr;
+}
+
+.universal-form-grid-4 {
+  grid-template-columns: 1fr;
+}
+
+/* Responsive Grid */
+@media (min-width: 768px) {
+  .universal-form-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .universal-form-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .universal-form-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .universal-form-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .universal-form-grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Form Buttons */
+.universal-form-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 1rem;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .universal-form-buttons {
+    border-top-color: #374151;
+  }
+}
+
+/* Form Item Spacing */
+.universal-form-item {
+  margin-bottom: 1rem;
+}
+
+.universal-form-item:last-child {
+  margin-bottom: 0;
+}
+
+/* Error Styles */
+.universal-form-error {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Help Text Styles */
+.universal-form-help {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Disabled State */
+.universal-form-disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Loading State */
+.universal-form-loading {
+  position: relative;
+}
+
+.universal-form-loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+/* Input Sizes */
+.universal-form-input-sm {
+  font-size: 0.875rem;
+  padding: 0.375rem 0.75rem;
+  height: 2rem;
+}
+
+.universal-form-input-md {
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  height: 2.5rem;
+}
+
+.universal-form-input-lg {
+  font-size: 1.125rem;
+  padding: 0.75rem 1.25rem;
+  height: 3rem;
+}
+
+/* Custom Spacing Utilities */
+.universal-form-gap-xs {
+  gap: 0.25rem;
+}
+
+.universal-form-gap-sm {
+  gap: 0.5rem;
+}
+
+.universal-form-gap-md {
+  gap: 1rem;
+}
+
+.universal-form-gap-lg {
+  gap: 1.5rem;
+}
+
+.universal-form-gap-xl {
+  gap: 2rem;
+}
+
+/* Margin Utilities */
+.universal-form-mt-xs {
+  margin-top: 0.25rem;
+}
+
+.universal-form-mt-sm {
+  margin-top: 0.5rem;
+}
+
+.universal-form-mt-md {
+  margin-top: 1rem;
+}
+
+.universal-form-mt-lg {
+  margin-top: 1.5rem;
+}
+
+.universal-form-mt-xl {
+  margin-top: 2rem;
+}
+
+/* Padding Utilities */
+.universal-form-p-xs {
+  padding: 0.25rem;
+}
+
+.universal-form-p-sm {
+  padding: 0.5rem;
+}
+
+.universal-form-p-md {
+  padding: 1rem;
+}
+
+.universal-form-p-lg {
+  padding: 1.5rem;
+}
+
+.universal-form-p-xl {
+  padding: 2rem;
+}
