@@ -34,14 +34,11 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
 
     // Обробник стрілочки браузера "Назад/Вперед"
     const handlePopState = () => {
-      window.scrollTo(0, 0);
-      lenis.scrollTo(0, { immediate: true, force: true });
+      // Дозволяємо браузеру та sessionStorage відновлювати позицію скролу
       lenis.resize();
       ScrollTrigger.refresh();
 
       requestAnimationFrame(() => {
-        window.scrollTo(0, 0);
-        lenis.scrollTo(0, { immediate: true, force: true });
         lenis.resize();
         ScrollTrigger.refresh();
       });

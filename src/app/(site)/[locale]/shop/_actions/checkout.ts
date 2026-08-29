@@ -3,7 +3,9 @@
 import { z } from "zod";
 import { db } from "~/lib/db";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import crypto from "crypto";
+import { rateLimit, getClientIp } from "~/lib/rate-limit";
 
 const cartItemSchema = z.object({
   productId: z.number().int().positive(),
@@ -38,7 +40,15 @@ export async function createOrderAction(data: CheckoutInput): Promise<{
   orderNumber?: string;
   error?: string;
 }> {
-  // 1. Валідація вхідних даних на сервері
+  // 1. Rate-limit: максимум 5 замовлень за 5 хвилин на IP
+  const headerList = await headers();
+  const ip = getClientIp(headerList);
+  const rl = rateLimit(`checkout:${ip}`, { limit: 5, windowMs: 5 * 60 * 1000 });
+  if (!rl.allowed) {
+    return { success: false, error: "Забагато спроб оформлення. Спробуйте пізніше." };
+  }
+
+  // 2. Валідація вхідних даних на сервері
   const parsed = checkoutSchema.safeParse(data);
   if (!parsed.success) {
     return { success: false, error: "Будь ласка, перевірте правильність заповнення полів" };

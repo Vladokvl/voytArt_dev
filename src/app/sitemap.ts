@@ -56,7 +56,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         })),
       ]),
     ];
-  } catch {
-    return staticRoutes;
+  } catch (err) {
+    console.error("Sitemap generation error:", err);
+    throw err;
   }
 }

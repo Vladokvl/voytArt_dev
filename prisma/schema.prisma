@@ -345,6 +345,9 @@ model AnalyticsEvent {
     createdAt   DateTime @default(now()) @map("created_at")
 
     @@index([createdAt])
+    @@index([createdAt, pageType])
+    @@index([createdAt, country])
+    @@index([visitorHash, createdAt])
     @@index([path])
     @@index([country])
     @@index([pageType])

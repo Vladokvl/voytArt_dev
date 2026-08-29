@@ -1,4 +1,4 @@
-import { useState, type RefObject } from "react";
+import { useState, useRef, useEffect, type RefObject } from "react";
 
 interface UseImageCropProps {
   fileInputRef: RefObject<HTMLInputElement | null>;
@@ -14,6 +14,26 @@ export function useImageCrop({
   maxVideoSizeMb = 50,
 }: UseImageCropProps) {
   const [cropFile, setCropFile] = useState<File | null>(null);
+  const createdUrlRef = useRef<string | null>(null);
+
+  const updatePreviewUrl = (file: File) => {
+    if (createdUrlRef.current) {
+      URL.revokeObjectURL(createdUrlRef.current);
+    }
+    const newUrl = URL.createObjectURL(file);
+    createdUrlRef.current = newUrl;
+    setPreview(newUrl);
+    return newUrl;
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (createdUrlRef.current) {
+        URL.revokeObjectURL(createdUrlRef.current);
+      }
+    };
+  }, []);
 
   const processFile = (file: File) => {
     if (file.type.startsWith("image/")) {
@@ -37,7 +57,7 @@ export function useImageCrop({
       dt.items.add(file);
       if (fileInputRef.current) fileInputRef.current.files = dt.files;
 
-      setPreview(URL.createObjectURL(file));
+      updatePreviewUrl(file);
       if (setPreviewType) setPreviewType("video");
     }
   };
@@ -62,7 +82,7 @@ export function useImageCrop({
     dt.items.add(croppedFile);
     if (fileInputRef.current) fileInputRef.current.files = dt.files;
 
-    setPreview(URL.createObjectURL(croppedFile));
+    updatePreviewUrl(croppedFile);
     if (setPreviewType) setPreviewType("image");
     setCropFile(null);
   };

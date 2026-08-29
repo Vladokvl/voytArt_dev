@@ -9,7 +9,7 @@ import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import ProductCarousel from "~/components/shop/ProductCarousel";
 import styles from "./product-page.module.scss";
 import { useTranslation } from "~/context/LanguageContext";
-import { getLocalized } from "~/lib/i18n";
+import { getLocalized, formatLocalizedPrice } from "~/lib/i18n";
 import { sanitizeHtml } from "~/lib/sanitize-html";
 
 type ProductImage = {
@@ -232,7 +232,7 @@ export default function ProductView({
             <h1 className={styles.title}>{localizedProductTitle}</h1>
             <div className={styles.priceRow}>
               <span className={styles.price}>
-                {currentPrice.toLocaleString("en-US")} €
+                {formatLocalizedPrice(currentPrice, locale)}
               </span>
             </div>
           </div>

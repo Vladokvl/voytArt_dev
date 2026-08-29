@@ -10,7 +10,7 @@ import { useCart } from "~/context/CartContext";
 import ProductCarousel from "~/components/shop/ProductCarousel";
 import styles from "./shop.module.scss";
 import { useTranslation } from "~/context/LanguageContext";
-import { getLocalized } from "~/lib/i18n";
+import { getLocalized, formatLocalizedPrice } from "~/lib/i18n";
 
 type ProductImage = { id: number; url: string; order: number };
 type ProductVariant = { id: number; title: string; titleUk?: string | null; price: number | null; stock: number };
@@ -250,7 +250,7 @@ export default function ShopStorefront({
                       <div className={styles.cardFooter}>
                         <div className={styles.priceWrap}>
                           <span className={styles.price}>
-                            {product.price.toLocaleString("en-US")} €
+                            {formatLocalizedPrice(product.price, locale)}
                           </span>
                           {product.variants && product.variants.length > 0 && (
                             <span className={styles.variantCountNote}>

@@ -95,12 +95,36 @@ export default async function ArtPage({
 }) {
   const { artist, collection, neon } = await searchParams;
   const isNeonMode = neon === "true";
-  const selectedAuthorId = parseIdParam(artist);
+  const parsedAuthorId = parseIdParam(artist);
   const selectedCollectionId = parseIdParam(collection);
-  const isArtistSelected = artist !== undefined && artist !== "";
 
   const limit = 9;
-  const [paintings, totalPaintings, authors, collections] = await Promise.all([
+
+  // 1. Отримуємо список активних авторів
+  const authors = await db.author.findMany({
+    where: {
+      active: true,
+      ...(isNeonMode
+        ? {
+            paintings: {
+              some: { hasNeon: true },
+            },
+          }
+        : {}),
+    },
+    orderBy: { order: "asc" },
+  });
+
+  // 2. Валідуємо, чи існує такий автор серед активних
+  const selectedAuthor = parsedAuthorId
+    ? authors.find((a) => a.id === parsedAuthorId) ?? null
+    : null;
+  const selectedAuthorId = selectedAuthor ? selectedAuthor.id : null;
+  const isArtistSelected = selectedAuthor !== null;
+  const safeArtistParam = selectedAuthor ? String(selectedAuthor.id) : null;
+
+  // 3. Завантажуємо картини та колекції тільки для валідного автора
+  const [paintings, totalPaintings, collections] = await Promise.all([
     db.painting.findMany({
       where: {
         ...(selectedAuthorId ? { authorId: selectedAuthorId } : {}),
@@ -123,19 +147,6 @@ export default async function ArtPage({
         ...(isNeonMode ? { hasNeon: true } : {}),
       },
     }),
-    db.author.findMany({
-      where: {
-        active: true,
-        ...(isNeonMode
-          ? {
-              paintings: {
-                some: { hasNeon: true },
-              },
-            }
-          : {}),
-      },
-      orderBy: { order: "asc" },
-    }),
     selectedAuthorId
       ? db.collection.findMany({
           where: { authorId: selectedAuthorId },
@@ -143,10 +154,6 @@ export default async function ArtPage({
         })
       : Promise.resolve([]),
   ]);
-
-  const selectedAuthor = selectedAuthorId
-    ? authors.find((a) => a.id === selectedAuthorId)
-    : null;
 
   const hasMore = paintings.length < totalPaintings;
 
@@ -188,7 +195,7 @@ export default async function ArtPage({
       <JsonLd schema={paintingsJsonLd} />
       <Suspense fallback={null}>
         <ArtHero
-          artistParam={artist ?? null}
+          artistParam={safeArtistParam}
           authors={authors}
         />
       </Suspense>
@@ -208,7 +215,7 @@ export default async function ArtPage({
           <CollectionFilter
             collections={collections}
             selectedId={selectedCollectionId}
-            artistParam={artist ?? null}
+            artistParam={safeArtistParam}
           />
         )}
 

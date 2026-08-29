@@ -357,7 +357,7 @@ export default function ArtHero({
       </div>
 
       {/* ── Лінія прогресу скролу (тільки для десктопу, коли більше 2 авторів) ── */}
-      {!isMobileRef.current && authors.length * colWidthVw > 100 && (
+      {!isMobileState && authors.length * colWidthVw > 100 && (
         <div className={styles.progressBarContainer}>
           <div
             className={styles.progressBarActive}

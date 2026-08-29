@@ -33,7 +33,9 @@ export default async function ShopPage() {
       include: {
         images: { orderBy: { order: "asc" } },
         variants: { orderBy: { sortOrder: "asc" } },
-        author: true,
+        author: {
+          select: { id: true, firstName: true, firstNameUk: true, lastName: true, lastNameUk: true },
+        },
         category: true,
       },
       orderBy: { sortOrder: "asc" },

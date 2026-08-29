@@ -214,7 +214,7 @@ export async function deleteAuthorAction(id: number): Promise<void> {
     }
   }
 
-  void Promise.allSettled(deleteTasks);
+  await Promise.allSettled(deleteTasks);
 
   revalidatePath("/admin/authors");
   revalidatePath("/admin");

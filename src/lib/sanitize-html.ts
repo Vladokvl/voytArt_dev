@@ -28,6 +28,13 @@ const PURIFY_CONFIG = {
   ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel|#|\/|\.\/|\.\.\/)|data:image\/(?:png|jpe?g|gif|webp);)/i,
 };
 
+// Автоматично додаємо rel="noopener noreferrer" для всіх посилань із target="_blank"
+DOMPurify.addHook("afterSanitizeAttributes", (node) => {
+  if (node.tagName === "A" && node.getAttribute("target") === "_blank") {
+    node.setAttribute("rel", "noopener noreferrer");
+  }
+});
+
 export function sanitizeHtml(html: string | null | undefined): string {
   if (!html) return "";
   return DOMPurify.sanitize(html, PURIFY_CONFIG);

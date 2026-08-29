@@ -34,7 +34,11 @@ export default auth(function middleware(req) {
 
     if (isLoginPage && isLoggedIn) {
       const callbackUrl = nextUrl.searchParams.get("callbackUrl");
-      return NextResponse.redirect(new URL(callbackUrl ?? "/admin", nextUrl));
+      const safeCallback =
+        callbackUrl && callbackUrl.startsWith("/admin") && !callbackUrl.startsWith("//")
+          ? callbackUrl
+          : "/admin";
+      return NextResponse.redirect(new URL(safeCallback, nextUrl));
     }
 
     return NextResponse.next();
