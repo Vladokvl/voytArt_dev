@@ -3,8 +3,10 @@
 import Image from "next/image";
 import * as Dialog from "@radix-ui/react-dialog";
 import styles from "./paintingCard.module.scss";
-import { useState, useEffect, useTransition, useRef } from "react";
+import { useState, useEffect, useTransition, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import useEmblaCarousel from "embla-carousel-react";
+import type { EmblaCarouselType } from "embla-carousel";
 import { useSearchParams } from "next/navigation";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import { createPaintingInquiryAction } from "~/app/(site)/[locale]/art/_inquiryActions";
@@ -52,28 +54,6 @@ type PaintingCardProps = {
   media: MediaItem[];
 };
 
-const slideVariants = {
-  enter: (direction: number) => ({
-    x: direction > 0 ? "100%" : "-100%",
-    opacity: 0,
-  }),
-  center: {
-    zIndex: 1,
-    x: 0,
-    opacity: 1,
-  },
-  exit: (direction: number) => ({
-    zIndex: 0,
-    x: direction > 0 ? "-100%" : "100%",
-    opacity: 0,
-  }),
-};
-
-const swipeConfidenceThreshold = 10000;
-const swipePower = (offset: number, velocity: number) => {
-  return Math.abs(offset) * velocity;
-};
-
 export default function PaintingCard({ painting }: { painting: PaintingCardProps }) {
   const { t, locale, getLocalizedHref } = useTranslation();
   const searchParams = useSearchParams();
@@ -103,8 +83,6 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isNeon, setIsNeon] = useState(isGlobalNeon && hasNeonMedia);
-  const [[page, direction], setPage] = useState([0, 0]);
-  const [loadedSet, setLoadedSet] = useState<Set<string>>(new Set());
 
   // Inquiry form states
   const [isInquiryOpen, setIsInquiryOpen] = useState(false);
@@ -115,6 +93,57 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
   const [message, setMessage] = useState("");
   const [inquiryResult, setInquiryResult] = useState<{ success: boolean; inquiryNumber?: string; error?: string } | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
+
+  const activeItems = isNeon ? neonMedia : defaultItems;
+  const hasMultiple = activeItems.length > 1;
+
+  // ── Embla Carousel setup for rock-solid mobile swipe & PC controls ───────────
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: true,
+    duration: 25,
+    skipSnaps: false,
+  });
+
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const onSelect = useCallback((api: EmblaCarouselType) => {
+    setSelectedIndex(api.selectedScrollSnap());
+  }, []);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect(emblaApi);
+    emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
+    return () => {
+      emblaApi.off("select", onSelect);
+      emblaApi.off("reInit", onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  // When active items change (e.g. toggling neon mode) or modal opens, reInit
+  useEffect(() => {
+    if (emblaApi) {
+      emblaApi.reInit();
+      emblaApi.scrollTo(0, true);
+      setSelectedIndex(0);
+    }
+  }, [isNeon, open, emblaApi]);
+
+  const scrollPrev = useCallback(() => {
+    if (emblaApi) emblaApi.scrollPrev();
+  }, [emblaApi]);
+
+  const scrollNext = useCallback(() => {
+    if (emblaApi) emblaApi.scrollNext();
+  }, [emblaApi]);
+
+  const scrollTo = useCallback(
+    (index: number) => {
+      if (emblaApi) emblaApi.scrollTo(index);
+    },
+    [emblaApi]
+  );
 
   useEffect(() => {
     setMounted(true);
@@ -138,21 +167,6 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
       return () => clearTimeout(timer);
     }
   }, [mounted, searchParams, painting.id]);
-
-  const activeItems = isNeon ? neonMedia : defaultItems;
-  const hasMultiple = activeItems.length > 1;
-  const imageIndex = ((page % activeItems.length) + activeItems.length) % activeItems.length;
-
-  const paginate = (newDirection: number) => {
-    if (activeItems.length <= 1) return;
-    setPage(([currPage]) => [currPage + newDirection, newDirection]);
-  };
-
-  const jumpToSlide = (newIndex: number) => {
-    if (newIndex === imageIndex) return;
-    const dir = newIndex > imageIndex ? 1 : -1;
-    setPage([newIndex, dir]);
-  };
 
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
@@ -192,8 +206,6 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
       }
     } else {
       setIsNeon(false);
-      setPage([0, 0]);
-      setLoadedSet(new Set());
       setIsInquiryOpen(false);
       setInquiryResult(null);
     }
@@ -201,21 +213,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
 
   const handleModeToggle = () => {
     setIsNeon((v) => !v);
-    setPage([0, 0]);
-    setLoadedSet(new Set());
   };
-
-  const markLoaded = (url: string) => {
-    setLoadedSet((s) => new Set([...s, url]));
-  };
-
-  const currentItem = activeItems[imageIndex];
-  const isCurrentLoaded =
-    currentItem?.type === "VIDEO"
-      ? true
-      : currentItem
-      ? loadedSet.has(currentItem.url)
-      : true;
 
   // Block Lenis scroll when modal is open
   const { start: startLenis, stop: stopLenis } = useLenis();
@@ -308,61 +306,36 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
           className={styles.modal}
           data-neon={isNeon ? "true" : undefined}
         >
-          {/* ── Slider area with Framer Motion Gestures ──────────── */}
+          {/* ── High-Performance Embla Carousel Area ──────────── */}
           <div className={styles.imageWrap}>
-            {/* Spinner shown while active image loads */}
-            {!isCurrentLoaded && <div className={styles.spinner} aria-hidden="true" />}
-
-            <AnimatePresence initial={false} custom={direction}>
-              <motion.div
-                key={page}
-                custom={direction}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{
-                  x: { type: "spring", stiffness: 350, damping: 35 },
-                  opacity: { duration: 0.2 },
-                }}
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.8}
-                onDragEnd={(_e, { offset, velocity }) => {
-                  const swipe = swipePower(offset.x, velocity.x);
-                  if (swipe < -swipeConfidenceThreshold || offset.x < -50) {
-                    paginate(1);
-                  } else if (swipe > swipeConfidenceThreshold || offset.x > 50) {
-                    paginate(-1);
-                  }
-                }}
-                className={styles.slide}
-              >
-                {currentItem?.type === "VIDEO" ? (
-                  <video
-                    className={styles.mediaEl}
-                    controls
-                    autoPlay
-                    playsInline
-                  >
-                    <source src={currentItem.url} />
-                  </video>
-                ) : (
-                  currentItem && (
-                    <Image
-                      src={getOptimizedImageUrl(currentItem.url, { preset: "large" })}
-                      alt={paintingTitle}
-                      fill
-                      className={styles.mediaEl}
-                      sizes="(max-width: 768px) 100vw, 66vw"
-                      onLoad={() => markLoaded(currentItem.url)}
-                      draggable={false}
-                      priority={imageIndex === 0}
-                    />
-                  )
-                )}
-              </motion.div>
-            </AnimatePresence>
+            <div className={styles.embla} ref={emblaRef}>
+              <div className={styles.emblaContainer}>
+                {activeItems.map((item, idx) => (
+                  <div className={styles.emblaSlide} key={`${item.id}-${item.url}-${idx}`}>
+                    {item.type === "VIDEO" ? (
+                      <video
+                        className={styles.mediaEl}
+                        controls
+                        autoPlay
+                        playsInline
+                      >
+                        <source src={item.url} />
+                      </video>
+                    ) : (
+                      <Image
+                        src={getOptimizedImageUrl(item.url, { preset: "large" })}
+                        alt={paintingTitle}
+                        fill
+                        className={styles.mediaEl}
+                        sizes="(max-width: 768px) 100vw, 66vw"
+                        draggable={false}
+                        priority={idx === 0}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
 
             {/* Desktop-only navigation arrows */}
             {hasMultiple && (
@@ -370,7 +343,7 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                 <button
                   type="button"
                   className={`${styles.navBtn} ${styles.navPrev}`}
-                  onClick={() => paginate(-1)}
+                  onClick={scrollPrev}
                   aria-label="Previous image"
                 >
                   <ChevronLeft size={20} />
@@ -378,13 +351,13 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
                 <button
                   type="button"
                   className={`${styles.navBtn} ${styles.navNext}`}
-                  onClick={() => paginate(1)}
+                  onClick={scrollNext}
                   aria-label="Next image"
                 >
                   <ChevronRight size={20} />
                 </button>
                 <div className={styles.counter}>
-                  {imageIndex + 1} / {activeItems.length}
+                  {selectedIndex + 1} / {activeItems.length}
                 </div>
               </>
             )}
@@ -394,12 +367,13 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
               <div className={styles.progressDashes} role="tablist" aria-label="Slides progress">
                 {activeItems.map((item, idx) => (
                   <button
-                    key={`dash-${item.id}-${item.url}`}
+                    key={`dash-${item.id}-${item.url}-${idx}`}
                     type="button"
-                    className={`${styles.dashItem} ${idx === imageIndex ? styles.dashItemActive : ""}`}
-                    onClick={() => jumpToSlide(idx)}
+                    role="tab"
+                    className={`${styles.dashItem} ${idx === selectedIndex ? styles.dashItemActive : ""}`}
+                    onClick={() => scrollTo(idx)}
                     aria-label={`Go to slide ${idx + 1}`}
-                    aria-selected={idx === imageIndex}
+                    aria-selected={idx === selectedIndex}
                   />
                 ))}
               </div>
