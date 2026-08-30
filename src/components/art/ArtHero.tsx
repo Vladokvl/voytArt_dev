@@ -2,6 +2,9 @@
 import { useEffect, useLayoutEffect, useRef, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import gsap from "gsap";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { A11y } from "swiper/modules";
+import type { Swiper as SwiperType } from "swiper";
 import styles from "~/app/(site)/[locale]/art/[[...artistId]]/art.module.scss";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import { useTranslation } from "~/context/LanguageContext";
@@ -41,8 +44,8 @@ export default function ArtHero({
 
   const heroRef = useRef<HTMLDivElement>(null);
   const sliderWrapperRef = useRef<HTMLDivElement>(null);
+  const swiperRef = useRef<SwiperType | null>(null);
   const pullTabRef = useRef<HTMLButtonElement>(null);
-  const touchStartXRef = useRef(0);
   const isMobileRef = useRef(false);
   const animatingRef = useRef(false);
   const prevArtistRef = useRef<string | null>(artistParam);
@@ -80,7 +83,6 @@ export default function ArtHero({
     const startIndex = initialIndex >= 0 ? initialIndex : 0;
 
     if (isMobile) {
-      gsap.set(sliderWrapperRef.current, { x: `-${startIndex * 100}vw` });
       setActiveMobileIndex(startIndex);
     } else {
       const maxTranslateVw = Math.max(0, authors.length * colWidthVw - 100);
@@ -110,12 +112,12 @@ export default function ArtHero({
   // ── Реакція на зміну скролу коліщатком миші (h-scroll для десктопу) ───────────
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      if (isArtistSelected) return; // не скролимо, якщо відкрита галерея
-      if (isMobileRef.current) return; // вимикаємо на мобілках
+      if (isArtistSelected) return;
+      if (isMobileRef.current) return;
       if (authors.length === 0) return;
 
       const maxTranslateVw = Math.max(0, authors.length * colWidthVw - 100);
-      if (maxTranslateVw <= 0) return; // Якщо 2 автори — вони вже займають по 50vw, скрол не потрібен
+      if (maxTranslateVw <= 0) return;
 
       e.preventDefault();
 
@@ -150,7 +152,7 @@ export default function ArtHero({
     };
   }, [isArtistSelected, authors, colWidthVw]);
 
-  // ── Реакція на зміну artistParam ───────────────────────────────────────────
+  // ── Реакція на зміну artistParam (Шторка відкриття/закриття через GSAP) ───────
   useEffect(() => {
     const prev = prevArtistRef.current;
     const curr = artistParam;
@@ -164,11 +166,8 @@ export default function ArtHero({
       return;
     }
 
-    const isMobile = isMobileRef.current;
-
     if (curr) {
       document.body.style.overflow = "";
-      // Жорстко фіксуємо стан hero open, поки шторка не сховається на 100%
       document.documentElement.setAttribute("data-art-hero", "open");
       gsap.to(heroRef.current, {
         y: "-100%",
@@ -182,14 +181,11 @@ export default function ArtHero({
     } else {
       document.body.style.overflow = "hidden";
       document.documentElement.setAttribute("data-art-hero", "open");
-      if (isMobile) {
-        gsap.set(sliderWrapperRef.current, { x: `-${activeMobileIndex * 100}vw` });
-      } else {
+      if (!isMobileRef.current) {
         gsap.set(sliderWrapperRef.current, { x: `-${currentXVw.current}vw` });
       }
       gsap.to(heroRef.current, { y: 0, duration: 1, ease: "power2.inOut" });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [artistParam]);
 
   // ── Клік по колонці автора ──────────────────────────────────────────────────
@@ -204,15 +200,12 @@ export default function ArtHero({
     router.push(getLocalizedHref("/art") + "?" + params.toString());
   };
 
-  // ── Кнопка повернення (шторка вниз) ─────────────────────────────────────────
+  // ── Кнопка повернення (шторка вниз через GSAP) ───────────────────────────────
   const handleBack = () => {
     animatingRef.current = true;
     document.body.style.overflow = "hidden";
-
-    // Жорстко блокуємо хедер миттєво при кліку на язичок
     document.documentElement.setAttribute("data-art-hero", "open");
 
-    // Плавно ховаємо футер вниз разом із рухом шторки
     const footerEl = document.querySelector("footer");
     if (footerEl) {
       gsap.to(footerEl, {
@@ -239,49 +232,17 @@ export default function ArtHero({
     });
   };
 
-  // ── Swipe обробники для мобільних ──────────────────────────────────────────
   const dismissSwipeHint = useCallback(() => {
     setHasSwiped(true);
   }, []);
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (isArtistSelected) return;
-    dismissSwipeHint();
-    touchStartXRef.current = e.touches[0]?.clientX ?? 0;
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (isArtistSelected) return;
-    dismissSwipeHint();
-    const touch = e.changedTouches[0];
-    if (!touch) return;
-    const delta = touch.clientX - touchStartXRef.current;
-    if (Math.abs(delta) < 35) return;
-
-    let newIndex = activeMobileIndex;
-    if (delta > 0) {
-      if (newIndex > 0) newIndex--;
-    } else {
-      if (newIndex < authors.length - 1) newIndex++;
-    }
-
-    setActiveMobileIndex(newIndex);
-    gsap.to(sliderWrapperRef.current, {
-      x: `-${newIndex * 100}vw`,
-      duration: 0.45,
-      ease: "power2.inOut",
-    });
-  };
 
   const handleDotClick = (index: number) => {
     if (isArtistSelected) return;
     dismissSwipeHint();
     setActiveMobileIndex(index);
-    gsap.to(sliderWrapperRef.current, {
-      x: `-${index * 100}vw`,
-      duration: 0.45,
-      ease: "power2.inOut",
-    });
+    if (isMobileState) {
+      swiperRef.current?.slideTo(index);
+    }
   };
 
   if (authors.length === 0) return null;
@@ -289,71 +250,117 @@ export default function ArtHero({
   const isSwipeHintHidden = isArtistSelected || hasSwiped || activeMobileIndex > 0;
 
   return (
-    <div
-      ref={heroRef}
-      className={styles.hero}
-      onTouchStart={handleTouchStart}
-      onTouchMove={dismissSwipeHint}
-      onTouchEnd={handleTouchEnd}
-      onPointerDown={dismissSwipeHint}
-    >
+    <div ref={heroRef} className={styles.hero} onPointerDown={dismissSwipeHint}>
       <div className={styles.sliderClip}>
-        <div
-          ref={sliderWrapperRef}
-          className={styles.sliderWrapper}
-          style={{ width: isMobileState ? `${authors.length * 100}vw` : `${authors.length * colWidthVw}vw` }}
-        >
-          {authors.map((author, index) => {
-            const isHovered = isMobileState ? activeMobileIndex === index : hoveredIndex === index;
-            const bgPhotoUrl =
-              author.bgPhotoUrl ??
-              DEFAULT_BG_PHOTOS[index % DEFAULT_BG_PHOTOS.length] ??
-              "/artPageAssets/IvankaBackground.jpg";
+        {isMobileState ? (
+          <Swiper
+            modules={[A11y]}
+            slidesPerView={1}
+            speed={380}
+            resistanceRatio={0.7}
+            threshold={5}
+            touchAngle={45}
+            touchEventsTarget="container"
+            passiveListeners={true}
+            watchSlidesProgress={false}
+            roundLengths={true}
+            initialSlide={activeMobileIndex}
+            onSwiper={(swiper) => {
+              swiperRef.current = swiper;
+            }}
+            onSlideChange={(swiper) => {
+              setActiveMobileIndex(swiper.activeIndex);
+              dismissSwipeHint();
+            }}
+            onTouchStart={dismissSwipeHint}
+            className={styles.mobileSwiper}
+          >
+            {authors.map((author, index) => {
+              const bgPhotoUrl =
+                author.bgPhotoUrl ??
+                DEFAULT_BG_PHOTOS[index % DEFAULT_BG_PHOTOS.length] ??
+                "/artPageAssets/IvankaBackground.jpg";
 
-            return (
-              <div
-                key={author.id}
-                className={`${styles.column} ${isTwoAuthors ? styles.columnHalf : ""} ${
-                  loadingArtistId === author.id ? styles.loadingColumn : ""
-                }`}
-                style={{ flex: isMobileState ? "0 0 100vw" : `0 0 ${colWidthVw}vw` }}
-                onClick={() => handleSelectArtist(author.id)}
-                onMouseEnter={() => !isMobileState && setHoveredIndex(index)}
-                onMouseLeave={() => !isMobileState && setHoveredIndex(null)}
-              >
-                {/* Фонове зображення карти */}
-                <div
-                  className={styles.colBg}
-                  style={{
-                    backgroundImage: `url(${getOptimizedImageUrl(bgPhotoUrl, { preset: "large" })})`,
-                  }}
-                />
-
-                {/* Затемнюючий оверлей */}
-                <div
-                  className={`${styles.colOverlay} ${
-                    isHovered ? styles.colOverlayVisible : ""
-                  }`}
-                />
-
-                {/* Контейнер імені та короткого опису */}
-                <div className={styles.infoWrap}>
-                  <h2 className={styles.colName}>{getLocalized(author, "firstName", locale)}</h2>
-
+              return (
+                <SwiperSlide key={author.id} className={styles.mobileSlide}>
                   <div
-                    className={`${styles.colText} ${
-                      isHovered ? styles.colTextVisible : ""
+                    className={`${styles.column} ${
+                      loadingArtistId === author.id ? styles.loadingColumn : ""
                     }`}
+                    onClick={() => handleSelectArtist(author.id)}
                   >
-                    <p className={styles.colDesc}>
-                      {getLocalized(author, "shortDesc", locale)}
-                    </p>
+                    <div
+                      className={styles.colBg}
+                      style={{
+                        backgroundImage: `url(${getOptimizedImageUrl(bgPhotoUrl, { preset: "medium" })})`,
+                      }}
+                    />
+                    <div className={`${styles.colOverlay} ${styles.colOverlayVisible}`} />
+                    <div className={styles.infoWrap}>
+                      <h2 className={styles.colName}>{getLocalized(author, "firstName", locale)}</h2>
+                      <div className={`${styles.colText} ${styles.colTextVisible}`}>
+                        <p className={styles.colDesc}>
+                          {getLocalized(author, "shortDesc", locale)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </SwiperSlide>
+              );
+            })}
+          </Swiper>
+        ) : (
+          <div
+            ref={sliderWrapperRef}
+            className={styles.sliderWrapper}
+            style={{ width: `${authors.length * colWidthVw}vw` }}
+          >
+            {authors.map((author, index) => {
+              const isHovered = hoveredIndex === index;
+              const bgPhotoUrl =
+                author.bgPhotoUrl ??
+                DEFAULT_BG_PHOTOS[index % DEFAULT_BG_PHOTOS.length] ??
+                "/artPageAssets/IvankaBackground.jpg";
+
+              return (
+                <div
+                  key={author.id}
+                  className={`${styles.column} ${isTwoAuthors ? styles.columnHalf : ""} ${
+                    loadingArtistId === author.id ? styles.loadingColumn : ""
+                  }`}
+                  style={{ flex: `0 0 ${colWidthVw}vw` }}
+                  onClick={() => handleSelectArtist(author.id)}
+                  onMouseEnter={() => setHoveredIndex(index)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                >
+                  <div
+                    className={styles.colBg}
+                    style={{
+                      backgroundImage: `url(${getOptimizedImageUrl(bgPhotoUrl, { preset: "large" })})`,
+                    }}
+                  />
+                  <div
+                    className={`${styles.colOverlay} ${
+                      isHovered ? styles.colOverlayVisible : ""
+                    }`}
+                  />
+                  <div className={styles.infoWrap}>
+                    <h2 className={styles.colName}>{getLocalized(author, "firstName", locale)}</h2>
+                    <div
+                      className={`${styles.colText} ${
+                        isHovered ? styles.colTextVisible : ""
+                      }`}
+                    >
+                      <p className={styles.colDesc}>
+                        {getLocalized(author, "shortDesc", locale)}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* ── Лінія прогресу скролу (тільки для десктопу, коли більше 2 авторів) ── */}
@@ -367,22 +374,24 @@ export default function ArtHero({
       )}
 
       {/* ── Крапки-індикатори для мобілок ── */}
-      <div className={styles.dotsContainer}>
-        {authors.map((_, index) => (
-          <button
-            key={index}
-            type="button"
-            className={`${styles.dot} ${
-              activeMobileIndex === index ? styles.dotActive : ""
-            }`}
-            onClick={() => handleDotClick(index)}
-            aria-label={`Go to artist ${index + 1}`}
-          />
-        ))}
-      </div>
+      {isMobileState && authors.length > 1 && (
+        <div className={styles.dotsContainer}>
+          {authors.map((_, index) => (
+            <button
+              key={index}
+              type="button"
+              className={`${styles.dot} ${
+                activeMobileIndex === index ? styles.dotActive : ""
+              }`}
+              onClick={() => handleDotClick(index)}
+              aria-label={`Go to artist ${index + 1}`}
+            />
+          ))}
+        </div>
+      )}
 
       {/* ── Swipe Indicator (тільки для мобілок на першому екрані до першого свайпу) ── */}
-      {!isArtistSelected && authors.length > 1 && (
+      {isMobileState && !isArtistSelected && authors.length > 1 && (
         <div
           className={`${styles.swipeIndicator} ${
             isSwipeHintHidden ? styles.swipeIndicatorHidden : ""

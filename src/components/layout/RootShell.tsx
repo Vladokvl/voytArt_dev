@@ -2,6 +2,10 @@
 import { type Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import { Suspense } from "react";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import "swiper/css/free-mode";
 import "~/styles/globals.scss";
 import SmoothScroll from "~/components/SmoothScroll/SmoothScroll";
 import PageLoader from "~/components/layout/PageLoader/PageLoader";
