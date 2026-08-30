@@ -80,16 +80,9 @@ function PaintingSlideMedia({
 }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50, isHovering: false });
-  const [touchScale, setTouchScale] = useState(1);
-  const [touchPan, setTouchPan] = useState({ x: 0, y: 0 });
-  const [showTouchHint, setShowTouchHint] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
-  const distStartRef = useRef<number>(0);
-  const scaleStartRef = useRef<number>(1);
-  const panStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const lastTapRef = useRef<number>(0);
   const fullUrl = item.url;
 
   useEffect(() => {
@@ -110,13 +103,6 @@ function PaintingSlideMedia({
   useEffect(() => {
     if (!isActive || !isZoomMode) {
       setZoomPos({ x: 50, y: 50, isHovering: false });
-      setTouchScale(1);
-      setTouchPan({ x: 0, y: 0 });
-      setShowTouchHint(false);
-    } else if (isZoomMode) {
-      setShowTouchHint(true);
-      const timer = setTimeout(() => setShowTouchHint(false), 3000);
-      return () => clearTimeout(timer);
     }
   }, [isActive, isZoomMode]);
 
@@ -151,67 +137,6 @@ function PaintingSlideMedia({
     }
   };
 
-  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (!isZoomMode || item.type === "VIDEO") return;
-    setShowTouchHint(false);
-
-    if (e.touches.length === 2) {
-      const t1 = e.touches[0]!;
-      const t2 = e.touches[1]!;
-      distStartRef.current = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
-      scaleStartRef.current = touchScale;
-    } else if (e.touches.length === 1) {
-      const now = Date.now();
-      if (now - lastTapRef.current < 320) {
-        // Подвійний тап для швидкого наближення / повернення
-        if (touchScale > 1.2) {
-          setTouchScale(1);
-          setTouchPan({ x: 0, y: 0 });
-        } else {
-          setTouchScale(2.4);
-        }
-        lastTapRef.current = 0;
-      } else {
-        lastTapRef.current = now;
-        const t1 = e.touches[0]!;
-        panStartRef.current = {
-          x: t1.clientX - touchPan.x,
-          y: t1.clientY - touchPan.y,
-        };
-      }
-    }
-  };
-
-  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (!isZoomMode || item.type === "VIDEO") return;
-
-    if (e.touches.length === 2) {
-      const t1 = e.touches[0]!;
-      const t2 = e.touches[1]!;
-      const currentDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
-      if (distStartRef.current > 0) {
-        const factor = currentDist / distStartRef.current;
-        const nextScale = Math.min(4, Math.max(1, scaleStartRef.current * factor));
-        setTouchScale(nextScale);
-      }
-    } else if (e.touches.length === 1 && touchScale > 1.05) {
-      const t1 = e.touches[0]!;
-      const nextX = t1.clientX - panStartRef.current.x;
-      const nextY = t1.clientY - panStartRef.current.y;
-      setTouchPan({ x: nextX, y: nextY });
-    }
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (!isZoomMode || item.type === "VIDEO") return;
-    if (e.touches.length === 0) {
-      if (touchScale <= 1.08) {
-        setTouchScale(1);
-        setTouchPan({ x: 0, y: 0 });
-      }
-    }
-  };
-
   if (item.type === "VIDEO") {
     return (
       <div className={styles.slideMedia}>
@@ -228,25 +153,13 @@ function PaintingSlideMedia({
     );
   }
 
-  const isTouchZoomed = touchScale > 1 || touchPan.x !== 0 || touchPan.y !== 0;
-
   return (
     <div
       className={`${styles.slideMedia} ${isZoomMode ? styles.slideMediaZoom : ""}`}
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
     >
-      {/* Touch Zoom Hint Badge on Mobile */}
-      {isZoomMode && showTouchHint && (
-        <div className={styles.zoomTouchHint}>
-          <span>🤏 Пінч або 2× тап для наближення</span>
-        </div>
-      )}
-
       {/* Placeholder — unmounted after full image loads to free mobile GPU memory */}
       {!isLoaded && placeholderUrl && (
         <Image
@@ -275,14 +188,7 @@ function PaintingSlideMedia({
         unoptimized
         className={`${styles.mediaEl} ${isLoaded ? styles.mediaElLoaded : ""}`}
         style={
-          isTouchZoomed
-            ? {
-                transform: `translate3d(${touchPan.x}px, ${touchPan.y}px, 0) scale(${touchScale})`,
-                transformOrigin: "center",
-                transition: "none",
-                willChange: "transform",
-              }
-            : isZoomMode && zoomPos.isHovering
+          isZoomMode && zoomPos.isHovering
             ? {
                 transform: "scale(2.3)",
                 transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
