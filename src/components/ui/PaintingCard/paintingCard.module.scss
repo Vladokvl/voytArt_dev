@@ -151,12 +151,52 @@
   user-select: none;
 }
 
+.slideInner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
 .mediaEl {
   object-fit: contain;
   width: 100%;
   height: 100%;
   user-select: none;
   -webkit-user-drag: none;
+  transition: opacity 0.35s ease-in-out;
+}
+
+.placeholderBlur {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: blur(14px);
+  transform: scale(1.04);
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+  transition: opacity 0.4s ease-out;
+}
+
+.spinner {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 38px;
+  height: 38px;
+  border: 3px solid rgba(255, 255, 255, 0.18);
+  border-top-color: var(--color-accent, #d7ff01);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  z-index: 6;
+  pointer-events: none;
+  box-shadow: 0 0 18px rgba(215, 255, 1, 0.3);
 }
 
 .navBtn {
@@ -756,6 +796,9 @@
 }
 
 @keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
   to {
     transform: rotate(360deg);
   }

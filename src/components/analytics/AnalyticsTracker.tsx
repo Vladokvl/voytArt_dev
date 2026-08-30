@@ -25,15 +25,40 @@ export default function AnalyticsTracker() {
     }
     lastTrackedRef.current = { url: currentUrl, timestamp: now };
 
+    const paintingParam = searchParams.get("painting");
     const artistParam = searchParams.get("artist");
     let targetId: number | undefined = undefined;
     let pageType: string | undefined = undefined;
 
-    if (artistParam) {
+    if (paintingParam) {
+      const parsed = parseInt(paintingParam, 10);
+      if (!isNaN(parsed)) {
+        targetId = parsed;
+        pageType = "PAINTING";
+      }
+    } else if (artistParam) {
       const parsed = parseInt(artistParam, 10);
       if (!isNaN(parsed)) {
         targetId = parsed;
         pageType = "ARTIST";
+      }
+    } else if (pathname.includes("/shop/")) {
+      const match = /\/shop\/(\d+)/.exec(pathname);
+      if (match?.[1]) {
+        const parsed = parseInt(match[1], 10);
+        if (!isNaN(parsed)) {
+          targetId = parsed;
+          pageType = "PRODUCT";
+        }
+      }
+    } else if (pathname.includes("/gallery/")) {
+      const match = /\/gallery\/(\d+)/.exec(pathname);
+      if (match?.[1]) {
+        const parsed = parseInt(match[1], 10);
+        if (!isNaN(parsed)) {
+          targetId = parsed;
+          pageType = "POSTS";
+        }
       }
     }
 

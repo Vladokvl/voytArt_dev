@@ -54,6 +54,68 @@ type PaintingCardProps = {
   media: MediaItem[];
 };
 
+function PaintingSlideMedia({
+  item,
+  paintingTitle,
+  isPriority,
+  isCover,
+}: {
+  item: MediaItem;
+  paintingTitle: string;
+  isPriority: boolean;
+  isCover: boolean;
+}) {
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  if (item.type === "VIDEO") {
+    return (
+      <div className={styles.slideInner}>
+        <video className={styles.mediaEl} controls autoPlay playsInline>
+          <source src={item.url} />
+        </video>
+      </div>
+    );
+  }
+
+  const placeholderUrl = getOptimizedImageUrl(item.url, {
+    preset: isCover ? "card" : "thumb",
+  });
+  const highResUrl = getOptimizedImageUrl(item.url, { preset: "large" });
+
+  return (
+    <div className={styles.slideInner}>
+      {/* Blurred instant preview: card-sized cache for cover or thumb for others */}
+      <Image
+        src={placeholderUrl}
+        alt=""
+        fill
+        className={styles.placeholderBlur}
+        style={{ opacity: isLoaded ? 0 : 1 }}
+        sizes="(max-width: 768px) 100vw, 66vw"
+        priority={isPriority}
+        draggable={false}
+        aria-hidden="true"
+      />
+
+      {/* Sleek loading spinner while high-res downloads */}
+      {!isLoaded && <div className={styles.spinner} aria-hidden="true" />}
+
+      {/* Full-resolution crisp artwork */}
+      <Image
+        src={highResUrl}
+        alt={paintingTitle}
+        fill
+        className={styles.mediaEl}
+        style={{ opacity: isLoaded ? 1 : 0 }}
+        sizes="(max-width: 768px) 100vw, 66vw"
+        onLoad={() => setIsLoaded(true)}
+        draggable={false}
+        priority={isPriority}
+      />
+    </div>
+  );
+}
+
 export default function PaintingCard({ painting }: { painting: PaintingCardProps }) {
   const { t, locale, getLocalizedHref } = useTranslation();
   const searchParams = useSearchParams();
@@ -187,8 +249,12 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
 
     if (next) {
       // Send background analytics event for painting modal open
+      const authorId = painting.authorId ?? painting.author?.id;
+      const pathUrl = authorId
+        ? `/art?artist=${authorId}&painting=${painting.id}`
+        : `/art?painting=${painting.id}`;
       const payload = JSON.stringify({
-        path: `/art?painting=${painting.id}`,
+        path: pathUrl,
         pageType: "PAINTING",
         targetId: painting.id,
       });
@@ -312,26 +378,12 @@ export default function PaintingCard({ painting }: { painting: PaintingCardProps
               <div className={styles.emblaContainer}>
                 {activeItems.map((item, idx) => (
                   <div className={styles.emblaSlide} key={`${item.id}-${item.url}-${idx}`}>
-                    {item.type === "VIDEO" ? (
-                      <video
-                        className={styles.mediaEl}
-                        controls
-                        autoPlay
-                        playsInline
-                      >
-                        <source src={item.url} />
-                      </video>
-                    ) : (
-                      <Image
-                        src={getOptimizedImageUrl(item.url, { preset: "large" })}
-                        alt={paintingTitle}
-                        fill
-                        className={styles.mediaEl}
-                        sizes="(max-width: 768px) 100vw, 66vw"
-                        draggable={false}
-                        priority={idx === 0}
-                      />
-                    )}
+                    <PaintingSlideMedia
+                      item={item}
+                      paintingTitle={paintingTitle}
+                      isPriority={idx === 0}
+                      isCover={idx === 0 && item.url === painting.coverUrl}
+                    />
                   </div>
                 ))}
               </div>
