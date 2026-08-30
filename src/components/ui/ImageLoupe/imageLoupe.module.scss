@@ -1,0 +1,75 @@
+.loupeContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: pan-y pinch-zoom;
+  user-select: none;
+  -webkit-user-select: none;
+
+  &.loupeActive {
+    cursor: crosshair;
+  }
+}
+
+.loupeImage {
+  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* ─── Floating Zoom Button (Desktop Loupe mode, bottom-right) ────────────── */
+.floatingZoomBtn {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 20;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.85rem;
+  height: 2.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(22, 22, 22, 0.9);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+
+  @media (min-width: 768px) {
+    display: inline-flex;
+    bottom: 1.25rem;
+    right: 1.25rem;
+    width: 3.15rem;
+    height: 3.15rem;
+  }
+
+  &:hover {
+    background: rgba(35, 35, 35, 1);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: scale(1.06);
+  }
+
+  &.zoomBtnActive {
+    background: #ffffff;
+    color: #000000;
+    border-color: #ffffff;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.45);
+
+    &:hover {
+      background: #f0f0f0;
+      color: #000000;
+    }
+  }
+}

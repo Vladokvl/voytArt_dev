@@ -7,6 +7,7 @@ import { ChevronRight, ShoppingBag, ArrowRight, ArrowLeft, Check } from "lucide-
 import { useCart } from "~/context/CartContext";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import ProductCarousel from "~/components/shop/ProductCarousel";
+import ImageLoupe from "~/components/ui/ImageLoupe/ImageLoupe";
 import styles from "./product-page.module.scss";
 import { useTranslation } from "~/context/LanguageContext";
 import { getLocalized, formatLocalizedPrice } from "~/lib/i18n";
@@ -189,11 +190,12 @@ export default function ProductView({
         <div className={styles.galleryCol}>
           <div className={styles.mainImageWrap}>
             {visibleImages[activeImageIndex] ? (
-              <Image
-                src={getOptimizedImageUrl(visibleImages[activeImageIndex].url, { preset: "large" })}
+              <ImageLoupe
+                src={visibleImages[activeImageIndex].url}
                 alt={localizedProductTitle}
                 fill
                 priority
+                unoptimized
                 className={styles.mainImage}
                 sizes="(max-width: 1024px) 100vw, 55vw"
               />

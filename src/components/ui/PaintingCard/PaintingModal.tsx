@@ -8,6 +8,7 @@ import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import { sanitizeHtml } from "~/lib/sanitize-html";
 import { createPaintingInquiryAction } from "~/app/(site)/[locale]/art/_inquiryActions";
 import Image from "next/image";
+import ImageLoupe from "~/components/ui/ImageLoupe/ImageLoupe";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useState, useEffect, useTransition, useRef, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -79,11 +80,7 @@ function PaintingSlideMedia({
   isZoomMode?: boolean;
 }) {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50, isHovering: false });
-
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const imgRef = useRef<HTMLImageElement | null>(null);
-  const fullUrl = item.url;
 
   useEffect(() => {
     if (!videoRef.current) return;
@@ -91,51 +88,6 @@ function PaintingSlideMedia({
       videoRef.current.pause();
     }
   }, [isActive]);
-
-  // Check if image was already cached by browser
-  useEffect(() => {
-    if (imgRef.current?.complete && imgRef.current.naturalWidth > 0) {
-      setIsLoaded(true);
-    }
-  }, [fullUrl]);
-
-  // Reset zoom on slide transition or mode toggle
-  useEffect(() => {
-    if (!isActive || !isZoomMode) {
-      setZoomPos({ x: 50, y: 50, isHovering: false });
-    }
-  }, [isActive, isZoomMode]);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isZoomMode || item.type === "VIDEO") return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    if (!rect.width || !rect.height) return;
-
-    // Запас від країв (12%), щоб не потрібно було доводити курсор впритул до межі модалки
-    const PADDING = 0.12;
-    const normX = (e.clientX - rect.left) / rect.width;
-    const normY = (e.clientY - rect.top) / rect.height;
-
-    const mappedX = (normX - PADDING) / (1 - 2 * PADDING);
-    const mappedY = (normY - PADDING) / (1 - 2 * PADDING);
-
-    const x = Math.max(0, Math.min(100, mappedX * 100));
-    const y = Math.max(0, Math.min(100, mappedY * 100));
-
-    setZoomPos({ x, y, isHovering: true });
-  };
-
-  const handleMouseEnter = () => {
-    if (isZoomMode && item.type !== "VIDEO") {
-      setZoomPos((prev) => ({ ...prev, isHovering: true }));
-    }
-  };
-
-  const handleMouseLeave = () => {
-    if (isZoomMode) {
-      setZoomPos((prev) => ({ ...prev, isHovering: false }));
-    }
-  };
 
   if (item.type === "VIDEO") {
     return (
@@ -154,61 +106,38 @@ function PaintingSlideMedia({
   }
 
   return (
-    <div
-      className={`${styles.slideMedia} ${isZoomMode ? styles.slideMediaZoom : ""}`}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      {/* Placeholder — unmounted after full image loads to free mobile GPU memory */}
-      {!isLoaded && placeholderUrl && (
-        <Image
-          src={placeholderUrl}
-          alt=""
-          fill
-          aria-hidden
-          className={styles.mediaPlaceholder}
-          sizes="(max-width: 768px) 100vw, 66vw"
-          priority={isPriority}
-          draggable={false}
-        />
-      )}
-
-      {/* Spinner — visible until full image loads */}
-      {!isLoaded && (
-        <span className={styles.loadingSpinner} aria-hidden />
-      )}
-
-      {/* Full resolution original image */}
-      <Image
-        ref={imgRef}
-        src={fullUrl}
+    <div className={styles.slideMedia}>
+      <ImageLoupe
+        src={item.url}
         alt={paintingTitle}
         fill
-        unoptimized
-        className={`${styles.mediaEl} ${isLoaded ? styles.mediaElLoaded : ""}`}
-        style={
-          isZoomMode && zoomPos.isHovering
-            ? {
-                transform: "scale(2.3)",
-                transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
-                transition: "transform 0.12s ease-out",
-                willChange: "transform, transform-origin",
-              }
-            : isZoomMode
-            ? {
-                transform: "scale(1)",
-                transformOrigin: "center",
-                transition: "transform 0.25s ease-out",
-              }
-            : undefined
-        }
-        sizes="(max-width: 768px) 100vw, 66vw"
         priority={isPriority}
-        loading={isPriority ? "eager" : "lazy"}
-        draggable={false}
+        unoptimized
+        sizes="(max-width: 768px) 100vw, 66vw"
+        isZoomMode={isZoomMode}
+        showButton={false}
+        className={`${styles.mediaEl} ${isLoaded ? styles.mediaElLoaded : ""}`}
         onLoad={() => setIsLoaded(true)}
-      />
+      >
+        {/* Placeholder — unmounted after full image loads to free mobile GPU memory */}
+        {!isLoaded && placeholderUrl && (
+          <Image
+            src={placeholderUrl}
+            alt=""
+            fill
+            aria-hidden
+            className={styles.mediaPlaceholder}
+            sizes="(max-width: 768px) 100vw, 66vw"
+            priority={isPriority}
+            draggable={false}
+          />
+        )}
+
+        {/* Spinner — visible until full image loads */}
+        {!isLoaded && (
+          <span className={styles.loadingSpinner} aria-hidden />
+        )}
+      </ImageLoupe>
     </div>
   );
 }
