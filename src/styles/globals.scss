@@ -46,9 +46,8 @@ a {
     -webkit-tap-highlight-color: transparent !important;
   }
 
-  // Забороняємо підстрибування/зсуви карток і кнопок при свайпах пальцем
-  a:hover,
-  button:hover,
+  // Забороняємо підстрибування/зсуви карток і посилань при свайпах пальцем
+  a:hover:not([class*="nav"]):not([class*="Nav"]),
   [class*="card"]:hover,
   [class*="Card"]:hover,
   [class*="item"]:hover,

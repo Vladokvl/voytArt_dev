@@ -162,31 +162,37 @@ export default function ModalMedia({
             placeholderUrl={getOptimizedImageUrl(currentItem.url, { preset: "card" })}
           />
         </div>
-
-        {/* Navigation arrows — fixed, stationary on hover */}
-        {hasMultiple && (
-          <>
-            <button
-              type="button"
-              className={`${styles.navBtn} ${styles.prev}`}
-              onClick={handlePrev}
-              disabled={currentIndex === 0}
-              aria-label="Previous media"
-            >
-              <ChevronLeft size={24} />
-            </button>
-            <button
-              type="button"
-              className={`${styles.navBtn} ${styles.next}`}
-              onClick={handleNext}
-              disabled={currentIndex === items.length - 1}
-              aria-label="Next media"
-            >
-              <ChevronRight size={24} />
-            </button>
-          </>
-        )}
       </div>
+
+      {/* Navigation arrows — fixed to viewport center (100% stationary, never moves) */}
+      {hasMultiple && (
+        <>
+          <button
+            type="button"
+            className={`${styles.navBtn} ${styles.prev}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              handlePrev();
+            }}
+            disabled={currentIndex === 0}
+            aria-label="Previous media"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <button
+            type="button"
+            className={`${styles.navBtn} ${styles.next}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNext();
+            }}
+            disabled={currentIndex === items.length - 1}
+            aria-label="Next media"
+          >
+            <ChevronRight size={24} />
+          </button>
+        </>
+      )}
 
       {/* Progress dashes placed outside/below the media area */}
       {hasMultiple && (
