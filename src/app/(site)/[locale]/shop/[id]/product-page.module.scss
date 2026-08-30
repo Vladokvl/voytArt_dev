@@ -79,12 +79,14 @@
 
 .productLayout {
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
   gap: 3.5rem;
   align-items: start;
+  width: 100%;
+  max-width: 100%;
 
   @media (max-width: 960px) {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 2.5rem;
   }
 }
@@ -96,6 +98,9 @@
   gap: 1rem;
   position: sticky;
   top: 6rem;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
 
   @media (max-width: 960px) {
     position: static;
@@ -105,16 +110,90 @@
 .mainImageWrap {
   position: relative;
   width: 100%;
+  max-width: 100%;
   aspect-ratio: 1 / 1;
   background: #f5f5f5;
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid #eaeaea;
+  touch-action: pan-y pinch-zoom;
+}
+
+.productSwiper {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+
+  :global(.swiper-wrapper) {
+    height: 100%;
+    width: 100%;
+  }
+}
+
+.productSlide {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mainImage {
   object-fit: cover;
   transition: transform 0.3s ease;
+}
+
+/* ── Hover Navigation Arrows (Desktop) ── */
+.swiperNavBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 15;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+  opacity: 0;
+  pointer-events: none;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+
+  &:hover:not(.swiperNavDisabled) {
+    background: #ffffff;
+    transform: translateY(-50%) scale(1.08);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  }
+
+  &.swiperNavDisabled {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+}
+
+.mainImageWrap:hover .swiperNavBtn:not(.swiperNavDisabled) {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.swiperNavPrev {
+  left: 0.85rem;
+}
+
+.swiperNavNext {
+  right: 0.85rem;
 }
 
 .thumbsList {

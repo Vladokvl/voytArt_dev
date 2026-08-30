@@ -11,6 +11,7 @@ export interface ImageLoupeProps {
   fill?: boolean;
   priority?: boolean;
   unoptimized?: boolean;
+  objectFit?: "contain" | "cover";
   className?: string;
   containerClassName?: string;
   sizes?: string;
@@ -29,6 +30,7 @@ export default function ImageLoupe({
   fill = true,
   priority = false,
   unoptimized = true,
+  objectFit,
   className = "",
   containerClassName = "",
   sizes = "(max-width: 768px) 100vw, 66vw",
@@ -111,8 +113,9 @@ export default function ImageLoupe({
         onLoad={onLoad}
         draggable={false}
         className={`${styles.loupeImage} ${className}`}
-        style={
-          isZoom && zoomPos.isHovering
+        style={{
+          ...(objectFit ? { objectFit } : {}),
+          ...(isZoom && zoomPos.isHovering
             ? {
                 transform: `scale(${zoomScale})`,
                 transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
@@ -125,8 +128,8 @@ export default function ImageLoupe({
                 transformOrigin: "center",
                 transition: "transform 0.25s ease-out",
               }
-            : undefined
-        }
+            : {}),
+        }}
       />
 
       {/* Floating Toggle Button (Desktop only) */}

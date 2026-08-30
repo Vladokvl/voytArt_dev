@@ -1,13 +1,19 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, ShoppingBag, ArrowRight, ArrowLeft, Check } from "lucide-react";
+import { ChevronRight, ShoppingBag, ArrowRight, ArrowLeft, Check, ChevronLeft } from "lucide-react";
 import { useCart } from "~/context/CartContext";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import ProductCarousel from "~/components/shop/ProductCarousel";
 import ImageLoupe from "~/components/ui/ImageLoupe/ImageLoupe";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination, A11y } from "swiper/modules";
+import type { Swiper as SwiperType } from "swiper";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 import styles from "./product-page.module.scss";
 import { useTranslation } from "~/context/LanguageContext";
 import { getLocalized, formatLocalizedPrice } from "~/lib/i18n";
@@ -111,7 +117,9 @@ export default function ProductView({
     return allImages;
   }, [allImages, selectedVariant]);
 
+  const swiperRef = useRef<SwiperType | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [isZoomMode, setIsZoomMode] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [addedAnimation, setAddedAnimation] = useState(false);
 
@@ -122,7 +130,13 @@ export default function ProductView({
   const handleVariantSelect = (variant: ProductVariant) => {
     setSelectedVariant(variant);
     setActiveImageIndex(0);
+    swiperRef.current?.slideTo(0);
     setQuantity(1);
+  };
+
+  const handleThumbnailClick = (idx: number) => {
+    setActiveImageIndex(idx);
+    swiperRef.current?.slideTo(idx);
   };
 
   const localizedProductTitle = getLocalized(product, "title", locale);
@@ -189,18 +203,78 @@ export default function ProductView({
         {/* Left: Gallery */}
         <div className={styles.galleryCol}>
           <div className={styles.mainImageWrap}>
-            {visibleImages[activeImageIndex] ? (
-              <ImageLoupe
-                src={visibleImages[activeImageIndex].url}
-                alt={localizedProductTitle}
-                fill
-                priority
-                unoptimized
-                className={styles.mainImage}
-                sizes="(max-width: 1024px) 100vw, 55vw"
-              />
+            {visibleImages.length > 0 ? (
+              <Swiper
+                key={`${product.id}-${selectedVariant?.id ?? "default"}`}
+                modules={[Navigation, Pagination, A11y]}
+                observer={true}
+                observeParents={true}
+                resizeObserver={true}
+                spaceBetween={0}
+                slidesPerView={1}
+                speed={350}
+                resistanceRatio={0.7}
+                threshold={5}
+                touchAngle={45}
+                watchSlidesProgress={false}
+                roundLengths={true}
+                nested={true}
+                touchReleaseOnEdges={true}
+                allowTouchMove={visibleImages.length > 1 && !isZoomMode}
+                onSwiper={(swiper) => {
+                  swiperRef.current = swiper;
+                }}
+                onSlideChange={(swiper) => {
+                  setActiveImageIndex(swiper.activeIndex);
+                }}
+                className={styles.productSwiper}
+              >
+                {visibleImages.map((img, idx) => (
+                  <SwiperSlide key={img.id || idx} className={styles.productSlide}>
+                    <ImageLoupe
+                      src={img.url}
+                      alt={`${localizedProductTitle} - ${idx + 1}`}
+                      fill
+                      priority={idx === 0}
+                      unoptimized
+                      objectFit="cover"
+                      isZoomMode={isZoomMode}
+                      showButton={true}
+                      onZoomToggle={setIsZoomMode}
+                      className={styles.mainImage}
+                      sizes="(max-width: 1024px) 100vw, 55vw"
+                    />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
             ) : (
               <div className={styles.imagePlaceholder}>No image</div>
+            )}
+
+            {/* Navigation arrows (desktop hover) */}
+            {visibleImages.length > 1 && !isZoomMode && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => swiperRef.current?.slidePrev()}
+                  className={`${styles.swiperNavBtn} ${styles.swiperNavPrev} ${
+                    activeImageIndex === 0 ? styles.swiperNavDisabled : ""
+                  }`}
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => swiperRef.current?.slideNext()}
+                  className={`${styles.swiperNavBtn} ${styles.swiperNavNext} ${
+                    activeImageIndex === visibleImages.length - 1 ? styles.swiperNavDisabled : ""
+                  }`}
+                  aria-label="Next image"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </>
             )}
           </div>
 
@@ -211,7 +285,7 @@ export default function ProductView({
                 <button
                   key={img.id || idx}
                   type="button"
-                  onClick={() => setActiveImageIndex(idx)}
+                  onClick={() => handleThumbnailClick(idx)}
                   className={`${styles.thumbBtn} ${idx === activeImageIndex ? styles.thumbBtnActive : ""}`}
                   aria-label={`View image ${idx + 1}`}
                 >
