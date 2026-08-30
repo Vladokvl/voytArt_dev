@@ -64,7 +64,7 @@ export default function HeroDesktop() {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imageCacheRef = useRef<Map<number, ImageBitmap | HTMLImageElement>>(new Map());
+  const imageCacheRef = useRef<Map<number, HTMLImageElement>>(new Map());
   const pendingLoadsRef = useRef<Set<number>>(new Set());
   const currentFrameRef = useRef(1);
   const frameTweenRef = useRef<gsap.core.Tween | null>(null);
@@ -211,15 +211,31 @@ export default function HeroDesktop() {
     neonVideo?.addEventListener("loadeddata", checkNeonBuffer);
     checkNeonBuffer();
 
+    const findClosestCachedFrame = (targetFrame: number): HTMLImageElement | null => {
+      const exact = imageCache.get(targetFrame);
+      if (exact) return exact;
+
+      let closest: HTMLImageElement | null = null;
+      let minDiff = Infinity;
+      for (const [f, img] of imageCache.entries()) {
+        const diff = Math.abs(f - targetFrame);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closest = img;
+        }
+      }
+      return closest;
+    };
+
     const drawFrame = (frame: number) => {
       const targetFrame = snapFrameToStride(frame, frameStride, DESKTOP_TOTAL_FRAMES);
-      const item = imageCache.get(targetFrame);
+      const item = findClosestCachedFrame(targetFrame);
       if (!item) return;
 
       const canvasW = canvas.width;
       const canvasH = canvas.height;
-      const imgW = "naturalWidth" in item ? item.naturalWidth : item.width;
-      const imgH = "naturalHeight" in item ? item.naturalHeight : item.height;
+      const imgW = item.naturalWidth || item.width;
+      const imgH = item.naturalHeight || item.height;
       if (!imgW || !imgH) return;
 
       const scale = Math.max(canvasW / imgW, canvasH / imgH);
@@ -262,73 +278,42 @@ export default function HeroDesktop() {
       drawFrame(currentFrameRef.current);
     };
 
-    // Нативне надшвидке завантаження зображення через createImageBitmap / браузерний кеш
-    const loadFrame = (rawFrame: number, onSettled?: () => void) => {
+    // Нативне надшвидке завантаження зображення через браузерний Image кеш
+    const loadFrame = (rawFrame: number, onSettled?: (ok: boolean) => void) => {
       const frame = snapFrameToStride(rawFrame, frameStride, DESKTOP_TOTAL_FRAMES);
       if (frame < 1 || frame > DESKTOP_TOTAL_FRAMES) return;
 
       const cached = imageCache.get(frame);
       if (cached) {
-        onSettled?.();
+        onSettled?.(true);
         return;
       }
 
       if (pendingLoads.has(frame)) return;
       pendingLoads.add(frame);
 
-      const url = getDesktopFrameUrl(frame, qualityTier);
-
-      // Використовуємо createImageBitmap для точного керування пам'яттю GPU/RAM
-      if (typeof window !== "undefined" && "createImageBitmap" in window) {
-        fetch(url)
-          .then((res) => {
-            if (!res.ok) throw new Error("Frame fetch failed");
-            return res.blob();
-          })
-          .then((blob) => createImageBitmap(blob))
-          .then((bitmap) => {
-            pendingLoads.delete(frame);
-            imageCache.set(frame, bitmap);
-            prefetchedFrames.add(frame);
-            updateBufferProgress();
-            onSettled?.();
-            if (frame === currentFrameRef.current) {
-              scheduleDraw(frame);
-            }
-          })
-          .catch(() => {
-            // Фолбек на HTMLImageElement у разі помилки fetch
-            const img = new Image();
-            img.decoding = "async";
-            img.onload = () => {
-              pendingLoads.delete(frame);
-              imageCache.set(frame, img);
-              prefetchedFrames.add(frame);
-              updateBufferProgress();
-              onSettled?.();
-              if (frame === currentFrameRef.current) {
-                scheduleDraw(frame);
-              }
-            };
-            img.onerror = () => {
-              pendingLoads.delete(frame);
-              onSettled?.();
-            };
-            img.src = url;
-          });
-        return;
-      }
-
       const img = new Image();
       img.decoding = "async";
-      img.src = url;
+      img.src = getDesktopFrameUrl(frame, qualityTier);
+
+      if (img.complete && img.naturalWidth > 0) {
+        pendingLoads.delete(frame);
+        imageCache.set(frame, img);
+        prefetchedFrames.add(frame);
+        updateBufferProgress();
+        onSettled?.(true);
+        if (frame === currentFrameRef.current) {
+          scheduleDraw(frame);
+        }
+        return;
+      }
 
       img.onload = () => {
         pendingLoads.delete(frame);
         imageCache.set(frame, img);
         prefetchedFrames.add(frame);
         updateBufferProgress();
-        onSettled?.();
+        onSettled?.(true);
         if (frame === currentFrameRef.current) {
           scheduleDraw(frame);
         }
@@ -336,7 +321,7 @@ export default function HeroDesktop() {
 
       img.onerror = () => {
         pendingLoads.delete(frame);
-        onSettled?.();
+        onSettled?.(false);
       };
     };
 
@@ -355,13 +340,9 @@ export default function HeroDesktop() {
         loadFrame(frame);
       }
 
-      // Очищуємо тільки якщо в пам'яті більше 120 кадрів, явно звільняючи GPU-пам'ять через .close()
-      if (imageCache.size > 120) {
-        for (const [frame, img] of imageCache.entries()) {
-          if (frame < startWindow - 20 || frame > endWindow + 20) {
-            if ("close" in img && typeof img.close === "function") {
-              img.close();
-            }
+      if (imageCache.size > 140) {
+        for (const frame of imageCache.keys()) {
+          if (frame < startWindow - 30 || frame > endWindow + 30) {
             imageCache.delete(frame);
           }
         }
@@ -370,7 +351,7 @@ export default function HeroDesktop() {
 
     let lastCacheTriggerFrame = 1;
     const triggerCacheIfNeeded = (frame: number) => {
-      if (Math.abs(frame - lastCacheTriggerFrame) >= 2) {
+      if (Math.abs(frame - lastCacheTriggerFrame) >= 5) {
         lastCacheTriggerFrame = frame;
         manageCache(frame);
       }
@@ -983,12 +964,8 @@ export default function HeroDesktop() {
       window.removeEventListener("touchmove", handleHeroTouchMove);
       window.removeEventListener("touchend", handleHeroTouchEnd);
 
-      for (const item of imageCache.values()) {
-        if ("close" in item && typeof item.close === "function") {
-          item.close();
-        } else if ("src" in item) {
-          item.src = "";
-        }
+      for (const img of imageCache.values()) {
+        img.src = "";
       }
       imageCache.clear();
       pendingLoads.clear();
