@@ -109,14 +109,17 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
           speed={450}
           roundLengths={true}
           watchSlidesProgress={false}
-          touchAngle={45}
+          touchAngle={35}
+          threshold={8}
+          touchEventsTarget="wrapper"
+          passiveListeners={true}
           nested={true}
           touchReleaseOnEdges={true}
           autoplay={
             products.length > 4
               ? {
                   delay: 8000,
-                  disableOnInteraction: false,
+                  disableOnInteraction: true,
                   pauseOnMouseEnter: true,
                 }
               : false
@@ -177,7 +180,7 @@ export default function ProductCarousel<T extends CarouselItem = CarouselItem>({
                       fill
                       priority={index < 2}
                       className={styles.productImage}
-                      sizes="(max-width: 640px) 100vw, 300px"
+                      sizes="(max-width: 640px) 75vw, (max-width: 1024px) 45vw, 300px"
                       draggable={false}
                     />
                     {product.stock <= 0 && <div className={styles.soldOut}>{t("shop.soldOut")}</div>}

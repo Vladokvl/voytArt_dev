@@ -214,8 +214,10 @@ export default function ProductView({
                 slidesPerView={1}
                 speed={350}
                 resistanceRatio={0.7}
-                threshold={5}
-                touchAngle={45}
+                threshold={8}
+                touchAngle={35}
+                touchEventsTarget="wrapper"
+                passiveListeners={true}
                 watchSlidesProgress={false}
                 roundLengths={true}
                 nested={true}
