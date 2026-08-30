@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./GalleryPosts.module.scss";
@@ -7,7 +7,7 @@ import { fetchPaginatedPosts } from "~/app/(site)/[locale]/gallery/_actions";
 import { motion } from "framer-motion";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import { useTranslation } from "~/context/LanguageContext";
-import { getLocalized, formatLocalizedDate } from "~/lib/i18n";
+import { getLocalized, formatLocalizedDate, type Locale } from "~/lib/i18n";
 
 type Post = {
   id: number;
@@ -30,7 +30,7 @@ const PostCard = React.memo(function PostCard({
   readMoreText,
 }: {
   post: Post;
-  locale: string;
+  locale: Locale;
   getLocalizedHref: (path: string) => string;
   readMoreText: string;
 }) {

@@ -10,7 +10,7 @@ import { useCart } from "~/context/CartContext";
 import ProductCarousel from "~/components/shop/ProductCarousel";
 import styles from "./shop.module.scss";
 import { useTranslation } from "~/context/LanguageContext";
-import { getLocalized, formatLocalizedPrice } from "~/lib/i18n";
+import { getLocalized, formatLocalizedPrice, type Locale } from "~/lib/i18n";
 
 type ProductImage = { id: number; url: string; order: number };
 type ProductVariant = { id: number; title: string; titleUk?: string | null; price: number | null; stock: number };
@@ -48,7 +48,7 @@ const ProductCardItem = React.memo(function ProductCardItem({
   product: Product;
   priority: boolean;
   isAdded: boolean;
-  locale: string;
+  locale: Locale;
   getLocalizedHref: (path: string) => string;
   onAddToCart: (product: Product) => void;
   t: (key: string, params?: Record<string, string | number>) => string;
