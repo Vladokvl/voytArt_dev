@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -35,6 +35,106 @@ export type Product = {
   images: ProductImage[];
   variants?: ProductVariant[];
 };
+
+const ProductCardItem = React.memo(function ProductCardItem({
+  product,
+  priority,
+  isAdded,
+  locale,
+  getLocalizedHref,
+  onAddToCart,
+  t,
+}: {
+  product: Product;
+  priority: boolean;
+  isAdded: boolean;
+  locale: string;
+  getLocalizedHref: (path: string) => string;
+  onAddToCart: (product: Product) => void;
+  t: (key: string, params?: Record<string, string | number>) => string;
+}) {
+  const rawUrl = product.coverUrl ?? product.images?.[0]?.url;
+  const coverImg = rawUrl
+    ? getOptimizedImageUrl(rawUrl, { preset: "card" })
+    : "/voyt.svg";
+
+  const isOutOfStock = product.stock <= 0;
+  const localizedTitle = getLocalized(product, "title", locale);
+  const authorFirstName = product.author ? getLocalized(product.author, "firstName", locale) : "";
+  const authorLastName = product.author ? getLocalized(product.author, "lastName", locale) : "";
+  const authorFullName = product.author ? `${authorFirstName} ${authorLastName}`.trim() : "VoytArt Gallery";
+
+  return (
+    <article className={styles.productCard}>
+      <div className={styles.imageWrapper}>
+        <Link href={getLocalizedHref(`/shop/${product.id}`)} className={styles.imageLink}>
+          <Image
+            src={coverImg}
+            alt={localizedTitle}
+            fill
+            priority={priority}
+            className={styles.productImage}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 320px"
+          />
+        </Link>
+
+        {isOutOfStock ? (
+          <span className={styles.soldOut}>{t("shop.soldOut")}</span>
+        ) : product.isFeatured ? (
+          <span className={styles.featuredBadge}>{t("shop.featured")}</span>
+        ) : null}
+      </div>
+
+      <div className={styles.cardInfo}>
+        <span className={styles.authorName}>{authorFullName}</span>
+
+        <Link href={getLocalizedHref(`/shop/${product.id}`)} className={styles.titleLink}>
+          <h2 className={styles.productTitle}>{localizedTitle}</h2>
+        </Link>
+
+        <div className={styles.cardFooter}>
+          <div className={styles.priceWrap}>
+            <span className={styles.price}>
+              {formatLocalizedPrice(product.price, locale)}
+            </span>
+            {product.variants && product.variants.length > 0 && (
+              <span className={styles.variantCountNote}>
+                {t("shop.optionsCount", { count: product.variants.length })}
+              </span>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => onAddToCart(product)}
+            disabled={isOutOfStock}
+            className={`${styles.addToCartBtn} ${isAdded ? styles.addedSuccess : ""}`}
+            aria-label={`Add ${localizedTitle} to cart`}
+          >
+            {isOutOfStock ? (
+              t("shop.soldOut")
+            ) : isAdded ? (
+              <>
+                <Check size={14} />
+                <span>{t("shop.added")}</span>
+              </>
+            ) : product.variants && product.variants.length > 0 ? (
+              <>
+                <span>{t("shop.options")}</span>
+                <ArrowRight size={14} />
+              </>
+            ) : (
+              <>
+                <ShoppingBag size={14} />
+                <span>{t("shop.add")}</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+});
 
 export default function ShopStorefront({
   initialProducts = [],
@@ -204,92 +304,18 @@ export default function ShopStorefront({
         ) : (
           <>
             <div className={styles.productGrid}>
-              {visibleProducts.map((product, index) => {
-                const rawUrl = product.coverUrl ?? product.images?.[0]?.url;
-                const coverImg = rawUrl
-                  ? getOptimizedImageUrl(rawUrl, { preset: "card" })
-                  : "/voyt.svg";
-
-                const isOutOfStock = product.stock <= 0;
-                const isAdded = addedItemAnimationId === product.id;
-                const localizedTitle = getLocalized(product, "title", locale);
-                const authorFirstName = product.author ? getLocalized(product.author, "firstName", locale) : "";
-                const authorLastName = product.author ? getLocalized(product.author, "lastName", locale) : "";
-                const authorFullName = product.author ? `${authorFirstName} ${authorLastName}`.trim() : "VoytArt Gallery";
-
-                return (
-                  <article key={product.id} className={styles.productCard}>
-                    <div className={styles.imageWrapper}>
-                      <Link href={getLocalizedHref(`/shop/${product.id}`)} className={styles.imageLink}>
-                        <Image
-                          src={coverImg}
-                          alt={localizedTitle}
-                          fill
-                          priority={index < 4}
-                          className={styles.productImage}
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 320px"
-                        />
-                      </Link>
-
-                      {isOutOfStock ? (
-                        <span className={styles.soldOut}>{t("shop.soldOut")}</span>
-                      ) : product.isFeatured ? (
-                        <span className={styles.featuredBadge}>{t("shop.featured")}</span>
-                      ) : null}
-                    </div>
-
-                    <div className={styles.cardInfo}>
-                      <span className={styles.authorName}>
-                        {authorFullName}
-                      </span>
-
-                      <Link href={getLocalizedHref(`/shop/${product.id}`)} className={styles.titleLink}>
-                        <h2 className={styles.productTitle}>{localizedTitle}</h2>
-                      </Link>
-
-                      <div className={styles.cardFooter}>
-                        <div className={styles.priceWrap}>
-                          <span className={styles.price}>
-                            {formatLocalizedPrice(product.price, locale)}
-                          </span>
-                          {product.variants && product.variants.length > 0 && (
-                            <span className={styles.variantCountNote}>
-                              {t("shop.optionsCount", { count: product.variants.length })}
-                            </span>
-                          )}
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => handleProductAdd(product)}
-                          disabled={isOutOfStock}
-                          className={`${styles.addToCartBtn} ${isAdded ? styles.addedSuccess : ""}`}
-                          aria-label={`Add ${localizedTitle} to cart`}
-                        >
-                          {isOutOfStock ? (
-                            t("shop.soldOut")
-                          ) : isAdded ? (
-                            <>
-                              <Check size={14} />
-                              <span>{t("shop.added")}</span>
-                            </>
-                          ) : product.variants && product.variants.length > 0 ? (
-                            <>
-                              <span>{t("shop.options")}</span>
-                              <ArrowRight size={14} />
-                            </>
-                          ) : (
-                            <>
-                              <ShoppingBag size={14} />
-                              <span>{t("shop.add")}</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
+              {visibleProducts.map((product, index) => (
+                <ProductCardItem
+                  key={product.id}
+                  product={product}
+                  priority={index < 4}
+                  isAdded={addedItemAnimationId === product.id}
+                  locale={locale}
+                  getLocalizedHref={getLocalizedHref}
+                  onAddToCart={handleProductAdd}
+                  t={t}
+                />
+              ))}
             </div>
 
             {hasMore && (

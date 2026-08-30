@@ -1,6 +1,14 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import { fetchCartProductsAction } from "~/app/(site)/[locale]/shop/_actions/cart-refresh";
 
 export type CartProduct = {
@@ -43,47 +51,75 @@ type CartContextType = {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const CART_STORAGE_KEY = "voyt_art_cart";
+const EMPTY_CART: CartItem[] = [];
+
+// In-memory cache to avoid recreating array references in getSnapshot
+let cachedCartString: string | null = null;
+let cachedCartItems: CartItem[] = EMPTY_CART;
+
+const listeners = new Set<() => void>();
+
+function notifyListeners() {
+  listeners.forEach((listener) => listener());
+}
+
+function subscribe(callback: () => void) {
+  listeners.add(callback);
+
+  const handleStorage = (e: StorageEvent) => {
+    if (e.key === CART_STORAGE_KEY) {
+      cachedCartString = null;
+      notifyListeners();
+    }
+  };
+
+  window.addEventListener("storage", handleStorage);
+  return () => {
+    listeners.delete(callback);
+    window.removeEventListener("storage", handleStorage);
+  };
+}
+
+function getSnapshot(): CartItem[] {
+  if (typeof window === "undefined") return EMPTY_CART;
+  try {
+    const raw = localStorage.getItem(CART_STORAGE_KEY);
+    if (raw !== cachedCartString) {
+      cachedCartString = raw;
+      cachedCartItems = raw ? (JSON.parse(raw) as CartItem[]) : EMPTY_CART;
+    }
+    return cachedCartItems;
+  } catch {
+    return EMPTY_CART;
+  }
+}
+
+function getServerSnapshot(): CartItem[] {
+  return EMPTY_CART;
+}
+
+function saveCart(items: CartItem[]) {
+  if (typeof window === "undefined") return;
+  try {
+    const serialized = JSON.stringify(items);
+    localStorage.setItem(CART_STORAGE_KEY, serialized);
+    cachedCartString = serialized;
+    cachedCartItems = items;
+    notifyListeners();
+  } catch (e) {
+    console.error("Failed to save cart to localStorage:", e);
+  }
+}
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const cart = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [refreshedOnce, setRefreshedOnce] = useState(false);
 
-  // 1. Load initial cart from localStorage on mount
+  // Refresh product data (prices/stock) from the server once after client load
   useEffect(() => {
-    let savedItems: CartItem[] = [];
-    try {
-      const saved = localStorage.getItem(CART_STORAGE_KEY);
-      if (saved) {
-        savedItems = JSON.parse(saved) as CartItem[];
-        setCart(savedItems);
-      }
-    } catch (e) {
-      console.error("Failed to load cart from localStorage:", e);
-    }
-    setIsHydrated(true);
-
-    // Sync across browser tabs
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === CART_STORAGE_KEY && e.newValue) {
-        try {
-          setCart(JSON.parse(e.newValue) as CartItem[]);
-        } catch (err) {
-          console.error(err);
-        }
-      }
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
-  }, []);
-
-  // 1b. Refresh product data (prices/stock) from the server after hydration —
-  // localStorage містить лише снапшот, тому ціни можуть застаріти
-  useEffect(() => {
-    if (!isHydrated || cart.length === 0) return;
+    if (refreshedOnce || cart.length === 0) return;
+    setRefreshedOnce(true);
 
     let isMounted = true;
 
@@ -94,30 +130,31 @@ export function CartProvider({ children }: { children: ReactNode }) {
         if (!isMounted) return;
 
         if (fresh.length === 0) {
-          setCart([]);
+          saveCart([]);
           return;
         }
+
         const freshMap = new Map(fresh.map((p) => [p.id, p]));
-        setCart((prev) =>
-          prev.flatMap((item) => {
-            const p = freshMap.get(item.product.id);
-            if (!p) return []; // продукт видалено/деактивовано
-            const variant =
-              item.variantId != null ? p.variants?.find((v) => v.id === item.variantId) : null;
-            const maxStock = variant ? variant.stock : (p.stock ?? 999);
-            const qty = Math.min(item.quantity, Math.max(1, maxStock));
-            return [
-              {
-                ...item,
-                quantity: qty,
-                variantTitle: variant ? variant.title : item.variantTitle,
-                product: { ...p },
-              },
-            ];
-          }),
-        );
+        const updated = cart.flatMap((item) => {
+          const p = freshMap.get(item.product.id);
+          if (!p) return [];
+          const variant =
+            item.variantId != null ? p.variants?.find((v) => v.id === item.variantId) : null;
+          const maxStock = variant ? variant.stock : (p.stock ?? 999);
+          const qty = Math.min(item.quantity, Math.max(1, maxStock));
+          return [
+            {
+              ...item,
+              quantity: qty,
+              variantTitle: variant ? variant.title : item.variantTitle,
+              product: { ...p },
+            },
+          ];
+        });
+
+        saveCart(updated);
       } catch {
-        // не блокуємо кошик, якщо refresh не вдався
+        // Silent catch: network failures should not break local cart
       }
     }
 
@@ -126,19 +163,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return () => {
       isMounted = false;
     };
-    // Only run once after hydration completes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isHydrated]);
-
-  // 2. Persist cart to localStorage whenever it changes
-  useEffect(() => {
-    if (!isHydrated) return;
-    try {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
-    } catch (e) {
-      console.error("Failed to save cart to localStorage:", e);
-    }
-  }, [cart, isHydrated]);
+  }, [cart, refreshedOnce]);
 
   const openCart = useCallback(() => setIsCartOpen(true), []);
   const closeCart = useCallback(() => setIsCartOpen(false), []);
@@ -160,26 +185,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const targetVariantId = variantId ?? null;
       const targetVariantTitle = variantTitle ?? null;
       const addQty = Math.max(1, quantity);
+      const currentCart = getSnapshot();
 
-      setCart((prevCart) => {
-        const existingIdx = prevCart.findIndex(
-          (item) =>
-            item.product.id === product.id &&
-            (item.variantId ?? null) === targetVariantId,
-        );
+      const existingIdx = currentCart.findIndex(
+        (item) =>
+          item.product.id === product.id &&
+          (item.variantId ?? null) === targetVariantId,
+      );
 
-        if (existingIdx > -1) {
-          return prevCart.map((item, idx) => {
-            if (idx === existingIdx) {
-              const updatedQty = Math.min(maxStock, item.quantity + addQty);
-              return { ...item, quantity: updatedQty };
-            }
-            return item;
-          });
-        }
-
-        return [
-          ...prevCart,
+      let nextCart: CartItem[];
+      if (existingIdx > -1) {
+        nextCart = currentCart.map((item, idx) => {
+          if (idx === existingIdx) {
+            const updatedQty = Math.min(maxStock, item.quantity + addQty);
+            return { ...item, quantity: updatedQty };
+          }
+          return item;
+        });
+      } else {
+        nextCart = [
+          ...currentCart,
           {
             product,
             variantId: targetVariantId,
@@ -187,49 +212,49 @@ export function CartProvider({ children }: { children: ReactNode }) {
             quantity: Math.min(maxStock, addQty),
           },
         ];
-      });
+      }
 
+      saveCart(nextCart);
       setIsCartOpen(true);
     },
     [],
   );
 
   const updateQuantity = useCallback((index: number, delta: number) => {
-    setCart((prevCart) => {
-      if (index < 0 || index >= prevCart.length) return prevCart;
-      return prevCart
-        .map((item, idx) => {
-          if (idx === index) {
-            const newQty = item.quantity + delta;
-            if (newQty <= 0) return null;
-            return { ...item, quantity: newQty };
-          }
-          return item;
-        })
-        .filter(Boolean) as CartItem[];
-    });
+    const currentCart = getSnapshot();
+    if (index < 0 || index >= currentCart.length) return;
+
+    const nextCart = currentCart
+      .map((item, idx) => {
+        if (idx === index) {
+          const newQty = item.quantity + delta;
+          if (newQty <= 0) return null;
+          return { ...item, quantity: newQty };
+        }
+        return item;
+      })
+      .filter(Boolean) as CartItem[];
+
+    saveCart(nextCart);
   }, []);
 
   const removeFromCart = useCallback((index: number) => {
-    setCart((prevCart) => prevCart.filter((_, idx) => idx !== index));
+    const currentCart = getSnapshot();
+    const nextCart = currentCart.filter((_, idx) => idx !== index);
+    saveCart(nextCart);
   }, []);
 
   const clearCart = useCallback(() => {
-    setCart([]);
+    saveCart([]);
   }, []);
 
-  const totalItems = isHydrated
-    ? cart.reduce((sum, item) => sum + item.quantity, 0)
-    : 0;
-
-  const totalPrice = isHydrated
-    ? cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
-    : 0;
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const totalPrice = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
   return (
     <CartContext.Provider
       value={{
-        cart: isHydrated ? cart : [],
+        cart,
         isCartOpen,
         openCart,
         closeCart,

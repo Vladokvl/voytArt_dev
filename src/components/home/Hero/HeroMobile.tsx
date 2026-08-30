@@ -712,21 +712,34 @@ export default function HeroMobile() {
     // ══════════════════════════════════════════════════════════════════════
     // INTENT-DRIVEN SECTION GLIDER (Direct Touch & Wheel Interceptors)
     // ══════════════════════════════════════════════════════════════════════
+    const TOTAL_SECTIONS = MOBILE_SNAP_POINTS.length + 2; // +1 Neon, +1 Footer
+    const NEON_INDEX = MOBILE_SNAP_POINTS.length;
+    const FOOTER_INDEX = MOBILE_SNAP_POINTS.length + 1;
+
     const updateTargetFromScroll = () => {
       if (isGlidingRef.current) return;
       const neonEl = neonContainerRef.current;
-      const mainMaxScroll = container.offsetHeight - window.innerHeight;
+      const footerEl = document.querySelector("footer");
+
+      if (footerEl) {
+        const footerRect = footerEl.getBoundingClientRect();
+        if (footerRect.top <= window.innerHeight * 0.5) {
+          targetIndexRef.current = FOOTER_INDEX;
+          return;
+        }
+      }
 
       // Якщо користувач уже в зоні Neon секції — ставимо індекс Neon
       if (neonEl) {
         const neonRect = neonEl.getBoundingClientRect();
         const neonAbsTop = neonRect.top + window.scrollY;
         if (window.scrollY >= neonAbsTop - 50) {
-          targetIndexRef.current = MOBILE_SNAP_POINTS.length;
+          targetIndexRef.current = NEON_INDEX;
           return;
         }
       }
 
+      const mainMaxScroll = container.offsetHeight - window.innerHeight;
       if (mainMaxScroll <= 0) return;
       const rawProgress = window.scrollY / mainMaxScroll;
       const clamped = Math.max(0, Math.min(1, rawProgress));
@@ -747,17 +760,28 @@ export default function HeroMobile() {
     window.addEventListener("scroll", updateTargetFromScroll, { passive: true });
 
     const goToSection = (index: number) => {
-      const isNeon = index >= MOBILE_SNAP_POINTS.length;
-      const clamped = isNeon
-        ? MOBILE_SNAP_POINTS.length
+      const isFooter = index >= FOOTER_INDEX;
+      const isNeon = !isFooter && index === NEON_INDEX;
+      const clamped = isFooter
+        ? FOOTER_INDEX
+        : isNeon
+        ? NEON_INDEX
         : Math.max(0, Math.min(MOBILE_SNAP_POINTS.length - 1, index));
+
+      if (isGlidingRef.current && targetIndexRef.current === clamped) return;
+
       targetIndexRef.current = clamped;
       isGlidingRef.current = true;
 
       let targetY: number;
       const neonEl = neonContainerRef.current;
+      const footerEl = document.querySelector("footer");
 
-      if (isNeon && neonEl) {
+      if (isFooter && footerEl) {
+        // ──── Footer: скролимо до початку футера ────
+        const footerRect = footerEl.getBoundingClientRect();
+        targetY = footerRect.top + window.scrollY;
+      } else if (isNeon && neonEl) {
         // getBoundingClientRect дає правильну позицію навіть у React-фрагментах
         const neonRect = neonEl.getBoundingClientRect();
         const neonAbsTop = neonRect.top + window.scrollY;
@@ -789,97 +813,84 @@ export default function HeroMobile() {
       }
     };
 
-    const TOTAL_SECTIONS = MOBILE_SNAP_POINTS.length + 1; // +1 для Neon
+    let lastWheelTriggerTime = 0;
+    const WHEEL_COOLDOWN_MS = 550;
 
     const handleHeroWheel = (e: WheelEvent) => {
-      const neonEl = neonContainerRef.current;
-      const mainMaxScroll = container.offsetHeight - window.innerHeight;
-      const neonRect = neonEl?.getBoundingClientRect();
-      const neonAbsTop = neonRect ? neonRect.top + window.scrollY : mainMaxScroll;
-      const neonMaxScroll = neonEl ? Math.max(0, neonEl.offsetHeight - window.innerHeight) : 0;
-      const neonTargetY = neonAbsTop + neonMaxScroll * MOBILE_NEON_SNAP;
-      const neonBottom = neonAbsTop + (neonEl ? neonEl.offsetHeight : 0);
+      const footerEl = document.querySelector("footer");
+      const footerRect = footerEl?.getBoundingClientRect();
+      const isAtFooter = footerRect ? footerRect.top <= 10 : false;
 
-      // Якщо користувач вже на/після Neon і крутить ВНИЗ -> відпускаємо до футера!
-      if (window.scrollY >= neonTargetY - 15 && e.deltaY > 0) {
+      // Якщо користувач вже в самому футері і крутить ВНИЗ -> відпускаємо
+      if (isAtFooter && e.deltaY > 0) {
         return;
       }
 
-      // Якщо користувач перебуває у футері та скролить вгору, поки не дійде до Neon -> не перехоплюємо
-      if (window.scrollY > neonBottom - window.innerHeight + 20 && e.deltaY < 0) {
+      e.preventDefault();
+
+      if (Math.abs(e.deltaY) < 10) return;
+
+      const now = performance.now();
+      if (now - lastWheelTriggerTime < WHEEL_COOLDOWN_MS) {
         return;
       }
 
-      // Якщо поза межами hero + neon
-      if (window.scrollY > neonBottom) return;
-
-      if (isGlidingRef.current) {
-        e.preventDefault();
-        return;
-      }
-
-      if (Math.abs(e.deltaY) < 8) return;
-
+      // 1 чітке прокручування = рівно 1 секція
       if (e.deltaY > 0 && targetIndexRef.current < TOTAL_SECTIONS - 1) {
-        e.preventDefault();
+        lastWheelTriggerTime = now;
         goToSection(targetIndexRef.current + 1);
         return;
       }
       if (e.deltaY < 0 && targetIndexRef.current > 0) {
-        e.preventDefault();
+        lastWheelTriggerTime = now;
         goToSection(targetIndexRef.current - 1);
         return;
       }
     };
 
     let touchStartY = 0;
+    let touchTriggered = false;
+
     const handleHeroTouchStart = (e: TouchEvent) => {
       touchStartY = e.touches[0]?.clientY ?? 0;
+      touchTriggered = false;
     };
+
     const handleHeroTouchMove = (e: TouchEvent) => {
-      const neonEl = neonContainerRef.current;
-      const mainMaxScroll = container.offsetHeight - window.innerHeight;
-      const neonRect = neonEl?.getBoundingClientRect();
-      const neonAbsTop = neonRect ? neonRect.top + window.scrollY : mainMaxScroll;
-      const neonMaxScroll = neonEl ? Math.max(0, neonEl.offsetHeight - window.innerHeight) : 0;
-      const neonTargetY = neonAbsTop + neonMaxScroll * MOBILE_NEON_SNAP;
-      const neonBottom = neonAbsTop + (neonEl ? neonEl.offsetHeight : 0);
+      const footerEl = document.querySelector("footer");
+      const footerRect = footerEl?.getBoundingClientRect();
+      const isAtFooter = footerRect ? footerRect.top <= 10 : false;
 
       const touchY = e.touches[0]?.clientY ?? 0;
       const deltaY = touchStartY - touchY;
 
-      // Свайп вгору (рух вниз до футера після Neon) -> відпускаємо
-      if (window.scrollY >= neonTargetY - 15 && deltaY > 0) {
+      // Якщо користувач вже в футері і свайпає вгору (рух вниз) -> відпускаємо
+      if (isAtFooter && deltaY > 0) {
         return;
       }
 
-      if (window.scrollY > neonBottom - window.innerHeight + 20 && deltaY < 0) {
-        return;
-      }
+      e.preventDefault();
 
-      if (window.scrollY > neonBottom) return;
+      if (touchTriggered) return;
 
-      if (isGlidingRef.current) {
-        e.preventDefault();
-        return;
-      }
-
-      if (Math.abs(deltaY) > 25) {
+      if (Math.abs(deltaY) > 35) {
+        touchTriggered = true;
         if (deltaY > 0 && targetIndexRef.current < TOTAL_SECTIONS - 1) {
-          e.preventDefault();
-          touchStartY = touchY;
           goToSection(targetIndexRef.current + 1);
         } else if (deltaY < 0 && targetIndexRef.current > 0) {
-          e.preventDefault();
-          touchStartY = touchY;
           goToSection(targetIndexRef.current - 1);
         }
       }
     };
 
+    const handleHeroTouchEnd = () => {
+      touchTriggered = false;
+    };
+
     window.addEventListener("wheel", handleHeroWheel, { passive: false });
     window.addEventListener("touchstart", handleHeroTouchStart, { passive: true });
     window.addEventListener("touchmove", handleHeroTouchMove, { passive: false });
+    window.addEventListener("touchend", handleHeroTouchEnd, { passive: true });
 
     return () => {
       window.removeEventListener("resize", resizeCanvas);
@@ -887,6 +898,7 @@ export default function HeroMobile() {
       window.removeEventListener("wheel", handleHeroWheel);
       window.removeEventListener("touchstart", handleHeroTouchStart);
       window.removeEventListener("touchmove", handleHeroTouchMove);
+      window.removeEventListener("touchend", handleHeroTouchEnd);
 
       for (const item of imageCache.values()) {
         if ("close" in item && typeof item.close === "function") {

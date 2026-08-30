@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 import gsap from "gsap";
@@ -18,39 +18,20 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   // Інстанс тримаємо в стані, щоб усі споживачі через LenisContext отримували його реактивно
   const [lenisInstance, setLenisInstance] = useState<Lenis | null>(null);
+  const lenisRef = useRef<Lenis | null>(null);
 
+  // 1. Ініціалізація Lenis один раз при монтуванні (фіксований масив залежностей [])
   useEffect(() => {
-    // Check if device is mobile or touch screen
-    const isTouchOrMobile =
-      typeof window !== "undefined" &&
-      (window.matchMedia("(max-width: 768px)").matches ||
-        window.matchMedia("(hover: none) and (pointer: coarse)").matches);
-
-    const isHome = isHomePath(pathname);
-
-    // On mobile: Lenis is ONLY enabled on the Home page (for 3D hero animation and section gliding).
-    // On all other pages on mobile, Lenis is completely disabled for 100% native momentum touch scroll.
-    const shouldEnableLenis = !isTouchOrMobile || isHome;
-
-    if (!shouldEnableLenis) {
-      setLenisInstance(null);
-      if (window.__lenis) {
-        window.__lenis.destroy();
-        window.__lenis = undefined;
-      }
-      ScrollTrigger.refresh();
-      return;
-    }
-
     // GSAP керує Lenis через свій ticker — вони завжди в одному кадрі.
     gsap.ticker.lagSmoothing(0);
 
     const lenis = new Lenis({
-      lerp: isTouchOrMobile ? 0.15 : 0.1,
+      lerp: 0.1,
       smoothWheel: true,
       anchors: true,
     });
 
+    lenisRef.current = lenis;
     setLenisInstance(lenis);
     // Залишено для backward-compat / дебагу в консолі — новий код має використовувати useLenis()
     window.__lenis = lenis;
@@ -62,7 +43,6 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
 
     // Обробник стрілочки браузера "Назад/Вперед"
     const handlePopState = () => {
-      // Дозволяємо браузеру та sessionStorage відновлювати позицію скролу
       lenis.resize();
       ScrollTrigger.refresh();
 
@@ -79,14 +59,29 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
       gsap.ticker.remove(driverFn);
       lenis.destroy();
       if (window.__lenis === lenis) window.__lenis = undefined;
+      lenisRef.current = null;
       setLenisInstance(null);
     };
-  }, [pathname]);
+  }, []);
 
-  // При кожній зміні маршруту гарантовано скидаємо скрол у 0 та перераховуємо розміри
+  // 2. Керування станом скролу при зміні маршруту: на мобільному Lenis активний лише на головній
   useEffect(() => {
-    if (!lenisInstance) return;
-    const lenis = lenisInstance;
+    const lenis = lenisRef.current;
+    if (!lenis) return;
+
+    const isTouchOrMobile =
+      typeof window !== "undefined" &&
+      (window.matchMedia("(max-width: 768px)").matches ||
+        window.matchMedia("(hover: none) and (pointer: coarse)").matches);
+
+    const isHome = isHomePath(pathname);
+
+    // На мобільних поза головною сторінкою повністю зупиняємо Lenis для нативного тач-скролу
+    if (isTouchOrMobile && !isHome) {
+      lenis.stop();
+    } else {
+      lenis.start();
+    }
 
     window.scrollTo(0, 0);
     lenis.scrollTo(0, { immediate: true, force: true });
@@ -117,7 +112,7 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
       clearTimeout(t1);
       clearTimeout(t2);
     };
-  }, [pathname, lenisInstance]);
+  }, [pathname]);
 
   const providerValue = useMemo(() => lenisInstance, [lenisInstance]);
 

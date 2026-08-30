@@ -23,6 +23,65 @@ function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
 
+const PostCard = React.memo(function PostCard({
+  post,
+  locale,
+  getLocalizedHref,
+  readMoreText,
+}: {
+  post: Post;
+  locale: string;
+  getLocalizedHref: (path: string) => string;
+  readMoreText: string;
+}) {
+  const localizedTitle = getLocalized(post, "title", locale);
+  const localizedContent = getLocalized(post, "content", locale);
+
+  return (
+    <motion.div
+      id={`post-${post.id}`}
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+    >
+      <Link
+        href={getLocalizedHref(`/gallery/${post.id}`)}
+        className={styles.card}
+        onClick={() => {
+          try {
+            sessionStorage.setItem("voyt_gallery_post_id", String(post.id));
+          } catch {
+            // ignore
+          }
+        }}
+      >
+        <div className={styles.coverWrapper}>
+          {post.coverUrl ? (
+            <Image
+              src={getOptimizedImageUrl(post.coverUrl, { preset: "card" })}
+              alt={localizedTitle}
+              fill
+              className={styles.coverImage}
+            />
+          ) : (
+            <div className={styles.noImage}>🖼</div>
+          )}
+        </div>
+
+        <div className={styles.cardBody}>
+          {post.date && (
+            <span className={styles.date}>{formatLocalizedDate(post.date, locale)}</span>
+          )}
+          <h3 className={styles.title}>{localizedTitle}</h3>
+          <p className={styles.excerpt}>{stripHtml(localizedContent)}</p>
+          <span className={styles.readMore}>{readMoreText}</span>
+        </div>
+      </Link>
+    </motion.div>
+  );
+});
+
 export default function GalleryPosts({
   initialPosts,
   initialHasMore,
@@ -87,55 +146,15 @@ export default function GalleryPosts({
           {posts.length === 0 ? (
             <p className={styles.empty}>{t("gallery.empty")}</p>
           ) : (
-            posts.map((post) => {
-              const localizedTitle = getLocalized(post, "title", locale);
-              const localizedContent = getLocalized(post, "content", locale);
-
-              return (
-                <motion.div
-                  key={post.id}
-                  id={`post-${post.id}`}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                >
-                  <Link
-                    href={getLocalizedHref(`/gallery/${post.id}`)}
-                    className={styles.card}
-                    onClick={() => {
-                      try {
-                        sessionStorage.setItem("voyt_gallery_post_id", String(post.id));
-                      } catch {
-                        // ignore
-                      }
-                    }}
-                  >
-                    <div className={styles.coverWrapper}>
-                      {post.coverUrl ? (
-                        <Image
-                          src={getOptimizedImageUrl(post.coverUrl, { preset: "card" })}
-                          alt={localizedTitle}
-                          fill
-                          className={styles.coverImage}
-                        />
-                      ) : (
-                        <div className={styles.noImage}>🖼</div>
-                      )}
-                    </div>
-
-                    <div className={styles.cardBody}>
-                      {post.date && (
-                        <span className={styles.date}>{formatLocalizedDate(post.date, locale)}</span>
-                      )}
-                      <h3 className={styles.title}>{localizedTitle}</h3>
-                      <p className={styles.excerpt}>{stripHtml(localizedContent)}</p>
-                      <span className={styles.readMore}>{t("gallery.readMore")}</span>
-                    </div>
-                  </Link>
-                </motion.div>
-              );
-            })
+            posts.map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                locale={locale}
+                getLocalizedHref={getLocalizedHref}
+                readMoreText={t("gallery.readMore")}
+              />
+            ))
           )}
         </div>
 

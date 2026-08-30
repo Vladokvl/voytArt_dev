@@ -262,7 +262,7 @@ export default function HeroDesktop() {
       drawFrame(currentFrameRef.current);
     };
 
-    // Нативне надшвидке завантаження зображення через браузерний кеш
+    // Нативне надшвидке завантаження зображення через createImageBitmap / браузерний кеш
     const loadFrame = (rawFrame: number, onSettled?: () => void) => {
       const frame = snapFrameToStride(rawFrame, frameStride, DESKTOP_TOTAL_FRAMES);
       if (frame < 1 || frame > DESKTOP_TOTAL_FRAMES) return;
@@ -276,21 +276,52 @@ export default function HeroDesktop() {
       if (pendingLoads.has(frame)) return;
       pendingLoads.add(frame);
 
-      const img = new Image();
-      img.decoding = "async";
-      img.src = getDesktopFrameUrl(frame, qualityTier);
+      const url = getDesktopFrameUrl(frame, qualityTier);
 
-      if (img.complete && img.naturalWidth > 0) {
-        pendingLoads.delete(frame);
-        imageCache.set(frame, img);
-        prefetchedFrames.add(frame);
-        updateBufferProgress();
-        onSettled?.();
-        if (frame === currentFrameRef.current) {
-          scheduleDraw(frame);
-        }
+      // Використовуємо createImageBitmap для точного керування пам'яттю GPU/RAM
+      if (typeof window !== "undefined" && "createImageBitmap" in window) {
+        fetch(url)
+          .then((res) => {
+            if (!res.ok) throw new Error("Frame fetch failed");
+            return res.blob();
+          })
+          .then((blob) => createImageBitmap(blob))
+          .then((bitmap) => {
+            pendingLoads.delete(frame);
+            imageCache.set(frame, bitmap);
+            prefetchedFrames.add(frame);
+            updateBufferProgress();
+            onSettled?.();
+            if (frame === currentFrameRef.current) {
+              scheduleDraw(frame);
+            }
+          })
+          .catch(() => {
+            // Фолбек на HTMLImageElement у разі помилки fetch
+            const img = new Image();
+            img.decoding = "async";
+            img.onload = () => {
+              pendingLoads.delete(frame);
+              imageCache.set(frame, img);
+              prefetchedFrames.add(frame);
+              updateBufferProgress();
+              onSettled?.();
+              if (frame === currentFrameRef.current) {
+                scheduleDraw(frame);
+              }
+            };
+            img.onerror = () => {
+              pendingLoads.delete(frame);
+              onSettled?.();
+            };
+            img.src = url;
+          });
         return;
       }
+
+      const img = new Image();
+      img.decoding = "async";
+      img.src = url;
 
       img.onload = () => {
         pendingLoads.delete(frame);
@@ -324,10 +355,13 @@ export default function HeroDesktop() {
         loadFrame(frame);
       }
 
-      // Очищуємо тільки якщо в пам'яті більше 120 кадрів, щоб не смикати GC при скролі вперед-назад
+      // Очищуємо тільки якщо в пам'яті більше 120 кадрів, явно звільняючи GPU-пам'ять через .close()
       if (imageCache.size > 120) {
-        for (const frame of imageCache.keys()) {
+        for (const [frame, img] of imageCache.entries()) {
           if (frame < startWindow - 20 || frame > endWindow + 20) {
+            if ("close" in img && typeof (img as ImageBitmap).close === "function") {
+              (img as ImageBitmap).close();
+            }
             imageCache.delete(frame);
           }
         }
@@ -760,21 +794,34 @@ export default function HeroDesktop() {
     // ══════════════════════════════════════════════════════════════════════
     // INTENT-DRIVEN SECTION GLIDER (Direct Wheel & Touch Interceptors)
     // ══════════════════════════════════════════════════════════════════════
+    const TOTAL_SECTIONS = DESKTOP_SNAP_POINTS.length + 2; // +1 Neon, +1 Footer
+    const NEON_INDEX = DESKTOP_SNAP_POINTS.length;
+    const FOOTER_INDEX = DESKTOP_SNAP_POINTS.length + 1;
+
     const updateTargetFromScroll = () => {
       if (isGlidingRef.current) return;
       const neonEl = neonContainerRef.current;
-      const mainMaxScroll = container.offsetHeight - window.innerHeight;
+      const footerEl = document.querySelector("footer");
+
+      if (footerEl) {
+        const footerRect = footerEl.getBoundingClientRect();
+        if (footerRect.top <= window.innerHeight * 0.5) {
+          targetIndexRef.current = FOOTER_INDEX;
+          return;
+        }
+      }
 
       // Якщо користувач уже в зоні Neon секції — ставимо індекс Neon
       if (neonEl) {
         const neonRect = neonEl.getBoundingClientRect();
         const neonAbsTop = neonRect.top + window.scrollY;
         if (window.scrollY >= neonAbsTop - 50) {
-          targetIndexRef.current = DESKTOP_SNAP_POINTS.length;
+          targetIndexRef.current = NEON_INDEX;
           return;
         }
       }
 
+      const mainMaxScroll = container.offsetHeight - window.innerHeight;
       if (mainMaxScroll <= 0) return;
       const rawProgress = window.scrollY / mainMaxScroll;
       const clamped = Math.max(0, Math.min(1, rawProgress));
@@ -795,18 +842,28 @@ export default function HeroDesktop() {
     window.addEventListener("scroll", updateTargetFromScroll, { passive: true });
 
     const goToSection = (index: number) => {
-      // index === DESKTOP_SNAP_POINTS.length означає Neon-секцію
-      const isNeon = index >= DESKTOP_SNAP_POINTS.length;
-      const clamped = isNeon
-        ? DESKTOP_SNAP_POINTS.length
+      const isFooter = index >= FOOTER_INDEX;
+      const isNeon = !isFooter && index === NEON_INDEX;
+      const clamped = isFooter
+        ? FOOTER_INDEX
+        : isNeon
+        ? NEON_INDEX
         : Math.max(0, Math.min(DESKTOP_SNAP_POINTS.length - 1, index));
+
+      if (isGlidingRef.current && targetIndexRef.current === clamped) return;
+
       targetIndexRef.current = clamped;
       isGlidingRef.current = true;
 
       let targetY: number;
       const neonEl = neonContainerRef.current;
+      const footerEl = document.querySelector("footer");
 
-      if (isNeon && neonEl) {
+      if (isFooter && footerEl) {
+        // ──── Footer: скролимо до початку футера ────
+        const footerRect = footerEl.getBoundingClientRect();
+        targetY = footerRect.top + window.scrollY;
+      } else if (isNeon && neonEl) {
         // ──── Neon: скролимо до позиції всередині neonContainer ────
         const neonRect = neonEl.getBoundingClientRect();
         const neonAbsTop = neonRect.top + window.scrollY;
@@ -839,100 +896,84 @@ export default function HeroDesktop() {
       }
     };
 
-    const TOTAL_SECTIONS = DESKTOP_SNAP_POINTS.length + 1; // +1 для Neon
+    let lastWheelTriggerTime = 0;
+    const WHEEL_COOLDOWN_MS = 550;
 
     const handleHeroWheel = (e: WheelEvent) => {
-      const neonEl = neonContainerRef.current;
-      const mainMaxScroll = container.offsetHeight - window.innerHeight;
-      const neonRect = neonEl?.getBoundingClientRect();
-      const neonAbsTop = neonRect ? neonRect.top + window.scrollY : mainMaxScroll;
-      const neonMaxScroll = neonEl ? Math.max(0, neonEl.offsetHeight - window.innerHeight) : 0;
-      const neonTargetY = neonAbsTop + neonMaxScroll * DESKTOP_NEON_SNAP;
-      const neonBottom = neonAbsTop + (neonEl ? neonEl.offsetHeight : 0);
+      const footerEl = document.querySelector("footer");
+      const footerRect = footerEl?.getBoundingClientRect();
+      const isAtFooter = footerRect ? footerRect.top <= 10 : false;
 
-      // Якщо користувач вже на/після Neon і крутить ВНИЗ -> відпускаємо до футера!
-      if (window.scrollY >= neonTargetY - 15 && e.deltaY > 0) {
+      // Якщо користувач вже в самому футері і крутить ВНИЗ -> відпускаємо
+      if (isAtFooter && e.deltaY > 0) {
         return;
       }
 
-      // Якщо користувач перебуває у футері та скролить вгору, поки не дійде до Neon -> не перехоплюємо
-      if (window.scrollY > neonBottom - window.innerHeight + 20 && e.deltaY < 0) {
+      e.preventDefault();
+
+      if (Math.abs(e.deltaY) < 10) return;
+
+      const now = performance.now();
+      if (now - lastWheelTriggerTime < WHEEL_COOLDOWN_MS) {
         return;
       }
 
-      // Якщо поза межами hero + neon
-      if (window.scrollY > neonBottom) return;
-
-      // Блокуємо паразитні мікро-рухи під час перельоту
-      if (isGlidingRef.current) {
-        e.preventDefault();
-        return;
-      }
-
-      if (Math.abs(e.deltaY) < 8) return;
-
-      // Скрол ВНИЗ -> до наступної секції (включно з Neon)
+      // 1 чітке прокручування = рівно 1 секція
       if (e.deltaY > 0 && targetIndexRef.current < TOTAL_SECTIONS - 1) {
-        e.preventDefault();
+        lastWheelTriggerTime = now;
         goToSection(targetIndexRef.current + 1);
         return;
       }
-      // Скрол ВГОРУ -> до попередньої секції
       if (e.deltaY < 0 && targetIndexRef.current > 0) {
-        e.preventDefault();
+        lastWheelTriggerTime = now;
         goToSection(targetIndexRef.current - 1);
         return;
       }
     };
 
     let touchStartY = 0;
+    let touchTriggered = false;
+
     const handleHeroTouchStart = (e: TouchEvent) => {
       touchStartY = e.touches[0]?.clientY ?? 0;
+      touchTriggered = false;
     };
+
     const handleHeroTouchMove = (e: TouchEvent) => {
-      const neonEl = neonContainerRef.current;
-      const mainMaxScroll = container.offsetHeight - window.innerHeight;
-      const neonRect = neonEl?.getBoundingClientRect();
-      const neonAbsTop = neonRect ? neonRect.top + window.scrollY : mainMaxScroll;
-      const neonMaxScroll = neonEl ? Math.max(0, neonEl.offsetHeight - window.innerHeight) : 0;
-      const neonTargetY = neonAbsTop + neonMaxScroll * DESKTOP_NEON_SNAP;
-      const neonBottom = neonAbsTop + (neonEl ? neonEl.offsetHeight : 0);
+      const footerEl = document.querySelector("footer");
+      const footerRect = footerEl?.getBoundingClientRect();
+      const isAtFooter = footerRect ? footerRect.top <= 10 : false;
 
       const touchY = e.touches[0]?.clientY ?? 0;
       const deltaY = touchStartY - touchY;
 
-      // Свайп вгору (рух вниз до футера після Neon) -> відпускаємо
-      if (window.scrollY >= neonTargetY - 15 && deltaY > 0) {
+      // Якщо користувач вже в футері і свайпає вгору (рух вниз) -> відпускаємо
+      if (isAtFooter && deltaY > 0) {
         return;
       }
 
-      if (window.scrollY > neonBottom - window.innerHeight + 20 && deltaY < 0) {
-        return;
-      }
+      e.preventDefault();
 
-      if (window.scrollY > neonBottom) return;
+      if (touchTriggered) return;
 
-      if (isGlidingRef.current) {
-        e.preventDefault();
-        return;
-      }
-
-      if (Math.abs(deltaY) > 25) {
+      if (Math.abs(deltaY) > 35) {
+        touchTriggered = true;
         if (deltaY > 0 && targetIndexRef.current < TOTAL_SECTIONS - 1) {
-          e.preventDefault();
-          touchStartY = touchY;
           goToSection(targetIndexRef.current + 1);
         } else if (deltaY < 0 && targetIndexRef.current > 0) {
-          e.preventDefault();
-          touchStartY = touchY;
           goToSection(targetIndexRef.current - 1);
         }
       }
     };
 
+    const handleHeroTouchEnd = () => {
+      touchTriggered = false;
+    };
+
     window.addEventListener("wheel", handleHeroWheel, { passive: false });
     window.addEventListener("touchstart", handleHeroTouchStart, { passive: true });
     window.addEventListener("touchmove", handleHeroTouchMove, { passive: false });
+    window.addEventListener("touchend", handleHeroTouchEnd, { passive: true });
 
     return () => {
       window.removeEventListener("resize", resizeCanvas);
@@ -940,6 +981,7 @@ export default function HeroDesktop() {
       window.removeEventListener("wheel", handleHeroWheel);
       window.removeEventListener("touchstart", handleHeroTouchStart);
       window.removeEventListener("touchmove", handleHeroTouchMove);
+      window.removeEventListener("touchend", handleHeroTouchEnd);
 
       for (const item of imageCache.values()) {
         if ("close" in item && typeof item.close === "function") {
