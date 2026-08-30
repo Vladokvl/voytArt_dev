@@ -8,6 +8,12 @@ import { LenisProvider } from "~/context/LenisContext";
 
 gsap.registerPlugin(ScrollTrigger);
 
+function isHomePath(path: string | null): boolean {
+  if (!path) return true;
+  const clean = path.replace(/\/+$/, "");
+  return clean === "" || clean === "/uk" || clean === "/en";
+}
+
 export default function SmoothScroll({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   // Інстанс тримаємо в стані, щоб усі споживачі через LenisContext отримували його реактивно
@@ -20,8 +26,18 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
       (window.matchMedia("(max-width: 768px)").matches ||
         window.matchMedia("(hover: none) and (pointer: coarse)").matches);
 
-    // On mobile devices, disable Lenis completely — use 100% native momentum touch scroll
-    if (isTouchOrMobile) {
+    const isHome = isHomePath(pathname);
+
+    // On mobile: Lenis is ONLY enabled on the Home page (for 3D hero animation and section gliding).
+    // On all other pages on mobile, Lenis is completely disabled for 100% native momentum touch scroll.
+    const shouldEnableLenis = !isTouchOrMobile || isHome;
+
+    if (!shouldEnableLenis) {
+      setLenisInstance(null);
+      if (window.__lenis) {
+        window.__lenis.destroy();
+        window.__lenis = undefined;
+      }
       ScrollTrigger.refresh();
       return;
     }
@@ -30,7 +46,7 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
     gsap.ticker.lagSmoothing(0);
 
     const lenis = new Lenis({
-      lerp: 0.1,
+      lerp: isTouchOrMobile ? 0.15 : 0.1,
       smoothWheel: true,
       anchors: true,
     });
@@ -65,7 +81,7 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
       if (window.__lenis === lenis) window.__lenis = undefined;
       setLenisInstance(null);
     };
-  }, []);
+  }, [pathname]);
 
   // При кожній зміні маршруту гарантовано скидаємо скрол у 0 та перераховуємо розміри
   useEffect(() => {
