@@ -67,10 +67,9 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.85);
   z-index: 300;
-  animation: fadeIn 0.2s ease;
+  animation: fadeIn 0.18s ease;
 }
 
 /* ─── Floating Close Button (mirrors Post return button style) ───────────── */
@@ -84,13 +83,12 @@
   justify-content: center;
   width: 2.85rem;
   height: 2.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 999px;
-  background: rgba(17, 17, 17, 0.6);
-  backdrop-filter: blur(14px);
+  background: rgba(22, 22, 22, 0.9);
   color: #fff;
   cursor: pointer;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   transition: background 0.2s ease, border-color 0.2s ease;
   user-select: none;
   -webkit-user-select: none;
@@ -104,8 +102,57 @@
   }
 
   &:hover {
-    background: rgba(17, 17, 17, 0.9);
-    border-color: rgba(255, 255, 255, 0.35);
+    background: rgba(35, 35, 35, 1);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+}
+
+/* ─── Floating Zoom Button (Desktop Loupe mode, opposite corner) ─────────── */
+.floatingZoomBtn {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.85rem;
+  height: 2.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(22, 22, 22, 0.9);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+
+  @media (min-width: 768px) {
+    display: inline-flex;
+    bottom: 1.25rem;
+    right: 1.25rem;
+    width: 3.15rem;
+    height: 3.15rem;
+  }
+
+  &:hover {
+    background: rgba(35, 35, 35, 1);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: scale(1.06);
+  }
+
+  &.zoomBtnActive {
+    background: #ffffff;
+    color: #000000;
+    border-color: #ffffff;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.45);
+
+    &:hover {
+      background: #f0f0f0;
+      color: #000000;
+    }
   }
 }
 
@@ -132,7 +179,7 @@
   transition: background 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
 
   &[data-neon] {
-    box-shadow: 0 0 30px rgba(215, 255, 1, 0.2), 0 0 70px rgba(215, 255, 1, 0.08);
+    box-shadow: 0 0 20px rgba(215, 255, 1, 0.15), 0 0 50px rgba(215, 255, 1, 0.06);
   }
 
   @media (min-width: 768px) {
@@ -159,9 +206,9 @@
   background: #000000;
   overflow: hidden;
   height: 52vh;
-  height: 52dvh;
   width: 100%;
   flex-shrink: 0;
+  touch-action: pan-y;
 
   @media (min-width: 768px) {
     width: 62%;
@@ -173,20 +220,33 @@
 .swiperInstance {
   width: 100%;
   height: 100%;
+  will-change: transform;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+
+  :global(.swiper-wrapper) {
+    will-change: transform;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
 }
 
 /* Each Swiper slide */
 .swiperSlide {
   position: relative;
   width: 100%;
-  height: 100%;
+  height: 100% !important;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  transform: translate3d(0, 0, 0);
-  -webkit-transform: translate3d(0, 0, 0);
+  will-change: transform;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 /* Wrapper inside each slide — needed for stacking placeholder + full image */
@@ -194,12 +254,17 @@
   position: relative;
   width: 100%;
   height: 100%;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  transform: translate3d(0, 0, 0);
-  -webkit-transform: translate3d(0, 0, 0);
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
   backface-visibility: hidden;
+
+  &.slideMediaZoom {
+    cursor: crosshair;
+  }
 }
 
 /* Fast lightweight placeholder (card-preset) */

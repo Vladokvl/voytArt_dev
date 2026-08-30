@@ -27,6 +27,8 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  ZoomIn,
+  ZoomOut,
 } from "lucide-react";
 
 export type MediaItem = {
@@ -66,17 +68,20 @@ function PaintingSlideMedia({
   paintingTitle,
   isPriority,
   placeholderUrl,
+  isZoomMode = false,
 }: {
   item: MediaItem;
   isActive: boolean;
   paintingTitle: string;
   isPriority: boolean;
   placeholderUrl?: string;
+  isZoomMode?: boolean;
 }) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50, isHovering: false });
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
-  const fullUrl = getOptimizedImageUrl(item.url, { preset: "large" });
+  const fullUrl = item.url;
 
   useEffect(() => {
     if (!videoRef.current) return;
@@ -91,6 +96,44 @@ function PaintingSlideMedia({
       setIsLoaded(true);
     }
   }, [fullUrl]);
+
+  // Reset zoom on slide transition
+  useEffect(() => {
+    if (!isActive || !isZoomMode) {
+      setZoomPos({ x: 50, y: 50, isHovering: false });
+    }
+  }, [isActive, isZoomMode]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isZoomMode || item.type === "VIDEO") return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
+    // Запас від країв (12%), щоб не потрібно було доводити курсор впритул до межі модалки
+    const PADDING = 0.12;
+    const normX = (e.clientX - rect.left) / rect.width;
+    const normY = (e.clientY - rect.top) / rect.height;
+
+    const mappedX = (normX - PADDING) / (1 - 2 * PADDING);
+    const mappedY = (normY - PADDING) / (1 - 2 * PADDING);
+
+    const x = Math.max(0, Math.min(100, mappedX * 100));
+    const y = Math.max(0, Math.min(100, mappedY * 100));
+
+    setZoomPos({ x, y, isHovering: true });
+  };
+
+  const handleMouseEnter = () => {
+    if (isZoomMode && item.type !== "VIDEO") {
+      setZoomPos((prev) => ({ ...prev, isHovering: true }));
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (isZoomMode) {
+      setZoomPos((prev) => ({ ...prev, isHovering: false }));
+    }
+  };
 
   if (item.type === "VIDEO") {
     return (
@@ -109,8 +152,13 @@ function PaintingSlideMedia({
   }
 
   return (
-    <div className={styles.slideMedia}>
-      {/* Placeholder — completely unmounted after full image loads to free mobile GPU memory */}
+    <div
+      className={`${styles.slideMedia} ${isZoomMode ? styles.slideMediaZoom : ""}`}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {/* Placeholder — unmounted after full image loads to free mobile GPU memory */}
       {!isLoaded && placeholderUrl && (
         <Image
           src={placeholderUrl}
@@ -129,13 +177,30 @@ function PaintingSlideMedia({
         <span className={styles.loadingSpinner} aria-hidden />
       )}
 
-      {/* Full resolution image */}
+      {/* Full resolution original image */}
       <Image
         ref={imgRef}
         src={fullUrl}
         alt={paintingTitle}
         fill
+        unoptimized
         className={`${styles.mediaEl} ${isLoaded ? styles.mediaElLoaded : ""}`}
+        style={
+          isZoomMode && zoomPos.isHovering
+            ? {
+                transform: "scale(2.3)",
+                transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
+                transition: "transform 0.12s ease-out",
+                willChange: "transform, transform-origin",
+              }
+            : isZoomMode
+            ? {
+                transform: "scale(1)",
+                transformOrigin: "center",
+                transition: "transform 0.25s ease-out",
+              }
+            : undefined
+        }
         sizes="(max-width: 768px) 100vw, 66vw"
         priority={isPriority}
         loading={isPriority ? "eager" : "lazy"}
@@ -180,6 +245,7 @@ export default function PaintingModal({
 
   const [isNeon, setIsNeon] = useState(isGlobalNeon && hasNeonMedia);
   const [slideIndex, setSlideIndex] = useState(0);
+  const [isZoomMode, setIsZoomMode] = useState(false);
   const swiperRef = useRef<SwiperType | null>(null);
 
   // Inquiry form state
@@ -204,16 +270,23 @@ export default function PaintingModal({
     setIsNeon(isGlobalNeon && hasNeonMedia);
   }, [isGlobalNeon, hasNeonMedia]);
 
-  // Reset to slide 0 when neon mode switches or modal opens
+  // Reset to slide 0 and disable zoom when neon mode switches or modal opens
   useEffect(() => {
     setSlideIndex(0);
+    setIsZoomMode(false);
     swiperRef.current?.slideTo(0, 0);
   }, [isNeon, open]);
+
+  // Reset zoom on slide change
+  useEffect(() => {
+    setIsZoomMode(false);
+  }, [slideIndex]);
 
   // Reset inquiry form when modal closes
   useEffect(() => {
     if (!open) {
       setIsNeon(false);
+      setIsZoomMode(false);
       setIsInquiryOpen(false);
       setInquiryResult(null);
     }
@@ -300,13 +373,17 @@ export default function PaintingModal({
             modules={[Navigation, Pagination, A11y]}
             spaceBetween={0}
             slidesPerView={1}
-            speed={280}
+            speed={300}
             resistanceRatio={0.7}
-            threshold={4}
+            threshold={5}
             touchAngle={45}
-            watchSlidesProgress={true}
+            watchSlidesProgress={false}
+            roundLengths={true}
+            autoHeight={false}
+            nested={true}
+            touchReleaseOnEdges={true}
             loop={false}
-            allowTouchMove={hasMultiple && activeItems[slideIndex]?.type !== "VIDEO"}
+            allowTouchMove={hasMultiple && !isZoomMode && activeItems[slideIndex]?.type !== "VIDEO"}
             onSwiper={(swiper) => { swiperRef.current = swiper; }}
             onSlideChange={handleSlideChange}
             className={styles.swiperInstance}
@@ -319,13 +396,36 @@ export default function PaintingModal({
                   paintingTitle={paintingTitle}
                   isPriority={idx < 2}
                   placeholderUrl={getOptimizedImageUrl(item.url, { preset: "card" })}
+                  isZoomMode={isZoomMode}
                 />
               </SwiperSlide>
             ))}
           </Swiper>
 
+          {/* Floating circular Zoom / Loupe button (Desktop only, opposite to close button) */}
+          {activeItems[slideIndex]?.type !== "VIDEO" && (
+            <button
+              type="button"
+              className={`${styles.floatingZoomBtn} ${isZoomMode ? styles.zoomBtnActive : ""}`}
+              onClick={() => setIsZoomMode((prev) => !prev)}
+              aria-label={isZoomMode ? "Disable zoom mode" : "Enable zoom mode"}
+              aria-pressed={isZoomMode}
+              title={
+                isZoomMode
+                  ? locale === "uk"
+                    ? "Вимкнути лупу"
+                    : "Disable loupe"
+                  : locale === "uk"
+                  ? "Увімкнути режим лупи"
+                  : "Enable loupe mode"
+              }
+            >
+              {isZoomMode ? <ZoomOut size={18} /> : <ZoomIn size={18} />}
+            </button>
+          )}
+
           {/* Arrow navigation */}
-          {hasMultiple && (
+          {hasMultiple && !isZoomMode && (
             <>
               <button
                 type="button"
@@ -352,7 +452,7 @@ export default function PaintingModal({
           )}
 
           {/* Progress dots */}
-          {hasMultiple && (
+          {hasMultiple && !isZoomMode && (
             <div className={styles.progressDashes} role="tablist" aria-label="Slides progress">
               {activeItems.map((item, idx) => (
                 <button
