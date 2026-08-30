@@ -93,9 +93,6 @@
   animation: scaleIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
   transition: background 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
-  contain: layout paint;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
 
   &[data-neon] {
     box-shadow: 0 0 30px rgba(215, 255, 1, 0.2), 0 0 70px rgba(215, 255, 1, 0.08);
@@ -109,7 +106,7 @@
   }
 }
 
-/* ─── Image Area / Embla Carousel Track ──────────────────────────────────── */
+/* ─── Image Area / Swiper Carousel ───────────────────────────────────────── */
 .imageWrap {
   position: relative;
   background: #000000;
@@ -118,7 +115,6 @@
   height: 50dvh;
   width: 100%;
   flex-shrink: 0;
-  contain: layout paint;
 
   @media (min-width: 768px) {
     width: 62%;
@@ -126,77 +122,83 @@
   }
 }
 
-.embla {
-  position: relative;
-  overflow: hidden;
+/* Swiper instance fills the image area completely */
+.swiperInstance {
   width: 100%;
   height: 100%;
 }
 
-.emblaContainer {
-  display: flex;
+/* Each Swiper slide */
+.swiperSlide {
+  position: relative;
+  width: 100%;
   height: 100%;
-  touch-action: pan-y pinch-zoom;
-  will-change: transform;
+  overflow: hidden;
 }
 
-.emblaSlide {
-  flex: 0 0 100%;
-  min-width: 0;
-  height: 100%;
+/* Wrapper inside each slide — needed for stacking placeholder + full image */
+.slideMedia {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* Blurred placeholder (card-preset, already in browser cache from grid) */
+.mediaPlaceholder {
+  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
   user-select: none;
+  -webkit-user-select: none;
+  filter: blur(18px);
+  transform: scale(1.08); /* slightly scaled to hide blur edges */
+  opacity: 1;
+  transition: opacity 0.45s ease;
+  z-index: 1;
 }
 
-.slideInner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+/* Placeholder fades out once full image is ready */
+.mediaPlaceholderHidden {
+  opacity: 0;
 }
 
+/* Full-res image — starts invisible, fades in on load */
 .mediaEl {
   object-fit: contain;
   width: 100%;
   height: 100%;
-  user-select: none;
-  -webkit-user-drag: none;
-  transition: opacity 0.35s ease-in-out;
-}
-
-.placeholderBlur {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: blur(14px);
-  transform: scale(1.04);
-  user-select: none;
-  -webkit-user-drag: none;
   pointer-events: none;
-  transition: opacity 0.4s ease-out;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  z-index: 2;
 }
 
-.spinner {
+/* Full image becomes visible after onLoad fires */
+.mediaElLoaded {
+  opacity: 1;
+}
+
+/* CSS-only spinner */
+.loadingSpinner {
   position: absolute;
   inset: 0;
   margin: auto;
-  width: 38px;
-  height: 38px;
-  border: 3px solid rgba(255, 255, 255, 0.18);
-  border-top-color: var(--color-accent, #d7ff01);
+  z-index: 3;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: rgba(255, 255, 255, 0.75);
   animation: spin 0.75s linear infinite;
-  z-index: 6;
   pointer-events: none;
-  box-shadow: 0 0 18px rgba(215, 255, 1, 0.3);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .navBtn {
