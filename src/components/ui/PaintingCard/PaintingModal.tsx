@@ -57,9 +57,9 @@ export type PaintingData = {
   media: MediaItem[];
 };
 
-// ── Blur-up slide media ─────────────────────────────────────────────────────
-// Shows a blurred card-preset placeholder (already in browser cache from the grid)
-// while the full large-preset image loads, then fades to sharp.
+// ── Blur-up / Fast placeholder slide media ───────────────────────────────────
+// Shows a lightweight card-preset placeholder while the full large-preset image loads,
+// and immediately unmounts the placeholder once loaded.
 function PaintingSlideMedia({
   item,
   isActive,
@@ -71,10 +71,11 @@ function PaintingSlideMedia({
   isActive: boolean;
   paintingTitle: string;
   isPriority: boolean;
-  placeholderUrl?: string; // smaller url already in browser cache (card preset)
+  placeholderUrl?: string;
 }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const imgRef = useRef<HTMLImageElement | null>(null);
   const fullUrl = getOptimizedImageUrl(item.url, { preset: "large" });
 
   useEffect(() => {
@@ -83,6 +84,13 @@ function PaintingSlideMedia({
       videoRef.current.pause();
     }
   }, [isActive]);
+
+  // Check if image was already cached by browser
+  useEffect(() => {
+    if (imgRef.current?.complete && imgRef.current.naturalWidth > 0) {
+      setIsLoaded(true);
+    }
+  }, [fullUrl]);
 
   if (item.type === "VIDEO") {
     return (
@@ -102,7 +110,7 @@ function PaintingSlideMedia({
 
   return (
     <div className={styles.slideMedia}>
-      {/* Blurred placeholder — unmounted after full image loads to free mobile GPU memory */}
+      {/* Placeholder — completely unmounted after full image loads to free mobile GPU memory */}
       {!isLoaded && placeholderUrl && (
         <Image
           src={placeholderUrl}
@@ -111,7 +119,7 @@ function PaintingSlideMedia({
           aria-hidden
           className={styles.mediaPlaceholder}
           sizes="(max-width: 768px) 100vw, 66vw"
-          priority
+          priority={isPriority}
           draggable={false}
         />
       )}
@@ -123,6 +131,7 @@ function PaintingSlideMedia({
 
       {/* Full resolution image */}
       <Image
+        ref={imgRef}
         src={fullUrl}
         alt={paintingTitle}
         fill
@@ -308,13 +317,8 @@ export default function PaintingModal({
                   item={item}
                   isActive={idx === slideIndex}
                   paintingTitle={paintingTitle}
-                  isPriority={idx === 0}
-                  // First slide: pass card-preset URL as placeholder (already cached from grid)
-                  placeholderUrl={
-                    idx === 0
-                      ? getOptimizedImageUrl(item.url, { preset: "card" })
-                      : undefined
-                  }
+                  isPriority={idx < 2}
+                  placeholderUrl={getOptimizedImageUrl(item.url, { preset: "card" })}
                 />
               </SwiperSlide>
             ))}

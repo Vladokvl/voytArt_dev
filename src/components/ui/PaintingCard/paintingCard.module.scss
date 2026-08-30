@@ -202,7 +202,7 @@
   backface-visibility: hidden;
 }
 
-/* Blurred placeholder (card-preset, already in browser cache from grid) */
+/* Fast lightweight placeholder (card-preset) */
 .mediaPlaceholder {
   object-fit: contain;
   width: 100%;
@@ -210,14 +210,15 @@
   pointer-events: none;
   user-select: none;
   -webkit-user-select: none;
-  filter: blur(10px);
-  transform: scale(1.04) translate3d(0, 0, 0);
-  opacity: 1;
+  opacity: 0.85;
   z-index: 1;
+  transform: translateZ(0);
   backface-visibility: hidden;
+  will-change: opacity;
+  transition: opacity 0.25s ease;
 }
 
-/* Full-res image — starts invisible, fades in on load */
+/* Full-res image — starts invisible, smoothly fades in on load */
 .mediaEl {
   object-fit: contain;
   width: 100%;
@@ -227,10 +228,11 @@
   -webkit-user-select: none;
   -webkit-user-drag: none;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 2;
-  transform: translate3d(0, 0, 0);
+  transform: translateZ(0);
   backface-visibility: hidden;
+  will-change: opacity;
 }
 
 /* Full image becomes visible after onLoad fires */
