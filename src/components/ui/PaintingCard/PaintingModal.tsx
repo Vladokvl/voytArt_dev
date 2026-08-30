@@ -60,22 +60,38 @@ export type PaintingData = {
 // while the full large-preset image loads, then fades to sharp.
 function PaintingSlideMedia({
   item,
+  isActive,
   paintingTitle,
   isPriority,
   placeholderUrl,
 }: {
   item: MediaItem;
+  isActive: boolean;
   paintingTitle: string;
   isPriority: boolean;
   placeholderUrl?: string; // smaller url already in browser cache (card preset)
 }) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const fullUrl = getOptimizedImageUrl(item.url, { preset: "large" });
+
+  useEffect(() => {
+    if (!videoRef.current) return;
+    if (!isActive) {
+      videoRef.current.pause();
+    }
+  }, [isActive]);
 
   if (item.type === "VIDEO") {
     return (
       <div className={styles.slideMedia}>
-        <video className={styles.mediaEl} controls autoPlay playsInline>
+        <video
+          ref={videoRef}
+          className={styles.mediaElVideo}
+          controls
+          playsInline
+          preload="metadata"
+        >
           <source src={item.url} />
         </video>
       </div>
@@ -84,14 +100,14 @@ function PaintingSlideMedia({
 
   return (
     <div className={styles.slideMedia}>
-      {/* Blurred placeholder — same URL as the card thumbnail, already cached */}
-      {placeholderUrl && (
+      {/* Blurred placeholder — unmounted after full image loads to free mobile GPU memory */}
+      {!isLoaded && placeholderUrl && (
         <Image
           src={placeholderUrl}
           alt=""
           fill
           aria-hidden
-          className={`${styles.mediaPlaceholder} ${isLoaded ? styles.mediaPlaceholderHidden : ""}`}
+          className={styles.mediaPlaceholder}
           sizes="(max-width: 768px) 100vw, 66vw"
           priority
           draggable={false}
@@ -262,8 +278,13 @@ export default function PaintingModal({
             modules={[Navigation, Pagination, A11y]}
             spaceBetween={0}
             slidesPerView={1}
+            speed={280}
+            resistanceRatio={0.7}
+            threshold={4}
+            touchAngle={45}
+            watchSlidesProgress={true}
             loop={false}
-            allowTouchMove={hasMultiple}
+            allowTouchMove={hasMultiple && activeItems[slideIndex]?.type !== "VIDEO"}
             onSwiper={(swiper) => { swiperRef.current = swiper; }}
             onSlideChange={handleSlideChange}
             className={styles.swiperInstance}
@@ -272,6 +293,7 @@ export default function PaintingModal({
               <SwiperSlide key={`${item.id}-${item.url}-${idx}`} className={styles.swiperSlide}>
                 <PaintingSlideMedia
                   item={item}
+                  isActive={idx === slideIndex}
                   paintingTitle={paintingTitle}
                   isPriority={idx === 0}
                   // First slide: pass card-preset URL as placeholder (already cached from grid)
