@@ -26,6 +26,7 @@ import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
+  X,
 } from "lucide-react";
 
 export type MediaItem = {
@@ -45,6 +46,7 @@ export type PaintingData = {
   descriptionUk?: string | null;
   coverUrl: string;
   year: number | null;
+  isForSale?: boolean;
   author: {
     id?: number;
     firstName: string;
@@ -272,6 +274,17 @@ export default function PaintingModal({
         className={styles.modal}
         data-neon={isNeon ? "true" : undefined}
       >
+        {/* Floating circular close button (mirrors gallery post back button style) */}
+        <Dialog.Close asChild>
+          <button
+            type="button"
+            className={styles.floatingCloseBtn}
+            aria-label="Close modal"
+          >
+            <X size={18} />
+          </button>
+        </Dialog.Close>
+
         {/* ── Swiper Carousel ─────────────────────────────────── */}
         <div className={styles.imageWrap}>
           <Swiper
@@ -423,13 +436,15 @@ export default function PaintingModal({
                 </div>
 
                 <div className={styles.actions}>
-                  <button
-                    type="button"
-                    onClick={() => setIsInquiryOpen(true)}
-                    className={styles.btnPrimary}
-                  >
-                    <span>{t("art.interested")}</span>
-                  </button>
+                  {painting.isForSale && (
+                    <button
+                      type="button"
+                      onClick={() => setIsInquiryOpen(true)}
+                      className={styles.btnPrimary}
+                    >
+                      <span>{t("art.interested")}</span>
+                    </button>
+                  )}
                   <Dialog.Close className={styles.btnGhost}>{t("art.close")}</Dialog.Close>
                 </div>
               </motion.div>

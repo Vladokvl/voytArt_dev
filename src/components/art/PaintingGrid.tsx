@@ -23,6 +23,7 @@ type Painting = {
   descriptionUk?: string | null;
   coverUrl: string;
   year: number | null;
+  isForSale?: boolean;
   author: { id?: number; firstName: string; firstNameUk?: string | null; lastName: string; lastNameUk?: string | null };
   media: MediaItem[];
 };
