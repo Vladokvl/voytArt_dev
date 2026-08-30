@@ -208,7 +208,7 @@
   height: 52vh;
   width: 100%;
   flex-shrink: 0;
-  touch-action: pan-y;
+  touch-action: pan-y pinch-zoom;
 
   @media (min-width: 768px) {
     width: 62%;

@@ -12,9 +12,10 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { useState, useEffect, useTransition, useRef, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, A11y } from "swiper/modules";
+import { Navigation, Pagination, A11y, Zoom } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
 import "swiper/css";
+import "swiper/css/zoom";
 import {
   Send,
   MessageCircle,
@@ -153,7 +154,7 @@ function PaintingSlideMedia({
 
   return (
     <div
-      className={`${styles.slideMedia} ${isZoomMode ? styles.slideMediaZoom : ""}`}
+      className={`swiper-zoom-container ${styles.slideMedia} ${isZoomMode ? styles.slideMediaZoom : ""}`}
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -370,7 +371,12 @@ export default function PaintingModal({
         {/* ── Swiper Carousel ─────────────────────────────────── */}
         <div className={styles.imageWrap}>
           <Swiper
-            modules={[Navigation, Pagination, A11y]}
+            modules={[Navigation, Pagination, A11y, Zoom]}
+            zoom={{
+              maxRatio: 3.5,
+              minRatio: 1,
+              toggle: true,
+            }}
             spaceBetween={0}
             slidesPerView={1}
             speed={300}
