@@ -14,6 +14,18 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
   const [lenisInstance, setLenisInstance] = useState<Lenis | null>(null);
 
   useEffect(() => {
+    // Check if device is mobile or touch screen
+    const isTouchOrMobile =
+      typeof window !== "undefined" &&
+      (window.matchMedia("(max-width: 768px)").matches ||
+        window.matchMedia("(hover: none) and (pointer: coarse)").matches);
+
+    // On mobile devices, disable Lenis completely — use 100% native momentum touch scroll
+    if (isTouchOrMobile) {
+      ScrollTrigger.refresh();
+      return;
+    }
+
     // GSAP керує Lenis через свій ticker — вони завжди в одному кадрі.
     gsap.ticker.lagSmoothing(0);
 

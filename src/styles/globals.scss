@@ -38,8 +38,13 @@ a {
   text-decoration: none;
 }
 
-// ── Вимкнення «липких» hover-ефектів на тачскрінах та мобільних пристроях ──
+// ── Вимкнення «липких» hover-ефектів та плавної інерції на тачскрінах/мобайлі ──
 @media (hover: none) or (max-width: 899px) {
+  html,
+  body {
+    scroll-behavior: auto !important;
+  }
+
   *,
   *::before,
   *::after {
