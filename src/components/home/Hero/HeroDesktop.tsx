@@ -359,8 +359,8 @@ export default function HeroDesktop() {
       if (imageCache.size > 120) {
         for (const [frame, img] of imageCache.entries()) {
           if (frame < startWindow - 20 || frame > endWindow + 20) {
-            if ("close" in img && typeof (img as ImageBitmap).close === "function") {
-              (img as ImageBitmap).close();
+            if ("close" in img && typeof img.close === "function") {
+              img.close();
             }
             imageCache.delete(frame);
           }
