@@ -1,6 +1,6 @@
 import { db } from "~/lib/db";
 import { notFound } from "next/navigation";
-import PostEditForm from "./_editForm";
+import PostForm from "../../_PostForm";
 import PostMediaSection from "./_MediaSection";
 
 export default async function EditPostPage({ params }: { params: Promise<{ id: string }> }) {
@@ -12,7 +12,7 @@ export default async function EditPostPage({ params }: { params: Promise<{ id: s
   if (!post) notFound();
   return (
     <>
-      <PostEditForm post={post} />
+      <PostForm post={post} />
       <PostMediaSection postId={post.id} items={post.media} />
     </>
   );

@@ -77,6 +77,7 @@ interface ImageCropModalProps {
   onCropSave: (croppedFile: File) => void;
   onCancel: () => void;
   maxSizeMb?: number;
+  defaultAspect?: number;
 }
 
 export default function ImageCropModal({
@@ -85,15 +86,16 @@ export default function ImageCropModal({
   onCropSave,
   onCancel,
   maxSizeMb = 5,
+  defaultAspect,
 }: ImageCropModalProps) {
   // Локальний стан файлу (для заміни на версію без фону)
   const [currentFile, setCurrentFile] = useState<File>(imageFile);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [aspect, setAspect] = useState<number | undefined>(undefined); // Free by default
+  const [aspect, setAspect] = useState<number | undefined>(defaultAspect);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
-  const [quality, setQuality] = useState(0.8); // Default quality 80%
+  const [quality, setQuality] = useState(0.85); // Default quality 85% for balanced size & sharpness
   const [compressedSize, setCompressedSize] = useState<number | null>(null);
   const [isCompressing, startCompression] = useTransition();
   const [originalAspect, setOriginalAspect] = useState<number | undefined>(undefined);
@@ -233,7 +235,13 @@ export default function ImageCropModal({
                   onZoomChange={setZoom}
                   onCropComplete={onCropComplete}
                   onMediaLoaded={(mediaSize) => {
-                    setOriginalAspect(mediaSize.naturalWidth / mediaSize.naturalHeight);
+                    const orig = mediaSize.naturalWidth / mediaSize.naturalHeight;
+                    setOriginalAspect(orig);
+                    if (defaultAspect !== undefined) {
+                      setAspect(defaultAspect);
+                    } else {
+                      setAspect(orig);
+                    }
                   }}
                 />
               )}
@@ -247,10 +255,11 @@ export default function ImageCropModal({
                 <div className={styles.buttonGrid}>
                   <button
                     type="button"
-                    className={`${styles.ratioBtn} ${aspect === undefined ? styles.ratioBtnActive : ""}`}
-                    onClick={() => setAspect(undefined)}
+                    className={`${styles.ratioBtn} ${aspect === originalAspect ? styles.ratioBtnActive : ""}`}
+                    onClick={() => originalAspect && setAspect(originalAspect)}
+                    disabled={!originalAspect}
                   >
-                    Вільний
+                    Оригінальний
                   </button>
                   <button
                     type="button"
@@ -282,11 +291,10 @@ export default function ImageCropModal({
                   </button>
                   <button
                     type="button"
-                    className={`${styles.ratioBtn} ${aspect === originalAspect ? styles.ratioBtnActive : ""}`}
-                    onClick={() => originalAspect && setAspect(originalAspect)}
-                    disabled={!originalAspect}
+                    className={`${styles.ratioBtn} ${aspect === undefined ? styles.ratioBtnActive : ""}`}
+                    onClick={() => setAspect(undefined)}
                   >
-                    Оригінальний
+                    Вільний
                   </button>
                 </div>
               </div>
