@@ -1,5 +1,5 @@
 import { db } from "~/lib/db";
-import ProductForm from "./_form";
+import ProductForm from "../_ProductForm";
 
 export default async function NewProductPage() {
   const [authors, categories] = await Promise.all([

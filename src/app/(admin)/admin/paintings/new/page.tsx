@@ -1,6 +1,5 @@
-// app/admin/paintings/new/page.tsx  — Server Component
 import { db } from "~/lib/db";
-import PaintingForm from "./_newForm";
+import PaintingForm from "../_PaintingForm";
 
 export default async function NewPaintingPage() {
   const [authors, collections] = await Promise.all([

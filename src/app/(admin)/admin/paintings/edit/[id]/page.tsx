@@ -1,6 +1,6 @@
 import { db } from "~/lib/db";
 import { notFound } from "next/navigation";
-import PaintingEditForm from "../_editForm";
+import PaintingForm from "../../_PaintingForm";
 
 export default async function EditPaintingPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: rawId } = await params;
@@ -12,5 +12,5 @@ export default async function EditPaintingPage({ params }: { params: Promise<{ i
   ]);
   if (!painting) return notFound();
 
-  return <PaintingEditForm painting={painting} authors={authors} collections={collections} />;
+  return <PaintingForm painting={painting} authors={authors} collections={collections} />;
 }

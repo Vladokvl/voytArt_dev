@@ -1,4 +1,4 @@
-import CategoryForm from "./_newForm";
+import CategoryForm from "../_CategoryForm";
 
 export default function NewCategoryPage() {
   return <CategoryForm />;
