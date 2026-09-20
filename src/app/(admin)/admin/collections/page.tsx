@@ -6,10 +6,12 @@ import DeleteCollectionButton from "./_DeleteButton";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import SortableHeader from "../_components/SortableHeader";
 import Pagination from "../_components/Pagination";
+import CollectionFilters from "./_CollectionFilters";
 
 type CollectionSortField = "title" | "author" | "paintingsCount" | "createdAt";
 
 type SearchParams = Promise<{
+  authorId?: string;
   sortBy?: CollectionSortField;
   sortDir?: "asc" | "desc";
   page?: string;
@@ -20,7 +22,8 @@ export default async function CollectionsPage({
 }: {
   searchParams: SearchParams;
 }) {
-  const { sortBy = "createdAt", sortDir = "desc", page: pageParam } = await searchParams;
+  const { authorId, sortBy = "createdAt", sortDir = "desc", page: pageParam } = await searchParams;
+  const authorFilter = authorId ? Number(authorId) : undefined;
   const validSortDir: "asc" | "desc" = sortDir === "asc" ? "asc" : "desc";
 
   let orderByQuery: Prisma.CollectionOrderByWithRelationInput = { createdAt: validSortDir };
@@ -37,8 +40,13 @@ export default async function CollectionsPage({
   const page = Number(pageParam) || 1;
   const pageSize = 20;
 
-  const [collections, totalCount] = await Promise.all([
+  const whereQuery: Prisma.CollectionWhereInput = {
+    ...(authorFilter ? { authorId: authorFilter } : {}),
+  };
+
+  const [collections, totalCount, authors] = await Promise.all([
     db.collection.findMany({
+      where: whereQuery,
       include: {
         author: true,
         _count: { select: { paintings: true } },
@@ -47,7 +55,11 @@ export default async function CollectionsPage({
       take: pageSize,
       skip: (page - 1) * pageSize,
     }),
-    db.collection.count(),
+    db.collection.count({ where: whereQuery }),
+    db.author.findMany({
+      orderBy: { order: "asc" },
+      select: { id: true, firstName: true, lastName: true },
+    }),
   ]);
 
   return (
@@ -62,6 +74,9 @@ export default async function CollectionsPage({
           <span>Додати колекцію</span>
         </Link>
       </div>
+
+      {/* Filters Bar */}
+      <CollectionFilters authors={authors} />
 
       {/* Table Card */}
       <div className={styles.tableCard}>

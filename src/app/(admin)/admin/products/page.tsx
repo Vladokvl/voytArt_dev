@@ -8,10 +8,13 @@ import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import SortableHeader from "../_components/SortableHeader";
 import Pagination from "../_components/Pagination";
 import { swapProductOrderAction, moveProductToPositionAction } from "./_actions";
+import ProductFilters from "./_ProductFilters";
 
 type ProductSortField = "title" | "author" | "category" | "price" | "stock" | "status" | "sortOrder";
 
 type SearchParams = Promise<{
+  authorId?: string;
+  categoryId?: string;
   sortBy?: ProductSortField;
   sortDir?: "asc" | "desc";
   page?: string;
@@ -22,7 +25,9 @@ export default async function ProductsPage({
 }: {
   searchParams: SearchParams;
 }) {
-  const { sortBy = "sortOrder", sortDir = "asc" } = await searchParams;
+  const { authorId, categoryId, sortBy = "sortOrder", sortDir = "asc", page: pageParam } = await searchParams;
+  const authorFilter = authorId ? Number(authorId) : undefined;
+  const categoryFilter = categoryId ? Number(categoryId) : undefined;
   const validSortDir: "asc" | "desc" = sortDir === "desc" ? "desc" : "asc";
 
   let orderByQuery: Prisma.ProductOrderByWithRelationInput = { sortOrder: validSortDir };
@@ -42,11 +47,17 @@ export default async function ProductsPage({
     orderByQuery = { sortOrder: validSortDir };
   }
 
-  const page = Number(await searchParams.then(s => s.page)) || 1;
+  const page = Number(pageParam) || 1;
   const pageSize = 20;
 
-  const [products, totalCount] = await Promise.all([
+  const whereQuery: Prisma.ProductWhereInput = {
+    ...(authorFilter ? { authorId: authorFilter } : {}),
+    ...(categoryFilter ? { categoryId: categoryFilter } : {}),
+  };
+
+  const [products, totalCount, authors, categories] = await Promise.all([
     db.product.findMany({
+      where: whereQuery,
       include: {
         category: true,
         author: true,
@@ -56,7 +67,15 @@ export default async function ProductsPage({
       take: pageSize,
       skip: (page - 1) * pageSize,
     }),
-    db.product.count(),
+    db.product.count({ where: whereQuery }),
+    db.author.findMany({
+      orderBy: { order: "asc" },
+      select: { id: true, firstName: true, lastName: true },
+    }),
+    db.category.findMany({
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
   ]);
 
   const plainProducts = products.map((p) => ({ ...p, price: decimalToNumber(p.price) }));
@@ -73,6 +92,9 @@ export default async function ProductsPage({
           <span>Додати товар</span>
         </Link>
       </div>
+
+      {/* Filters Bar */}
+      <ProductFilters authors={authors} categories={categories} />
 
       {/* Table Card */}
       <div className={styles.tableCard}>
