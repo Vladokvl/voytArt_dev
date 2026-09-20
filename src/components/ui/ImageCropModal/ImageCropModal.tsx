@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useTransition } from "react";
+import React, { useState, useEffect, useTransition, useRef } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import Cropper, { type Area } from "react-easy-crop";
+import { FolderOpen } from "lucide-react";
 import styles from "./ImageCropModal.module.scss";
 
 // Helper function to crop and compress image
@@ -106,6 +107,25 @@ export default function ImageCropModal({
   const [bgRemovalError, setBgRemovalError] = useState<string | null>(null);
 
   const originalSizeMb = currentFile.size / (1024 * 1024);
+
+  const replaceInputRef = useRef<HTMLInputElement>(null);
+
+  const handleReplaceFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > maxSizeMb * 1024 * 1024) {
+        alert(`Файл занадто великий (${(file.size / (1024 * 1024)).toFixed(1)} MB). Максимум: ${maxSizeMb} MB.`);
+        if (replaceInputRef.current) replaceInputRef.current.value = "";
+        return;
+      }
+      setCurrentFile(file);
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+      setBgRemovalError(null);
+      setBgProgress(null);
+      if (replaceInputRef.current) replaceInputRef.current.value = "";
+    }
+  };
 
   // Синхронізація локального файлу при зміні пропу
   useEffect(() => {
@@ -249,6 +269,26 @@ export default function ImageCropModal({
 
             {/* Controls sidebar */}
             <div className={styles.sidebar}>
+              {/* Replace Image Button */}
+              <div className={styles.section}>
+                <button
+                  type="button"
+                  className={styles.replaceBtn}
+                  onClick={() => replaceInputRef.current?.click()}
+                  title="Завантажити інший файл з пристрою"
+                >
+                  <FolderOpen size={16} />
+                  <span>Замінити файл на інший</span>
+                </button>
+                <input
+                  ref={replaceInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/avif"
+                  style={{ display: "none" }}
+                  onChange={handleReplaceFile}
+                />
+              </div>
+
               {/* Aspect Ratio Selector */}
               <div className={styles.section}>
                 <span className={styles.sectionLabel}>Формат (Aspect Ratio)</span>

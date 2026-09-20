@@ -101,6 +101,7 @@ export default function ImageUploadField({
 
     try {
       const uploadedUrl = await uploadToCloudinary(croppedFile, folder);
+      rawFileRef.current = croppedFile;
 
       // If replacing a previously staged image from this session, delete it from Cloudinary
       if (currentUrl && currentUrl !== initialUrl) {
@@ -142,12 +143,39 @@ export default function ImageUploadField({
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleOpenCropAgain = () => {
+  const [isLoadingInitialFile, setIsLoadingInitialFile] = useState(false);
+
+  const handleOpenCropAgain = async () => {
     if (rawFileRef.current) {
       setCropFile(rawFileRef.current);
-    } else {
-      fileInputRef.current?.click();
+      return;
     }
+
+    const targetUrl = previewUrl ?? currentUrl;
+    if (targetUrl) {
+      setIsLoadingInitialFile(true);
+      try {
+        const response = await fetch(targetUrl);
+        if (!response.ok) throw new Error("Failed to load image");
+        const blob = await response.blob();
+        const extension = blob.type.split("/")[1] ?? "jpg";
+        const file = new File([blob], `image.${extension}`, {
+          type: blob.type || "image/jpeg",
+          lastModified: Date.now(),
+        });
+        rawFileRef.current = file;
+        setCropFile(file);
+      } catch (err) {
+        console.error("Could not load image into file for crop:", err);
+        // Fallback to file picker if fetch failed
+        fileInputRef.current?.click();
+      } finally {
+        setIsLoadingInitialFile(false);
+      }
+      return;
+    }
+
+    fileInputRef.current?.click();
   };
 
   return (
@@ -195,11 +223,21 @@ export default function ImageUploadField({
             <button
               type="button"
               className={styles.changeBtn}
-              onClick={handleOpenCropAgain}
+              onClick={() => void handleOpenCropAgain()}
+              disabled={isLoadingInitialFile}
               title="Змінити або повторно обрізати фото"
             >
-              <Crop size={14} />
-              <span>Змінити / Обрізати</span>
+              {isLoadingInitialFile ? (
+                <>
+                  <div className={styles.spinner} style={{ width: 13, height: 13 }} />
+                  <span>Завантаження...</span>
+                </>
+              ) : (
+                <>
+                  <Crop size={14} />
+                  <span>Змінити / Обрізати</span>
+                </>
+              )}
             </button>
             <button
               type="button"
