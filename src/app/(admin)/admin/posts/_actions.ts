@@ -54,12 +54,21 @@ export async function updatePostAction(
     select: { coverUrl: true },
   });
 
-  if (oldPost?.coverUrl && coverUrl && oldPost.coverUrl !== coverUrl) {
+  if (!oldPost) {
+    return { error: "Цей пост вже було видалено іншим користувачем на іншому пристрої." };
+  }
+
+  if (oldPost.coverUrl && coverUrl && oldPost.coverUrl !== coverUrl) {
     const { deleteAssetByUrl } = await import("~/lib/cloudinary");
     void deleteAssetByUrl(oldPost.coverUrl);
   }
 
-  await db.galleryPost.update({ where: { id }, data: { title, titleUk, content, contentUk, coverUrl, coverPublicId, date } });
+  try {
+    await db.galleryPost.update({ where: { id }, data: { title, titleUk, content, contentUk, coverUrl, coverPublicId, date } });
+  } catch (err) {
+    console.error("Помилка оновлення посту:", err);
+    return { error: "Не вдалося оновити пост: запис було видалено або змінено іншим користувачем." };
+  }
 
   revalidatePath("/admin/posts");
   revalidatePath("/gallery");
@@ -82,16 +91,27 @@ export async function deletePostAction(id: number): Promise<void> {
     },
   });
 
-  await db.galleryPost.delete({ where: { id } });
+  if (!post) {
+    revalidatePath("/admin/posts");
+    return;
+  }
+
+  try {
+    await db.galleryPost.delete({ where: { id } });
+  } catch (err) {
+    console.error("Помилка видалення посту:", err);
+    revalidatePath("/admin/posts");
+    return;
+  }
 
   const deleteTasks: Promise<void>[] = [];
 
-  const coverPublicId = post?.coverPublicId ?? (post?.coverUrl ? getPublicIdFromCloudinaryUrl(post.coverUrl) : null);
+  const coverPublicId = post.coverPublicId || (post.coverUrl ? getPublicIdFromCloudinaryUrl(post.coverUrl) : null);
   if (coverPublicId) {
     deleteTasks.push(deleteAsset(coverPublicId, "image"));
   }
 
-  for (const media of post?.media ?? []) {
+  for (const media of post.media) {
     const publicId = media.publicId ?? getPublicIdFromCloudinaryUrl(media.url);
     if (!publicId) continue;
 

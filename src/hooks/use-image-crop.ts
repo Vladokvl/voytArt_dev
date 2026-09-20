@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, type RefObject } from "react";
+import { isHeicFile, convertHeicToJpeg } from "~/lib/heic-converter";
 
 interface UseImageCropProps {
   fileInputRef: RefObject<HTMLInputElement | null>;
@@ -35,15 +36,27 @@ export function useImageCrop({
     };
   }, []);
 
-  const processFile = (file: File) => {
-    if (file.type.startsWith("image/")) {
+  const processFile = async (file: File) => {
+    let targetFile = file;
+    if (isHeicFile(file)) {
+      try {
+        targetFile = await convertHeicToJpeg(file);
+      } catch (err) {
+        console.error("HEIC conversion failed:", err);
+        alert("Не вдалося конвертувати HEIC файл. Будь ласка, спробуйте JPG або PNG.");
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
+    }
+
+    if (targetFile.type.startsWith("image/")) {
       // It's an image, open cropping modal
-      setCropFile(file);
-    } else if (file.type.startsWith("video/")) {
+      setCropFile(targetFile);
+    } else if (targetFile.type.startsWith("video/")) {
       // It's a video, perform validation and set directly
       const maxSize = maxVideoSizeMb * 1024 * 1024;
-      if (file.size > maxSize) {
-        const sizeInMb = (file.size / (1024 * 1024)).toFixed(1);
+      if (targetFile.size > maxSize) {
+        const sizeInMb = (targetFile.size / (1024 * 1024)).toFixed(1);
         alert(
           `Помилка: Відео занадто велике (${sizeInMb} MB).\n\n` +
           `Максимальний дозволений розмір для відео — ${maxVideoSizeMb} MB.\n` +
@@ -54,10 +67,10 @@ export function useImageCrop({
       }
 
       const dt = new DataTransfer();
-      dt.items.add(file);
+      dt.items.add(targetFile);
       if (fileInputRef.current) fileInputRef.current.files = dt.files;
 
-      updatePreviewUrl(file);
+      updatePreviewUrl(targetFile);
       if (setPreviewType) setPreviewType("video");
     }
   };
@@ -65,7 +78,7 @@ export function useImageCrop({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      processFile(file);
+      void processFile(file);
     }
   };
 
@@ -73,7 +86,7 @@ export function useImageCrop({
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     if (file) {
-      processFile(file);
+      void processFile(file);
     }
   };
 

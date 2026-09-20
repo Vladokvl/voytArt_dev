@@ -6,6 +6,7 @@ import { ChevronRight } from "lucide-react";
 import AdminSidebar from "./_components/AdminSidebar";
 import { BreadcrumbProvider, useBreadcrumb } from "./_components/BreadcrumbContext";
 import { UnsavedUploadProvider } from "./_components/UnsavedUploadContext";
+import AdminAutoRefresh from "./_components/AdminAutoRefresh";
 import styles from "./admin.module.scss";
 
 const sectionLabels: Record<string, { title: string; newLabel: string }> = {
@@ -89,6 +90,7 @@ export default function AdminLayout({
   return (
     <UnsavedUploadProvider>
       <BreadcrumbProvider>
+        <AdminAutoRefresh />
         <div className={styles.admin} data-lenis-prevent>
           <AdminSidebar />
           <div className={styles.main}>

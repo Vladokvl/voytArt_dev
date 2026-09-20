@@ -73,6 +73,7 @@ export default async function OrdersPage({
 
       {/* Orders Table Card */}
       <div className={styles.tableCard}>
+        <Pagination totalItems={totalCount} pageSize={pageSize} position="top" />
         <table className={styles.table}>
           <thead>
             <tr>

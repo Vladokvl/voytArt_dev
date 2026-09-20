@@ -101,35 +101,44 @@ export async function updateAuthorAction(
     select: { photoUrl: true, bgPhotoUrl: true },
   });
 
-  if (oldAuthor?.photoUrl && photoUrl && oldAuthor.photoUrl !== photoUrl) {
+  if (!oldAuthor) {
+    return { error: "Цього автора вже було видалено іншим користувачем на іншому пристрої." };
+  }
+
+  if (oldAuthor.photoUrl && photoUrl && oldAuthor.photoUrl !== photoUrl) {
     const { deleteAssetByUrl } = await import("~/lib/cloudinary");
     void deleteAssetByUrl(oldAuthor.photoUrl);
   }
 
-  if (oldAuthor?.bgPhotoUrl && bgPhotoUrl && oldAuthor.bgPhotoUrl !== bgPhotoUrl) {
+  if (oldAuthor.bgPhotoUrl && bgPhotoUrl && oldAuthor.bgPhotoUrl !== bgPhotoUrl) {
     const { deleteAssetByUrl } = await import("~/lib/cloudinary");
     void deleteAssetByUrl(oldAuthor.bgPhotoUrl);
   }
 
-  await db.author.update({
-    where: { id },
-    data: {
-      firstName,
-      lastName,
-      firstNameUk: (formData.get("firstNameUk") as string)?.trim() || null,
-      lastNameUk: (formData.get("lastNameUk") as string)?.trim() || null,
-      bio,
-      bioUk: (formData.get("bioUk") as string) || null,
-      shortDesc,
-      shortDescUk: (formData.get("shortDescUk") as string) || null,
-      photoUrl,
-      photoPublicId,
-      bgPhotoUrl,
-      bgPhotoPublicId,
-      ...(order !== undefined ? { order } : {}),
-      active,
-    },
-  });
+  try {
+    await db.author.update({
+      where: { id },
+      data: {
+        firstName,
+        lastName,
+        firstNameUk: (formData.get("firstNameUk") as string)?.trim() || null,
+        lastNameUk: (formData.get("lastNameUk") as string)?.trim() || null,
+        bio,
+        bioUk: (formData.get("bioUk") as string) || null,
+        shortDesc,
+        shortDescUk: (formData.get("shortDescUk") as string) || null,
+        photoUrl,
+        photoPublicId,
+        bgPhotoUrl,
+        bgPhotoPublicId,
+        ...(order !== undefined ? { order } : {}),
+        active,
+      },
+    });
+  } catch (err) {
+    console.error("Помилка оновлення автора:", err);
+    return { error: "Не вдалося оновити автора: запис було видалено або змінено іншим користувачем." };
+  }
 
   revalidatePath("/admin/authors");
   revalidatePath("/admin");
@@ -185,7 +194,13 @@ export async function deleteAuthorAction(id: number): Promise<void> {
     }
   }
 
-  await db.author.delete({ where: { id } });
+  try {
+    await db.author.delete({ where: { id } });
+  } catch (err) {
+    console.error("Помилка видалення автора:", err);
+    revalidatePath("/admin/authors");
+    return;
+  }
 
   const deleteTasks: Promise<void>[] = [];
 

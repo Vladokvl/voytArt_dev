@@ -165,6 +165,7 @@ export default async function InquiriesPage({
 
       {/* Inquiries Table Card */}
       <div className={styles.tableCard}>
+        <Pagination totalItems={totalCount} pageSize={pageSize} position="top" />
         <table className={styles.table}>
           <thead>
             <tr>

@@ -47,7 +47,12 @@ export async function updateCategoryAction(
   const exists = await db.category.findFirst({ where: { slug, NOT: { id } } });
   if (exists) return { error: "Категорія з таким slug вже існує" };
 
-  await db.category.update({ where: { id }, data: { name, nameUk, slug } });
+  try {
+    await db.category.update({ where: { id }, data: { name, nameUk, slug } });
+  } catch (err) {
+    console.error("Помилка оновлення категорії:", err);
+    return { error: "Не вдалося оновити категорію: запис було видалено або змінено іншим користувачем." };
+  }
 
   revalidatePath("/admin/categories");
   revalidatePath("/shop");
@@ -65,7 +70,11 @@ export async function deleteCategoryAction(id: number): Promise<void> {
     redirect(`/admin/categories?error=products-linked`);
   }
 
-  await db.category.delete({ where: { id } });
+  try {
+    await db.category.delete({ where: { id } });
+  } catch (err) {
+    console.error("Помилка видалення категорії:", err);
+  }
   revalidatePath("/admin/categories");
   revalidateTag(CACHE_TAGS.shop);
 }

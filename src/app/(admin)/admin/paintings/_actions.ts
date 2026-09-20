@@ -20,16 +20,32 @@ export async function deletePaintingAction(id: number) {
     },
   });
 
-  await db.painting.delete({ where: { id } });
+  if (!painting) {
+    // Already deleted on another device
+    revalidatePath("/admin/paintings");
+    revalidatePath("/admin");
+    revalidatePath("/art");
+    return;
+  }
+
+  try {
+    await db.painting.delete({ where: { id } });
+  } catch {
+    // If deleted concurrently between findUnique and delete
+    revalidatePath("/admin/paintings");
+    revalidatePath("/admin");
+    revalidatePath("/art");
+    return;
+  }
 
   const deleteTasks: Promise<void>[] = [];
 
-  const coverPublicId = painting?.coverPublicId ?? (painting?.coverUrl ? getPublicIdFromCloudinaryUrl(painting.coverUrl) : null);
+  const coverPublicId = painting.coverPublicId || (painting.coverUrl ? getPublicIdFromCloudinaryUrl(painting.coverUrl) : null);
   if (coverPublicId) {
     deleteTasks.push(deleteAsset(coverPublicId, "image"));
   }
 
-  for (const media of painting?.media ?? []) {
+  for (const media of painting.media) {
     const publicId = media.publicId ?? getPublicIdFromCloudinaryUrl(media.url);
     if (!publicId) continue;
 

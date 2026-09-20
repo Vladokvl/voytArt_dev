@@ -140,7 +140,7 @@ export default function MediaSection({
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/*,video/*"
+          accept="image/*,video/*,image/heic,image/heif,.heic,.heif"
           hidden
           onChange={handleFileChange}
         />

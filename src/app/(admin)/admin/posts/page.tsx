@@ -59,6 +59,7 @@ export default async function PostsPage({
 
       {/* Table Card */}
       <div className={styles.tableCard}>
+        <Pagination totalItems={totalCount} pageSize={pageSize} position="top" />
         <table className={styles.table}>
           <thead>
             <tr>

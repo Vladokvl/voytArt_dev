@@ -4,6 +4,7 @@ import React, { useState, useEffect, useTransition, useRef } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import Cropper, { type Area } from "react-easy-crop";
 import { FolderOpen } from "lucide-react";
+import { isHeicFile, convertHeicToJpeg } from "~/lib/heic-converter";
 import styles from "./ImageCropModal.module.scss";
 
 // Helper function to crop and compress image
@@ -28,12 +29,14 @@ export async function getCroppedImg(
     throw new Error("Не вдалося створити контекст 2D для canvas");
   }
 
+  // Встановлюємо розміри canvas відповідно до розміру обрізки
   canvas.width = pixelCrop.width;
   canvas.height = pixelCrop.height;
 
-  // Очищення canvas (для прозорого PNG фону)
+  // Очищення canvas (для збереження прозорого фону у PNG)
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  // Малюємо обрізану частину на canvas
   ctx.drawImage(
     image,
     pixelCrop.x,
@@ -46,7 +49,7 @@ export async function getCroppedImg(
     pixelCrop.height
   );
 
-  // Визначаємо формат файлу (для збереження прозорості)
+  // Конвертуємо у File зі стисненням
   const isPng = fileName.toLowerCase().endsWith(".png");
   const mimeType = isPng ? "image/png" : "image/jpeg";
   const outputFileName = isPng
@@ -100,6 +103,7 @@ export default function ImageCropModal({
   const [compressedSize, setCompressedSize] = useState<number | null>(null);
   const [isCompressing, startCompression] = useTransition();
   const [originalAspect, setOriginalAspect] = useState<number | undefined>(undefined);
+  const [isConvertingHeic, setIsConvertingHeic] = useState(false);
 
   // Стани AI-видалення фону
   const [isRemovingBg, setIsRemovingBg] = useState(false);
@@ -110,15 +114,30 @@ export default function ImageCropModal({
 
   const replaceInputRef = useRef<HTMLInputElement>(null);
 
-  const handleReplaceFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleReplaceFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > maxSizeMb * 1024 * 1024) {
-        alert(`Файл занадто великий (${(file.size / (1024 * 1024)).toFixed(1)} MB). Максимум: ${maxSizeMb} MB.`);
+      let targetFile = file;
+      if (isHeicFile(file)) {
+        try {
+          setIsConvertingHeic(true);
+          targetFile = await convertHeicToJpeg(file);
+        } catch (err) {
+          console.error("HEIC conversion error:", err);
+          alert("Не вдалося конвертувати HEIC файл. Спробуйте JPG або PNG.");
+          if (replaceInputRef.current) replaceInputRef.current.value = "";
+          return;
+        } finally {
+          setIsConvertingHeic(false);
+        }
+      }
+
+      if (targetFile.size > maxSizeMb * 1024 * 1024) {
+        alert(`Файл занадто великий (${(targetFile.size / (1024 * 1024)).toFixed(1)} MB). Максимум: ${maxSizeMb} MB.`);
         if (replaceInputRef.current) replaceInputRef.current.value = "";
         return;
       }
-      setCurrentFile(file);
+      setCurrentFile(targetFile);
       setCrop({ x: 0, y: 0 });
       setZoom(1);
       setBgRemovalError(null);
@@ -129,9 +148,29 @@ export default function ImageCropModal({
 
   // Синхронізація локального файлу при зміні пропу
   useEffect(() => {
-    setCurrentFile(imageFile);
+    let isMounted = true;
+    if (isHeicFile(imageFile)) {
+      setIsConvertingHeic(true);
+      convertHeicToJpeg(imageFile)
+        .then((converted) => {
+          if (isMounted) {
+            setCurrentFile(converted);
+          }
+        })
+        .catch((err) => {
+          console.error("HEIC conversion error:", err);
+        })
+        .finally(() => {
+          if (isMounted) setIsConvertingHeic(false);
+        });
+    } else {
+      setCurrentFile(imageFile);
+    }
     setBgRemovalError(null);
     setBgProgress(null);
+    return () => {
+      isMounted = false;
+    };
   }, [imageFile]);
 
   // Generate URL for crop library
@@ -245,7 +284,12 @@ export default function ImageCropModal({
           <div className={styles.body}>
             {/* Cropper container */}
             <div className={styles.cropperContainer}>
-              {imageSrc && (
+              {isConvertingHeic ? (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", color: "#94a3b8", gap: "0.75rem" }}>
+                  <div className={styles.customSpinner} />
+                  <span>Конвертація HEIC у JPG...</span>
+                </div>
+              ) : imageSrc ? (
                 <Cropper
                   image={imageSrc}
                   crop={crop}
@@ -264,7 +308,7 @@ export default function ImageCropModal({
                     }
                   }}
                 />
-              )}
+              ) : null}
             </div>
 
             {/* Controls sidebar */}
@@ -283,7 +327,7 @@ export default function ImageCropModal({
                 <input
                   ref={replaceInputRef}
                   type="file"
-                  accept="image/png,image/jpeg,image/webp,image/avif"
+                  accept="image/png,image/jpeg,image/webp,image/avif,image/heic,image/heif,.heic,.heif"
                   style={{ display: "none" }}
                   onChange={handleReplaceFile}
                 />

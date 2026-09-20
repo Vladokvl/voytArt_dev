@@ -24,7 +24,7 @@ export default function PostMediaSection({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const folder = mediaType === "VIDEO" ? "voytart/posts/videos" : "voytart/posts/images";
-  const accept = mediaType === "VIDEO" ? "video/*" : "image/*";
+  const accept = mediaType === "VIDEO" ? "video/*" : "image/*,image/heic,image/heif,.heic,.heif";
   const resourceType = mediaType === "VIDEO" ? "video" : "image";
 
   const {

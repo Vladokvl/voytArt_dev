@@ -52,15 +52,24 @@ export async function updateCollectionAction(
     select: { coverPhotoUrl: true },
   });
 
-  if (oldCollection?.coverPhotoUrl && coverPhotoUrl && oldCollection.coverPhotoUrl !== coverPhotoUrl) {
+  if (!oldCollection) {
+    return { error: "Цю колекцію вже було видалено іншим користувачем на іншому пристрої." };
+  }
+
+  if (oldCollection.coverPhotoUrl && coverPhotoUrl && oldCollection.coverPhotoUrl !== coverPhotoUrl) {
     const { deleteAssetByUrl } = await import("~/lib/cloudinary");
     void deleteAssetByUrl(oldCollection.coverPhotoUrl);
   }
 
-  await db.collection.update({
-    where: { id },
-    data: { title, titleUk, authorId, coverPhotoUrl, coverPhotoPublicId },
-  });
+  try {
+    await db.collection.update({
+      where: { id },
+      data: { title, titleUk, authorId, coverPhotoUrl, coverPhotoPublicId },
+    });
+  } catch (err) {
+    console.error("Помилка оновлення колекції:", err);
+    return { error: "Не вдалося оновити колекцію: запис було видалено або змінено іншим користувачем." };
+  }
 
   revalidatePath("/admin/collections");
   revalidatePath("/admin");
@@ -76,15 +85,29 @@ export async function deleteCollectionAction(id: number): Promise<void> {
     select: { coverPhotoUrl: true, coverPhotoPublicId: true },
   });
 
-  // Захист від P2003 (FK constraint failed): спершу обнуляємо посилання картин
-  // на колекцію (relation nullable), потім видаляємо саму колекцію.
-  await db.painting.updateMany({ where: { collectionId: id }, data: { collectionId: null } });
+  if (!collection) {
+    revalidatePath("/admin/collections");
+    revalidatePath("/admin");
+    revalidatePath("/admin/paintings/new");
+    return;
+  }
 
-  await db.collection.delete({ where: { id } });
+  try {
+    // Захист від P2003 (FK constraint failed): спершу обнуляємо посилання картин
+    // на колекцію (relation nullable), потім видаляємо саму колекцію.
+    await db.painting.updateMany({ where: { collectionId: id }, data: { collectionId: null } });
+    await db.collection.delete({ where: { id } });
+  } catch (err) {
+    console.error("Помилка видалення колекції:", err);
+    revalidatePath("/admin/collections");
+    revalidatePath("/admin");
+    revalidatePath("/admin/paintings/new");
+    return;
+  }
 
   const publicId =
-    collection?.coverPhotoPublicId ??
-    (collection?.coverPhotoUrl ? getPublicIdFromCloudinaryUrl(collection.coverPhotoUrl) : null);
+    collection.coverPhotoPublicId ||
+    (collection.coverPhotoUrl ? getPublicIdFromCloudinaryUrl(collection.coverPhotoUrl) : null);
   if (publicId) {
     await deleteAsset(publicId, "image").catch(() => undefined);
   }

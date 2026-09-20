@@ -98,6 +98,7 @@ export default async function PaintingsPage({
 
       {/* Table Card */}
       <div className={tableStyles.tableCard}>
+        <Pagination totalItems={totalCount} pageSize={pageSize} position="top" />
         <table className={tableStyles.table}>
           <thead>
             <tr>

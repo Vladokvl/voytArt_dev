@@ -138,15 +138,20 @@ export async function updateProductAction(
     categoryId,
   };
 
+  const oldProduct = await db.product.findUnique({
+    where: { id },
+    select: { coverPublicId: true, coverUrl: true },
+  });
+
+  if (!oldProduct) {
+    return { error: "Цей товар вже було видалено іншим користувачем на іншому пристрої." };
+  }
+
   if (coverUrl) {
     dataToUpdate.coverUrl = coverUrl;
     dataToUpdate.coverPublicId = getPublicIdFromCloudinaryUrl(coverUrl) ?? "";
 
-    const oldProduct = await db.product.findUnique({
-      where: { id },
-      select: { coverPublicId: true, coverUrl: true },
-    });
-    if (oldProduct && oldProduct.coverUrl !== coverUrl) {
+    if (oldProduct.coverUrl && oldProduct.coverUrl !== coverUrl) {
       const publicId = oldProduct.coverPublicId || getPublicIdFromCloudinaryUrl(oldProduct.coverUrl);
       if (publicId) void deleteAsset(publicId, "image");
     }
@@ -154,7 +159,8 @@ export async function updateProductAction(
 
   // Атомарний sync продукту та варіантів в одній транзакції: без неї збій у середині
   // циклу лишав би товар без частини варіантів/з розсинхронізованим stock.
-  await db.$transaction(async (tx) => {
+  try {
+    await db.$transaction(async (tx) => {
     await tx.product.update({
       where: { id },
       data: dataToUpdate,
@@ -214,6 +220,10 @@ export async function updateProductAction(
       });
     }
   });
+  } catch (err) {
+    console.error("Помилка оновлення товару:", err);
+    return { error: "Не вдалося оновити товар: запис було змінено або видалено іншим користувачем." };
+  }
 
   revalidatePath("/admin/products");
   revalidatePath(`/admin/products/edit/${id}`);
@@ -224,30 +234,47 @@ export async function updateProductAction(
 
 export async function toggleProductActiveAction(id: number, isActive: boolean) {
   await requireAdmin();
-  await db.product.update({
-    where: { id },
-    data: { isActive },
-  });
+  try {
+    await db.product.update({
+      where: { id },
+      data: { isActive },
+    });
+  } catch (err) {
+    console.error("Помилка зміни активності товару:", err);
+  }
   revalidatePath("/admin/products");
   revalidatePath("/shop");
 }
 
 export async function deleteProductAction(id: number): Promise<void> {
   await requireAdmin();
-  const images = await db.productImage.findMany({
-    where: { productId: id },
-    select: { url: true, publicId: true },
-  });
-
   const product = await db.product.findUnique({
     where: { id },
     select: { coverUrl: true, coverPublicId: true },
   });
 
-  await db.product.delete({ where: { id } });
+  if (!product) {
+    revalidatePath("/admin/products");
+    revalidatePath("/shop");
+    return;
+  }
+
+  const images = await db.productImage.findMany({
+    where: { productId: id },
+    select: { url: true, publicId: true },
+  });
+
+  try {
+    await db.product.delete({ where: { id } });
+  } catch (err) {
+    console.error("Помилка видалення товару:", err);
+    revalidatePath("/admin/products");
+    revalidatePath("/shop");
+    return;
+  }
 
   const toDelete = [...images];
-  if (product?.coverUrl) {
+  if (product.coverUrl) {
     toDelete.push({ url: product.coverUrl, publicId: product.coverPublicId });
   }
 
@@ -270,10 +297,14 @@ export async function swapProductOrderAction(idA: number, idB: number) {
     db.product.findUnique({ where: { id: idB }, select: { sortOrder: true } }),
   ]);
   if (!a || !b) return;
-  await db.$transaction([
-    db.product.update({ where: { id: idA }, data: { sortOrder: b.sortOrder } }),
-    db.product.update({ where: { id: idB }, data: { sortOrder: a.sortOrder } }),
-  ]);
+  try {
+    await db.$transaction([
+      db.product.update({ where: { id: idA }, data: { sortOrder: b.sortOrder } }),
+      db.product.update({ where: { id: idB }, data: { sortOrder: a.sortOrder } }),
+    ]);
+  } catch (err) {
+    console.error("Помилка переміщення товарів:", err);
+  }
   revalidatePath("/admin/products");
   revalidatePath("/shop");
 }
@@ -284,12 +315,15 @@ export async function moveProductToPositionAction(id: number, targetIndex: numbe
   const without = all.filter((p) => p.id !== id);
   const clamped = Math.max(0, Math.min(targetIndex, without.length));
   without.splice(clamped, 0, { id });
-  // Атомарне оновлення порядку в межах однієї транзакції
-  await db.$transaction(
-    without.map((p, i) =>
-      db.product.update({ where: { id: p.id }, data: { sortOrder: i } }),
-    ),
-  );
+  try {
+    await db.$transaction(
+      without.map((p, i) =>
+        db.product.update({ where: { id: p.id }, data: { sortOrder: i } }),
+      ),
+    );
+  } catch (err) {
+    console.error("Помилка переміщення товару:", err);
+  }
   revalidatePath("/admin/products");
   revalidatePath("/shop");
 }

@@ -8,9 +8,11 @@ import styles from "./Pagination.module.scss";
 export default function Pagination({
   totalItems,
   pageSize = 20,
+  position = "bottom",
 }: {
   totalItems: number;
   pageSize?: number;
+  position?: "top" | "bottom";
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -26,7 +28,7 @@ export default function Pagination({
   };
 
   return (
-    <div className={styles.pagination}>
+    <div className={`${styles.pagination} ${position === "top" ? styles.top : ""}`}>
       <div className={styles.info}>
         Показано {(currentPage - 1) * pageSize + 1} - {Math.min(currentPage * pageSize, totalItems)} з {totalItems}
       </div>

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Upload, Trash2, Crop, AlertCircle } from "lucide-react";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
 import LazyImageCropModal from "~/components/ui/ImageCropModal/LazyImageCropModal";
+import { isHeicFile, convertHeicToJpeg } from "~/lib/heic-converter";
 import { useUnsavedUploads } from "./UnsavedUploadContext";
 import styles from "./ImageUploadField.module.scss";
 
@@ -39,6 +40,7 @@ export default function ImageUploadField({
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialUrl ?? null);
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isConvertingHeic, setIsConvertingHeic] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -58,26 +60,41 @@ export default function ImageUploadField({
     onUploadingChange?.(isUploading);
   }, [isUploading, onUploadingChange]);
 
-  const handleSelectFile = (file: File) => {
+  const handleSelectFile = async (file: File) => {
     setUploadError(null);
 
+    let targetFile = file;
+    if (isHeicFile(file)) {
+      try {
+        setIsConvertingHeic(true);
+        targetFile = await convertHeicToJpeg(file);
+      } catch (err) {
+        console.error("HEIC conversion error:", err);
+        setUploadError("Не вдалося конвертувати HEIC фото. Будь ласка, спробуйте JPG або PNG.");
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      } finally {
+        setIsConvertingHeic(false);
+      }
+    }
+
     // Validate size limit before opening crop
-    if (file.size > maxSizeMb * 1024 * 1024) {
+    if (targetFile.size > maxSizeMb * 1024 * 1024) {
       setUploadError(
-        `Файл занадто великий (${(file.size / (1024 * 1024)).toFixed(1)} MB). Максимум: ${maxSizeMb} MB.`
+        `Файл занадто великий (${(targetFile.size / (1024 * 1024)).toFixed(1)} MB). Максимум: ${maxSizeMb} MB.`
       );
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
-    rawFileRef.current = file;
-    setCropFile(file);
+    rawFileRef.current = targetFile;
+    setCropFile(targetFile);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      handleSelectFile(file);
+      void handleSelectFile(file);
     }
   };
 
@@ -85,8 +102,8 @@ export default function ImageUploadField({
     e.preventDefault();
     setIsDragOver(false);
     const file = e.dataTransfer.files?.[0];
-    if (file?.type.startsWith("image/")) {
-      handleSelectFile(file);
+    if (file && (file.type.startsWith("image/") || isHeicFile(file))) {
+      void handleSelectFile(file);
     }
   };
 
@@ -187,7 +204,7 @@ export default function ImageUploadField({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/png,image/jpeg,image/webp,image/avif"
+        accept="image/png,image/jpeg,image/webp,image/avif,image/heic,image/heif,.heic,.heif"
         style={{ display: "none" }}
         onChange={handleInputChange}
       />
@@ -201,7 +218,12 @@ export default function ImageUploadField({
       </div>
 
       {/* States */}
-      {isUploading ? (
+      {isConvertingHeic ? (
+        <div className={styles.uploadingBox}>
+          <div className={styles.spinner} />
+          <span>Конвертація HEIC у JPG...</span>
+        </div>
+      ) : isUploading ? (
         <div className={styles.uploadingBox}>
           <div className={styles.spinner} />
           <span>Завантаження на Cloudinary...</span>
@@ -276,7 +298,7 @@ export default function ImageUploadField({
           <div>
             <div className={styles.dropTitle}>Натисніть або перетягніть фото сюди</div>
             <div className={styles.dropSubtitle}>
-              PNG, JPG, WebP до {maxSizeMb} MB
+              PNG, JPG, WebP, HEIC до {maxSizeMb} MB
             </div>
           </div>
         </div>

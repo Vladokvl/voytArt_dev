@@ -20,27 +20,36 @@ export async function updatePaintingAction(_prev: { error: string } | undefined,
     select: { coverUrl: true },
   });
 
-  if (oldPainting?.coverUrl && coverUrl && oldPainting.coverUrl !== coverUrl) {
+  if (!oldPainting) {
+    return { error: "Цю картину вже було видалено іншим користувачем на іншому пристрої." };
+  }
+
+  if (oldPainting.coverUrl && coverUrl && oldPainting.coverUrl !== coverUrl) {
     const { deleteAssetByUrl } = await import("~/lib/cloudinary");
     void deleteAssetByUrl(oldPainting.coverUrl);
   }
 
-  await db.painting.update({
-    where: { id },
-    data: {
-      title,
-      titleUk: (formData.get("titleUk") as string)?.trim() || null,
-      authorId,
-      description: (formData.get("description") as string) || null,
-      descriptionUk: (formData.get("descriptionUk") as string) || null,
-      year: formData.get("year") ? Number(formData.get("year")) : null,
-      hasNeon: formData.get("hasNeon") === "on",
-      isForSale: formData.get("isForSale") === "on",
-      collectionId: formData.get("collectionId") ? Number(formData.get("collectionId")) : null,
-      coverUrl: coverUrl || undefined,
-      coverPublicId: coverUrl ? (getPublicIdFromCloudinaryUrl(coverUrl) ?? "") : undefined,
-    },
-  });
+  try {
+    await db.painting.update({
+      where: { id },
+      data: {
+        title,
+        titleUk: (formData.get("titleUk") as string)?.trim() || null,
+        authorId,
+        description: (formData.get("description") as string) || null,
+        descriptionUk: (formData.get("descriptionUk") as string) || null,
+        year: formData.get("year") ? Number(formData.get("year")) : null,
+        hasNeon: formData.get("hasNeon") === "on",
+        isForSale: formData.get("isForSale") === "on",
+        collectionId: formData.get("collectionId") ? Number(formData.get("collectionId")) : null,
+        coverUrl: coverUrl || undefined,
+        coverPublicId: coverUrl ? (getPublicIdFromCloudinaryUrl(coverUrl) ?? "") : undefined,
+      },
+    });
+  } catch (err) {
+    console.error("Помилка оновлення картини:", err);
+    return { error: "Не вдалося оновити картину: запис було видалено або змінено іншим користувачем." };
+  }
 
   revalidatePath("/admin/paintings");
   revalidatePath("/art");
