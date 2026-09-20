@@ -49,6 +49,16 @@ export async function updatePostAction(
     return { error: "Заповніть обовʼязкові поля" };
   }
 
+  const oldPost = await db.galleryPost.findUnique({
+    where: { id },
+    select: { coverUrl: true },
+  });
+
+  if (oldPost?.coverUrl && coverUrl && oldPost.coverUrl !== coverUrl) {
+    const { deleteAssetByUrl } = await import("~/lib/cloudinary");
+    void deleteAssetByUrl(oldPost.coverUrl);
+  }
+
   await db.galleryPost.update({ where: { id }, data: { title, titleUk, content, contentUk, coverUrl, coverPublicId, date } });
 
   revalidatePath("/admin/posts");

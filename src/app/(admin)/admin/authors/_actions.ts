@@ -96,6 +96,21 @@ export async function updateAuthorAction(
     }
   }
 
+  const oldAuthor = await db.author.findUnique({
+    where: { id },
+    select: { photoUrl: true, bgPhotoUrl: true },
+  });
+
+  if (oldAuthor?.photoUrl && photoUrl && oldAuthor.photoUrl !== photoUrl) {
+    const { deleteAssetByUrl } = await import("~/lib/cloudinary");
+    void deleteAssetByUrl(oldAuthor.photoUrl);
+  }
+
+  if (oldAuthor?.bgPhotoUrl && bgPhotoUrl && oldAuthor.bgPhotoUrl !== bgPhotoUrl) {
+    const { deleteAssetByUrl } = await import("~/lib/cloudinary");
+    void deleteAssetByUrl(oldAuthor.bgPhotoUrl);
+  }
+
   await db.author.update({
     where: { id },
     data: {

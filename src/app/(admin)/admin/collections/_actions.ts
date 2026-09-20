@@ -47,6 +47,16 @@ export async function updateCollectionAction(
     return { error: "Заповніть обовʼязкові поля" };
   }
 
+  const oldCollection = await db.collection.findUnique({
+    where: { id },
+    select: { coverPhotoUrl: true },
+  });
+
+  if (oldCollection?.coverPhotoUrl && coverPhotoUrl && oldCollection.coverPhotoUrl !== coverPhotoUrl) {
+    const { deleteAssetByUrl } = await import("~/lib/cloudinary");
+    void deleteAssetByUrl(oldCollection.coverPhotoUrl);
+  }
+
   await db.collection.update({
     where: { id },
     data: { title, titleUk, authorId, coverPhotoUrl, coverPhotoPublicId },

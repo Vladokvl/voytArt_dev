@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import PaintingCard from "~/components/ui/PaintingCard/PaintingCard";
 import styles from "~/app/(site)/[locale]/art/[[...artistId]]/art.module.scss";
@@ -48,6 +48,34 @@ export default function PaintingGrid({
   const [paintings, setPaintings] = useState<Painting[]>(initialPaintings);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
+  const [columnsCount, setColumnsCount] = useState<number>(3);
+
+  // Responsive column count matching breakpoints
+  useEffect(() => {
+    const updateColumns = () => {
+      const w = window.innerWidth;
+      if (w < 640) {
+        setColumnsCount(1);
+      } else if (w < 1024) {
+        setColumnsCount(2);
+      } else {
+        setColumnsCount(3);
+      }
+    };
+
+    updateColumns();
+    window.addEventListener("resize", updateColumns);
+    return () => window.removeEventListener("resize", updateColumns);
+  }, []);
+
+  // Stable round-robin distribution: newly loaded paintings only append to columns without moving previous items
+  const columns = useMemo(() => {
+    const cols: Painting[][] = Array.from({ length: columnsCount }, () => []);
+    paintings.forEach((painting, index) => {
+      cols[index % columnsCount]!.push(painting);
+    });
+    return cols;
+  }, [paintings, columnsCount]);
 
   // Sync state with server-side changes (e.g. filter changes)
   useEffect(() => {
@@ -82,10 +110,14 @@ export default function PaintingGrid({
         <p className={styles.empty}>{t("art.empty")}</p>
       ) : (
         <>
-          <div className={styles.masonry}>
-            {paintings.map((painting) => (
-              <div key={painting.id} className={styles.masonryItem}>
-                <PaintingCard painting={painting} />
+          <div className={styles.masonryGrid}>
+            {columns.map((col, colIdx) => (
+              <div key={colIdx} className={styles.masonryColumn}>
+                {col.map((painting) => (
+                  <div key={painting.id} className={styles.masonryItem}>
+                    <PaintingCard painting={painting} />
+                  </div>
+                ))}
               </div>
             ))}
           </div>

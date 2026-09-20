@@ -15,6 +15,16 @@ export async function updatePaintingAction(_prev: { error: string } | undefined,
     return { error: "Заповніть обовʼязкові поля" };
   }
 
+  const oldPainting = await db.painting.findUnique({
+    where: { id },
+    select: { coverUrl: true },
+  });
+
+  if (oldPainting?.coverUrl && coverUrl && oldPainting.coverUrl !== coverUrl) {
+    const { deleteAssetByUrl } = await import("~/lib/cloudinary");
+    void deleteAssetByUrl(oldPainting.coverUrl);
+  }
+
   await db.painting.update({
     where: { id },
     data: {

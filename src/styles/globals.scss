@@ -38,6 +38,13 @@ a {
   text-decoration: none;
 }
 
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
 // ── Вимкнення «липких» hover-ефектів та плавної інерції на тачскрінах/мобайлі ──
 @media (hover: none) or (max-width: 899px) {
   html,

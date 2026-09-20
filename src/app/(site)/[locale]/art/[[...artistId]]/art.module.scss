@@ -390,22 +390,23 @@
   }
 }
 
-.masonry {
-  columns: 1;
-  column-gap: 1.5rem;
+.masonryGrid {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  width: 100%;
+}
 
-  @include tablet {
-    columns: 2;
-  }
-
-  @include desktop {
-    columns: 3;
-  }
+.masonryColumn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 0;
 }
 
 .masonryItem {
-  break-inside: avoid;
-  margin-bottom: 1.5rem;
+  width: 100%;
 }
 
 .empty {
@@ -486,6 +487,7 @@
 }
 
 .collectionChip {
+  font-family: inherit;
   display: flex;
   align-items: center;
   gap: 0.625rem;
