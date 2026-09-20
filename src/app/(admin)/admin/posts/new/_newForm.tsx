@@ -21,6 +21,7 @@ import LanguageTabs from "../../_components/LanguageTabs";
 export default function PostForm() {
   const [state, formAction] = useActionState(createPostAction, undefined);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [langTab, setLangTab] = useState<"en" | "uk">("en");
   const [content, setContent] = useState("");
@@ -47,13 +48,17 @@ export default function PostForm() {
     const file = fileInput.files?.[0];
 
     setUploading(true);
+    setUploadError(null);
     let coverUrl = "";
 
     if (file) {
       try {
         coverUrl = await uploadToCloudinary(file, "voytart/posts");
       } catch (err) {
-        console.error(err);
+        console.error("Cloudinary upload failed:", err);
+        setUploadError(err instanceof Error ? err.message : "Помилка завантаження обкладинки у Cloudinary");
+        setUploading(false);
+        return;
       }
     }
 
@@ -69,7 +74,7 @@ export default function PostForm() {
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
       <h1 style={{ fontSize: "1.25rem", fontWeight: 600 }}>Новий пост</h1>
-      {state?.error && <p className={styles.error}>{state.error}</p>}
+      {(uploadError ?? state?.error) && <p className={styles.error}>{uploadError ?? state?.error}</p>}
 
       <LanguageTabs activeTab={langTab} onChange={setLangTab} />
 

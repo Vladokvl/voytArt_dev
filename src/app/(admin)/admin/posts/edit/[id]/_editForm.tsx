@@ -36,6 +36,7 @@ export default function PostEditForm({ post }: { post: Post }) {
   useSetBreadcrumb(post.title);
   const [state, formAction] = useActionState(updatePostAction, undefined);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [langTab, setLangTab] = useState<"en" | "uk">("en");
   const [content, setContent] = useState(post.content);
@@ -64,13 +65,17 @@ export default function PostEditForm({ post }: { post: Post }) {
     const file = fileInput.files?.[0];
 
     setUploading(true);
+    setUploadError(null);
     let coverUrl = post.coverUrl ?? "";
 
     if (file) {
       try {
         coverUrl = await uploadToCloudinary(file, "voytart/posts");
       } catch (err) {
-        console.error(err);
+        console.error("Cloudinary upload failed:", err);
+        setUploadError(err instanceof Error ? err.message : "Помилка завантаження обкладинки у Cloudinary");
+        setUploading(false);
+        return;
       }
     }
 
@@ -110,7 +115,7 @@ export default function PostEditForm({ post }: { post: Post }) {
         </button>
       </div>
 
-      {state?.error && <p className={styles.error}>{state.error}</p>}
+      {(uploadError ?? state?.error) && <p className={styles.error}>{uploadError ?? state?.error}</p>}
       <input type="hidden" name="id" value={post.id} />
 
       {/* ── 2-Column Grid Layout ───────────────────────────── */}

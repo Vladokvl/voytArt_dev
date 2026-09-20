@@ -53,7 +53,7 @@ const config = {
           {
             key: "Content-Security-Policy",
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' res.cloudinary.com images.unsplash.com data: blob:; media-src 'self' res.cloudinary.com data: blob:; font-src 'self' data:; connect-src 'self' ipwho.is https://res.cloudinary.com; frame-ancestors 'none';",
+              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' res.cloudinary.com images.unsplash.com data: blob:; media-src 'self' res.cloudinary.com data: blob:; font-src 'self' data:; connect-src 'self' ipwho.is https://res.cloudinary.com https://api.cloudinary.com; frame-ancestors 'none';",
           },
         ],
       },

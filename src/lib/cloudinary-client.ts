@@ -17,7 +17,7 @@ export async function uploadToCloudinary(
   }
 
   // 1. Get the signature from the Server Action
-  const { signature, timestamp, apiKey } = await getCloudinarySignature({
+  const { signature, timestamp, apiKey, cloudName: serverCloudName } = await getCloudinarySignature({
     folder,
   });
 
@@ -29,20 +29,37 @@ export async function uploadToCloudinary(
   data.append("signature", signature);
   data.append("folder", folder);
 
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const cloudName = serverCloudName || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME?.trim();
+  if (!cloudName) {
+    throw new Error("Не знайдено назву Cloudinary cloud name. Перевірте змінні середовища.");
+  }
   
   // 3. Post to the signed upload endpoint
-  const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
-    {
-      method: "POST",
-      body: data,
-    }
-  );
+  let res: Response;
+  try {
+    res = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
+      {
+        method: "POST",
+        body: data,
+      }
+    );
+  } catch (networkErr) {
+    throw new Error(`Помилка запиту до Cloudinary: ${networkErr instanceof Error ? networkErr.message : String(networkErr)}`);
+  }
 
   if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`Cloudinary upload failed: ${errorText}`);
+    let errorMsg = `HTTP ${res.status} ${res.statusText}`;
+    try {
+      const errJson = (await res.json()) as { error?: { message?: string } };
+      if (errJson?.error?.message) {
+        errorMsg = errJson.error.message;
+      }
+    } catch {
+      const errorText = await res.text().catch(() => "");
+      if (errorText) errorMsg = errorText;
+    }
+    throw new Error(`Cloudinary помилка: ${errorMsg}`);
   }
 
   const json = (await res.json()) as { secure_url: string };

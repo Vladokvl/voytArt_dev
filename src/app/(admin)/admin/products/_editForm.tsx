@@ -72,6 +72,7 @@ export default function ProductEditForm({
   useSetBreadcrumb(product.title);
   const [state, formAction] = useActionState(updateProductAction, undefined);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [langTab, setLangTab] = useState<"en" | "uk">("en");
   const [description, setDescription] = useState(product.description ?? "");
@@ -112,13 +113,17 @@ export default function ProductEditForm({
     const file = fileInput.files?.[0];
 
     setUploading(true);
+    setUploadError(null);
     let coverUrl = product.coverUrl;
 
     if (file) {
       try {
         coverUrl = await uploadToCloudinary(file, "voytart/products");
       } catch (err) {
-        console.error(err);
+        console.error("Cloudinary upload failed:", err);
+        setUploadError(err instanceof Error ? err.message : "Помилка завантаження фото у Cloudinary");
+        setUploading(false);
+        return;
       }
     }
 
@@ -179,7 +184,7 @@ export default function ProductEditForm({
         </div>
       </div>
 
-      {state?.error && <p className={styles.error}>{state.error}</p>}
+      {(uploadError ?? state?.error) && <p className={styles.error}>{uploadError ?? state?.error}</p>}
       <input type="hidden" name="id" value={product.id} />
 
       {/* ── 2-Column Grid Layout ───────────────────────────── */}

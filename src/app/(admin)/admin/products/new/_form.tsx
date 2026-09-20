@@ -34,6 +34,7 @@ export default function ProductForm({
 }) {
   const [state, formAction] = useActionState(createProductAction, undefined);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [langTab, setLangTab] = useState<"en" | "uk">("en");
   const [description, setDescription] = useState("");
@@ -63,13 +64,17 @@ export default function ProductForm({
     const file = fileInput.files?.[0];
 
     setUploading(true);
+    setUploadError(null);
     let coverUrl = "";
 
     if (file) {
       try {
         coverUrl = await uploadToCloudinary(file, "voytart/products");
       } catch (err) {
-        console.error(err);
+        console.error("Cloudinary upload failed:", err);
+        setUploadError(err instanceof Error ? err.message : "Помилка завантаження фото у Cloudinary");
+        setUploading(false);
+        return;
       }
     }
 
@@ -109,7 +114,7 @@ export default function ProductForm({
         </button>
       </div>
 
-      {state?.error && <p className={styles.error}>{state.error}</p>}
+      {(uploadError ?? state?.error) && <p className={styles.error}>{uploadError ?? state?.error}</p>}
 
       {/* ── 2-Column Grid Layout ───────────────────────────── */}
       <div className={styles.formGrid}>

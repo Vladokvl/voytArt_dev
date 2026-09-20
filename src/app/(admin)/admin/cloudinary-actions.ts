@@ -30,6 +30,11 @@ export async function getCloudinarySignature(params: Record<string, string | num
 
   const apiSecret = process.env.CLOUDINARY_API_SECRET?.trim().replace(/^["']|["']$/g, "") ?? "";
   const apiKey = process.env.CLOUDINARY_API_KEY?.trim().replace(/^["']|["']$/g, "") ?? "";
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim().replace(/^["']|["']$/g, "") ?? "";
+
+  if (!apiSecret || !apiKey || !cloudName) {
+    throw new Error("Cloudinary credentials are not configured on the server.");
+  }
 
   const signature = cloudinary.utils.api_sign_request(
     paramsToSign,
@@ -40,5 +45,6 @@ export async function getCloudinarySignature(params: Record<string, string | num
     signature,
     timestamp,
     apiKey,
+    cloudName,
   };
 }

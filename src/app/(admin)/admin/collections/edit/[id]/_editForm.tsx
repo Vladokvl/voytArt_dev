@@ -30,6 +30,7 @@ export default function CollectionEditForm({
   useSetBreadcrumb(collection.title);
   const [state, formAction] = useActionState(updateCollectionAction, undefined);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [preview, setPreview] = useState<string | null>(null);
   const [coverPhotoUrl, setCoverPhotoUrl] = useState(collection.coverPhotoUrl ?? "");
@@ -52,11 +53,13 @@ export default function CollectionEditForm({
     if (!file) return;
 
     setUploading(true);
+    setUploadError(null);
     try {
       const secureUrl = await uploadToCloudinary(file, "voytart/collections");
       setCoverPhotoUrl(secureUrl);
     } catch (err) {
-      console.error(err);
+      console.error("Cloudinary upload failed:", err);
+      setUploadError(err instanceof Error ? err.message : "Помилка завантаження фото у Cloudinary");
     } finally {
       setUploading(false);
       setPreview(null);
@@ -96,7 +99,7 @@ export default function CollectionEditForm({
         </button>
       </div>
 
-      {state?.error && <p className={styles.error}>{state.error}</p>}
+      {(uploadError ?? state?.error) && <p className={styles.error}>{uploadError ?? state?.error}</p>}
       <input type="hidden" name="id" value={String(collection.id)} />
       <input type="hidden" name="coverPhotoUrl" value={coverPhotoUrl} />
 

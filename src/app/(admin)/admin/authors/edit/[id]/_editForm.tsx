@@ -31,6 +31,7 @@ type Author = {
 export default function AuthorEditForm({ author }: { author: Author }) {
   const [state, formAction] = useActionState(updateAuthorAction, undefined);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const [langTab, setLangTab] = useState<"en" | "uk">("en");
@@ -100,6 +101,7 @@ export default function AuthorEditForm({ author }: { author: Author }) {
 
     if (file || bgFile) {
       setUploading(true);
+      setUploadError(null);
       try {
         if (file) {
           finalPhotoUrl = await uploadToCloudinary(file, "voytart/authors");
@@ -110,7 +112,10 @@ export default function AuthorEditForm({ author }: { author: Author }) {
           setBgPhotoUrl(finalBgPhotoUrl);
         }
       } catch (err) {
-        console.error(err);
+        console.error("Cloudinary upload failed:", err);
+        setUploadError(err instanceof Error ? err.message : "Помилка завантаження фото у Cloudinary");
+        setUploading(false);
+        return;
       } finally {
         setUploading(false);
       }
@@ -190,7 +195,7 @@ export default function AuthorEditForm({ author }: { author: Author }) {
           </button>
         </div>
 
-        {state?.error && <p className={styles.error}>{state.error}</p>}
+        {(uploadError ?? state?.error) && <p className={styles.error}>{uploadError ?? state?.error}</p>}
         <input type="hidden" name="id" value={author.id} />
         <input type="hidden" name="order" value={author.order} />
 

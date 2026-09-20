@@ -22,6 +22,7 @@ import LanguageTabs from "../../_components/LanguageTabs";
 export default function PaintingForm({ authors, collections }: { authors: Author[]; collections: { id: number; title: string; authorId: number }[] }) {
   const [state, formAction] = useActionState(createPaintingAction, undefined);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [langTab, setLangTab] = useState<"en" | "uk">("en");
   const [description, setDescription] = useState("");
@@ -64,13 +65,17 @@ export default function PaintingForm({ authors, collections }: { authors: Author
     const file = fileInput.files?.[0];
 
     setUploading(true);
+    setUploadError(null);
     let imageUrl = "";
 
     if (file) {
       try {
         imageUrl = await uploadToCloudinary(file, "voytart/paintings");
       } catch (err) {
-        console.error(err);
+        console.error("Cloudinary upload failed:", err);
+        setUploadError(err instanceof Error ? err.message : "Помилка завантаження зображення у Cloudinary");
+        setUploading(false);
+        return;
       }
     }
 
@@ -102,7 +107,7 @@ export default function PaintingForm({ authors, collections }: { authors: Author
 
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
-      {state?.error && <p className={styles.error}>{state.error}</p>}
+      {(uploadError ?? state?.error) && <p className={styles.error}>{uploadError ?? state?.error}</p>}
 
       <LanguageTabs activeTab={langTab} onChange={setLangTab} />
 

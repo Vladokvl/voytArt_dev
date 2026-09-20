@@ -11,6 +11,7 @@ import LanguageTabs from "../../_components/LanguageTabs";
 export default function AuthorForm() {
   const [state, formAction] = useActionState(createAuthorAction, undefined);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const [langTab, setLangTab] = useState<"en" | "uk">("en");
@@ -71,6 +72,7 @@ export default function AuthorForm() {
     const bgFile = bgFileInputRef.current?.files?.[0];
 
     setUploading(true);
+    setUploadError(null);
     let photoUrl = "";
     let bgPhotoUrl = "";
 
@@ -82,7 +84,10 @@ export default function AuthorForm() {
         bgPhotoUrl = await uploadToCloudinary(bgFile, "voytart/authors");
       }
     } catch (err) {
-      console.error(err);
+      console.error("Cloudinary upload failed:", err);
+      setUploadError(err instanceof Error ? err.message : "Помилка завантаження фото у Cloudinary");
+      setUploading(false);
+      return;
     } finally {
       setUploading(false);
     }
@@ -108,25 +113,19 @@ export default function AuthorForm() {
         }
         .previewPanel {
           position: fixed;
-          right: 0;
           top: 0;
-          bottom: 0;
+          right: 0;
           width: 33.333vw;
           height: 100vh;
-          z-index: 999;
-          border-left: 2px solid rgba(255, 255, 255, 0.15);
-          box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
-          background: #111;
           overflow: hidden;
+          z-index: 100;
+          background: #000;
+          box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+          pointer-events: none;
         }
-        @media (max-width: 999px) {
+        @media (max-width: 1024px) {
           .previewPanel {
-            position: relative !important;
-            width: 100% !important;
-            height: 100vh !important;
-            border-left: none !important;
-            border-top: 2px solid rgba(255, 255, 255, 0.15);
-            box-shadow: none !important;
+            display: none !important;
           }
           .formColumn {
             max-width: 100% !important;
@@ -138,7 +137,7 @@ export default function AuthorForm() {
       {/* Основна форма */}
       <form onSubmit={handleSubmit} className={`${styles.form} formColumn`} style={{ margin: 0 }}>
         <h1 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "1.5rem" }}>Новий автор</h1>
-        {state?.error && <p className={styles.error}>{state.error}</p>}
+        {(uploadError ?? state?.error) && <p className={styles.error}>{uploadError ?? state?.error}</p>}
 
         <LanguageTabs activeTab={langTab} onChange={setLangTab} />
 

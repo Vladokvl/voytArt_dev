@@ -52,7 +52,9 @@ export default function MediaSection({
     try {
       secureUrl = await uploadToCloudinary(file, "voytart/products");
     } catch (err) {
-      console.error(err);
+      console.error("Cloudinary upload failed:", err);
+      const errMsg = err instanceof Error ? err.message : "Не вдалося завантажити файл на Cloudinary. Спробуйте ще раз.";
+      alert(errMsg);
       setUploading(false);
       return;
     }

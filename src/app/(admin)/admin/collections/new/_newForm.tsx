@@ -10,6 +10,7 @@ import ImageCropModal from "~/components/ui/ImageCropModal/LazyImageCropModal";
 export default function CollectionNewForm({ authors }: { authors: Author[] }) {
   const [state, formAction] = useActionState(createCollectionAction, undefined);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [preview, setPreview] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -35,10 +36,14 @@ export default function CollectionNewForm({ authors }: { authors: Author[] }) {
     let coverPhotoUrl = "";
     if (file) {
       setUploading(true);
+      setUploadError(null);
       try {
         coverPhotoUrl = await uploadToCloudinary(file, "voytart/collections");
       } catch (err) {
-        console.error(err);
+        console.error("Cloudinary upload failed:", err);
+        setUploadError(err instanceof Error ? err.message : "Помилка завантаження фото у Cloudinary");
+        setUploading(false);
+        return;
       } finally {
         setUploading(false);
       }
@@ -52,7 +57,7 @@ export default function CollectionNewForm({ authors }: { authors: Author[] }) {
 
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
-      {state?.error && <p className={styles.error}>{state.error}</p>}
+      {(uploadError ?? state?.error) && <p className={styles.error}>{uploadError ?? state?.error}</p>}
 
       <div className={styles.field}>
         <label className={styles.label}>Назва (EN) *</label>
