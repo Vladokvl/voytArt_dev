@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Upload, Trash2, Crop, AlertCircle } from "lucide-react";
 import { uploadToCloudinary } from "~/lib/cloudinary-client";
 import LazyImageCropModal from "~/components/ui/ImageCropModal/LazyImageCropModal";
+import { useUnsavedUploads } from "./UnsavedUploadContext";
 import styles from "./ImageUploadField.module.scss";
 
 export interface ImageUploadFieldProps {
@@ -32,6 +33,8 @@ export default function ImageUploadField({
   onChange,
   onUploadingChange,
 }: ImageUploadFieldProps) {
+  const { registerStagedUrl, discardStagedUrl } = useUnsavedUploads();
+
   const [currentUrl, setCurrentUrl] = useState<string>(initialUrl ?? "");
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialUrl ?? null);
   const [cropFile, setCropFile] = useState<File | null>(null);
@@ -98,6 +101,13 @@ export default function ImageUploadField({
 
     try {
       const uploadedUrl = await uploadToCloudinary(croppedFile, folder);
+
+      // If replacing a previously staged image from this session, delete it from Cloudinary
+      if (currentUrl && currentUrl !== initialUrl) {
+        void discardStagedUrl(currentUrl);
+      }
+
+      registerStagedUrl(uploadedUrl);
       setCurrentUrl(uploadedUrl);
       setPreviewUrl(uploadedUrl);
       onChange?.(uploadedUrl);
@@ -120,6 +130,11 @@ export default function ImageUploadField({
   };
 
   const handleRemove = () => {
+    // If this image was staged in this session, delete it from Cloudinary
+    if (currentUrl && currentUrl !== initialUrl) {
+      void discardStagedUrl(currentUrl);
+    }
+
     setCurrentUrl("");
     setPreviewUrl(null);
     setUploadError(null);

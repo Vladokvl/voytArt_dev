@@ -8,6 +8,7 @@ import { createProductAction, updateProductAction } from "./_actions";
 import formStyles from "../_formStyles.module.scss";
 import LanguageTabs from "../_components/LanguageTabs";
 import ImageUploadField from "../_components/ImageUploadField";
+import { useUnsavedUploads } from "../_components/UnsavedUploadContext";
 import VariantEditor, { type VariantItem } from "./_VariantEditor";
 import MediaSection from "./edit/[id]/_MediaSection";
 import { useSetBreadcrumb } from "@/app/(admin)/admin/_components/BreadcrumbContext";
@@ -102,8 +103,11 @@ export default function ProductForm({
       title: v.title,
     }));
 
+  const { commitStagedUrls } = useUnsavedUploads();
+
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    commitStagedUrls();
     const formData = new FormData(e.currentTarget);
     formData.set("description", description);
     formData.set("descriptionUk", descriptionUk);

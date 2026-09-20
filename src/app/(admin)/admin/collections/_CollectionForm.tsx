@@ -7,6 +7,7 @@ import { createCollectionAction, updateCollectionAction } from "./_actions";
 import { type Author } from "@/types/Author";
 import styles from "../_formStyles.module.scss";
 import ImageUploadField from "../_components/ImageUploadField";
+import { useUnsavedUploads } from "../_components/UnsavedUploadContext";
 import { useSetBreadcrumb } from "@/app/(admin)/admin/_components/BreadcrumbContext";
 
 export type CollectionItem = {
@@ -31,9 +32,11 @@ export default function CollectionForm({ collection, authors }: CollectionFormPr
 
   const [pending, startTransition] = useTransition();
   const [isUploading, setIsUploading] = useState(false);
+  const { commitStagedUrls } = useUnsavedUploads();
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    commitStagedUrls();
     const formData = new FormData(e.currentTarget);
     startTransition(() => {
       formAction(formData);

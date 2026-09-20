@@ -48,3 +48,30 @@ export async function getCloudinarySignature(params: Record<string, string | num
     cloudName,
   };
 }
+
+export async function deleteCloudinaryAssetAction(url: string): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin();
+  if (!url) return { success: false, error: "No URL provided" };
+  try {
+    const { deleteAssetByUrl } = await import("~/lib/cloudinary");
+    await deleteAssetByUrl(url);
+    return { success: true };
+  } catch (err) {
+    console.error("Failed to delete Cloudinary asset:", err);
+    return { success: false, error: err instanceof Error ? err.message : "Deletion failed" };
+  }
+}
+
+export async function deleteMultipleCloudinaryAssetsAction(urls: string[]): Promise<{ success: boolean }> {
+  await requireAdmin();
+  if (!urls || urls.length === 0) return { success: true };
+  try {
+    const { deleteAssetByUrl } = await import("~/lib/cloudinary");
+    await Promise.allSettled(urls.map((u) => deleteAssetByUrl(u)));
+    return { success: true };
+  } catch (err) {
+    console.error("Failed to delete Cloudinary assets:", err);
+    return { success: false };
+  }
+}
+

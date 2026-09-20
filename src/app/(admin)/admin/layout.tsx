@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import AdminSidebar from "./_components/AdminSidebar";
 import { BreadcrumbProvider, useBreadcrumb } from "./_components/BreadcrumbContext";
+import { UnsavedUploadProvider } from "./_components/UnsavedUploadContext";
 import styles from "./admin.module.scss";
 
 const sectionLabels: Record<string, { title: string; newLabel: string }> = {
@@ -86,24 +87,26 @@ export default function AdminLayout({
   if (isLoginPage) return <>{children}</>;
 
   return (
-    <BreadcrumbProvider>
-      <div className={styles.admin} data-lenis-prevent>
-        <AdminSidebar />
-        <div className={styles.main}>
-          <header className={styles.topbar}>
-            <BreadcrumbsView />
+    <UnsavedUploadProvider>
+      <BreadcrumbProvider>
+        <div className={styles.admin} data-lenis-prevent>
+          <AdminSidebar />
+          <div className={styles.main}>
+            <header className={styles.topbar}>
+              <BreadcrumbsView />
 
-            <div className={styles.topbarRight}>
-              <div className={styles.liveBadge}>
-                <span className={styles.pulseDot} />
-                <span>Production Live</span>
+              <div className={styles.topbarRight}>
+                <div className={styles.liveBadge}>
+                  <span className={styles.pulseDot} />
+                  <span>Production Live</span>
+                </div>
               </div>
-            </div>
-          </header>
+            </header>
 
-          <main className={styles.content}>{children}</main>
+            <main className={styles.content}>{children}</main>
+          </div>
         </div>
-      </div>
-    </BreadcrumbProvider>
+      </BreadcrumbProvider>
+    </UnsavedUploadProvider>
   );
 }

@@ -8,6 +8,7 @@ import styles from "../_formStyles.module.scss";
 import artStyles from "~/app/(site)/[locale]/art/[[...artistId]]/art.module.scss";
 import LanguageTabs from "../_components/LanguageTabs";
 import ImageUploadField from "../_components/ImageUploadField";
+import { useUnsavedUploads } from "../_components/UnsavedUploadContext";
 
 export type Author = {
   id: number;
@@ -61,9 +62,11 @@ export default function AuthorForm({ author }: AuthorFormProps) {
   const [bgPreview, setBgPreview] = useState<string | null>(author?.bgPhotoUrl ?? null);
 
   const isSavingOrUploading = pending || isPortraitUploading || isBgUploading;
+  const { commitStagedUrls } = useUnsavedUploads();
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    commitStagedUrls();
     const formData = new FormData(e.currentTarget);
     startTransition(() => {
       formAction(formData);

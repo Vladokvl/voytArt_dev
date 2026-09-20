@@ -8,6 +8,7 @@ import { createPostAction, updatePostAction } from "./_actions";
 import styles from "../_formStyles.module.scss";
 import LanguageTabs from "../_components/LanguageTabs";
 import ImageUploadField from "../_components/ImageUploadField";
+import { useUnsavedUploads } from "../_components/UnsavedUploadContext";
 import { useSetBreadcrumb } from "@/app/(admin)/admin/_components/BreadcrumbContext";
 
 const TipTapEditor = dynamic(() => import("~/components/admin/TipTapEditor"), {
@@ -47,8 +48,11 @@ export default function PostForm({ post }: PostFormProps) {
   const [content, setContent] = useState(post?.content ?? "");
   const [contentUk, setContentUk] = useState(post?.contentUk ?? "");
 
+  const { commitStagedUrls } = useUnsavedUploads();
+
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    commitStagedUrls();
     const formData = new FormData(e.currentTarget);
     formData.set("content", content);
     formData.set("contentUk", contentUk);
