@@ -15,6 +15,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
+import { formatAuthorName } from "~/lib/i18n";
 import styles from "./analytics.module.scss";
 import DateRangePicker from "./_DateRangePicker";
 
@@ -122,7 +123,7 @@ export default async function AnalyticsPage({
       take: ANALYTICS_MAX_ROWS,
     }),
     db.author.findMany({
-      select: { id: true, firstName: true, lastName: true, photoUrl: true },
+      select: { id: true, firstName: true, lastName: true, photoUrl: true, bgPhotoUrl: true },
     }),
     db.product.findMany({
       select: { id: true, title: true, price: true, coverUrl: true, author: { select: { firstName: true, lastName: true } } },
@@ -448,20 +449,23 @@ export default async function AnalyticsPage({
             <Users size={18} color="#64748b" />
           </div>
           <div className={styles.listGroup}>
-            {topAuthorsList.map((a) => (
-              <div key={a.id} className={styles.listItem}>
-                <div className={styles.itemLeft}>
-                  <div style={{ width: 36, height: 36, position: "relative", borderRadius: "50%", overflow: "hidden", background: "#f1f5f9", flexShrink: 0 }}>
-                    <Image src={a.photoUrl ? getOptimizedImageUrl(a.photoUrl, { preset: "thumb" }) : "/voyt.svg"} alt={a.firstName} fill style={{ objectFit: "cover" }} />
+            {topAuthorsList.map((a) => {
+              const authorPhoto = a.photoUrl ?? a.bgPhotoUrl;
+              return (
+                <div key={a.id} className={styles.listItem}>
+                  <div className={styles.itemLeft}>
+                    <div style={{ width: 36, height: 36, position: "relative", borderRadius: "50%", overflow: "hidden", background: "#f1f5f9", flexShrink: 0 }}>
+                      <Image src={authorPhoto ? getOptimizedImageUrl(authorPhoto, { preset: "thumb" }) : "/voyt.svg"} alt={a.firstName} fill style={{ objectFit: "cover" }} />
+                    </div>
+                    <span className={styles.itemName}>{formatAuthorName(a.firstName, a.lastName)}</span>
                   </div>
-                  <span className={styles.itemName}>{a.firstName} {a.lastName}</span>
+                  <div className={styles.itemRight}>
+                    <span className={styles.itemCount}>{a.views}</span>
+                    <span className={styles.itemPercent}>переглядів</span>
+                  </div>
                 </div>
-                <div className={styles.itemRight}>
-                  <span className={styles.itemCount}>{a.views}</span>
-                  <span className={styles.itemPercent}>переглядів</span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

@@ -5,6 +5,7 @@ import { Plus, Edit2, ArrowUp, ArrowDown, ArrowRight } from "lucide-react";
 import DeleteAuthorButton from "./_DeleteButton";
 import { swapAuthorOrderAction, moveAuthorToPositionAction } from "./_actions";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
+import { formatAuthorName } from "~/lib/i18n";
 import SortableHeader from "../_components/SortableHeader";
 import Pagination from "../_components/Pagination";
 
@@ -83,21 +84,23 @@ export default async function AuthorsPage({
                 </td>
               </tr>
             ) : (
-              authors.map((a, index) => (
-                <tr key={a.id}>
-                  <td className={styles.tdThumb}>
-                    {a.photoUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={getOptimizedImageUrl(a.photoUrl, { preset: "thumb" })} alt={a.firstName} loading="lazy" className={styles.thumbnail} />
-                    ) : (
-                      <div className={styles.thumbnail} style={{ display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: "0.75rem" }}>
-                        —
-                      </div>
-                    )}
-                  </td>
-                  <td className={styles.td} style={{ fontWeight: 600 }}>
-                    {a.firstName} {a.lastName}
-                  </td>
+              authors.map((a, index) => {
+                const thumbUrl = a.photoUrl ?? a.bgPhotoUrl;
+                return (
+                  <tr key={a.id}>
+                    <td className={styles.tdThumb}>
+                      {thumbUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={getOptimizedImageUrl(thumbUrl, { preset: "thumb" })} alt={a.firstName} loading="lazy" className={styles.thumbnail} />
+                      ) : (
+                        <div className={styles.thumbnail} style={{ display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: "0.75rem" }}>
+                          —
+                        </div>
+                      )}
+                    </td>
+                    <td className={styles.td} style={{ fontWeight: 600 }}>
+                      {formatAuthorName(a.firstName, a.lastName)}
+                    </td>
                   <td className={styles.td}>
                     <span className={`${styles.badge} ${styles.badgeNeutral}`}>
                       {a._count.paintings} робіт
@@ -181,8 +184,9 @@ export default async function AuthorsPage({
                     </div>
                   </td>
                 </tr>
-              ))
-            )}
+              );
+            })
+          )}
           </tbody>
         </table>
 
