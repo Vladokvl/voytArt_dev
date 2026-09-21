@@ -203,7 +203,12 @@ export default async function ArtPage({
       <section className={styles.gallery}>
         <div className={styles.galleryHeader}>
           <ArtGalleryTitle
-            selectedAuthor={selectedAuthor ? { firstName: selectedAuthor.firstName, firstNameUk: selectedAuthor.firstNameUk } : null}
+            selectedAuthor={selectedAuthor ? {
+              firstName: selectedAuthor.firstName,
+              firstNameUk: selectedAuthor.firstNameUk,
+              lastName: selectedAuthor.lastName,
+              lastNameUk: selectedAuthor.lastNameUk,
+            } : null}
             className={styles.galleryTitle}
           />
           <Suspense fallback={null}>

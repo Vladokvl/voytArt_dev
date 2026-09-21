@@ -3,7 +3,7 @@
 import styles from "./paintingCard.module.scss";
 import { useTranslation } from "~/context/LanguageContext";
 import { useLenis } from "~/context/LenisContext";
-import { getLocalized } from "~/lib/i18n";
+import { getLocalized, formatAuthorName } from "~/lib/i18n";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import { sanitizeHtml } from "~/lib/sanitize-html";
 import { createPaintingInquiryAction } from "~/app/(site)/[locale]/art/_inquiryActions";
@@ -272,9 +272,9 @@ export default function PaintingModal({
     });
   };
 
-  const authorName = painting.author
-    ? `${getLocalized(painting.author, "firstName", locale)} ${getLocalized(painting.author, "lastName", locale)}`.trim()
-    : "VoytArt Artist";
+  const authorFirstName = painting.author ? getLocalized(painting.author, "firstName", locale) : "";
+  const authorLastName = painting.author ? getLocalized(painting.author, "lastName", locale) : "";
+  const authorName = formatAuthorName(authorFirstName, authorLastName) || "VoytArt Artist";
   const paintingTitle = getLocalized(painting, "title", locale);
   const telegramDirectUrl = `https://t.me/voytart?text=${encodeURIComponent(
     `Привіт! Мене цікавить картина "${paintingTitle}" (${authorName})`

@@ -9,6 +9,7 @@ import artStyles from "~/app/(site)/[locale]/art/[[...artistId]]/art.module.scss
 import LanguageTabs from "../_components/LanguageTabs";
 import ImageUploadField from "../_components/ImageUploadField";
 import { useUnsavedUploads } from "../_components/UnsavedUploadContext";
+import { formatAuthorName } from "~/lib/i18n";
 
 export type Author = {
   id: number;
@@ -372,7 +373,9 @@ export default function AuthorForm({ author }: AuthorFormProps) {
           />
 
           <div className={artStyles.infoWrap}>
-            <h2 className={artStyles.colName}>{firstName || "ІМʼЯ"}</h2>
+            <h2 className={artStyles.colName}>
+              {formatAuthorName(firstName, lastName) || "ІМʼЯ ТА ПРІЗВИЩЕ"}
+            </h2>
             <div
               className={`${artStyles.colText} ${isHovered ? artStyles.colTextVisible : ""}`}
             >

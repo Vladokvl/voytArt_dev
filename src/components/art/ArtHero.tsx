@@ -8,7 +8,7 @@ import type { Swiper as SwiperType } from "swiper";
 import styles from "~/app/(site)/[locale]/art/[[...artistId]]/art.module.scss";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import { useTranslation } from "~/context/LanguageContext";
-import { getLocalized } from "~/lib/i18n";
+import { getLocalized, formatAuthorName } from "~/lib/i18n";
 
 type DBAuthor = {
   id: number;
@@ -297,7 +297,9 @@ export default function ArtHero({
                     />
                     <div className={`${styles.colOverlay} ${styles.colOverlayVisible}`} />
                     <div className={styles.infoWrap}>
-                      <h2 className={styles.colName}>{getLocalized(author, "firstName", locale)}</h2>
+                      <h2 className={styles.colName}>
+                        {formatAuthorName(getLocalized(author, "firstName", locale), getLocalized(author, "lastName", locale))}
+                      </h2>
                       <div className={`${styles.colText} ${styles.colTextVisible}`}>
                         <p className={styles.colDesc}>
                           {getLocalized(author, "shortDesc", locale)}
@@ -345,7 +347,9 @@ export default function ArtHero({
                     }`}
                   />
                   <div className={styles.infoWrap}>
-                    <h2 className={styles.colName}>{getLocalized(author, "firstName", locale)}</h2>
+                    <h2 className={styles.colName}>
+                      {formatAuthorName(getLocalized(author, "firstName", locale), getLocalized(author, "lastName", locale))}
+                    </h2>
                     <div
                       className={`${styles.colText} ${
                         isHovered ? styles.colTextVisible : ""

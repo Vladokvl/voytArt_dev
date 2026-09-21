@@ -62,3 +62,29 @@ export function formatLocalizedPrice(amount: number, locale: Locale = "en"): str
   const intlLocale = locale === "uk" ? "uk-UA" : "en-US";
   return `${amount.toLocaleString(intlLocale)} ${CURRENCY}`;
 }
+
+/**
+ * Combines author's first and last name into a clean, unified display string.
+ * Handles cases where:
+ * - Only firstName is provided (e.g. single name or optional last name)
+ * - Only lastName is provided
+ * - firstName already contains lastName (e.g. accidental user duplication)
+ */
+export function formatAuthorName(
+  firstName?: string | null,
+  lastName?: string | null
+): string {
+  const f = firstName?.trim() ?? "";
+  const l = lastName?.trim() ?? "";
+  if (!f && !l) return "";
+  if (!l) return f;
+  if (!f) return l;
+
+  // Prevent duplication if firstName already contains lastName (case-insensitive)
+  if (f.toLowerCase().includes(l.toLowerCase())) {
+    return f;
+  }
+
+  return `${f} ${l}`;
+}
+
