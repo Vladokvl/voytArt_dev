@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { useTranslation } from "~/context/LanguageContext";
 import styles from "./ComingSoonBanner.module.scss";
 
@@ -13,13 +14,15 @@ export default function ComingSoonBanner({
   comingSoonMode: propComingSoon,
   isPreview: propIsPreview,
 }: ComingSoonBannerProps) {
+  const pathname = usePathname();
+  const isAdmin = pathname.startsWith("/admin");
   const { locale, comingSoonMode: ctxComingSoon, isPreview: ctxIsPreview } = useTranslation();
 
   const isModeActive = propComingSoon ?? ctxComingSoon;
   const isPreviewMode = propIsPreview ?? ctxIsPreview;
 
   useEffect(() => {
-    if (isModeActive) {
+    if (isModeActive && !isAdmin) {
       document.documentElement.style.setProperty("--banner-offset", "52px");
     } else {
       document.documentElement.style.removeProperty("--banner-offset");
@@ -27,9 +30,9 @@ export default function ComingSoonBanner({
     return () => {
       document.documentElement.style.removeProperty("--banner-offset");
     };
-  }, [isModeActive]);
+  }, [isModeActive, isAdmin]);
 
-  if (!isModeActive) return null;
+  if (!isModeActive || isAdmin) return null;
 
   const isUk = locale === "uk";
 
