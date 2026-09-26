@@ -50,37 +50,42 @@ export async function createProductAction(
     ? variants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0)
     : (isNaN(baseStock) ? 0 : baseStock);
 
-  await db.product.create({
-    data: {
-      title,
-      titleUk,
-      description,
-      descriptionUk,
-      price,
-      stock: totalStock,
-      sortOrder,
-      isFeatured,
-      isActive,
-      authorId,
-      categoryId,
-      coverUrl,
-      coverPublicId: getPublicIdFromCloudinaryUrl(coverUrl) ?? "",
-      ...(variants.length > 0
-        ? {
-            variants: {
-              create: variants.map((v, i) => ({
-                title: v.title,
-                titleUk: v.titleUk ?? null,
-                price: v.price ? Number(v.price) : null,
-                stock: Number(v.stock) || 0,
-                sku: v.sku ?? null,
-                sortOrder: i,
-              })),
-            },
-          }
-        : {}),
-    },
-  });
+  try {
+    await db.product.create({
+      data: {
+        title,
+        titleUk,
+        description,
+        descriptionUk,
+        price,
+        stock: totalStock,
+        sortOrder,
+        isFeatured,
+        isActive,
+        authorId,
+        categoryId,
+        coverUrl,
+        coverPublicId: getPublicIdFromCloudinaryUrl(coverUrl) ?? "",
+        ...(variants.length > 0
+          ? {
+              variants: {
+                create: variants.map((v, i) => ({
+                  title: v.title,
+                  titleUk: v.titleUk ?? null,
+                  price: v.price ? Number(v.price) : null,
+                  stock: Number(v.stock) || 0,
+                  sku: v.sku ?? null,
+                  sortOrder: i,
+                })),
+              },
+            }
+          : {}),
+      },
+    });
+  } catch (err) {
+    console.error("Помилка створення товару:", err);
+    return { error: "Не вдалося зберегти товар через затримку бази даних. Будь ласка, спробуйте ще раз." };
+  }
 
   revalidatePath("/admin/products");
   revalidatePath("/shop");

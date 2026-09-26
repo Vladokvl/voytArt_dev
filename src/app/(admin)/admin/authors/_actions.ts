@@ -30,24 +30,29 @@ export async function createAuthorAction(
     return { error: "Заповніть обовʼязкові поля" };
   }
 
-  await db.author.create({
-    data: {
-      firstName,
-      lastName,
-      firstNameUk: (formData.get("firstNameUk") as string)?.trim() || null,
-      lastNameUk: (formData.get("lastNameUk") as string)?.trim() || null,
-      bio,
-      bioUk: (formData.get("bioUk") as string) || null,
-      shortDesc,
-      shortDescUk: (formData.get("shortDescUk") as string) || null,
-      photoUrl,
-      photoPublicId,
-      bgPhotoUrl,
-      bgPhotoPublicId,
-      order,
-      active,
-    },
-  });
+  try {
+    await db.author.create({
+      data: {
+        firstName,
+        lastName,
+        firstNameUk: (formData.get("firstNameUk") as string)?.trim() || null,
+        lastNameUk: (formData.get("lastNameUk") as string)?.trim() || null,
+        bio,
+        bioUk: (formData.get("bioUk") as string) || null,
+        shortDesc,
+        shortDescUk: (formData.get("shortDescUk") as string) || null,
+        photoUrl,
+        photoPublicId,
+        bgPhotoUrl,
+        bgPhotoPublicId,
+        order,
+        active,
+      },
+    });
+  } catch (err) {
+    console.error("Помилка створення автора:", err);
+    return { error: "Не вдалося зберегти автора через затримку бази даних. Будь ласка, натисніть «Зберегти» ще раз." };
+  }
 
   revalidatePath("/admin/authors");
   revalidatePath("/admin");

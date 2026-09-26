@@ -23,7 +23,12 @@ export async function createPostAction(
     return { error: "Заповніть обовʼязкові поля" };
   }
 
-  await db.galleryPost.create({ data: { title, titleUk, content, contentUk, coverUrl, coverPublicId, date } });
+  try {
+    await db.galleryPost.create({ data: { title, titleUk, content, contentUk, coverUrl, coverPublicId, date } });
+  } catch (err) {
+    console.error("Помилка створення посту:", err);
+    return { error: "Не вдалося зберегти пост через тимчасову затримку бази даних. Будь ласка, натисніть «Опублікувати» ще раз." };
+  }
 
   revalidatePath("/admin/posts");
   revalidatePath("/gallery");

@@ -61,8 +61,16 @@ export default function AdminErrorBoundary({
         <h2 style={{ fontSize: "1.25rem", fontWeight: 600, margin: 0 }}>Помилка панелі керування</h2>
 
         <p style={{ color: "#a1a1aa", fontSize: "0.875rem", lineHeight: 1.5, margin: 0 }}>
-          {error.message || "Сталася помилка при завантаженні розділу адмінки."}
+          {error.message?.includes("Server Components render")
+            ? "Виникла тимчасова затримка звʼязку з сервером або базою даних. Натисніть кнопку «Спробувати знову» нижче для повторного завантаження."
+            : (error.message || "Сталася помилка при завантаженні розділу адмінки.")}
         </p>
+
+        {error.digest && (
+          <p style={{ color: "#64748b", fontSize: "0.75rem", margin: 0, fontFamily: "monospace" }}>
+            Код помилки (Digest): {error.digest}
+          </p>
+        )}
 
         <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}>
           <button

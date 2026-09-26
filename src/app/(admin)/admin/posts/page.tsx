@@ -94,10 +94,10 @@ export default async function PostsPage({
                   </td>
                   <td className={styles.td} style={{ fontWeight: 600 }}>{p.title}</td>
                   <td className={styles.td}>
-                    {p.date ? (
+                    {p.date && !isNaN(new Date(p.date).getTime()) ? (
                       <span className={`${styles.badge} ${styles.badgeNeutral}`}>
                         <Calendar size={12} />
-                        <span>{p.date.toLocaleDateString("uk-UA")}</span>
+                        <span>{new Date(p.date).toLocaleDateString("uk-UA")}</span>
                       </span>
                     ) : (
                       <span style={{ color: "#94a3b8" }}>Без дати</span>

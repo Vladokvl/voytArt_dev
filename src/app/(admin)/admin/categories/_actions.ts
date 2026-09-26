@@ -22,7 +22,12 @@ export async function createCategoryAction(
   const exists = await db.category.findUnique({ where: { slug } });
   if (exists) return { error: "Категорія з таким slug вже існує" };
 
-  await db.category.create({ data: { name, nameUk, slug } });
+  try {
+    await db.category.create({ data: { name, nameUk, slug } });
+  } catch (err) {
+    console.error("Помилка створення категорії:", err);
+    return { error: "Не вдалося створити категорію через затримку бази даних. Будь ласка, спробуйте ще раз." };
+  }
 
   revalidatePath("/admin/categories");
   revalidatePath("/shop");

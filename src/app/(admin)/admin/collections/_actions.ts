@@ -20,9 +20,14 @@ export async function createCollectionAction(
     return { error: "Заповніть обовʼязкові поля" };
   }
 
-  await db.collection.create({
-    data: { title, titleUk, authorId, coverPhotoUrl, coverPhotoPublicId },
-  });
+  try {
+    await db.collection.create({
+      data: { title, titleUk, authorId, coverPhotoUrl, coverPhotoPublicId },
+    });
+  } catch (err) {
+    console.error("Помилка створення колекції:", err);
+    return { error: "Не вдалося створити колекцію через затримку бази даних. Будь ласка, спробуйте ще раз." };
+  }
 
   revalidatePath("/admin/collections");
   revalidatePath("/admin");
