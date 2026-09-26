@@ -1,9 +1,9 @@
 .header {
   position: fixed;
-  top: var(--banner-offset, 0px);
+  top: calc(var(--banner-offset, 0px) + 1.35rem);
   left: 0;
   right: 0;
-  height: 5.5rem;
+  height: 3.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -15,7 +15,6 @@
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease, top 0.3s ease;
 
   @media (max-width: 768px) {
-    height: 4.5rem;
     padding: 0 1rem;
   }
 }
@@ -30,11 +29,7 @@
 }
 
 .headerArt {
-  top: calc(var(--banner-offset, 0px) + 0.6rem);
-
-  @media (max-width: 768px) {
-    top: var(--banner-offset, 0px);
-  }
+  top: calc(var(--banner-offset, 0px) + 1.35rem);
 }
 
 .headerVisible {
@@ -52,7 +47,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.6rem 1.5rem;
+  height: 3.25rem;
+  box-sizing: border-box;
+  padding: 0 1.5rem;
   border-radius: 999px;
   background: rgba(232, 232, 232, 0.85);
   backdrop-filter: blur(16px);
@@ -61,6 +58,10 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
 
   &:hover {
     transform: translateY(-2px) scale(1.03);
@@ -76,13 +77,13 @@
 
 .logoImage {
   width: auto;
-  height: 34px;
-  max-width: 160px;
+  height: 28px;
+  max-width: 150px;
   object-fit: contain;
   display: block;
 
   @media (max-width: 768px) {
-    height: 28px;
-    max-width: 125px;
+    height: 24px;
+    max-width: 120px;
   }
 }
