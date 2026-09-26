@@ -1,6 +1,6 @@
 .header {
   position: fixed;
-  top: 0;
+  top: var(--banner-offset, 0px);
   left: 0;
   right: 0;
   height: 5.5rem;
@@ -25,7 +25,7 @@
 }
 
 .headerArt {
-  top: 2rem;
+  top: calc(var(--banner-offset, 0px) + 2rem);
 }
 
 .headerVisible {

@@ -1,10 +1,11 @@
 .menuShell {
 	position: fixed;
-	top: 1.35rem;
+	top: calc(var(--banner-offset, 0px) + 1.35rem);
 	right: 1.35rem;
 	z-index: 260;
 	display: flex;
 	align-items: center;
+	transition: top 0.3s ease;
 }
 
 .menuTrigger {

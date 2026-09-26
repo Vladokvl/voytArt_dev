@@ -25,10 +25,9 @@ export default auth(function middleware(req) {
   const hasExitPreview = nextUrl.searchParams.has("exit_preview");
 
   if (previewParam === "false" || previewParam === "exit" || hasExitPreview) {
-    const cleanUrl = new URL(nextUrl.toString());
-    cleanUrl.searchParams.delete("preview");
-    cleanUrl.searchParams.delete("exit_preview");
-    const res = NextResponse.redirect(cleanUrl);
+    const targetLocale = getLocaleFromPathname(pathname) ?? detectLocale(req);
+    const homeUrl = new URL(`/${targetLocale}`, nextUrl);
+    const res = NextResponse.redirect(homeUrl);
     res.cookies.delete("voytart_preview");
     return res;
   }
