@@ -4,7 +4,8 @@ import styles from "./Sections.module.scss";
 import { useTranslation } from "~/context/LanguageContext";
 
 export default function ArtShopSection() {
-  const { t, getLocalizedHref } = useTranslation();
+  const { t, getLocalizedHref, isRestricted, locale } = useTranslation();
+  const isUk = locale === "uk";
 
   return (
     <>
@@ -19,12 +20,18 @@ export default function ArtShopSection() {
       <p className={styles.description}>
         {t("section.shop.desc")}
       </p>
-      <Link
-        href={getLocalizedHref("/shop")}
-        className={`${styles.cta} ${styles.ctaAccent}`}
-      >
-        {t("section.shop.btn")}
-      </Link>
+      {isRestricted ? (
+        <span className={`${styles.cta} ${styles.ctaDisabled}`}>
+          {isUk ? "Скоро буде" : "Coming Soon"}
+        </span>
+      ) : (
+        <Link
+          href={getLocalizedHref("/shop")}
+          className={`${styles.cta} ${styles.ctaAccent}`}
+        >
+          {t("section.shop.btn")}
+        </Link>
+      )}
     </>
   );
 }

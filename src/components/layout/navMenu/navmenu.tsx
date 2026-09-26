@@ -10,7 +10,7 @@ import { stripLocaleFromPathname } from "~/lib/locale-path";
 
 export default function NavMenu() {
   const pathname = usePathname();
-  const { t, getLocalizedHref } = useTranslation();
+  const { t, getLocalizedHref, isRestricted, locale } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const currentBaseRoute = stripLocaleFromPathname(pathname);
@@ -89,10 +89,26 @@ export default function NavMenu() {
         aria-hidden={!isOpen}
       >
         {navItems.map((item) => {
+          const isItemRestricted = isRestricted && item.href !== "/";
           const isActive =
             item.href === "/"
               ? currentBaseRoute === "/"
               : currentBaseRoute.startsWith(item.href);
+
+          if (isItemRestricted) {
+            return (
+              <span
+                key={item.href}
+                className={styles.menuLink}
+                style={{ opacity: 0.5, cursor: "not-allowed", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+              >
+                <span>{item.label}</span>
+                <span style={{ fontSize: "0.65rem", padding: "0.15rem 0.4rem", borderRadius: "4px", background: "rgba(168, 85, 247, 0.2)", color: "#c084fc", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  {locale === "uk" ? "Скоро" : "Soon"}
+                </span>
+              </span>
+            );
+          }
 
           return (
             <Link

@@ -17,6 +17,7 @@ import {
   BarChart3,
   Activity,
   MessageSquare,
+  Settings,
 } from "lucide-react";
 import styles from "../admin.module.scss";
 import { logoutAction } from "../_action";
@@ -39,6 +40,7 @@ const navSections = [
     items: [
       { label: "Колекції", href: "/admin/collections", icon: Sparkles },
       { label: "Категорії", href: "/admin/categories", icon: FolderTree },
+      { label: "Керування сайтом", href: "/admin/settings", icon: Settings },
     ],
   },
   {

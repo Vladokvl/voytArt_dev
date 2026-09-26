@@ -4,7 +4,8 @@ import styles from "./Sections.module.scss";
 import { useTranslation } from "~/context/LanguageContext";
 
 export default function NeonSection() {
-  const { t, getLocalizedHref } = useTranslation();
+  const { t, getLocalizedHref, isRestricted, locale } = useTranslation();
+  const isUk = locale === "uk";
 
   return (
     <>
@@ -19,9 +20,15 @@ export default function NeonSection() {
       <p className={styles.description}>
         {t("section.neon.desc")}
       </p>
-      <Link href={getLocalizedHref("/art?neon=true")} className={styles.cta}>
-        {t("section.neon.btn")}
-      </Link>
+      {isRestricted ? (
+        <span className={`${styles.cta} ${styles.ctaDisabled}`}>
+          {isUk ? "Скоро буде" : "Coming Soon"}
+        </span>
+      ) : (
+        <Link href={getLocalizedHref("/art?neon=true")} className={styles.cta}>
+          {t("section.neon.btn")}
+        </Link>
+      )}
     </>
   );
 }

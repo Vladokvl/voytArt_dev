@@ -10,6 +10,9 @@ interface LanguageContextType {
   setLocale: (loc: Locale) => void;
   t: (path: string, params?: Record<string, string | number>) => string;
   getLocalizedHref: (href: string) => string;
+  comingSoonMode: boolean;
+  isPreview: boolean;
+  isRestricted: boolean;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -19,9 +22,15 @@ const COOKIE_NAME = "NEXT_LOCALE";
 export function LanguageProvider({
   children,
   initialLocale = "en",
+  initialTranslations,
+  comingSoonMode = false,
+  isPreview = false,
 }: {
   children: React.ReactNode;
   initialLocale?: Locale;
+  initialTranslations?: { en: Record<string, unknown>; uk: Record<string, unknown> };
+  comingSoonMode?: boolean;
+  isPreview?: boolean;
 }) {
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
   const router = useRouter();
@@ -66,10 +75,13 @@ export function LanguageProvider({
     [locale]
   );
 
+  const isRestricted = comingSoonMode && !isPreview;
+  const currentTranslations = initialTranslations ?? translations;
+
   const t = useCallback(
     (path: string, params?: Record<string, string | number>): string => {
       const resolve = (loc: Locale): string | undefined => {
-        let result: unknown = translations[loc];
+        let result: unknown = currentTranslations[loc];
         for (const key of path.split(".")) {
           if (result && typeof result === "object" && key in (result as Record<string, unknown>)) {
             result = (result as Record<string, unknown>)[key];
@@ -90,7 +102,7 @@ export function LanguageProvider({
 
       return result;
     },
-    [locale]
+    [locale, currentTranslations]
   );
 
   const contextValue = useMemo(
@@ -99,8 +111,11 @@ export function LanguageProvider({
       setLocale,
       t,
       getLocalizedHref,
+      comingSoonMode,
+      isPreview,
+      isRestricted,
     }),
-    [locale, setLocale, t, getLocalizedHref]
+    [locale, setLocale, t, getLocalizedHref, comingSoonMode, isPreview, isRestricted]
   );
 
   return (
@@ -119,6 +134,5 @@ export function useLanguage() {
 }
 
 export function useTranslation() {
-  const { t, locale, getLocalizedHref } = useLanguage();
-  return { t, locale, getLocalizedHref };
+  return useLanguage();
 }

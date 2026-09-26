@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { db } from "~/lib/db";
 import { plainProduct } from "~/lib/plain-product";
+import { checkComingSoonGuard } from "~/lib/site-settings";
 import ShopStorefront from "./_ShopStorefront";
 import { type Metadata } from "next";
 
@@ -26,7 +27,15 @@ export const metadata: Metadata = {
 // ISR: контент змінюється лише через адмінку; admin actions викликають revalidatePath("/shop")
 export const revalidate = 60;
 
-export default async function ShopPage() {
+export default async function ShopPage({
+  params,
+}: {
+  params?: Promise<{ locale?: string }>;
+}) {
+  const resolvedParams = params ? await params : undefined;
+  const locale = resolvedParams?.locale ?? "uk";
+  await checkComingSoonGuard(locale);
+
   const [products, categories] = await Promise.all([
     db.product.findMany({
       where: { isActive: true },

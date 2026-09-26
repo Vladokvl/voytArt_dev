@@ -9,4 +9,8 @@ export const CACHE_TAGS = {
   gallery: "gallery",
   /** Каталог картин / автори / колекції */
   art: "art",
+  /** Налаштування сайту (Coming Soon тощо) */
+  settings: "settings",
+  /** Переклади інтерфейсу сайту */
+  translations: "translations",
 } as const;

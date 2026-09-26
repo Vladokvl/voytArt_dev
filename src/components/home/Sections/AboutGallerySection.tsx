@@ -4,7 +4,8 @@ import styles from "./Sections.module.scss";
 import { useTranslation } from "~/context/LanguageContext";
 
 export default function AboutGallerySection() {
-  const { t, getLocalizedHref } = useTranslation();
+  const { t, getLocalizedHref, isRestricted, locale } = useTranslation();
+  const isUk = locale === "uk";
 
   return (
     <>
@@ -19,9 +20,15 @@ export default function AboutGallerySection() {
       <p className={styles.description}>
         {t("section.about.desc")}
       </p>
-      <Link href={getLocalizedHref("/gallery")} className={styles.cta}>
-        {t("section.about.btn")}
-      </Link>
+      {isRestricted ? (
+        <span className={`${styles.cta} ${styles.ctaDisabled}`}>
+          {isUk ? "Скоро буде" : "Coming Soon"}
+        </span>
+      ) : (
+        <Link href={getLocalizedHref("/gallery")} className={styles.cta}>
+          {t("section.about.btn")}
+        </Link>
+      )}
     </>
   );
 }

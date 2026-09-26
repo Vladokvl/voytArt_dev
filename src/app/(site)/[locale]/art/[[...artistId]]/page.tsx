@@ -6,6 +6,7 @@ import ArtGalleryTitle from "~/components/art/ArtGalleryTitle";
 import JsonLd from "~/components/seo/JsonLd";
 import { db } from "~/lib/db";
 import { parseIdParam } from "~/lib/parse-id";
+import { checkComingSoonGuard } from "~/lib/site-settings";
 import styles from "./art.module.scss";
 import { type Metadata } from "next";
 import { Suspense } from "react";
@@ -89,10 +90,16 @@ export async function generateMetadata({
 }
 
 export default async function ArtPage({
+  params,
   searchParams,
 }: {
+  params?: Promise<{ locale?: string }>;
   searchParams: Promise<{ artist?: string; collection?: string; neon?: string }>;
 }) {
+  const resolvedParams = params ? await params : undefined;
+  const locale = resolvedParams?.locale ?? "uk";
+  await checkComingSoonGuard(locale);
+
   const { artist, collection, neon } = await searchParams;
   const isNeonMode = neon === "true";
   const parsedAuthorId = parseIdParam(artist);

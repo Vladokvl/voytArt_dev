@@ -1,4 +1,5 @@
 import { db } from "~/lib/db";
+import { checkComingSoonGuard } from "~/lib/site-settings";
 import GalleryHero from "~/components/gallery/GalleryHero";
 import OurStory from "~/components/gallery/OurStory";
 import GalleryPosts from "~/components/gallery/GalleryPosts";
@@ -27,7 +28,15 @@ export const metadata: Metadata = {
 // ISR: контент змінюється лише через адмінку; admin actions викликають revalidatePath("/gallery")
 export const revalidate = 60;
 
-export default async function GalleryPage() {
+export default async function GalleryPage({
+  params,
+}: {
+  params?: Promise<{ locale?: string }>;
+}) {
+  const resolvedParams = params ? await params : undefined;
+  const locale = resolvedParams?.locale ?? "uk";
+  await checkComingSoonGuard(locale);
+
   const limit = 6;
   const posts = await db.galleryPost.findMany({
     orderBy: { date: "desc" },

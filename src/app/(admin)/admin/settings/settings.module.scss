@@ -1,0 +1,471 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 4rem;
+}
+
+// ─── Header & Top Actions ─────────────────────────────────────────────────────
+.headerCard {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.historyBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: #27272a;
+  border: 1px solid #3f3f46;
+  border-radius: 8px;
+  color: #f4f4f5;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #3f3f46;
+    color: #ffffff;
+  }
+}
+
+.badgeCount {
+  background: rgba(168, 85, 247, 0.2);
+  color: #c084fc;
+  padding: 0.15rem 0.45rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.saveGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.versionNameInput {
+  background: #09090b;
+  border: 1px solid #27272a;
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  color: #f4f4f5;
+  font-size: 0.85rem;
+  width: 220px;
+  outline: none;
+
+  &:focus {
+    border-color: #3b82f6;
+  }
+
+  &::placeholder {
+    color: #71717a;
+  }
+}
+
+.saveBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.25rem;
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: #2563eb;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// ─── Coming Soon Card ─────────────────────────────────────────────────────────
+.comingSoonCard {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.comingSoonInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.comingSoonTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.comingSoonDesc {
+  font-size: 0.85rem;
+  color: #a1a1aa;
+}
+
+.comingSoonControls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.copyLinkBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.85rem;
+  background: #27272a;
+  border: 1px solid #3f3f46;
+  border-radius: 8px;
+  color: #e4e4e7;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #3f3f46;
+    color: #ffffff;
+  }
+}
+
+// Toggle switch
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #3f3f46;
+  transition: 0.3s;
+  border-radius: 26px;
+
+  &:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+  }
+}
+
+.switch input:checked + .slider {
+  background-color: #a855f7;
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+// ─── Split-view Editor ────────────────────────────────────────────────────────
+.editorSection {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.sectionHeader {
+  padding: 1rem 1.5rem;
+  background: #202024;
+  border-bottom: 1px solid #27272a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    background: #27272a;
+  }
+}
+
+.sectionTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #f4f4f5;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.splitHeader {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #141417;
+  border-bottom: 1px solid #27272a;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #a1a1aa;
+}
+
+.splitHeaderCol {
+  padding: 0.6rem 1.5rem;
+
+  &:first-child {
+    border-right: 1px solid #27272a;
+  }
+}
+
+.rowsList {
+  display: flex;
+  flex-direction: column;
+}
+
+.rowItem {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid #27272a;
+  padding: 0.75rem 1.5rem;
+  gap: 0.4rem;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.015);
+  }
+}
+
+.keyLabel {
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: #71717a;
+}
+
+.inputsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.fieldInput {
+  width: 100%;
+  background: #09090b;
+  border: 1px solid #27272a;
+  border-radius: 8px;
+  padding: 0.55rem 0.75rem;
+  color: #f4f4f5;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  outline: none;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-color: #3b82f6;
+  }
+}
+
+// ─── Modal ───────────────────────────────────────────────────────────────────
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.modal {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 680px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+.modalHeader {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #27272a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modalTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: #a1a1aa;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 6px;
+
+  &:hover {
+    color: #ffffff;
+    background: #27272a;
+  }
+}
+
+.modalBody {
+  padding: 1.25rem 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.versionCard {
+  background: #09090b;
+  border: 1px solid #27272a;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  transition: border-color 0.2s;
+
+  &.versionActive {
+    border-color: #a855f7;
+    background: rgba(168, 85, 247, 0.05);
+  }
+}
+
+.versionInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.versionName {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #f4f4f5;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.activeBadge {
+  font-size: 0.7rem;
+  background: rgba(168, 85, 247, 0.2);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  padding: 0.1rem 0.45rem;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+.versionDate {
+  font-size: 0.75rem;
+  color: #71717a;
+}
+
+.versionActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.previewVersionBtn {
+  padding: 0.45rem 0.75rem;
+  border-radius: 6px;
+  background: #27272a;
+  border: 1px solid #3f3f46;
+  color: #f4f4f5;
+  font-size: 0.75rem;
+  cursor: pointer;
+
+  &:hover {
+    background: #3f3f46;
+  }
+}
+
+.activateVersionBtn {
+  padding: 0.45rem 0.85rem;
+  border-radius: 6px;
+  background: #3b82f6;
+  border: none;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: #2563eb;
+  }
+}
+
+.previewViewer {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: #141417;
+  border: 1px solid #27272a;
+  border-radius: 8px;
+  max-height: 250px;
+  overflow-y: auto;
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: #d4d4d8;
+  white-space: pre-wrap;
+}

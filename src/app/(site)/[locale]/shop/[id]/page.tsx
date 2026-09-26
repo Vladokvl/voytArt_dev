@@ -2,12 +2,13 @@ import { db } from "~/lib/db";
 import { notFound } from "next/navigation";
 import { type Metadata } from "next";
 import { plainProduct } from "~/lib/plain-product";
+import { checkComingSoonGuard } from "~/lib/site-settings";
 import JsonLd from "~/components/seo/JsonLd";
 import { siteUrl } from "~/lib/site-url";
 import ProductView from "./_ProductView";
 
 type Props = {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; locale?: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -56,7 +57,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ProductDetailPage({ params }: Props) {
-  const { id } = await params;
+  const { id, locale = "uk" } = await params;
+  await checkComingSoonGuard(locale);
+
   const productId = Number(id);
 
   if (isNaN(productId)) {

@@ -20,6 +20,27 @@ export default auth(function middleware(req) {
   const { nextUrl } = req;
   const pathname = nextUrl.pathname;
 
+  // ─── 0. Обробка Preview-доступу (?preview=true або ?preview=false) ─────────
+  const previewParam = nextUrl.searchParams.get("preview")?.toLowerCase();
+  const hasExitPreview = nextUrl.searchParams.has("exit_preview");
+
+  if (previewParam === "false" || previewParam === "exit" || hasExitPreview) {
+    const cleanUrl = new URL(nextUrl.toString());
+    cleanUrl.searchParams.delete("preview");
+    cleanUrl.searchParams.delete("exit_preview");
+    const res = NextResponse.redirect(cleanUrl);
+    res.cookies.delete("voytart_preview");
+    return res;
+  }
+
+  if (previewParam === "true" || previewParam === "voytart" || previewParam === "1") {
+    const cleanUrl = new URL(nextUrl.toString());
+    cleanUrl.searchParams.delete("preview");
+    const res = NextResponse.redirect(cleanUrl);
+    res.cookies.set("voytart_preview", "true", { path: "/", sameSite: "lax" });
+    return res;
+  }
+
   // ─── 1. Адмінка: сесійний захист (поза локаллю), як і раніше ──────────────
   if (pathname.startsWith("/admin")) {
     const isLoggedIn = !!req.auth?.user;

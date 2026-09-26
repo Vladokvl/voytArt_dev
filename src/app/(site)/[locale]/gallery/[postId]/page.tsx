@@ -1,5 +1,6 @@
 import { db } from "~/lib/db";
 import { notFound } from "next/navigation";
+import { checkComingSoonGuard } from "~/lib/site-settings";
 import PostHero from "~/components/gallery/posts/PostHero";
 import PostContent from "~/components/gallery/posts/PostContent";
 import PostMedia from "~/components/gallery/posts/PostMedia";
@@ -10,7 +11,7 @@ import { type Metadata } from "next";
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ postId: string }>;
+  params: Promise<{ postId: string; locale?: string }>;
 }): Promise<Metadata> {
   const { postId } = await params;
   const post = await db.galleryPost.findUnique({
@@ -49,9 +50,10 @@ export async function generateMetadata({
 export default async function GalleryPostPage({
   params,
 }: {
-  params: Promise<{ postId: string }>;
+  params: Promise<{ postId: string; locale?: string }>;
 }) {
-  const { postId } = await params;
+  const { postId, locale = "uk" } = await params;
+  await checkComingSoonGuard(locale);
   const post = await db.galleryPost.findUnique({
     where: { id: Number(postId) },
     include: { media: { orderBy: { order: "asc" } } },

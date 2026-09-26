@@ -376,3 +376,25 @@ model PaintingInquiry {
     @@index([status])
     @@map("painting_inquiries")
 }
+
+// ── Site Settings (Керування сайтом) ──────────────────────────────────────────
+model SiteSetting {
+    id             Int      @id @default(autoincrement())
+    comingSoonMode Boolean  @default(false) @map("coming_soon_mode")
+    updatedAt      DateTime @updatedAt @map("updated_at")
+
+    @@map("site_settings")
+}
+
+// ── Translation Versions (Версіонування локалізації) ──────────────────────────
+model TranslationVersion {
+    id        Int      @id @default(autoincrement())
+    name      String?
+    dataEn    Json     @map("data_en")
+    dataUk    Json     @map("data_uk")
+    isActive  Boolean  @default(true)  @map("is_active")
+    createdAt DateTime @default(now())   @map("created_at")
+
+    @@index([isActive])
+    @@map("translation_versions")
+}

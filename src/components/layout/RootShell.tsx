@@ -19,6 +19,8 @@ import { LanguageProvider } from "~/context/LanguageContext";
 import { cookies } from "next/headers";
 import { type Locale } from "~/lib/i18n";
 import { siteUrl } from "~/lib/site-url";
+import { getCachedSiteSettings, getCachedTranslations } from "~/lib/site-settings";
+import ComingSoonBanner from "~/components/layout/ComingSoonBanner";
 
 export const montserratFont = Montserrat({
   subsets: ["latin", "cyrillic"],
@@ -40,6 +42,12 @@ export default async function RootShell({
   localeParam?: string;
   children: React.ReactNode;
 }) {
+  const [cookieStore, settings, translationsData] = await Promise.all([
+    cookies(),
+    getCachedSiteSettings(),
+    getCachedTranslations(),
+  ]);
+
   let initialLocale: Locale;
   if (localeParam === "uk") {
     initialLocale = "uk";
@@ -47,10 +55,11 @@ export default async function RootShell({
     initialLocale = "en";
   } else {
     // Fallback для дерева поза локаллю (адмінка): cookie, як у попередній реалізації
-    const cookieStore = await cookies();
     const rawLocale = cookieStore.get("NEXT_LOCALE")?.value;
     initialLocale = rawLocale === "uk" ? "uk" : "en";
   }
+
+  const isPreview = cookieStore.get("voytart_preview")?.value === "true";
 
   return (
     <html lang={initialLocale} className={montserratFont.variable}>
@@ -60,9 +69,15 @@ export default async function RootShell({
       </head>
       <body>
         <script dangerouslySetInnerHTML={{ __html: "history.scrollRestoration='manual';window.scrollTo(0,0);" }} />
-        <LanguageProvider initialLocale={initialLocale}>
+        <LanguageProvider
+          initialLocale={initialLocale}
+          initialTranslations={translationsData}
+          comingSoonMode={settings.comingSoonMode}
+          isPreview={isPreview}
+        >
           <VhFix />
           <InAppBrowserBanner />
+          <ComingSoonBanner />
           <Suspense fallback={null}>
             <AnalyticsTracker />
           </Suspense>

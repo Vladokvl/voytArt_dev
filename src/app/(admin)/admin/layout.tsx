@@ -17,6 +17,7 @@ const sectionLabels: Record<string, { title: string; newLabel: string }> = {
   posts: { title: "Пости", newLabel: "Новий пост" },
   categories: { title: "Категорії", newLabel: "Нова категорія" },
   collections: { title: "Колекції", newLabel: "Нова колекція" },
+  settings: { title: "Керування сайтом", newLabel: "" },
 };
 
 function BreadcrumbsView() {
