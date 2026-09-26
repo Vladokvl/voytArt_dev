@@ -110,10 +110,6 @@ export async function checkComingSoonGuard(locale = "uk"): Promise<void> {
   const isPreview = cookieStore.get("voytart_preview")?.value === "true";
   if (isPreview) return;
 
-  const { auth } = await import("~/auth");
-  const session = await auth();
-  if (session?.user) return;
-
   const { redirect } = await import("next/navigation");
   redirect(`/${locale}`);
 }

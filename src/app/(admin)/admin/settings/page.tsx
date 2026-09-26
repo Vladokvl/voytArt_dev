@@ -32,10 +32,10 @@ export default async function SettingsPage() {
   return (
     <div>
       <div style={{ marginBottom: "1.5rem" }}>
-        <h1 style={{ fontSize: "1.5rem", fontWeight: 700, color: "#ffffff", margin: "0 0 0.4rem 0" }}>
+        <h1 style={{ fontSize: "1.5rem", fontWeight: 700, color: "#0f172a", margin: "0 0 0.4rem 0" }}>
           Керування сайтом
         </h1>
-        <p style={{ margin: 0, fontSize: "0.85rem", color: "#a1a1aa" }}>
+        <p style={{ margin: 0, fontSize: "0.85rem", color: "#64748b" }}>
           Налаштування режиму «Скоро відкриття», генерація preview-посилань та редагування перекладів з історією версій.
         </p>
       </div>

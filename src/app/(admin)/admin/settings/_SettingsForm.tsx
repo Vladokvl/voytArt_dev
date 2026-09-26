@@ -115,7 +115,12 @@ export default function SettingsForm({
 
   // Copy preview link
   function handleCopyPreviewLink() {
-    const previewUrl = `${siteUrl}?preview=voytart`;
+    const origin =
+      typeof window !== "undefined" && window.location.origin
+        ? window.location.origin
+        : siteUrl;
+    const base = origin.replace(/\/+$/, "");
+    const previewUrl = `${base}/?preview=voytart`;
     void navigator.clipboard.writeText(previewUrl);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2500);
