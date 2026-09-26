@@ -33,9 +33,21 @@ export default auth(function middleware(req) {
   }
 
   if (previewParam === "true" || previewParam === "voytart" || previewParam === "1") {
-    const cleanUrl = new URL(nextUrl.toString());
-    cleanUrl.searchParams.delete("preview");
-    const res = NextResponse.redirect(cleanUrl);
+    let targetUrl: URL;
+    const existingLocale = getLocaleFromPathname(pathname);
+    if (existingLocale) {
+      targetUrl = new URL(nextUrl.toString());
+      targetUrl.searchParams.delete("preview");
+    } else {
+      const targetLocale = detectLocale(req);
+      const restPath = stripLocaleFromPathname(pathname) === "/" ? "" : stripLocaleFromPathname(pathname);
+      targetUrl = new URL(`/${targetLocale}${restPath}`, nextUrl);
+      nextUrl.searchParams.forEach((val, key) => {
+        if (key !== "preview") targetUrl.searchParams.set(key, val);
+      });
+    }
+
+    const res = NextResponse.redirect(targetUrl);
     res.cookies.set("voytart_preview", "true", { path: "/", sameSite: "lax" });
     return res;
   }

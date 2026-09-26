@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "~/context/LanguageContext";
 import styles from "./ComingSoonBanner.module.scss";
@@ -18,8 +18,25 @@ export default function ComingSoonBanner({
   const isAdmin = pathname.startsWith("/admin");
   const { locale, comingSoonMode: ctxComingSoon, isPreview: ctxIsPreview } = useTranslation();
 
-  const isModeActive = propComingSoon ?? ctxComingSoon;
-  const isPreviewMode = propIsPreview ?? ctxIsPreview;
+  const [clientIsPreview, setClientIsPreview] = useState(false);
+
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      const hasCookie = document.cookie
+        .split("; ")
+        .some((c) => c.startsWith("voytart_preview=true"));
+      const hasQuery =
+        typeof window !== "undefined" &&
+        (window.location.search.includes("preview=true") ||
+          window.location.search.includes("preview=voytart"));
+      if (hasCookie || hasQuery) {
+        setClientIsPreview(true);
+      }
+    }
+  }, []);
+
+  const isPreviewMode = propIsPreview ?? (ctxIsPreview || clientIsPreview);
+  const isModeActive = (propComingSoon ?? ctxComingSoon) || isPreviewMode;
 
   useEffect(() => {
     if (isModeActive && !isAdmin) {

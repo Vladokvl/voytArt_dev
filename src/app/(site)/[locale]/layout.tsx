@@ -3,9 +3,7 @@ import { notFound } from "next/navigation";
 import RootShell, { baseMetadata } from "~/components/layout/RootShell";
 import { siteUrl } from "~/lib/site-url";
 
-export function generateStaticParams(): Array<{ locale: string }> {
-  return [{ locale: "en" }, { locale: "uk" }];
-}
+export const dynamic = "force-dynamic";
 
 /** 404 для будь-якого першого сегмента, який не є валідною локаллю */
 export default async function LocaleLayout({
