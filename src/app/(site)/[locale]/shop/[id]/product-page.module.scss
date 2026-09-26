@@ -1,19 +1,19 @@
 .pageContainer {
   min-height: 100vh;
   min-height: 100dvh;
-  padding: 6rem 2rem 4rem;
+  padding: calc(var(--banner-offset, 0px) + 7.5rem) 2rem 4rem;
   max-width: 1300px;
   margin: 0 auto;
   color: #1a1a1a;
 
   @media (max-width: 768px) {
-    padding: 5.5rem 1.15rem 3.5rem;
+    padding: calc(var(--banner-offset, 0px) + 6rem) 1.15rem 3.5rem;
   }
 }
 
 .floatingBackBtn {
   position: fixed;
-  top: 1.35rem;
+  top: calc(var(--banner-offset, 0px) + 1.35rem);
   left: 1.35rem;
   z-index: 250;
   display: inline-flex;
@@ -28,7 +28,7 @@
   cursor: pointer;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   text-decoration: none;
-  transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+  transition: top 0.3s ease, background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
 
   &:hover {
     background: rgba(17, 17, 17, 0.85);

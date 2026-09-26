@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ShoppingBag, ArrowRight, Sparkles, Check } from "lucide-react";
+import { ShoppingBag, ArrowRight, Check } from "lucide-react";
 import { getOptimizedImageUrl } from "~/lib/cloudinary-optimize";
 import { useCart } from "~/context/CartContext";
 import ProductCarousel from "~/components/shop/ProductCarousel";
@@ -236,10 +236,6 @@ export default function ShopStorefront({
     <div className={styles.shopWrapper}>
       {/* ── Editorial Hero ── */}
       <section className={styles.shopHero}>
-        <div className={styles.heroBadge}>
-          <Sparkles size={14} />
-          <span>{t("shop.curatedBadge")}</span>
-        </div>
         <h1 className={styles.shopTitle}>{t("shop.storeTitle")}</h1>
         <p className={styles.shopSub}>
           {t("shop.storeSubtitle")}
