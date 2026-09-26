@@ -7,7 +7,12 @@ import withBundleAnalyzer from "@next/bundle-analyzer";
 
 /** @type {import("next").NextConfig} */
 const config = {
-  allowedDevOrigins: ["testing.zhovtok.work"],
+  allowedDevOrigins: [
+    "testing.zhovtok.work",
+    "192.168.100.43",
+    "192.168.100.43:3000",
+    "localhost:3000",
+  ],
   output: "standalone",
   compress: true,
   experimental: {

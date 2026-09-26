@@ -10,7 +10,7 @@ import { stripLocaleFromPathname } from "~/lib/locale-path";
 
 export default function NavMenu() {
   const pathname = usePathname();
-  const { t, getLocalizedHref, isRestricted, locale } = useTranslation();
+  const { t, getLocalizedHref, isRestricted } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const currentBaseRoute = stripLocaleFromPathname(pathname);
@@ -88,50 +88,41 @@ export default function NavMenu() {
         aria-label="Main navigation"
         aria-hidden={!isOpen}
       >
-        <div className={styles.linksContainer}>
-          {navItems.map((item) => {
-            const isItemRestricted = isRestricted && item.href !== "/";
-            const isActive =
-              item.href === "/"
-                ? currentBaseRoute === "/"
-                : currentBaseRoute.startsWith(item.href);
+        {navItems.map((item) => {
+          const isItemRestricted = isRestricted && item.href !== "/";
+          const isActive =
+            item.href === "/"
+              ? currentBaseRoute === "/"
+              : currentBaseRoute.startsWith(item.href);
 
-            if (isItemRestricted) {
-              return (
-                <span
-                  key={item.href}
-                  className={`${styles.menuLink} ${styles.menuLinkRestricted}`}
-                >
-                  <span>{item.label}</span>
-                  <span className={styles.restrictedBadge}>
-                    {locale === "uk" ? "Скоро" : "Soon"}
-                  </span>
-                </span>
-              );
-            }
-
+          if (isItemRestricted) {
             return (
-              <Link
+              <span
                 key={item.href}
-                href={getLocalizedHref(item.href)}
-                className={`${styles.menuLink} ${isActive ? styles.menuLinkActive : ""}`}
+                className={`${styles.menuLink} ${styles.menuLinkDisabled}`}
+                aria-disabled="true"
               >
                 {item.label}
-              </Link>
+              </span>
             );
-          })}
-        </div>
+          }
 
-        {/* Mobile Language Switcher inside the full-width floating menu */}
-        <div className={styles.mobileLangContainer}>
-          <LanguageSwitcher inMenu horizontal />
-        </div>
+          return (
+            <Link
+              key={item.href}
+              href={getLocalizedHref(item.href)}
+              className={`${styles.menuLink} ${isActive ? styles.menuLinkActive : ""}`}
+            >
+              {item.label}
+            </Link>
+          );
+        })}
       </nav>
       
       <button
         type="button"
         className={styles.menuTrigger}
-        aria-label="Open navigation menu"
+        aria-label={isOpen ? t("nav.close") : t("nav.menu")}
         aria-expanded={isOpen}
         aria-controls="site-menu-panel"
         onClick={() => setIsOpen((open) => !open)}
@@ -142,26 +133,18 @@ export default function NavMenu() {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.9"
+            strokeWidth="2"
             strokeLinecap="round"
+            className={styles.hamburgerSvg}
           >
-            {isOpen ? (
-              <>
-                <path d="M6 6l12 12" />
-                <path d="M6 18L18 6" />
-              </>
-            ) : (
-              <>
-                <path d="M4 7h16" />
-                <path d="M4 12h16" />
-                <path d="M4 17h16" />
-              </>
-            )}
+            <line x1="4" y1="12" x2="20" y2="12" className={styles.lineTop} />
+            <line x1="4" y1="12" x2="20" y2="12" className={styles.lineMid} />
+            <line x1="4" y1="12" x2="20" y2="12" className={styles.lineBot} />
           </svg>
         </span>
       </button>
 
-      {/* Desktop Language Switcher emerging downwards from menu button */}
+      {/* Language Switcher emerging downwards from menu button */}
       <div className={styles.langDropdown}>
         <LanguageSwitcher inMenu />
       </div>

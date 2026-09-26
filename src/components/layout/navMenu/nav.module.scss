@@ -1,15 +1,15 @@
+$edge-offset: 1.35rem;
+$trigger-size-mobile: 3.25rem;
+$menu-gap-mobile: 0.5rem;
+
 .menuShell {
 	position: fixed;
 	top: calc(var(--banner-offset, 0px) + 1.35rem);
-	right: 1.35rem;
+	right: $edge-offset;
 	z-index: 260;
 	display: flex;
 	align-items: center;
 	transition: top 0.3s ease;
-
-	@media (max-width: 768px) {
-		right: 1rem;
-	}
 }
 
 .menuTrigger {
@@ -25,6 +25,7 @@
 	border: 1px solid rgba(255, 255, 255, 0.14);
 	border-radius: 999px;
 	background: rgba(17, 17, 17, 0.555);
+	-webkit-backdrop-filter: blur(16px);
 	backdrop-filter: blur(16px);
 	color: #fff;
 	cursor: pointer;
@@ -63,23 +64,46 @@
 	width: 1.55rem;
 	height: 1.55rem;
 	color: var(--color-accent);
+}
 
-	svg {
-		width: 100%;
-		height: 100%;
+.hamburgerSvg {
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+	transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+
+	line {
+		transform-origin: 12px 12px;
+		transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+		            opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 	}
+}
+
+.lineTop {
+	transform: translateY(-5.5px);
+}
+
+.lineMid {
+	transform: translateY(0);
+	opacity: 1;
+}
+
+.lineBot {
+	transform: translateY(5.5px);
 }
 
 .dropdown {
 	position: absolute;
-	right: calc(100% + 0.6rem);
+	right: calc(100% + 0.65rem);
 	top: 50%;
 	display: flex;
 	align-items: center;
-	padding: 0.3rem 0.55rem;
-	border-radius: 1.15rem;
+	gap: 0.5rem;
+	padding: 0.35rem 0.65rem;
+	border-radius: 1.25rem;
 	border: 1px solid rgba(255, 255, 255, 0.1);
 	background: rgba(10, 10, 10, 0.55);
+	-webkit-backdrop-filter: blur(18px);
 	backdrop-filter: blur(18px);
 	box-shadow: 0 20px 48px rgba(0, 0, 0, 0.32);
 	opacity: 0;
@@ -89,63 +113,45 @@
 	transition: opacity 0.24s ease, transform 0.24s ease;
 	white-space: nowrap;
 
-	.linksContainer {
-		display: flex;
-		align-items: center;
-		gap: 0.35rem;
-	}
-
-	.mobileLangContainer {
-		display: none;
-	}
-
 	@media (max-width: 768px) {
-		position: fixed;
-		top: calc(var(--banner-offset, 0px) + 5.1rem);
-		left: 0.85rem;
-		right: 0.85rem;
-		width: auto;
-		max-width: none;
-		flex-direction: column;
-		align-items: stretch;
-		gap: 0.45rem;
-		padding: 0.55rem 0.65rem;
-		border-radius: 1.25rem;
-		background: rgba(14, 14, 14, 0.84);
-		backdrop-filter: blur(24px);
-		-webkit-backdrop-filter: blur(24px);
-		border: 1px solid rgba(255, 255, 255, 0.14);
-		box-shadow: 0 20px 48px rgba(0, 0, 0, 0.45);
-		transform: translateY(-10px) scale(0.98);
-		transform-origin: top center;
-		z-index: 260;
-
-		.linksContainer {
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			gap: 0.3rem;
-			width: 100%;
-		}
-
-		.mobileLangContainer {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			padding-top: 0.45rem;
-			border-top: 1px solid rgba(255, 255, 255, 0.08);
-			width: 100%;
-		}
+		right: calc(100% + #{$menu-gap-mobile});
+		width: calc(100vw - (#{$edge-offset} * 2) - #{$trigger-size-mobile} - #{$menu-gap-mobile});
+		max-width: calc(100vw - (#{$edge-offset} * 2) - #{$trigger-size-mobile} - #{$menu-gap-mobile});
+		box-sizing: border-box;
+		gap: 0.2rem;
+		padding: 0.32rem 0.35rem;
+		border-radius: 1.15rem;
 	}
 }
 
-.menuShell[data-open="true"] .dropdown {
-	opacity: 1;
-	transform: translateY(-50%) translateX(0) scale(1);
-	pointer-events: auto;
+.menuShell[data-open="true"] {
+	.hamburgerSvg {
+		transform: rotate(90deg);
+	}
 
-	@media (max-width: 768px) {
-		transform: translateY(0) scale(1);
+	.lineTop {
+		transform: translateY(0) rotate(45deg);
+	}
+
+	.lineMid {
+		transform: translateY(0) scaleX(0);
+		opacity: 0;
+	}
+
+	.lineBot {
+		transform: translateY(0) rotate(-45deg);
+	}
+
+	.dropdown {
+		opacity: 1;
+		transform: translateY(-50%) translateX(0) scale(1);
+		pointer-events: auto;
+	}
+
+	.langDropdown {
+		opacity: 1;
+		transform: translateX(-50%) translateY(0) scale(1);
+		pointer-events: auto;
 	}
 }
 
@@ -164,57 +170,41 @@
 	white-space: nowrap;
 
 	@media (max-width: 768px) {
-		display: none;
+		top: calc(100% + 0.5rem);
+		left: 50%;
+		transform: translateX(-50%) translateY(-8px) scale(0.95);
 	}
-}
-
-.menuShell[data-open="true"] .langDropdown {
-	opacity: 1;
-	transform: translateX(-50%) translateY(0) scale(1);
-	pointer-events: auto;
 }
 
 .menuLink {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	min-height: 2.5rem;
-	padding: 0.7rem 0.75rem;
-	border-radius: 0.85rem;
-	color: rgba(255, 255, 255, 0.82);
+	min-height: 2.6rem;
+	padding: 0.7rem 1.05rem;
+	border-radius: 0.9rem;
+	color: rgba(255, 255, 255, 0.85);
 	text-decoration: none;
-	font-size: 0.94rem;
-	font-weight: 500;
+	font-size: 0.95rem;
+	font-weight: 550;
 	line-height: 1;
+	white-space: nowrap;
 	transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
 
 	&:hover {
-		background: rgba(255, 255, 255, 0.07);
+		background: rgba(255, 255, 255, 0.08);
 		color: #fff;
 		transform: translateY(-1px);
 	}
 
 	@media (max-width: 768px) {
-		flex: 1;
-		min-height: 2.7rem;
-		padding: 0.5rem 0.35rem;
-		font-size: 0.92rem;
+		flex: 1 1 auto;
+		min-width: 0;
+		min-height: 2.45rem;
+		padding: 0.52rem clamp(0.2rem, 0.9vw, 0.45rem);
+		font-size: clamp(0.88rem, 2.6vw, 0.94rem);
 		font-weight: 600;
-		letter-spacing: -0.01em;
-		text-align: center;
-		border-radius: 0.75rem;
-	}
-
-	@media (max-width: 480px) {
-		min-height: 2.5rem;
-		padding: 0.45rem 0.25rem;
-		font-size: 0.88rem;
-		letter-spacing: -0.015em;
-	}
-
-	@media (max-width: 360px) {
-		padding: 0.4rem 0.15rem;
-		font-size: 0.82rem;
+		border-radius: 0.85rem;
 	}
 }
 
@@ -223,32 +213,9 @@
 	background: rgba(201, 169, 77, 0.1);
 }
 
-.menuLinkRestricted {
-	opacity: 0.5;
+.menuLinkDisabled {
+	opacity: 0.35;
 	cursor: not-allowed;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 0.35rem;
-
-	@media (max-width: 768px) {
-		gap: 0.25rem;
-	}
-}
-
-.restrictedBadge {
-	font-size: 0.65rem;
-	padding: 0.15rem 0.4rem;
-	border-radius: 4px;
-	background: rgba(168, 85, 247, 0.2);
-	color: #c084fc;
-	text-transform: uppercase;
-	letter-spacing: 0.05em;
-	line-height: 1;
-	flex-shrink: 0;
-
-	@media (max-width: 768px) {
-		font-size: 0.54rem;
-		padding: 0.1rem 0.25rem;
-	}
+	pointer-events: none;
+	user-select: none;
 }
