@@ -3,10 +3,10 @@
   color: var(--color-text);
   min-height: 100vh;
   min-height: 100dvh;
-  padding: calc(var(--banner-offset, 0px) + 8rem) 2rem 8rem;
+  padding: calc(var(--banner-offset, 0px) + 6rem) 2rem 8rem;
 
   @media (max-width: 768px) {
-    padding: calc(var(--banner-offset, 0px) + 6.5rem) 1.25rem 6rem;
+    padding: calc(var(--banner-offset, 0px) + 5rem) 1.25rem 6rem;
   }
 }
 

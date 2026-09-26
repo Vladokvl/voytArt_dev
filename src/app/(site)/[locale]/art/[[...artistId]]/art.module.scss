@@ -236,12 +236,12 @@
 .gallery {
   position: relative;
   z-index: 1;
-  padding: calc(var(--banner-offset, 0px) + 9rem) 4rem 8rem;
+  padding: calc(var(--banner-offset, 0px) + 7rem) 4rem 8rem;
   background: var(--color-bg, #fff);
   transition: background 0.4s ease;
 
   @include mobile {
-    padding: calc(var(--banner-offset, 0px) + 7.5rem) 1.5rem 6rem;
+    padding: calc(var(--banner-offset, 0px) + 5.5rem) 1.5rem 6rem;
   }
 }
 
