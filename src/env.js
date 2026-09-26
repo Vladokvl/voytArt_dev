@@ -16,6 +16,8 @@ export const env = createEnv({
     CLOUDINARY_CLOUD_NAME: z.string().trim().min(1).optional(),
     CLOUDINARY_API_KEY: z.string().trim().min(1).optional(),
     CLOUDINARY_API_SECRET: z.string().trim().min(1).optional(),
+    RESEND_API: z.string().trim().min(1).optional(),
+    RESEND_API_KEY: z.string().trim().min(1).optional(),
   },
   client: {
     NEXT_PUBLIC_APP_URL: z.string().optional(),
@@ -28,6 +30,8 @@ export const env = createEnv({
     CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME?.trim(),
     CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY?.trim(),
     CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET?.trim(),
+    RESEND_API: process.env.RESEND_API?.trim(),
+    RESEND_API_KEY: process.env.RESEND_API_KEY?.trim(),
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
   },

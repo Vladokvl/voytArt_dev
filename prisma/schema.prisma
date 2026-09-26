@@ -244,6 +244,7 @@ model Order {
     deliveryCity    String        @map("delivery_city")
     deliveryAddress String        @map("delivery_address")
     comment         String?
+    locale          String        @default("uk")
     totalAmount     Decimal       @db.Decimal(10, 2) @map("total_amount")
     status          OrderStatus   @default(NEW)
     paymentMethod   PaymentMethod @default(COD) @map("payment_method")
@@ -365,6 +366,7 @@ model PaintingInquiry {
     customerContact  String        @map("customer_contact")
     preferredContact String        @default("TELEGRAM") @map("preferred_contact")
     message          String?
+    locale           String        @default("uk")
     status           InquiryStatus @default(NEW)
     notes            String?
 
@@ -379,9 +381,14 @@ model PaintingInquiry {
 
 // ── Site Settings (Керування сайтом) ──────────────────────────────────────────
 model SiteSetting {
-    id             Int      @id @default(autoincrement())
-    comingSoonMode Boolean  @default(false) @map("coming_soon_mode")
-    updatedAt      DateTime @updatedAt @map("updated_at")
+    id                    Int      @id @default(autoincrement())
+    comingSoonMode        Boolean  @default(false) @map("coming_soon_mode")
+    notifyEmail           String?  @map("notify_email")
+    senderEmail           String?  @default("notifications@contact.voytart.com") @map("sender_email")
+    notifyOnOrders        Boolean  @default(true) @map("notify_on_orders")
+    notifyOnInquiries     Boolean  @default(true) @map("notify_on_inquiries")
+    notifyCustomerOnOrder Boolean  @default(true) @map("notify_customer_on_order")
+    updatedAt             DateTime @updatedAt @map("updated_at")
 
     @@map("site_settings")
 }

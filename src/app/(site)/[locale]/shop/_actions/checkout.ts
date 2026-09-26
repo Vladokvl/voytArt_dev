@@ -6,6 +6,10 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import crypto from "crypto";
 import { rateLimit, getClientIp } from "~/lib/rate-limit";
+import {
+  sendOrderNotificationEmail,
+  sendCustomerOrderConfirmationEmail,
+} from "~/lib/email/resend";
 
 const cartItemSchema = z.object({
   productId: z.number().int().positive(),
@@ -25,6 +29,7 @@ const checkoutSchema = z.object({
   deliveryCity: z.string().trim().min(2).max(100),
   deliveryAddress: z.string().trim().min(3).max(300),
   comment: z.string().trim().max(1000).optional(),
+  locale: z.enum(["en", "uk"]).default("uk"),
   items: z.array(cartItemSchema).min(1).max(50),
 });
 
@@ -78,6 +83,8 @@ export async function createOrderAction(data: CheckoutInput): Promise<{
         const product = productMap.get(item.productId);
         if (!product) throw new Error(`PRODUCT_UNAVAILABLE:${item.productId}`);
 
+        const isEn = input.locale === "en";
+        const itemTitle = isEn ? product.title : (product.titleUk ?? product.title);
         let unitPrice = Number(product.price);
         let variantTitle: string | null = null;
         let variantId: number | null = null;
@@ -86,7 +93,7 @@ export async function createOrderAction(data: CheckoutInput): Promise<{
           const variant = product.variants.find((v) => v.id === item.variantId);
           if (!variant) throw new Error(`VARIANT_UNAVAILABLE:${item.variantId}`);
           unitPrice = variant.price !== null ? Number(variant.price) : unitPrice;
-          variantTitle = variant.title;
+          variantTitle = isEn ? variant.title : (variant.titleUk ?? variant.title);
           variantId = variant.id;
         }
 
@@ -96,13 +103,13 @@ export async function createOrderAction(data: CheckoutInput): Promise<{
             ? (product.variants.find((v) => v.id === variantId)?.stock ?? 0)
             : product.stock;
         if (availableStock < item.quantity) {
-          throw new Error(`OUT_OF_STOCK:${product.title}`);
+          throw new Error(`OUT_OF_STOCK:${itemTitle}`);
         }
 
         pricedItems.push({
           productId: item.productId,
           variantId,
-          title: product.title,
+          title: itemTitle,
           variantTitle,
           price: unitPrice,
           quantity: item.quantity,
@@ -124,6 +131,7 @@ export async function createOrderAction(data: CheckoutInput): Promise<{
               deliveryCity: input.deliveryCity,
               deliveryAddress: input.deliveryAddress,
               comment: input.comment ?? null,
+              locale: input.locale,
               totalAmount,
               status: "NEW",
               paymentMethod: "COD",
@@ -166,6 +174,16 @@ export async function createOrderAction(data: CheckoutInput): Promise<{
 
       return newOrder;
     });
+
+    // Сповіщення на email адміністратора (не блокує відповідь клієнту)
+    void sendOrderNotificationEmail(order.id).catch((e) =>
+      console.error("Order notification email dispatch failed:", e)
+    );
+
+    // Підтвердження замовлення для клієнта мовою замовлення (UK/EN)
+    void sendCustomerOrderConfirmationEmail(order.id).catch((e) =>
+      console.error("Customer confirmation email dispatch failed:", e)
+    );
 
     revalidatePath("/admin/orders");
     revalidatePath("/shop");

@@ -36,12 +36,33 @@ export const getCachedSiteSettings = unstable_cache(
     try {
       const setting = await db.siteSetting.findFirst();
       if (!setting) {
-        return { comingSoonMode: false };
+        return {
+          comingSoonMode: false,
+          notifyEmail: null,
+          senderEmail: "notifications@contact.voytart.com",
+          notifyOnOrders: true,
+          notifyOnInquiries: true,
+          notifyCustomerOnOrder: true,
+        };
       }
-      return { comingSoonMode: setting.comingSoonMode };
+      return {
+        comingSoonMode: setting.comingSoonMode,
+        notifyEmail: setting.notifyEmail,
+        senderEmail: setting.senderEmail ?? "notifications@contact.voytart.com",
+        notifyOnOrders: setting.notifyOnOrders ?? true,
+        notifyOnInquiries: setting.notifyOnInquiries ?? true,
+        notifyCustomerOnOrder: setting.notifyCustomerOnOrder ?? true,
+      };
     } catch (e) {
       console.error("Помилка завантаження налаштувань сайту:", e);
-      return { comingSoonMode: false };
+      return {
+        comingSoonMode: false,
+        notifyEmail: null,
+        senderEmail: "notifications@contact.voytart.com",
+        notifyOnOrders: true,
+        notifyOnInquiries: true,
+        notifyCustomerOnOrder: true,
+      };
     }
   },
   ["site-settings"],

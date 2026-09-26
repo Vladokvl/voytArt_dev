@@ -20,7 +20,7 @@ export default function CartDrawer() {
     totalItems,
     totalPrice,
   } = useCart();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   // ── Блокування фонового скролу (iOS Safari + Android + Desktop) ──────────
   // iOS Safari ігнорує overflow:hidden на body, тому використовуємо position:fixed
@@ -96,6 +96,7 @@ export default function CartDrawer() {
           deliveryCity: formData.city.trim(),
           deliveryAddress: formData.address.trim(),
           comment: formData.comment.trim() || undefined,
+          locale: locale === "en" ? ("en" as const) : ("uk" as const),
           totalAmount: totalPrice,
           items: cart.map((item) => ({
             productId: item.product.id,

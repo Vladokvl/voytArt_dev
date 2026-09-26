@@ -1,6 +1,7 @@
 import { requireAdmin } from "~/lib/admin-guard";
 import { db } from "~/lib/db";
 import { getCachedSiteSettings, getCachedTranslations } from "~/lib/site-settings";
+import { isResendConfigured } from "~/lib/email/resend";
 import { siteUrl } from "~/lib/site-url";
 import SettingsForm from "./_SettingsForm";
 import type { VersionItem } from "./_VersionsModal";
@@ -36,7 +37,7 @@ export default async function SettingsPage() {
           Керування сайтом
         </h1>
         <p style={{ margin: 0, fontSize: "0.85rem", color: "#64748b" }}>
-          Налаштування режиму «Скоро відкриття», генерація preview-посилань та редагування перекладів з історією версій.
+          Керування режимом очікування, перекладами, поштовими сповіщеннями Resend та налаштуваннями сайту.
         </p>
       </div>
 
@@ -45,6 +46,12 @@ export default async function SettingsPage() {
         initialTranslations={translations}
         initialVersions={versions}
         siteUrl={siteUrl}
+        initialNotifyEmail={settings.notifyEmail}
+        initialSenderEmail={settings.senderEmail}
+        initialNotifyOnOrders={settings.notifyOnOrders}
+        initialNotifyOnInquiries={settings.notifyOnInquiries}
+        initialNotifyCustomerOnOrder={settings.notifyCustomerOnOrder}
+        isResendConfigured={isResendConfigured()}
       />
     </div>
   );

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import crypto from "crypto";
 import { rateLimit, getClientIp } from "~/lib/rate-limit";
+import { sendInquiryNotificationEmail } from "~/lib/email/resend";
 
 export type CreateInquiryInput = {
   paintingId: number;
@@ -65,6 +66,11 @@ export async function createPaintingInquiryAction(input: CreateInquiryInput) {
       }
     }
     if (!inquiry) throw new Error("INQUIRY_NUMBER_EXHAUSTED");
+
+    // Сповіщення на email адміністратора (не блокує відповідь клієнту)
+    void sendInquiryNotificationEmail(inquiry.id).catch((e) =>
+      console.error("Inquiry notification email dispatch failed:", e)
+    );
 
     revalidatePath("/admin/inquiries");
 

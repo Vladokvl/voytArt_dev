@@ -120,3 +120,77 @@ export async function activateTranslationVersionAction(
     return { success: false, error: "Не вдалося активувати версію. Спробуйте ще раз." };
   }
 }
+
+export async function saveEmailSettingsAction(input: {
+  notifyEmail: string | null;
+  senderEmail: string | null;
+  notifyOnOrders: boolean;
+  notifyOnInquiries: boolean;
+  notifyCustomerOnOrder: boolean;
+}): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin();
+
+  try {
+    const existing = await db.siteSetting.findFirst();
+    let notifyEmail: string | null = null;
+    if (input.notifyEmail?.trim()) {
+      notifyEmail = input.notifyEmail.trim();
+    }
+
+    let senderEmail = "notifications@contact.voytart.com";
+    if (input.senderEmail?.trim()) {
+      senderEmail = input.senderEmail.trim();
+    }
+
+    const data = {
+      notifyEmail,
+      senderEmail,
+      notifyOnOrders: input.notifyOnOrders,
+      notifyOnInquiries: input.notifyOnInquiries,
+      notifyCustomerOnOrder: input.notifyCustomerOnOrder,
+    };
+
+    if (existing) {
+      await db.siteSetting.update({
+        where: { id: existing.id },
+        data,
+      });
+    } else {
+      await db.siteSetting.create({
+        data,
+      });
+    }
+
+    revalidateTag(CACHE_TAGS.settings);
+    revalidatePath("/admin/settings");
+    return { success: true };
+  } catch (err) {
+    console.error("Помилка збереження налаштувань пошти:", err);
+    return { success: false, error: "Не вдалося зберегти налаштування пошти." };
+  }
+}
+
+export async function sendTestEmailAction(
+  targetEmail: string
+): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin();
+
+  const email = targetEmail.trim();
+  if (!email.includes("@")) {
+    return { success: false, error: "Будь ласка, вкажіть коректну email адресу для перевірки." };
+  }
+
+  const { buildTestEmailHtml, sendEmailViaResend } = await import("~/lib/email/resend");
+  const { getCachedSiteSettings } = await import("~/lib/site-settings");
+
+  const settings = await getCachedSiteSettings();
+  const html = buildTestEmailHtml(email);
+
+  return sendEmailViaResend({
+    from: settings.senderEmail ?? "VoytArt Gallery <notifications@contact.voytart.com>",
+    to: email,
+    subject: "VoytArt Gallery — Тестове сповіщення системи",
+    html,
+  });
+}
+

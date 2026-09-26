@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { History, Save, Copy, Check, ChevronDown, ChevronUp, Radio } from "lucide-react";
+import { History, Save, Copy, Check, ChevronDown, ChevronUp, Radio, Globe, Mail } from "lucide-react";
 import styles from "./settings.module.scss";
 import VersionsModal, { type VersionItem } from "./_VersionsModal";
+import EmailSettingsCard from "./_EmailSettingsCard";
 import {
   toggleComingSoonAction,
   saveTranslationVersionAction,
@@ -17,6 +18,12 @@ interface SettingsFormProps {
   initialTranslations: { en: MessagesRecord; uk: MessagesRecord };
   initialVersions: VersionItem[];
   siteUrl: string;
+  initialNotifyEmail: string | null;
+  initialSenderEmail: string | null;
+  initialNotifyOnOrders: boolean;
+  initialNotifyOnInquiries: boolean;
+  initialNotifyCustomerOnOrder: boolean;
+  isResendConfigured: boolean;
 }
 
 const sectionTitles: Record<string, string> = {
@@ -80,7 +87,15 @@ export default function SettingsForm({
   initialTranslations,
   initialVersions,
   siteUrl,
+  initialNotifyEmail,
+  initialSenderEmail,
+  initialNotifyOnOrders,
+  initialNotifyOnInquiries,
+  initialNotifyCustomerOnOrder,
+  isResendConfigured,
 }: SettingsFormProps) {
+  const [activeTab, setActiveTab] = useState<"general" | "email">("general");
+
   const [comingSoon, setComingSoon] = useState(initialComingSoonMode);
   const [isTogglingMode, startTransition] = useTransition();
 
@@ -196,8 +211,42 @@ export default function SettingsForm({
 
   return (
     <div className={styles.container}>
-      {/* ── 1. Top Action Bar ────────────────────────────────────────── */}
-      <div className={styles.headerCard}>
+      {/* ── Settings Tabs Navigation ── */}
+      <div className={styles.tabNav}>
+        <button
+          type="button"
+          className={`${styles.tabBtn} ${activeTab === "general" ? styles.tabActive : ""}`}
+          onClick={() => setActiveTab("general")}
+        >
+          <Globe size={18} />
+          <span>Загальні та Переклади</span>
+        </button>
+
+        <button
+          type="button"
+          className={`${styles.tabBtn} ${activeTab === "email" ? styles.tabActive : ""}`}
+          onClick={() => setActiveTab("email")}
+        >
+          <Mail size={18} />
+          <span>Сповіщення (Email)</span>
+        </button>
+      </div>
+
+      {activeTab === "email" && (
+        <EmailSettingsCard
+          initialNotifyEmail={initialNotifyEmail}
+          initialSenderEmail={initialSenderEmail}
+          initialNotifyOnOrders={initialNotifyOnOrders}
+          initialNotifyOnInquiries={initialNotifyOnInquiries}
+          initialNotifyCustomerOnOrder={initialNotifyCustomerOnOrder}
+          isResendConfigured={isResendConfigured}
+        />
+      )}
+
+      {activeTab === "general" && (
+        <>
+          {/* ── 1. Top Action Bar ────────────────────────────────────────── */}
+          <div className={styles.headerCard}>
         <div className={styles.headerLeft}>
           <button
             type="button"
@@ -366,6 +415,8 @@ export default function SettingsForm({
         versions={versions}
         onActivate={handleActivateVersion}
       />
+        </>
+      )}
     </div>
   );
 }
