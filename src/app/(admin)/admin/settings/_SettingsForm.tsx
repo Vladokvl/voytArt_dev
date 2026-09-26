@@ -229,9 +229,9 @@ export default function SettingsForm({
           style={{
             padding: "0.75rem 1.25rem",
             borderRadius: "8px",
-            background: saveMessage.startsWith("Помилка") ? "rgba(239, 68, 68, 0.15)" : "rgba(34, 197, 94, 0.15)",
-            border: saveMessage.startsWith("Помилка") ? "1px solid rgba(239, 68, 68, 0.4)" : "1px solid rgba(34, 197, 94, 0.4)",
-            color: saveMessage.startsWith("Помилка") ? "#fca5a5" : "#86efac",
+            background: saveMessage.startsWith("Помилка") ? "#fef2f2" : "#f0fdf4",
+            border: saveMessage.startsWith("Помилка") ? "1px solid #fecaca" : "1px solid #bbf7d0",
+            color: saveMessage.startsWith("Помилка") ? "#991b1b" : "#166534",
             fontSize: "0.85rem",
             fontWeight: 500,
           }}
@@ -244,7 +244,7 @@ export default function SettingsForm({
       <div className={styles.comingSoonCard}>
         <div className={styles.comingSoonInfo}>
           <span className={styles.comingSoonTitle}>
-            <Radio size={18} color={comingSoon ? "#a855f7" : "#71717a"} />
+            <Radio size={18} color={comingSoon ? "#10b981" : "#94a3b8"} />
             Режим сайту «Скоро відкриття» (Coming Soon)
           </span>
           <span className={styles.comingSoonDesc}>
@@ -259,7 +259,7 @@ export default function SettingsForm({
             onClick={handleCopyPreviewLink}
             title="Скопіювати посилання для перегляду без обмежень"
           >
-            {copiedLink ? <Check size={14} color="#86efac" /> : <Copy size={14} />}
+            {copiedLink ? <Check size={14} color="#16a34a" /> : <Copy size={14} />}
             <span>{copiedLink ? "Посилання скопійовано!" : "Скопіювати Preview-посилання"}</span>
           </button>
 
@@ -288,11 +288,11 @@ export default function SettingsForm({
             >
               <span className={styles.sectionTitle}>
                 {title}
-                <span style={{ fontSize: "0.75rem", color: "#71717a", fontWeight: 400 }}>
+                <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 500 }}>
                   ({keys.length} полів)
                 </span>
               </span>
-              {isCollapsed ? <ChevronDown size={18} color="#71717a" /> : <ChevronUp size={18} color="#71717a" />}
+              {isCollapsed ? <ChevronDown size={18} color="#64748b" /> : <ChevronUp size={18} color="#64748b" />}
             </div>
 
             {!isCollapsed && (

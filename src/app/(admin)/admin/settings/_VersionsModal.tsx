@@ -55,7 +55,7 @@ export default function VersionsModal({
 
         <div className={styles.modalBody}>
           {versions.length === 0 ? (
-            <p style={{ color: "#71717a", textAlign: "center", margin: "2rem 0" }}>
+            <p style={{ color: "#64748b", textAlign: "center", margin: "2rem 0" }}>
               Збережених версій перекладів ще немає.
             </p>
           ) : (

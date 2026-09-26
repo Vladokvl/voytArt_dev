@@ -7,15 +7,16 @@
 
 // ─── Header & Top Actions ─────────────────────────────────────────────────────
 .headerCard {
-  background: #18181b;
-  border: 1px solid #27272a;
-  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   padding: 1.25rem 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .headerLeft {
@@ -29,28 +30,30 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.6rem 1rem;
-  background: #27272a;
-  border: 1px solid #3f3f46;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
-  color: #f4f4f5;
+  color: #334155;
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 
   &:hover {
-    background: #3f3f46;
-    color: #ffffff;
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #0f172a;
   }
 }
 
 .badgeCount {
-  background: rgba(168, 85, 247, 0.2);
-  color: #c084fc;
-  padding: 0.15rem 0.45rem;
+  background: #ede9fe;
+  color: #7c3aed;
+  padding: 0.15rem 0.5rem;
   border-radius: 9999px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .saveGroup {
@@ -60,40 +63,47 @@
 }
 
 .versionNameInput {
-  background: #09090b;
-  border: 1px solid #27272a;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   padding: 0.6rem 0.85rem;
-  color: #f4f4f5;
+  color: #0f172a;
   font-size: 0.85rem;
-  width: 220px;
+  width: 250px;
   outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    border-color: #94a3b8;
+  }
 
   &:focus {
-    border-color: #3b82f6;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
   }
 
   &::placeholder {
-    color: #71717a;
+    color: #94a3b8;
   }
 }
 
 .saveBtn {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.45rem;
   padding: 0.6rem 1.25rem;
-  background: #3b82f6;
+  background: #0f172a;
   color: #ffffff;
   border: none;
   border-radius: 8px;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.15s ease, transform 0.1s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 
   &:hover:not(:disabled) {
-    background: #2563eb;
+    background: #1e293b;
   }
 
   &:disabled {
@@ -104,15 +114,16 @@
 
 // ─── Coming Soon Card ─────────────────────────────────────────────────────────
 .comingSoonCard {
-  background: #18181b;
-  border: 1px solid #27272a;
-  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   padding: 1.25rem 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
   flex-wrap: wrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .comingSoonInfo {
@@ -123,8 +134,8 @@
 
 .comingSoonTitle {
   font-size: 1rem;
-  font-weight: 600;
-  color: #ffffff;
+  font-weight: 700;
+  color: #0f172a;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -132,7 +143,9 @@
 
 .comingSoonDesc {
   font-size: 0.85rem;
-  color: #a1a1aa;
+  color: #64748b;
+  max-width: 650px;
+  line-height: 1.45;
 }
 
 .comingSoonControls {
@@ -144,20 +157,22 @@
 .copyLinkBtn {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.5rem 0.85rem;
-  background: #27272a;
-  border: 1px solid #3f3f46;
+  gap: 0.45rem;
+  padding: 0.55rem 0.95rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
-  color: #e4e4e7;
-  font-size: 0.8rem;
-  font-weight: 500;
+  color: #334155;
+  font-size: 0.82rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 
   &:hover {
-    background: #3f3f46;
-    color: #ffffff;
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #0f172a;
   }
 }
 
@@ -182,7 +197,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #3f3f46;
+  background-color: #cbd5e1;
   transition: 0.3s;
   border-radius: 26px;
 
@@ -193,14 +208,15 @@
     width: 20px;
     left: 3px;
     bottom: 3px;
-    background-color: white;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     transition: 0.3s;
     border-radius: 50%;
   }
 }
 
 .switch input:checked + .slider {
-  background-color: #a855f7;
+  background-color: #10b981;
 }
 
 .switch input:checked + .slider:before {
@@ -209,31 +225,33 @@
 
 // ─── Split-view Editor ────────────────────────────────────────────────────────
 .editorSection {
-  background: #18181b;
-  border: 1px solid #27272a;
-  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .sectionHeader {
-  padding: 1rem 1.5rem;
-  background: #202024;
-  border-bottom: 1px solid #27272a;
+  padding: 1.1rem 1.5rem;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
   user-select: none;
+  transition: background 0.15s ease;
 
   &:hover {
-    background: #27272a;
+    background: #f1f5f9;
   }
 }
 
 .sectionTitle {
   font-size: 0.95rem;
-  font-weight: 600;
-  color: #f4f4f5;
+  font-weight: 700;
+  color: #0f172a;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -242,20 +260,23 @@
 .splitHeader {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  background: #141417;
-  border-bottom: 1px solid #27272a;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
   font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #a1a1aa;
+  color: #64748b;
 }
 
 .splitHeaderCol {
-  padding: 0.6rem 1.5rem;
+  padding: 0.65rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 
   &:first-child {
-    border-right: 1px solid #27272a;
+    border-right: 1px solid #e2e8f0;
   }
 }
 
@@ -267,23 +288,25 @@
 .rowItem {
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid #27272a;
-  padding: 0.75rem 1.5rem;
-  gap: 0.4rem;
+  border-bottom: 1px solid #f1f5f9;
+  padding: 1rem 1.5rem;
+  gap: 0.45rem;
+  transition: background 0.15s ease;
 
   &:last-child {
     border-bottom: none;
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.015);
+    background: #fafbfc;
   }
 }
 
 .keyLabel {
   font-size: 0.75rem;
-  font-family: monospace;
-  color: #71717a;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: #64748b;
+  font-weight: 600;
 }
 
 .inputsGrid {
@@ -294,20 +317,29 @@
 
 .fieldInput {
   width: 100%;
-  background: #09090b;
-  border: 1px solid #27272a;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
-  padding: 0.55rem 0.75rem;
-  color: #f4f4f5;
-  font-size: 0.85rem;
-  line-height: 1.4;
+  padding: 0.65rem 0.85rem;
+  color: #0f172a;
+  font-size: 0.88rem;
+  line-height: 1.45;
   outline: none;
   font-family: inherit;
   resize: vertical;
-  transition: border-color 0.2s;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    border-color: #94a3b8;
+  }
 
   &:focus {
-    border-color: #3b82f6;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  &::placeholder {
+    color: #94a3b8;
   }
 }
 
@@ -315,7 +347,7 @@
 .modalBackdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(15, 23, 42, 0.55);
   backdrop-filter: blur(4px);
   z-index: 1000;
   display: flex;
@@ -325,8 +357,8 @@
 }
 
 .modal {
-  background: #18181b;
-  border: 1px solid #27272a;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 16px;
   width: 100%;
   max-width: 680px;
@@ -334,12 +366,12 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
 }
 
 .modalHeader {
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #27272a;
+  border-bottom: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -347,22 +379,26 @@
 
 .modalTitle {
   font-size: 1.1rem;
-  font-weight: 600;
-  color: #ffffff;
+  font-weight: 700;
+  color: #0f172a;
   margin: 0;
 }
 
 .closeBtn {
   background: transparent;
   border: none;
-  color: #a1a1aa;
+  color: #64748b;
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0.35rem;
   border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
 
   &:hover {
-    color: #ffffff;
-    background: #27272a;
+    color: #0f172a;
+    background: #f1f5f9;
   }
 }
 
@@ -372,22 +408,29 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  background: #f8fafc;
 }
 
 .versionCard {
-  background: #09090b;
-  border: 1px solid #27272a;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 10px;
   padding: 1rem 1.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+
+  &:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
 
   &.versionActive {
-    border-color: #a855f7;
-    background: rgba(168, 85, 247, 0.05);
+    border-color: #7c3aed;
+    background: #faf5ff;
   }
 }
 
@@ -400,7 +443,7 @@
 .versionName {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #f4f4f5;
+  color: #0f172a;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -408,17 +451,17 @@
 
 .activeBadge {
   font-size: 0.7rem;
-  background: rgba(168, 85, 247, 0.2);
-  color: #c084fc;
-  border: 1px solid rgba(168, 85, 247, 0.4);
+  background: #ede9fe;
+  color: #7c3aed;
+  border: 1px solid #ddd6fe;
   padding: 0.1rem 0.45rem;
   border-radius: 9999px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .versionDate {
   font-size: 0.75rem;
-  color: #71717a;
+  color: #64748b;
 }
 
 .versionActions {
@@ -430,42 +473,48 @@
 .previewVersionBtn {
   padding: 0.45rem 0.75rem;
   border-radius: 6px;
-  background: #27272a;
-  border: 1px solid #3f3f46;
-  color: #f4f4f5;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
   font-size: 0.75rem;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.15s ease;
 
   &:hover {
-    background: #3f3f46;
+    background: #f8fafc;
+    color: #0f172a;
+    border-color: #94a3b8;
   }
 }
 
 .activateVersionBtn {
   padding: 0.45rem 0.85rem;
   border-radius: 6px;
-  background: #3b82f6;
+  background: #2563eb;
   border: none;
   color: #ffffff;
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.15s ease;
 
   &:hover {
-    background: #2563eb;
+    background: #1d4ed8;
   }
 }
 
 .previewViewer {
   margin-top: 0.75rem;
-  padding: 0.75rem;
-  background: #141417;
-  border: 1px solid #27272a;
+  padding: 0.85rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
   max-height: 250px;
   overflow-y: auto;
   font-size: 0.75rem;
-  font-family: monospace;
-  color: #d4d4d8;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: #0f172a;
   white-space: pre-wrap;
+  line-height: 1.5;
 }
