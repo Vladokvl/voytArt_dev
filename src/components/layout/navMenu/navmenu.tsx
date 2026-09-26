@@ -88,37 +88,44 @@ export default function NavMenu() {
         aria-label="Main navigation"
         aria-hidden={!isOpen}
       >
-        {navItems.map((item) => {
-          const isItemRestricted = isRestricted && item.href !== "/";
-          const isActive =
-            item.href === "/"
-              ? currentBaseRoute === "/"
-              : currentBaseRoute.startsWith(item.href);
+        <div className={styles.linksContainer}>
+          {navItems.map((item) => {
+            const isItemRestricted = isRestricted && item.href !== "/";
+            const isActive =
+              item.href === "/"
+                ? currentBaseRoute === "/"
+                : currentBaseRoute.startsWith(item.href);
 
-          if (isItemRestricted) {
-            return (
-              <span
-                key={item.href}
-                className={`${styles.menuLink} ${styles.menuLinkRestricted}`}
-              >
-                <span>{item.label}</span>
-                <span className={styles.restrictedBadge}>
-                  {locale === "uk" ? "Скоро" : "Soon"}
+            if (isItemRestricted) {
+              return (
+                <span
+                  key={item.href}
+                  className={`${styles.menuLink} ${styles.menuLinkRestricted}`}
+                >
+                  <span>{item.label}</span>
+                  <span className={styles.restrictedBadge}>
+                    {locale === "uk" ? "Скоро" : "Soon"}
+                  </span>
                 </span>
-              </span>
-            );
-          }
+              );
+            }
 
-          return (
-            <Link
-              key={item.href}
-              href={getLocalizedHref(item.href)}
-              className={`${styles.menuLink} ${isActive ? styles.menuLinkActive : ""}`}
-            >
-              {item.label}
-            </Link>
-          );
-        })}
+            return (
+              <Link
+                key={item.href}
+                href={getLocalizedHref(item.href)}
+                className={`${styles.menuLink} ${isActive ? styles.menuLinkActive : ""}`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Mobile Language Switcher inside the full-width floating menu */}
+        <div className={styles.mobileLangContainer}>
+          <LanguageSwitcher inMenu horizontal />
+        </div>
       </nav>
       
       <button
@@ -138,14 +145,23 @@ export default function NavMenu() {
             strokeWidth="1.9"
             strokeLinecap="round"
           >
-            <path d="M4 7h16" />
-            <path d="M4 12h16" />
-            <path d="M4 17h16" />
+            {isOpen ? (
+              <>
+                <path d="M6 6l12 12" />
+                <path d="M6 18L18 6" />
+              </>
+            ) : (
+              <>
+                <path d="M4 7h16" />
+                <path d="M4 12h16" />
+                <path d="M4 17h16" />
+              </>
+            )}
           </svg>
         </span>
       </button>
 
-      {/* Language Switcher emerging downwards from menu button */}
+      {/* Desktop Language Switcher emerging downwards from menu button */}
       <div className={styles.langDropdown}>
         <LanguageSwitcher inMenu />
       </div>

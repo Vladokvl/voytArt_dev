@@ -6,14 +6,26 @@ import styles from "./LanguageSwitcher.module.scss";
 
 interface LanguageSwitcherProps {
   inMenu?: boolean;
+  horizontal?: boolean;
+  className?: string;
 }
 
-export default function LanguageSwitcher({ inMenu = false }: LanguageSwitcherProps) {
+export default function LanguageSwitcher({
+  inMenu = false,
+  horizontal = false,
+  className = "",
+}: LanguageSwitcherProps) {
   const { locale, setLocale } = useLanguage();
+
+  const menuClass = horizontal
+    ? styles.switcherInMenuHorizontal
+    : inMenu
+    ? styles.switcherInMenu
+    : "";
 
   return (
     <div
-      className={`${styles.switcher} ${inMenu ? styles.switcherInMenu : ""}`}
+      className={`${styles.switcher} ${menuClass} ${className}`.trim()}
       role="group"
       aria-label="Language selection"
     >
